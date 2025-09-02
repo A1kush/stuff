@@ -1,0 +1,102 @@
+A1K Runner — v14.3 SIX SKILLS UPDATE (S1–S4 + R1 + X1)
+===========================================================
+
+Scope: We now have **six** abilities per character:
+• Skills: **S1, S2, S3, S4**
+• **R1 (Rage)**: time-limited, meter-based super (manual-only; AI never uses)
+• **X1 (Secret)**: anime-level finisher, **costs 20% Max HP**, manual-only
+
+Global rules
+------------
+• **Manual-Only**: R1 and X1 are never fired by AI.
+• **Secret Cost**: X1 consumes **20% of Max HP** on cast. If HP ≤ 20%, X1 is **blocked** (toast: “Too weak to cast Secret”). If HP is exactly 20%, leave at **1 HP**.
+• **i-Frames**: R1 & X1 grant **0.4 s** cast i-frames.
+• **UI Placement**: Non-leaders show **S1–S4** overhead fan; **X1** foot button. **R1** remains in the main skill cluster for the leader only.
+• **CD Skip**: Cooldown Skip **never** bypasses R1 or X1.
+• **Telemetry**: ev_rage_cast, ev_secret_cast (hp_cost, overkill, targets).
+
+UI refresh
+----------
+• Overhead fan remains S1–S4 only.
+• Foot button is **X1 (Secret)**; lights only when charged and HP cost is payable.
+• Rage button (R1) stays in primary cluster; glows at full meter; disabled for followers.
+• Banner on X1 includes anime-style cut-in + screen-edge speed lines (≤0.6 s).
+
+Character kits (concise)
+========================
+
+A1 — BOSS SLAYER (void/astral blades)
+-------------------------------------
+S1 **Umbral Crescent**: 180% ATK + 1% target Max HP (boss cap 5%), pierce 5, **Shield Breaker 40%**, CD 4 s.
+S2 **Vortex Cross**: dash + X-explosion 220% ATK; −30% slow 3 s, CD 8 s.
+S3 **Mirror Reversal**: 1.2 s parry; counter 300% ATK, reflect bullets, reset S2, +20% DR 5 s, CD 14 s.
+S4 **Riftfall Impact**: leap shockwave 400% ATK, 30% armor shred, knock-up, **SB40%**, CD 22 s.
+
+R1 **Nocturne Ascendance** (Rage; manual-only)
+• Requirements: Rage ≥ 100%. Duration **10 s**.
+• Effects: +25% ATK, +20% attack speed, parry window +0.1 s, Perfect Guard grants +10% crit (stacks to +30% for 4 s).
+• Visual: eclipse halo, black-red aura trails.
+• Ends early on death/vehicle mount; cooldown = rage rebuild.
+
+X1 **Astral Sever EX** (Secret; manual-only, **costs 20% Max HP**)
+• Cast: 0.5 s ink-brush cut-in → full-screen cross-slash.
+• Damage: **1000% ATK + 10% current boss HP (cap 25%)**, ignores 50% DEF; mobs stunned 2 s.
+• On Kill: refund **10% Max HP** and reset **S1**.
+• VFX flair: frame-freeze (0.12 s), kanji-style impact glyph, trailing starfield.
+• Gating: blocked under shields that negate HP cost; shows “Too weak to cast Secret” if HP ≤ 20%.
+
+UNIQUE — MOB SLAYER (prisms/modules)
+------------------------------------
+S1 **Scatter Bloom**: 5 ricochet shards; shardlings on kill; CD 5 s.
+S2 **Harmonic Field**: team haste + drop buff; spawns temp modules; CD 12 s.
+S3 **Overcharge Stream v2**: attachment sweep; ramps damage; mob bias; CD 16 s.
+S4 **Prism Rail Sweep**: lock+ sweep; initial rail **SB40%**; CD 28 s.
+
+R1 **Prism Overdrive** (Rage; manual-only)
+• Requirements: Rage ≥ 100%. Duration **8 s**.
+• Effects: +1 orbit module (cap 3), module beams gain light homing + extra pierce, shardling spawns doubled, +15% move speed.
+• Visual: kaleidoscope chroma bloom.
+
+X1 **Prismatic Cataclysm** (Secret; **20% Max HP cost**)
+• Cast: 0.4 s rainbow stutter + time-slice.
+• Effect (4 s): builds a **lattice** of prism rails; nodes fire micro-beams along edges; hits chain between nodes.
+• Damage: massive pack melt; **bossMult 0.7** (fair on bosses).
+• Bonus: lattice collapse vacuums coins/gems (300 px), then detonates “Prism Finish” pops.
+• VFX flair: screen kaleidoscope, scanline shimmer, multi-echo sound slice.
+
+MISSY — SUPPORT / LOOT (clover/jackpot)
+---------------------------------------
+S1 **Lucky Charm Volley**: marks (−10% dmg & speed, stack 3); +1 Clover; CD 4 s.
+S2 **Winged Aegis v2**: reflect dome → motes; heal 8% max HP; +15% haste 6 s; CD 14 s.
+S3 **Neko Dominion v2**: **Maneki guardians last 30 s**; taunt, pounce, vacuum; +1 Clover on pounce; CD 32 s.
+S4 **Queen’s Bell**: pulses heal 2% + +10% ATK every 1.5 s; pull pickups; weaken mobs −15% dmg; CD 28 s.
+
+R1 **Jackpot Rush** (Rage; manual-only)
+• Requirements: Rage ≥ 100%. Duration **6 s**.
+• Effects: **continuous Jackpot** (crit/drops/magnet on), extra motes from charms, guardians gain pierce.
+• Visual: golden coinstorm + cat pawprints.
+
+X1 **Sovereign Parade** (Secret; **20% Max HP cost**)
+• Cast: 0.4 s gold brush cut-in → confetti ring.
+• Effect (8 s): summon **2 royal Bells**, spawn a **gold procession** of Maneki that convert enemy bullets → coin sparks; global pickup pull (LoS).
+• Team Buff: +20% ATK, heal **4%/s**, Drop +30%, Magnet ×2 during effect.
+• Boss fairness: guardians **bossMult 0.75**, bullet→coin capped per second.
+• Flair: taiko-hit burst, paper-lantern glow, glitter trails.
+
+Plumbing changes
+----------------
+• Secret HP gate:
+  canPaySecretCost(actor){ return actor.hp > 0.20*actor.hpMax; }
+  applySecretCost(actor){ const cost = Math.ceil(0.20*actor.hpMax); actor.hp = Math.max(actor.hp - cost, 1); }
+• On X1 cast: check charge+gate → apply cost → 0.4 s i-frames → execute.
+• UI: Foot button glow requires **charge ready AND canPaySecretCost()**.
+
+Acceptance
+----------
+[ ] Rage (R1) visible for leader, not followers; AI never casts R1/X1.
+[ ] X1 casting reduces HP by 20% Max HP (min 1), blocks under ≤20% HP.
+[ ] A1 X1 banner + cross-slash; S1 resets on kill; damage matches spec.
+[ ] Unique X1 creates lattice with node beams + vacuum + finish pops.
+[ ] Missy X1 spawns 2 Bells + procession; global pickup pull; heal 4%/s; capped bullet→coin.
+[ ] i-frames 0.4 s on R1/X1; cooldown skip does not affect R1/X1.
+[ ] No UI overlaps; foot button glows only when charge+HP conditions met.
