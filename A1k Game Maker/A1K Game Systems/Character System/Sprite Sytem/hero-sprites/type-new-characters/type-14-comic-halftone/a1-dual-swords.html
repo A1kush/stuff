@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A1 Dual Swords - Comic Halftone</title>
+    <style>
+        body {margin: 0; background: #FFEB3B; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        canvas {border: 5px solid #000;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        x.fillStyle = '#FFF'; x.fillRect(0, 0, 512, 512);
+        // Halftone dots background
+        for (let i = 0; i < 512; i += 10) {
+            for (let j = 0; j < 512; j += 10) {
+                x.fillStyle = '#FFB3BA';
+                x.beginPath();
+                x.arc(i, j, 2, 0, Math.PI * 2);
+                x.fill();
+            }
+        }
+        // Body with bold outlines
+        x.fillStyle = '#FF0000';
+        x.fillRect(200, 250, 112, 150);
+        x.strokeStyle = '#000';
+        x.lineWidth = 6;
+        x.strokeRect(200, 250, 112, 150);
+        // Head
+        x.fillStyle = '#FFB380';
+        x.fillRect(200, 150, 112, 100);
+        x.strokeRect(200, 150, 112, 100);
+        // Baseball cap (black)
+        x.fillStyle = '#000';
+        x.fillRect(200, 150, 112, 30);
+        x.fillRect(185, 175, 30, 10);
+        // RED glowing eyes
+        x.fillStyle = '#FF0000';
+        x.shadowColor = '#FF0000';
+        x.shadowBlur = 15;
+        x.fillRect(220, 195, 22, 22);
+        x.fillRect(270, 195, 22, 22);
+        x.shadowBlur = 0;
+        x.strokeRect(220, 195, 22, 22);
+        x.strokeRect(270, 195, 22, 22);
+        // LEFT SWORD
+        x.save();
+        x.translate(175, 300);
+        x.rotate(-0.3);
+        x.fillStyle = '#FFD700';
+        x.fillRect(-10, -60, 20, 120);
+        x.strokeRect(-10, -60, 20, 120);
+        x.restore();
+        // RIGHT SWORD
+        x.save();
+        x.translate(337, 300);
+        x.rotate(0.3);
+        x.fillStyle = '#FFD700';
+        x.fillRect(-10, -60, 20, 120);
+        x.strokeRect(-10, -60, 20, 120);
+        x.restore();
+        // Comic-style speed lines
+        x.strokeStyle = '#000';
+        x.lineWidth = 3;
+        for (let i = 0; i < 5; i++) {
+            x.beginPath();
+            x.moveTo(100, 50 + i * 20);
+            x.lineTo(50, 80 + i * 20);
+            x.stroke();
+        }
+    </script>
+</body>
+</html>

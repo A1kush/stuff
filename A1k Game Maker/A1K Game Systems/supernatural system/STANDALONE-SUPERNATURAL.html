@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ Supernatural Spirit System - STANDALONE</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Georgia', serif;
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #3a2560 100%);
+      color: #e0d4ff;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      text-shadow: 0 0 20px #7c3aed, 0 0 40px #a78bfa;
+      color: #e9d5ff;
+      margin: 20px 0;
+    }
+    canvas {
+      border: 3px solid #7c3aed;
+      box-shadow: 0 0 30px rgba(124, 58, 237, 0.6);
+      background: radial-gradient(ellipse at center, #1a0a2e 0%, #0f0520 100%);
+    }
+    .controls {
+      background: rgba(42, 27, 78, 0.9);
+      border: 2px solid #a78bfa;
+      border-radius: 15px;
+      padding: 25px;
+      margin: 20px 0;
+      max-width: 1400px;
+    }
+    h2 {
+      color: #e9d5ff;
+      text-shadow: 0 0 15px #a78bfa;
+      margin-bottom: 20px;
+    }
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    #item-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 20px;
+      background: rgba(124, 58, 237, 0.3);
+      color: #e9d5ff;
+      border: 2px solid #7c3aed;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Georgia', serif;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background: rgba(167, 139, 250, 0.4);
+      transform: scale(1.05);
+    }
+    button.selected {
+      background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+      color: #ffffff;
+      box-shadow: 0 0 20px #a78bfa;
+    }
+    .info {
+      background: rgba(15, 5, 32, 0.95);
+      border: 2px solid #7c3aed;
+      border-radius: 12px;
+      padding: 25px;
+      line-height: 1.9;
+    }
+    .info strong {
+      color: #e9d5ff;
+    }
+    .note {
+      background: rgba(124, 58, 237, 0.2);
+      border-left: 5px solid #7c3aed;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>✨ Supernatural Spirit Gallery</h1>
+    <div class="note">
+      ✅ <strong>STANDALONE MODE</strong> - No server needed! Just double-click!
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+      <h2>7 Spirits + 7 Abilities</h2>
+      <div class="tabs">
+        <button id="spirits-tab" class="selected">✨ Spirits (7)</button>
+        <button id="abilities-tab">🔮 Abilities (7)</button>
+      </div>
+      <div id="item-selector"></div>
+      <div id="item-stats" class="info"></div>
+    </div>
+  </div>
+
+  <script>
+    // SPIRIT REGISTRY
+    const SPIRITS = [
+      { id: 'dark_soul', name: 'Dark Soul', icon: '🜏', element: 'dark', power: 85, rarity: 'rare', atkMul: 0.06, attackDmg: 30, cooldown: 2.5, color: '#7c3aed', secondaryColor: '#a78bfa' },
+      { id: 'light_soul', name: 'Light Soul', icon: '☀️', element: 'light', power: 90, rarity: 'rare', hpFlat: 60, attackDmg: 25, cooldown: 2.0, color: '#ffd56a', secondaryColor: '#fff7d1' },
+      { id: 'golden_spirit', name: 'Golden Spirit', icon: '✶', element: 'gold', power: 75, rarity: 'uncommon', goldGain: 0.15, attackDmg: 20, cooldown: 3.0, color: '#ffbf3b', secondaryColor: '#ffd56a' },
+      { id: 'tech_essence', name: 'Tech Essence', icon: '⚡', element: 'tech', power: 80, rarity: 'rare', speedMul: 0.05, attackDmg: 35, cooldown: 2.2, color: '#3ec5ff', secondaryColor: '#7dd3fc' },
+      { id: 'storm_wisp', name: 'Storm Wisp', icon: '🌩️', element: 'storm', power: 92, rarity: 'epic', atkMul: 0.08, speedMul: 0.03, attackDmg: 40, cooldown: 2.8, color: '#60a5fa', secondaryColor: '#e0e7ff' },
+      { id: 'guardian_sand', name: 'Guardian Sand', icon: '⏳', element: 'earth', power: 88, rarity: 'epic', damageTakenMul: 0.85, attackDmg: 28, cooldown: 3.5, color: '#d97706', secondaryColor: '#fbbf24' },
+      { id: 'ember_fox', name: 'Ember Fox', icon: '🦊', element: 'fire', power: 94, rarity: 'legendary', atkMul: 0.05, luck: 5, attackDmg: 45, cooldown: 2.4, color: '#ff6b35', secondaryColor: '#fbbf24' }
+    ];
+
+    const ABILITIES = [
+      { id: 'divine_barrier', name: 'Divine Barrier', icon: '🛡️', type: 'active', category: 'defensive', cooldown: 12, duration: 4, damageTakenMul: 0.7, color: '#7b61ff', secondaryColor: '#2EA8FF' },
+      { id: 'angelic_might', name: 'Angelic Might', icon: '⚔️', type: 'active', category: 'offensive', cooldown: 15, duration: 5, atkMul: 0.25, color: '#ffd56a', secondaryColor: '#ff6b35' },
+      { id: 'dash_nova', name: 'Dash Nova', icon: '💨', type: 'active', category: 'mobility', cooldown: 9, duration: 0.2, dashSpeed: 800, damage: 50, invulnerable: true, color: '#60a5fa', secondaryColor: '#e0e7ff' },
+      { id: 'radiant_burst', name: 'Radiant Burst', icon: '✨', type: 'active', category: 'offensive', cooldown: 11, duration: 0.4, atkMul: 0.1, damage: 80, aoeRadius: 150, color: '#ffd56a', secondaryColor: '#fff7d1' },
+      { id: 'flame_dash', name: 'Flame Dash', icon: '🔥', type: 'active', category: 'mobility', cooldown: 9, duration: 0.2, dashSpeed: 800, damage: 40, trailDamage: 15, color: '#ff6b35', secondaryColor: '#fbbf24' },
+      { id: 'aura_of_fortune', name: 'Aura of Fortune', icon: '🍀', type: 'passive', category: 'utility', cooldown: 0, luck: 10, alwaysActive: true, color: '#ffbf3b', secondaryColor: '#ffd56a' },
+      { id: 'iron_will', name: 'Iron Will', icon: '🛡️', type: 'passive', category: 'defensive', cooldown: 0, damageTakenMul: 0.9, alwaysActive: true, color: '#94a3b8', secondaryColor: '#cbd5e1' }
+    ];
+
+    const RARITIES = {
+      uncommon: { stars: '⭐⭐', color: '#4CAF50' },
+      rare: { stars: '⭐⭐⭐', color: '#3498db' },
+      epic: { stars: '⭐⭐⭐⭐', color: '#9b59b6' },
+      legendary: { stars: '⭐⭐⭐⭐⭐', color: '#f39c12' }
+    };
+
+    // Simple spirit/ability rendering
+    class Renderer {
+      renderSpirit(ctx, spirit, x, y, time) {
+        const pulse = Math.sin(time / 300) * 0.3 + 0.7;
+        const orbit = Math.sin(time / 500) * 3;
+        
+        ctx.save();
+        ctx.translate(x, y + orbit);
+        
+        // Outer glow
+        ctx.globalAlpha = 0.3 * pulse;
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 50);
+        grad.addColorStop(0, spirit.color + 'aa');
+        grad.addColorStop(1, '#00000000');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 50, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        
+        // Core orb
+        const coreGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 20);
+        coreGrad.addColorStop(0, '#ffffff');
+        coreGrad.addColorStop(0.5, spirit.color);
+        coreGrad.addColorStop(1, spirit.secondaryColor);
+        ctx.fillStyle = coreGrad;
+        ctx.shadowColor = spirit.color;
+        ctx.shadowBlur = 25 * pulse;
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Icon
+        ctx.font = '32px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(spirit.icon, 0, 0);
+        
+        ctx.restore();
+      }
+
+      renderAbility(ctx, ability, x, y, time) {
+        const pulse = Math.sin(time / 400) * 0.2 + 0.8;
+        
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // Ring
+        ctx.strokeStyle = ability.color;
+        ctx.lineWidth = 4;
+        ctx.globalAlpha = 0.5 * pulse;
+        ctx.shadowColor = ability.color;
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(0, 0, 60, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        
+        // Center
+        ctx.fillStyle = ability.color;
+        ctx.shadowColor = ability.color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(0, 0, 30 * pulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Icon
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(ability.icon, 0, 0);
+        
+        ctx.restore();
+      }
+    }
+
+    // MAIN APP
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1400;
+    canvas.height = 800;
+
+    const renderer = new Renderer();
+    let showSpirits = true;
+    let selectedIndex = 0;
+    let animTime = 0;
+
+    function switchTab(isSpirits) {
+      showSpirits = isSpirits;
+      selectedIndex = 0;
+      document.getElementById('spirits-tab').className = isSpirits ? 'selected' : '';
+      document.getElementById('abilities-tab').className = !isSpirits ? 'selected' : '';
+      updateSelector();
+      updateStats();
+    }
+
+    document.getElementById('spirits-tab').onclick = () => switchTab(true);
+    document.getElementById('abilities-tab').onclick = () => switchTab(false);
+
+    function updateSelector() {
+      const items = showSpirits ? SPIRITS : ABILITIES;
+      const selector = document.getElementById('item-selector');
+      selector.innerHTML = '';
+      
+      items.forEach((item, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = `${item.icon} ${item.name}`;
+        btn.className = index === 0 ? 'selected' : '';
+        btn.onclick = () => {
+          selectedIndex = index;
+          document.querySelectorAll('#item-selector button').forEach((b, i) => {
+            b.className = i === index ? 'selected' : '';
+          });
+          updateStats();
+        };
+        selector.appendChild(btn);
+      });
+    }
+
+    function updateStats() {
+      if (showSpirits) {
+        const spirit = SPIRITS[selectedIndex];
+        const rarity = RARITIES[spirit.rarity];
+        let bonuses = '';
+        if (spirit.atkMul) bonuses += `<p>• Attack: +${(spirit.atkMul * 100).toFixed(0)}%</p>`;
+        if (spirit.hpFlat) bonuses += `<p>• HP: +${spirit.hpFlat}</p>`;
+        if (spirit.goldGain) bonuses += `<p>• Gold: +${(spirit.goldGain * 100).toFixed(0)}%</p>`;
+        if (spirit.speedMul) bonuses += `<p>• Speed: +${(spirit.speedMul * 100).toFixed(0)}%</p>`;
+        if (spirit.damageTakenMul) bonuses += `<p>• Damage Reduction: ${((1 - spirit.damageTakenMul) * 100).toFixed(0)}%</p>`;
+        if (spirit.luck) bonuses += `<p>• Luck: +${spirit.luck}</p>`;
+        
+        document.getElementById('item-stats').innerHTML = `
+          <h3>${spirit.icon} ${spirit.name} ${rarity.stars}</h3>
+          <p><strong>Element:</strong> ${spirit.element.toUpperCase()}</p>
+          <p><strong>Power:</strong> ${spirit.power}</p>
+          <p><strong>Rarity:</strong> <span style="color: ${rarity.color}">${spirit.rarity.toUpperCase()}</span></p>
+          <div style="margin-top: 15px;"><strong>Bonuses:</strong>${bonuses}</div>
+          <div style="margin-top: 15px;">
+            <p><strong>Attack:</strong> ${spirit.attackDmg} damage</p>
+            <p><strong>Cooldown:</strong> ${spirit.cooldown}s</p>
+          </div>
+        `;
+      } else {
+        const ability = ABILITIES[selectedIndex];
+        let bonuses = '';
+        if (ability.atkMul) bonuses += `<p>• Attack: +${(ability.atkMul * 100).toFixed(0)}%</p>`;
+        if (ability.damageTakenMul) bonuses += `<p>• Damage Reduction: ${((1 - ability.damageTakenMul) * 100).toFixed(0)}%</p>`;
+        if (ability.luck) bonuses += `<p>• Luck: +${ability.luck}</p>`;
+        if (ability.damage) bonuses += `<p>• Damage: ${ability.damage}</p>`;
+        
+        document.getElementById('item-stats').innerHTML = `
+          <h3>${ability.icon} ${ability.name}</h3>
+          <p><strong>Type:</strong> ${ability.type.toUpperCase()}</p>
+          <p><strong>Category:</strong> ${ability.category.toUpperCase()}</p>
+          ${ability.cooldown > 0 ? `<p><strong>Cooldown:</strong> ${ability.cooldown}s</p>` : '<p><strong>Always Active</strong></p>'}
+          ${ability.duration ? `<p><strong>Duration:</strong> ${ability.duration}s</p>` : ''}
+          ${bonuses ? `<div style="margin-top: 15px;"><strong>Effects:</strong>${bonuses}</div>` : ''}
+          ${ability.dashSpeed ? `<p><strong>Dash Speed:</strong> ${ability.dashSpeed}</p>` : ''}
+          ${ability.invulnerable ? '<p><strong>Grants Invincibility</strong></p>' : ''}
+        `;
+      }
+    }
+
+    function render() {
+      // Background
+      const bgGrad = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.height);
+      bgGrad.addColorStop(0, '#1a0a2e');
+      bgGrad.addColorStop(0.5, '#2d1b4e');
+      bgGrad.addColorStop(1, '#0f0520');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Stars
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 100; i++) {
+        const x = (i * 137.5) % canvas.width;
+        const y = (i * 241.3) % canvas.height;
+        ctx.globalAlpha = (Math.sin(animTime / 200 + i) * 0.5 + 0.5) * 0.8;
+        ctx.beginPath();
+        ctx.arc(x, y, 1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      const item = showSpirits ? SPIRITS[selectedIndex] : ABILITIES[selectedIndex];
+      
+      // Title
+      ctx.fillStyle = item.color;
+      ctx.font = 'bold 56px Georgia';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = item.color;
+      ctx.shadowBlur = 25;
+      ctx.fillText(item.name, canvas.width / 2, 120);
+      ctx.shadowBlur = 0;
+
+      // Render item (large, centered, scaled)
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(2, 2);
+      if (showSpirits) {
+        renderer.renderSpirit(ctx, item, 0, 0, animTime);
+      } else {
+        renderer.renderAbility(ctx, item, 0, 0, animTime);
+      }
+      ctx.restore();
+
+      // Type
+      ctx.fillStyle = item.secondaryColor;
+      ctx.font = 'bold 32px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText(showSpirits ? `Power: ${item.power}` : `${item.type.toUpperCase()}`, canvas.width / 2, canvas.height - 80);
+    }
+
+    function gameLoop() {
+      animTime += 16;
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    updateSelector();
+    updateStats();
+    gameLoop();
+
+    console.log('✅ Supernatural Gallery loaded!');
+    console.log('Total spirits:', SPIRITS.length);
+    console.log('Total abilities:', ABILITIES.length);
+  </script>
+</body>
+</html>
+

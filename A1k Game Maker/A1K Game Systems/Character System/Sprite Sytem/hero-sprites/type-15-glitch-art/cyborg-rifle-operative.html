@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Cyborg - Glitch Art Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; color: #0ff; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        canvas { border: 2px solid #0ff; box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); image-rendering: pixelated; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+        #controls { background: #111; border: 2px solid #0ff; border-radius: 8px; padding: 20px; margin-top: 20px; max-width: 800px; width: 100%; }
+        h1 { color: #0ff; margin-bottom: 15px; text-shadow: 0 0 10px #0ff; }
+        .control-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; color: #0ff; font-size: 11px; text-transform: uppercase; }
+        select, button { width: 100%; padding: 10px; background: #000; border: 1px solid #0ff; color: #0ff; border-radius: 4px; cursor: pointer; font-family: inherit; }
+        button:hover { background: #001111; box-shadow: 0 0 10px #0ff; }
+        .button-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .stat { background: #001111; padding: 10px; border: 1px solid #0ff; border-radius: 4px; text-align: center; }
+        .stat-label { font-size: 9px; color: #0aa; }
+        .stat-value { font-size: 18px; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <canvas id="spriteCanvas" width="400" height="400"></canvas>
+    <div id="controls">
+        <h1>🔫 UNIQUE CYBORG - GLITCH ART</h1>
+        <div class="control-group">
+            <label>Animation</label>
+            <select id="animSelect">
+                <option value="idle">Idle</option>
+                <option value="walk">Walk</option>
+                <option value="attack">Attack</option>
+                <option value="jump">Jump</option>
+                <option value="hurt">Hurt</option>
+                <option value="victory">Victory</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Color Palette</label>
+            <select id="paletteSelect">
+                <option value="fire">Fire</option>
+                <option value="ice">Ice</option>
+                <option value="shadow">Shadow</option>
+                <option value="light">Light</option>
+                <option value="nature">Nature</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Export</label>
+            <div class="button-group">
+                <button id="exportPNG">PNG</button>
+                <button id="exportSheet">Sheet</button>
+                <button id="exportJSON">JSON</button>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat"><div class="stat-label">Frame</div><div class="stat-value" id="frameCount">0</div></div>
+            <div class="stat"><div class="stat-label">FPS</div><div class="stat-value">60</div></div>
+            <div class="stat"><div class="stat-label">Glitch</div><div class="stat-value" id="glitchIntensity">0%</div></div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('spriteCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentAnim = 'idle', currentPalette = 'fire', frame = 0, glitchTimer = 0;
+        
+        const palettes = {
+            fire: { primary: '#FF4500', secondary: '#FF8C00', accent: '#FFD700' },
+            ice: { primary: '#00CED1', secondary: '#1E90FF', accent: '#87CEEB' },
+            shadow: { primary: '#8B00FF', secondary: '#4B0082', accent: '#9370DB' },
+            light: { primary: '#FFD700', secondary: '#FFA500', accent: '#FFFFE0' },
+            nature: { primary: '#228B22', secondary: '#32CD32', accent: '#90EE90' }
+        };
+
+        function drawGlitchCyborg(x, y, animState, frameNum) {
+            const glitchActive = Math.random() < 0.15;
+            const glitchOffset = glitchActive ? (Math.random() - 0.5) * 20 : 0;
+            
+            if (glitchActive) {
+                glitchTimer = 5;
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.globalAlpha = 0.6;
+                drawCyborgShape(x + 2, y, animState, frameNum, '#FF0000');
+                drawCyborgShape(x - 2, y, animState, frameNum, '#00FF00');
+                drawCyborgShape(x, y + 2, animState, frameNum, '#0000FF');
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1;
+                ctx.restore();
+            }
+            
+            for (let i = 0; i < canvas.height; i += 2) {
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.05)';
+                ctx.fillRect(0, i, canvas.width, 1);
+            }
+            
+            drawCyborgShape(x + glitchOffset, y, animState, frameNum, null);
+            
+            if (glitchTimer > 0) {
+                for (let i = 0; i < 5; i++) {
+                    ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.5})`;
+                    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 30 + 10, Math.random() * 5 + 2);
+                }
+                glitchTimer--;
+            }
+            
+            document.getElementById('glitchIntensity').textContent = glitchActive ? '100%' : '0%';
+        }
+
+        function drawCyborgShape(x, y, animState, frameNum, colorOverride) {
+            const p = palettes[currentPalette];
+            const c1 = colorOverride || p.primary;
+            const c2 = colorOverride || p.secondary;
+            const c3 = colorOverride || p.accent;
+            
+            const bounce = animState === 'idle' ? Math.sin(frameNum / 20) * 2 : 0;
+            const walkCycle = animState === 'walk' ? Math.sin(frameNum / 5) * 5 : 0;
+            const aimRecoil = animState === 'attack' && frameNum % 30 < 5 ? -3 : 0;
+            const jumpY = animState === 'jump' ? -Math.abs(Math.sin(frameNum / 15)) * 40 : 0;
+            const hurtShake = animState === 'hurt' ? (frameNum % 4 < 2 ? 3 : -3) : 0;
+            
+            y += bounce + jumpY;
+            x += hurtShake + aimRecoil;
+            
+            // Head (cyborg)
+            ctx.fillStyle = '#333';
+            ctx.fillRect(x - 15, y - 40, 30, 30);
+            ctx.fillStyle = c2;
+            ctx.fillRect(x - 12, y - 37, 24, 6);
+            // Visor
+            ctx.fillStyle = c3;
+            ctx.fillRect(x - 10, y - 30, 20, 8);
+            
+            // Body (armor)
+            ctx.fillStyle = c1;
+            ctx.fillRect(x - 20, y - 10, 40, 35);
+            ctx.fillStyle = '#666';
+            ctx.fillRect(x - 5, y, 10, 20);
+            
+            // Arms
+            ctx.fillStyle = '#333';
+            ctx.save();
+            ctx.translate(x - 20, y);
+            ctx.rotate(walkCycle * 0.1);
+            ctx.fillRect(-8, -5, 8, 25);
+            ctx.restore();
+            ctx.save();
+            ctx.translate(x + 20, y);
+            ctx.rotate(-walkCycle * 0.1 + (animState === 'attack' ? -0.3 : 0));
+            ctx.fillRect(0, -5, 8, 25);
+            ctx.restore();
+            
+            // Rifle
+            ctx.fillStyle = c3;
+            ctx.save();
+            ctx.translate(x + 28, y + 15);
+            ctx.rotate(animState === 'attack' ? -0.3 : 0);
+            ctx.fillRect(-5, -8, 25, 8);
+            ctx.fillRect(15, -10, 5, 2);
+            if (animState === 'attack' && frameNum % 30 < 5) {
+                ctx.fillStyle = '#FFF';
+                ctx.fillRect(20, -11, 10, 4);
+            }
+            ctx.restore();
+            
+            // Legs
+            ctx.fillStyle = '#333';
+            const legSpread = animState === 'walk' ? walkCycle : 0;
+            ctx.fillRect(x - 15 + legSpread, y + 25, 10, 30);
+            ctx.fillRect(x + 5 - legSpread, y + 25, 10, 30);
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawGlitchCyborg(canvas.width / 2, canvas.height / 2 + 50, currentAnim, frame);
+            if (Math.random() < 0.05) {
+                ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.2})`;
+                ctx.fillRect(0, Math.random() * canvas.height, canvas.width, 2);
+            }
+            frame++;
+            document.getElementById('frameCount').textContent = frame;
+            requestAnimationFrame(draw);
+        }
+
+        document.getElementById('animSelect').addEventListener('change', (e) => { currentAnim = e.target.value; frame = 0; });
+        document.getElementById('paletteSelect').addEventListener('change', (e) => { currentPalette = e.target.value; });
+        document.getElementById('exportPNG').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `cyborg-glitch-${currentAnim}-${currentPalette}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+        document.getElementById('exportSheet').addEventListener('click', () => { alert('Sprite sheet: 48 frames'); });
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = { character: 'Unique Cyborg', style: 'Glitch Art', animation: currentAnim, palette: currentPalette };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = 'cyborg-glitch-data.json';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+        draw();
+    </script>
+</body>
+</html>

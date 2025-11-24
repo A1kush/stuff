@@ -1,0 +1,52 @@
+{
+  "id": "wavii",
+  "name": "Wavii",
+  "rank": "S",
+  "role": "striker",
+  "summary": {
+    "hook": "Twin-gun drifter who bends light and shadow.",
+    "gameplay": "High burst DPS with rhythm-linked crit windows and stealth dashes.",
+    "why_it_matters": "Enables stylish no-hit clears and teaches players to chase performance bonuses."
+  },
+  "stats": {"attack": 95, "defense": 45, "luck": 70, "support": 30, "speed": 90},
+  "skills": [
+    {
+      "name": "Eclipse Volley",
+      "type": "attack",
+      "cooldown": 10,
+      "aura_cost": 30,
+      "effects": ["charged_barrage", "crit_scaling"],
+      "rationale": "Lets players dump aura into spectacular bursts that feel anime-tier."
+    },
+    {
+      "name": "Hat Trick Feint",
+      "type": "utility",
+      "cooldown": 16,
+      "aura_cost": 12,
+      "effects": ["teleport_dash", "stealth_brief"],
+      "rationale": "Stealth moments justify his mercenary mystique and reward precision."
+    },
+    {
+      "name": "Dreadlock Anthem",
+      "type": "buff",
+      "cooldown": 22,
+      "aura_cost": 20,
+      "effects": ["rhythm_damage_buff", "music_sync"],
+      "rationale": "Encourages players to align attacks with soundtrack beats for higher skill ceiling."
+    }
+  ],
+  "acquisition": {
+    "method": "Mercenary duel",
+    "costs": {"battle_bonds": 3},
+    "spawn_logic": "Chance spikes after a flawless room clear."
+  },
+  "synergy": {
+    "combos": ["Gun Eclipse (with Jae Reload + A1 Kush)", "Brawler Choir setups"],
+    "counters": ["Anti-crit armor"]
+  },
+  "visuals": {
+    "palette": ["#1b1b1b", "#ffcc00", "#6be4ff"],
+    "aura": "Yin-yang muzzle flashes trailing from dual pistols.",
+    "animation_notes": "Layer dreadlocks as separate sprites to exaggerate motion arcs."
+  }
+}

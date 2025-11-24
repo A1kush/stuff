@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Dual Swords - Low-Poly 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {margin: 0; padding: 0;}
+        body {min-height: 100vh; background: linear-gradient(135deg, #2c3e50, #34495e); display: flex; align-items: center; justify-content: center; padding: 20px;}
+        #viewport {border: 3px solid #3498db; border-radius: 10px;}
+        #controls {background: rgba(255,255,255,0.95); border: 3px solid #3498db; border-radius: 10px; padding: 25px; width: 350px; position: absolute; top: 20px; right: 20px;}
+        h1 {font-size: 18px; color: #2980b9; border-bottom: 3px solid #3498db; padding-bottom: 10px;}
+        select, button {width: 100%; padding: 10px; background: #ecf0f1; border: 2px solid #3498db; border-radius: 8px; cursor: pointer; margin: 5px 0;}
+        button {background: linear-gradient(135deg, #3498db, #2980b9); color: #FFF;}
+    </style>
+</head>
+<body>
+    <div id="viewport"></div>
+    <div id="controls">
+        <h1>⚔️ A1 LOW-POLY 3D</h1>
+        <select id="anim"><option>idle</option><option>walk</option><option>attack</option></select>
+        <select id="pal"><option>fire</option><option>ice</option><option>shadow</option></select>
+        <button id="exp">Export PNG</button>
+    </div>
+    <script>
+        let scene, camera, renderer, warrior, frame = 0;
+        const pals = {fire: 0xff4444, ice: 0x44ffff, shadow: 0xaa44ff};
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x2c3e50);
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera.position.set(0, 1.5, 4);
+            camera.lookAt(0, 1, 0);
+            renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
+            renderer.setSize(512, 512);
+            document.getElementById('viewport').appendChild(renderer.domElement);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 5);
+            scene.add(dirLight);
+            createWarrior();
+        }
+        function createWarrior() {
+            warrior = new THREE.Group();
+            const matBody = new THREE.MeshPhongMaterial({color: 0x1a1a1a, flatShading: true});
+            const matSkin = new THREE.MeshPhongMaterial({color: 0x8b6347, flatShading: true});
+            const matHair = new THREE.MeshPhongMaterial({color: 0x000000, flatShading: true});
+            const matSword = new THREE.MeshPhongMaterial({color: pals.fire, flatShading: true, emissive: pals.fire, emissiveIntensity: 0.5});
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.3), matBody);
+            body.position.y = 1;
+            warrior.add(body);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.3), matSkin);
+            head.position.y = 1.5;
+            warrior.add(head);
+            const hair = new THREE.Mesh(new THREE.BoxGeometry(0.37, 0.15, 0.32), matHair);
+            hair.position.y = 1.65;
+            warrior.add(hair);
+            const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), matBody);
+            leftLeg.position.set(-0.12, 0.5, 0);
+            warrior.add(leftLeg);
+            const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), matBody);
+            rightLeg.position.set(0.12, 0.5, 0);
+            warrior.add(rightLeg);
+            const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.1), matSkin);
+            leftArm.position.set(-0.25, 1.1, 0);
+            warrior.add(leftArm);
+            const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.1), matSkin);
+            rightArm.position.set(0.25, 1.1, 0);
+            warrior.add(rightArm);
+            const leftSword = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.6, 0.02), matSword);
+            leftSword.position.set(-0.35, 1.0, 0);
+            warrior.add(leftSword);
+            const rightSword = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.6, 0.02), matSword);
+            rightSword.position.set(0.35, 1.0, 0);
+            warrior.add(rightSword);
+            scene.add(warrior);
+        }
+        function animate() {
+            frame++;
+            if (warrior) warrior.rotation.y += 0.01;
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        document.getElementById('pal').addEventListener('change', (e) => {
+            const newCol = pals[e.target.value];
+            warrior.children.forEach(child => {
+                if (child.geometry && child.geometry.type.includes('Box') && child.position.x !== 0 && Math.abs(child.position.x) > 0.3) {
+                    child.material.color.setHex(newCol);
+                    child.material.emissive.setHex(newCol);
+                }
+            });
+        });
+        document.getElementById('exp').addEventListener('click', () => {
+            const l = document.createElement('a');
+            l.download = 'a1-lowpoly.png';
+            l.href = renderer.domElement.toDataURL('image/png');
+            l.click();
+        });
+        init();
+        animate();
+    </script>
+</body>
+</html>

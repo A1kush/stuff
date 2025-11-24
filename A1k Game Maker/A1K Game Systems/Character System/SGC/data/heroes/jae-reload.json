@@ -1,0 +1,52 @@
+{
+  "id": "jae-reload",
+  "name": "Jae Reload",
+  "rank": "S",
+  "role": "striker",
+  "summary": {
+    "hook": "Mirrored gunner who resonates with A1 Kush's destiny.",
+    "gameplay": "Synchronizes dual shots, freezes time zones, and amplifies when allies share his sprite DNA.",
+    "why_it_matters": "Gives designers a lever to reward duo compositions without coding bespoke encounters."
+  },
+  "stats": {"attack": 90, "defense": 50, "luck": 65, "support": 35, "speed": 85},
+  "skills": [
+    {
+      "name": "Reload Rapture",
+      "type": "buff",
+      "cooldown": 14,
+      "aura_cost": 18,
+      "effects": ["instant_ammo", "attack_boost"],
+      "rationale": "Keeps gunner rotations fluid so canvas demos never feel sluggish."
+    },
+    {
+      "name": "Crossfire Fate",
+      "type": "attack",
+      "cooldown": 12,
+      "aura_cost": 26,
+      "effects": ["dual_line_pierce", "armor_shred"],
+      "rationale": "Wide piercing shots make mob waves cinematic without extra enemy logic."
+    },
+    {
+      "name": "Pulse Jam",
+      "type": "utility",
+      "cooldown": 28,
+      "aura_cost": 24,
+      "effects": ["bullet_time_field", "enemy_slow"],
+      "rationale": "Localized slow zones let players appreciate sprite effects at full detail."
+    }
+  ],
+  "acquisition": {
+    "method": "Event recruit",
+    "costs": {"reputation_shards": 35},
+    "spawn_logic": "Chance rises when Wavii or A1 Kush already ride along."
+  },
+  "synergy": {
+    "combos": ["Gun Eclipse", "Echo of A1 passive"],
+    "counters": ["Time-lock traps"]
+  },
+  "visuals": {
+    "palette": ["#ff9c54", "#5630ff", "#151515"],
+    "aura": "Neon copper line art overlaying the A1 rig.",
+    "animation_notes": "Reuse A1 sprite sheet but recolor via shader mask for production speed."
+  }
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Bag System Demo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Game Simulation Container -->
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="game-ui">
+            <h1>Urban Legends (Demo)</h1>
+            <p>Press 'B' to toggle Bag</p>
+            <div class="controls">
+                <button id="btn-open-bag">🎒 Open Bag</button>
+                <button id="btn-add-item">🎁 Loot Random Item</button>
+                <button id="btn-save">💾 Force Save</button>
+                <button id="btn-clear">🗑️ Reset Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Bag System Container (Injected by JS, but we can put a placeholder or let JS create it) -->
+    <!-- Ideally, the system injects itself, but for clarity we verify here. -->
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A1 Dual Swords - PREMIUM Vector Cel-Shaded</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 50%, #0a0a0a 100%);
+    color: #ff3333;
+    font-family: 'Orbitron', 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #container { display: flex; gap: 40px; max-width: 1600px; position: relative; }
+  #canvas-wrapper {
+    flex-shrink: 0;
+    position: relative;
+    filter: drop-shadow(0 20px 60px rgba(255, 0, 0, 0.5));
+  }
+  canvas {
+    border: 3px solid #ff0000;
+    background: #000;
+    box-shadow: 0 0 40px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.1);
+  }
+  #controls {
+    background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 0, 0, 0.95) 100%);
+    border: 3px solid #ff0000;
+    padding: 30px;
+    width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  }
+  h1 {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #ff0000;
+    border-bottom: 3px solid #ff0000;
+    padding-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    letter-spacing: 2px;
+  }
+  .control-group { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 10px;
+    color: #cc3333;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  select, button {
+    width: 100%;
+    padding: 12px;
+    background: #1a0000;
+    border: 2px solid #cc0000;
+    color: #ff3333;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  select:hover, button:hover {
+    border-color: #ff0000;
+    background: #2a0000;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+  }
+  button { margin-top: 10px; background: #2a0000; }
+  button:active { transform: scale(0.98); }
+  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info {
+    font-size: 9px;
+    color: #cc3333;
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 2px solid #cc0000;
+    line-height: 1.8;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 15px;
+  }
+  .stat {
+    background: rgba(255, 0, 0, 0.05);
+    padding: 10px;
+    border: 2px solid #cc0000;
+  }
+  .stat-label { font-size: 8px; color: #cc3333; }
+  .stat-value { font-size: 14px; color: #ff0000; font-weight: bold; margin-top: 4px; }
+  .premium-badge {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    padding: 8px 16px;
+    font-size: 9px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.8);
+    z-index: 10;
+    animation: pulse 2s infinite;
+    font-weight: bold;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-wrapper">
+      <div class="premium-badge">★ PREMIUM ★</div>
+      <canvas id="canvas" width="200" height="200"></canvas>
+    </div>
+    <div id="controls">
+      <h1>⚔️ A1 DUAL SWORDS VECTOR PREMIUM</h1>
+      <div class="control-group">
+        <label>⚡ ANIMATION STATE</label>
+        <select id="animState">
+          <option value="idle">IDLE - Breathing</option>
+          <option value="walk">WALK - 8-Frame Cycle</option>
+          <option value="attack">ATTACK - Sword Combo</option>
+          <option value="jump">JUMP - Air Dash</option>
+          <option value="hurt">HURT - Damage React</option>
+          <option value="victory">VICTORY - Pose</option>
+          <option value="special">SPECIAL - Ultimate Burst</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>🎨 COLOR PALETTE</label>
+        <select id="palette">
+          <option value="crimson">🔥 Crimson (Red/Black)</option>
+          <option value="azure">💙 Azure (Blue/Cyan)</option>
+          <option value="emerald">💚 Emerald (Green/Gold)</option>
+          <option value="amethyst">💜 Amethyst (Purple/Pink)</option>
+          <option value="solar">☀️ Solar (Orange/Yellow)</option>
+          <option value="moonlight">🌙 Moonlight (Silver/White)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>⚙️ SPEED CONTROL</label>
+        <select id="speed">
+          <option value="0.25">0.25X Ultra Slow</option>
+          <option value="0.5">0.5X Slow</option>
+          <option value="1" selected>1X Normal</option>
+          <option value="1.5">1.5X Fast</option>
+          <option value="2">2X Turbo</option>
+          <option value="3">3X Ultra</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>🔍 DISPLAY SCALE</label>
+        <select id="scale">
+          <option value="2">2X (400px)</option>
+          <option value="2.5">2.5X (500px)</option>
+          <option value="3" selected>3X (600px)</option>
+          <option value="3.5">3.5X (700px)</option>
+          <option value="4">4X (800px)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>💾 EXPORT OPTIONS</label>
+        <div class="btn-group">
+          <button id="exportFrame">PNG Frame</button>
+          <button id="exportSheet">Sprite Sheet</button>
+        </div>
+        <button id="exportJSON">Export JSON Data</button>
+        <button id="exportGIF">Export Animated GIF</button>
+      </div>
+      <div class="info">
+        <strong>★ PREMIUM TYPE 2 VECTOR CEL-SHADED ★</strong><br>
+        Anime / Borderlands Style<br><br>
+        ✓ RESOLUTION: 200×200 Vector<br>
+        ✓ TECHNIQUE: Canvas2D Vector Rendering<br>
+        ✓ BLACK BASEBALL CAP + CURLY HAIR<br>
+        ✓ GLOWING RED EYES<br>
+        ✓ DUAL RED ENERGY SWORDS<br>
+        ✓ ENHANCED ANIMATIONS (12 FRAMES)<br>
+        ✓ CEL-SHADED OUTLINES<br>
+        ✓ FRAME RATE: 60FPS<br><br>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">FRAME</div>
+            <div class="stat-value" id="frameCount">0/12</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">FPS</div>
+            <div class="stat-value" id="fpsCount">60</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">QUALITY</div>
+            <div class="stat-value">★★★★★</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let currentAnim = 'idle';
+    let currentFrame = 0;
+    let frameTimer = 0;
+    let animSpeed = 1;
+    let palette = 'crimson';
+    let lastTime = 0;
+    let fps = 60;
+    let frameCount = 0;
+    let lastFpsTime = 0;
+
+    const palettes = {
+      crimson: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#1a0000', '#3a0000', '#5a0000'], weapon: ['#660000', '#ff0000', '#ff3333'] },
+      azure: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#001a3a', '#003a6a', '#005a9a'], weapon: ['#0066aa', '#00ccff', '#66ffff'] },
+      emerald: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#1a3a1a', '#2a5a2a', '#3a7a3a'], weapon: ['#336633', '#00ff00', '#66ff66'] },
+      amethyst: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#2a1a3a', '#4a2a5a', '#6a3a7a'], weapon: ['#660099', '#cc00ff', '#ff66ff'] },
+      solar: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#3a2a0a', '#6a4a1a', '#9a6a2a'], weapon: ['#cc6600', '#ff9900', '#ffcc66'] },
+      moonlight: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#2a2a3a', '#4a4a6a', '#6a6a9a'], weapon: ['#9999cc', '#ccccff', '#ffffff'] }
+    };
+
+    const animations = {
+      idle: { frames: 8, frameTime: 400, loop: true },
+      walk: { frames: 8, frameTime: 100, loop: true },
+      attack: { frames: 6, frameTime: 80, loop: false },
+      jump: { frames: 8, frameTime: 100, loop: false },
+      hurt: { frames: 4, frameTime: 150, loop: false },
+      victory: { frames: 8, frameTime: 200, loop: true },
+      special: { frames: 12, frameTime: 60, loop: false }
+    };
+
+    function drawA1Premium(frame, anim) {
+      const pal = palettes[palette];
+      const centerX = 100;
+      const centerY = 100;
+      
+      let bobY = 0, legOffset = 0, armAngle = 0, jumpHeight = 0, swordGlow = 0;
+      
+      if (anim === 'idle') {
+        bobY = Math.sin(frame / 4 * Math.PI) * 3;
+        swordGlow = (Math.sin(frame / 2 * Math.PI) + 1) * 0.5;
+      } else if (anim === 'walk') {
+        bobY = Math.abs(Math.sin(frame / 4 * Math.PI)) * 4;
+        legOffset = Math.sin(frame / 4 * Math.PI) * 6;
+      } else if (anim === 'attack') {
+        armAngle = Math.sin((frame / 6) * Math.PI) * 60;
+        swordGlow = frame < 3 ? 1 : 0.5;
+      } else if (anim === 'jump') {
+        jumpHeight = frame < 4 ? frame * 12 : (8 - frame) * 12;
+      } else if (anim === 'hurt') {
+        bobY = (frame % 2) * 5;
+      } else if (anim === 'victory') {
+        bobY = Math.sin(frame / 4 * Math.PI) * 4;
+        armAngle = 30;
+      } else if (anim === 'special') {
+        armAngle = Math.sin((frame / 12) * Math.PI * 2) * 80;
+        swordGlow = 1;
+        bobY = Math.sin(frame / 6 * Math.PI) * 5;
+      }
+
+      ctx.clearRect(0, 0, 200, 200);
+      const y = centerY - bobY - jumpHeight;
+
+      // Sword glow aura
+      if (swordGlow > 0.5) {
+        ctx.fillStyle = pal.weapon[1];
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath();
+        ctx.arc(centerX - 40, y - 10, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(centerX + 40, y - 10, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // Legs
+      const legGrad = ctx.createLinearGradient(centerX - 15, y + 30, centerX + 15, y + 30);
+      legGrad.addColorStop(0, pal.clothes[0]);
+      legGrad.addColorStop(0.5, pal.clothes[1]);
+      legGrad.addColorStop(1, pal.clothes[0]);
+      ctx.fillStyle = legGrad;
+      ctx.fillRect(centerX - 15, y + 30 + legOffset, 12, 35);
+      ctx.fillRect(centerX + 3, y + 30 - legOffset, 12, 35);
+      
+      // Torso
+      const torsoGrad = ctx.createLinearGradient(centerX - 25, y + 5, centerX + 25, y + 5);
+      torsoGrad.addColorStop(0, pal.clothes[0]);
+      torsoGrad.addColorStop(0.5, pal.clothes[2]);
+      torsoGrad.addColorStop(1, pal.clothes[0]);
+      ctx.fillStyle = torsoGrad;
+      ctx.beginPath();
+      ctx.roundRect(centerX - 25, y + 5, 50, 30, 5);
+      ctx.fill();
+      
+      // Head
+      const headGrad = ctx.createRadialGradient(centerX - 10, y - 15, 5, centerX, y - 10, 30);
+      headGrad.addColorStop(0, pal.skin[2]);
+      headGrad.addColorStop(0.7, pal.skin[1]);
+      headGrad.addColorStop(1, pal.skin[0]);
+      ctx.fillStyle = headGrad;
+      ctx.beginPath();
+      ctx.arc(centerX, y - 10, 25, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Baseball cap
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.ellipse(centerX, y - 25, 30, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(centerX - 20, y - 20, 10, 4, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Black curly hair
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(centerX - 20, y - 15, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(centerX + 20, y - 15, 8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Glowing RED eyes
+      ctx.fillStyle = '#ff0000';
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(centerX - 10, y - 5, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(centerX + 10, y - 5, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Arms
+      ctx.fillStyle = pal.skin[1];
+      ctx.fillRect(centerX - 35, y + 10, 8, 20);
+      ctx.fillRect(centerX + 27, y + 10, 8, 20);
+      
+      // Left sword
+      ctx.save();
+      ctx.translate(centerX - 45, y + 15);
+      ctx.rotate((-45 + armAngle) * Math.PI / 180);
+      const swordGrad1 = ctx.createLinearGradient(0, -40, 0, 0);
+      swordGrad1.addColorStop(0, pal.weapon[2]);
+      swordGrad1.addColorStop(0.5, pal.weapon[1]);
+      swordGrad1.addColorStop(1, pal.weapon[0]);
+      ctx.fillStyle = swordGrad1;
+      ctx.fillRect(-3, -40, 6, 45);
+      ctx.fillStyle = pal.clothes[0];
+      ctx.fillRect(-4, 5, 8, 8);
+      ctx.restore();
+      
+      // Right sword
+      ctx.save();
+      ctx.translate(centerX + 45, y + 15);
+      ctx.rotate((45 - armAngle) * Math.PI / 180);
+      const swordGrad2 = ctx.createLinearGradient(0, -40, 0, 0);
+      swordGrad2.addColorStop(0, pal.weapon[2]);
+      swordGrad2.addColorStop(0.5, pal.weapon[1]);
+      swordGrad2.addColorStop(1, pal.weapon[0]);
+      ctx.fillStyle = swordGrad2;
+      ctx.fillRect(-3, -40, 6, 45);
+      ctx.fillStyle = pal.clothes[0];
+      ctx.fillRect(-4, 5, 8, 8);
+      ctx.restore();
+      
+      // Special burst
+      if (anim === 'special' && frame > 3 && frame < 9) {
+        for (let i = 0; i < 16; i++) {
+          const angle = (i / 16) * Math.PI * 2 + (frame * 0.3);
+          const dist = 35 + (frame - 3) * 8;
+          const px = centerX + Math.cos(angle) * dist;
+          const py = y + Math.sin(angle) * dist;
+          ctx.fillStyle = pal.weapon[2];
+          ctx.beginPath();
+          ctx.arc(px, py, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      // Outlines
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(centerX, y - 10, 25, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function animate(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+      const deltaTime = timestamp - lastTime;
+      lastTime = timestamp;
+
+      frameCount++;
+      if (timestamp - lastFpsTime >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        lastFpsTime = timestamp;
+        document.getElementById('fpsCount').textContent = fps;
+      }
+
+      const anim = animations[currentAnim];
+      frameTimer += deltaTime * animSpeed;
+
+      if (frameTimer >= anim.frameTime) {
+        frameTimer = 0;
+        currentFrame++;
+        if (currentFrame >= anim.frames) {
+          currentFrame = anim.loop ? 0 : anim.frames - 1;
+        }
+        document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+      }
+
+      drawA1Premium(currentFrame, currentAnim);
+      requestAnimationFrame(animate);
+    }
+
+    document.getElementById('animState').addEventListener('change', (e) => {
+      currentAnim = e.target.value;
+      currentFrame = 0;
+      frameTimer = 0;
+    });
+
+    document.getElementById('palette').addEventListener('change', (e) => {
+      palette = e.target.value;
+    });
+
+    document.getElementById('speed').addEventListener('change', (e) => {
+      animSpeed = parseFloat(e.target.value);
+    });
+
+    document.getElementById('scale').addEventListener('change', (e) => {
+      const scale = parseFloat(e.target.value);
+      canvas.style.width = (200 * scale) + 'px';
+      canvas.style.height = (200 * scale) + 'px';
+    });
+
+    document.getElementById('exportFrame').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `a1-dualswords-PREMIUM-vector-${currentAnim}-f${currentFrame}-${palette}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    document.getElementById('exportSheet').addEventListener('click', () => {
+      const anim = animations[currentAnim];
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 200 * anim.frames;
+      tempCanvas.height = 200;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      for (let i = 0; i < anim.frames; i++) {
+        drawA1Premium(i, currentAnim);
+        tempCtx.drawImage(canvas, i * 200, 0);
+      }
+
+      const link = document.createElement('a');
+      link.download = `a1-dualswords-PREMIUM-vector-${currentAnim}-sheet-${palette}.png`;
+      link.href = tempCanvas.toDataURL('image/png');
+      link.click();
+
+      drawA1Premium(currentFrame, currentAnim);
+    });
+
+    document.getElementById('exportJSON').addEventListener('click', () => {
+      const data = {
+        character: 'A1 (Dual Swords) - PREMIUM VECTOR CEL-SHADED',
+        type: 'Vector Cel-Shaded Enhanced',
+        version: '2.0 Premium',
+        resolution: '200x200',
+        animations: animations,
+        palettes: Object.keys(palettes),
+        currentState: {
+          animation: currentAnim,
+          frame: currentFrame,
+          palette: palette,
+          speed: animSpeed
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.download = `a1-dualswords-PREMIUM-vector-data-${palette}.json`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    });
+
+    document.getElementById('exportGIF').addEventListener('click', () => {
+      alert('GIF export feature coming soon!');
+    });
+
+    canvas.style.width = '600px';
+    canvas.style.height = '600px';
+    animate(0);
+  </script>
+</body>
+</html>
+

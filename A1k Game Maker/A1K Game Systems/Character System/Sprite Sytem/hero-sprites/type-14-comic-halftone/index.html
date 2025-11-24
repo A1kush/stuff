@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 14: Comic Book Halftone Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #fffacd;
+            color: #000;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #ff0000;
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 4px 4px 0 #000;
+        }
+        .subtitle {
+            text-align: center;
+            color: #000;
+            margin-bottom: 40px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .sprite-card {
+            background: #fff;
+            border: 4px solid #000;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: 6px 6px 0 #000;
+        }
+        .sprite-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0 #000;
+        }
+        .sprite-card h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .sprite-card p {
+            color: #333;
+            font-size: 12px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+        }
+        .sprite-card a {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #ff6347;
+            border: 3px solid #000;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .sprite-card a:hover {
+            background: #ffff00;
+            color: #000;
+        }
+        .info-box {
+            background: #fff;
+            border: 4px solid #000;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 6px 6px 0 #000;
+        }
+        .info-box h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .info-box ul {
+            list-style: none;
+            line-height: 2;
+            color: #000;
+            font-family: 'Courier New', monospace;
+        }
+        .info-box ul li:before {
+            content: "💥 ";
+            margin-right: 8px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #000;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 3px solid #000;
+            padding: 10px 20px;
+            background: #fff;
+        }
+        .back-link:hover {
+            background: #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../START_HERE.html" class="back-link">← BACK TO GALLERY</a>
+
+        <h1>TYPE 14: COMIC BOOK HALFTONE!</h1>
+        <p class="subtitle">BEN-DAY DOTS + BOLD BLACK OUTLINES</p>
+
+        <div class="gallery">
+            <div class="sprite-card">
+                <h2>⚔️ A1 WARRIOR</h2>
+                <p>DUAL SWORDS HERO WITH HALFTONE DOTS AND ACTION LINES! POW!</p>
+                <a href="warrior-dual-swords.html">VIEW NOW</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>😇 MISSY CAT ANGEL</h2>
+                <p>BLACK CAT WITH HALO, WINGS, 2 EYES, GUN + SWORD! BANG!</p>
+                <a href="cat-angel-gunner.html">VIEW NOW</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>🤖 UNIQUE CYBORG</h2>
+                <p>ARMORED CYBORG WITH ENERGY RIFLE AND PIGTAILS! ZAP!</p>
+                <a href="cyborg-rifle-operative.html">VIEW NOW</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>ABOUT TYPE 14: COMIC HALFTONE</h3>
+            <ul>
+                <li><strong>TECHNIQUE:</strong> CANVAS2D BEN-DAY DOT PATTERNS</li>
+                <li><strong>RESOLUTION:</strong> 320×320</li>
+                <li><strong>STYLE:</strong> SILVER AGE COMICS / POP ART</li>
+                <li><strong>HALFTONE:</strong> ADJUSTABLE DOT DENSITY (4-10PX)</li>
+                <li><strong>ANIMATIONS:</strong> IDLE, WALK, ATTACK, JUMP, HURT, VICTORY</li>
+                <li><strong>STYLES:</strong> CLASSIC, NOIR, POP ART, MANGA, SILVER AGE (5 TOTAL)</li>
+                <li><strong>HAIR COLOR:</strong> ALWAYS BLACK (LOCKED)</li>
+                <li><strong>OUTLINES:</strong> BOLD 4-5PX BLACK STROKES</li>
+                <li><strong>SOUND FX:</strong> POW! BANG! ZAP! TEXT ON ATTACK</li>
+                <li><strong>EXPORT:</strong> PNG FRAMES AND SPRITE SHEETS</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HPC Demo - New Character Sprites</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #aaa;
+            font-weight: 300;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-panel h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .info-panel p {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(102, 126, 234, 0.6);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .character-card h3 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .character-card .rank-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .rank-e { background: #888; color: #fff; }
+        .rank-d { background: #4a90e2; color: #fff; }
+        .rank-c { background: #50c878; color: #fff; }
+        .rank-b { background: #9b59b6; color: #fff; }
+        .rank-a { background: #e67e22; color: #fff; }
+        .rank-s { background: #e74c3c; color: #fff; }
+
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            margin: 15px 0;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .character-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px;
+            border-radius: 5px;
+            color: #aaa;
+        }
+
+        .stat-label {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .hire-button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hire-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .hire-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .controls h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .control-group select {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .gold-display {
+            text-align: center;
+            font-size: 24px;
+            color: #ffd700;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 HPC Character Gallery</h1>
+            <p class="subtitle">Hireable Playable Characters - New Chibi Pixel Art Style</p>
+        </header>
+
+        <div class="info-panel">
+            <h2>📖 About This Demo</h2>
+            <p><strong>Style:</strong> Chibi Pixel Art (NEW - Different from Type-1 HD Pixel Art)</p>
+            <p><strong>Resolution:</strong> 96×96 pixels (smaller, cuter style)</p>
+            <p><strong>Features:</strong> Each character has unique head, body, arms, legs, and weapon</p>
+            <p><strong>Character Types:</strong> Warrior, Mage, Archer, Healer, Rogue, Tank, Crafter</p>
+            <p><strong>Ranks:</strong> E, D, C, B, A, S (each with different stats and hire costs)</p>
+        </div>
+
+        <div class="gold-display">
+            💰 Gold: <span id="goldAmount">10000</span>
+        </div>
+
+        <div class="character-grid" id="characterGrid">
+            <!-- Characters will be dynamically generated -->
+        </div>
+
+        <div class="controls">
+            <h3>🎨 Display Controls</h3>
+            <div class="control-group">
+                <label>Animation:</label>
+                <select id="animSelect">
+                    <option value="idle">Idle</option>
+                    <option value="walk">Walk</option>
+                    <option value="attack">Attack</option>
+                </select>
+                <label>Speed:</label>
+                <select id="speedSelect">
+                    <option value="0.5">0.5x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2x</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            gold: 10000,
+            hired: [],
+            party: []
+        };
+
+        // Character database with NEW unique sprites
+        const HPC_CHARACTERS = [
+            // WARRIOR
+            { id: 'warrior_e', type: 'warrior', rank: 'E', name: 'Rookie Warrior', cost: 500, 
+              stats: { hp: 100, atk: 15, def: 10, speed: 8 },
+              colors: { skin: '#f4a460', hair: '#8b4513', clothes: '#4a5568', weapon: '#c0c0c0' },
+              weaponType: 'sword' },
+            { id: 'warrior_d', type: 'warrior', rank: 'D', name: 'Trained Warrior', cost: 1000,
+              stats: { hp: 130, atk: 20, def: 15, speed: 10 },
+              colors: { skin: '#d2b48c', hair: '#654321', clothes: '#2d3748', weapon: '#a0a0a0' },
+              weaponType: 'sword' },
+            { id: 'warrior_c', type: 'warrior', rank: 'C', name: 'Veteran Warrior', cost: 2500,
+              stats: { hp: 170, atk: 28, def: 22, speed: 12 },
+              colors: { skin: '#cd853f', hair: '#5d4037', clothes: '#1a202c', weapon: '#808080' },
+              weaponType: 'sword' },
+            
+            // MAGE
+            { id: 'mage_e', type: 'mage', rank: 'E', name: 'Apprentice Mage', cost: 500,
+              stats: { hp: 70, atk: 25, def: 5, speed: 9 },
+              colors: { skin: '#ffe4b5', hair: '#ffd700', clothes: '#4a148c', weapon: '#9c27b0' },
+              weaponType: 'staff' },
+            { id: 'mage_d', type: 'mage', rank: 'D', name: 'Scholar Mage', cost: 1000,
+              stats: { hp: 90, atk: 35, def: 8, speed: 11 },
+              colors: { skin: '#fff8dc', hair: '#ffa500', clothes: '#6a1b9a', weapon: '#7b1fa2' },
+              weaponType: 'staff' },
+            { id: 'mage_c', type: 'mage', rank: 'C', name: 'Master Mage', cost: 2500,
+              stats: { hp: 120, atk: 50, def: 12, speed: 13 },
+              colors: { skin: '#f5deb3', hair: '#ff8c00', clothes: '#4a148c', weapon: '#6a1b9a' },
+              weaponType: 'staff' },
+            
+            // ARCHER
+            { id: 'archer_e', type: 'archer', rank: 'E', name: 'Novice Archer', cost: 500,
+              stats: { hp: 90, atk: 18, def: 8, speed: 12 },
+              colors: { skin: '#deb887', hair: '#8b4513', clothes: '#2d5016', weapon: '#8b4513' },
+              weaponType: 'bow' },
+            { id: 'archer_d', type: 'archer', rank: 'D', name: 'Hunter Archer', cost: 1000,
+              stats: { hp: 110, atk: 25, def: 10, speed: 15 },
+              colors: { skin: '#d2b48c', hair: '#654321', clothes: '#1b4332', weapon: '#6b4423' },
+              weaponType: 'bow' },
+            { id: 'archer_c', type: 'archer', rank: 'C', name: 'Elite Archer', cost: 2500,
+              stats: { hp: 140, atk: 35, def: 14, speed: 18 },
+              colors: { skin: '#c9a961', hair: '#5d4037', clothes: '#081c15', weapon: '#5d4037' },
+              weaponType: 'bow' },
+            
+            // HEALER
+            { id: 'healer_e', type: 'healer', rank: 'E', name: 'Acolyte Healer', cost: 500,
+              stats: { hp: 80, atk: 10, def: 12, speed: 10 },
+              colors: { skin: '#ffe4e1', hair: '#ffb6c1', clothes: '#ffffff', weapon: '#ff69b4' },
+              weaponType: 'heal_staff' },
+            { id: 'healer_d', type: 'healer', rank: 'D', name: 'Priest Healer', cost: 1000,
+              stats: { hp: 100, atk: 15, def: 15, speed: 12 },
+              colors: { skin: '#fff0f5', hair: '#ffc0cb', clothes: '#f8f8ff', weapon: '#ff1493' },
+              weaponType: 'heal_staff' },
+            { id: 'healer_c', type: 'healer', rank: 'C', name: 'Bishop Healer', cost: 2500,
+              stats: { hp: 130, atk: 22, def: 20, speed: 14 },
+              colors: { skin: '#ffe4e1', hair: '#ff69b4', clothes: '#ffffff', weapon: '#c71585' },
+              weaponType: 'heal_staff' },
+            
+            // ROGUE
+            { id: 'rogue_e', type: 'rogue', rank: 'E', name: 'Thief Rogue', cost: 500,
+              stats: { hp: 85, atk: 22, def: 6, speed: 16 },
+              colors: { skin: '#2f2f2f', hair: '#1a1a1a', clothes: '#000000', weapon: '#4a4a4a' },
+              weaponType: 'daggers' },
+            { id: 'rogue_d', type: 'rogue', rank: 'D', name: 'Assassin Rogue', cost: 1000,
+              stats: { hp: 105, atk: 30, def: 8, speed: 20 },
+              colors: { skin: '#3a3a3a', hair: '#2a2a2a', clothes: '#0a0a0a', weapon: '#5a5a5a' },
+              weaponType: 'daggers' },
+            { id: 'rogue_c', type: 'rogue', rank: 'C', name: 'Shadow Rogue', cost: 2500,
+              stats: { hp: 135, atk: 42, def: 12, speed: 24 },
+              colors: { skin: '#404040', hair: '#303030', clothes: '#000000', weapon: '#6a6a6a' },
+              weaponType: 'daggers' },
+            
+            // TANK
+            { id: 'tank_e', type: 'tank', rank: 'E', name: 'Guard Tank', cost: 500,
+              stats: { hp: 150, atk: 12, def: 25, speed: 6 },
+              colors: { skin: '#8b7355', hair: '#654321', clothes: '#4a4a4a', weapon: '#2a2a2a' },
+              weaponType: 'shield_mace' },
+            { id: 'tank_d', type: 'tank', rank: 'D', name: 'Knight Tank', cost: 1000,
+              stats: { hp: 200, atk: 18, def: 35, speed: 8 },
+              colors: { skin: '#a0826d', hair: '#5d4037', clothes: '#3a3a3a', weapon: '#1a1a1a' },
+              weaponType: 'shield_mace' },
+            { id: 'tank_c', type: 'tank', rank: 'C', name: 'Paladin Tank', cost: 2500,
+              stats: { hp: 260, atk: 25, def: 50, speed: 10 },
+              colors: { skin: '#b8956a', hair: '#4e342e', clothes: '#2a2a2a', weapon: '#0a0a0a' },
+              weaponType: 'shield_mace' },
+            
+            // CRAFTER
+            { id: 'crafter_e', type: 'crafter', rank: 'E', name: 'Apprentice Crafter', cost: 500,
+              stats: { hp: 95, atk: 14, def: 14, speed: 9 },
+              colors: { skin: '#d4a574', hair: '#8b6914', clothes: '#8b4513', weapon: '#654321' },
+              weaponType: 'hammer' },
+            { id: 'crafter_d', type: 'crafter', rank: 'D', name: 'Artisan Crafter', cost: 1000,
+              stats: { hp: 120, atk: 20, def: 18, speed: 11 },
+              colors: { skin: '#c9a961', hair: '#7d5a1e', clothes: '#6b4423', weapon: '#5d4037' },
+              weaponType: 'hammer' },
+            { id: 'crafter_c', type: 'crafter', rank: 'C', name: 'Master Crafter', cost: 2500,
+              stats: { hp: 155, atk: 28, def: 25, speed: 13 },
+              colors: { skin: '#b8956a', hair: '#6b4e1a', clothes: '#5d4037', weapon: '#4e342e' },
+              weaponType: 'hammer' }
+        ];
+
+        // Animation state
+        let currentAnim = 'idle';
+        let animSpeed = 1;
+        let frameCounters = {};
+
+        // Initialize frame counters for each character
+        HPC_CHARACTERS.forEach(char => {
+            frameCounters[char.id] = { frame: 0, timer: 0 };
+        });
+
+        // Create character cards
+        function createCharacterCards() {
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = '';
+
+            HPC_CHARACTERS.forEach(char => {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                
+                const isHired = gameState.hired.includes(char.id);
+                const canAfford = gameState.gold >= char.cost;
+                
+                card.innerHTML = `
+                    <h3>${char.name}</h3>
+                    <span class="rank-badge rank-${char.rank.toLowerCase()}">${char.rank}-Rank</span>
+                    <canvas id="canvas-${char.id}" width="96" height="96"></canvas>
+                    <div class="character-stats">
+                        <div class="stat"><span class="stat-label">HP:</span> ${char.stats.hp}</div>
+                        <div class="stat"><span class="stat-label">ATK:</span> ${char.stats.atk}</div>
+                        <div class="stat"><span class="stat-label">DEF:</span> ${char.stats.def}</div>
+                        <div class="stat"><span class="stat-label">SPD:</span> ${char.stats.speed}</div>
+                    </div>
+                    <div style="margin-top: 10px; color: #ffd700; font-weight: bold;">
+                        💰 ${char.cost} Gold
+                    </div>
+                    <button class="hire-button" data-char-id="${char.id}" 
+                            ${isHired ? 'disabled' : !canAfford ? 'disabled' : ''}>
+                        ${isHired ? '✅ Hired' : !canAfford ? '❌ Not Enough Gold' : '💰 Hire'}
+                    </button>
+                `;
+                
+                grid.appendChild(card);
+                
+                // Initialize canvas
+                const canvas = document.getElementById(`canvas-${char.id}`);
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                
+                // Draw character
+                drawCharacter(ctx, char, 0);
+            });
+
+            // Add hire button listeners
+            document.querySelectorAll('.hire-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const charId = e.target.dataset.charId;
+                    hireCharacter(charId);
+                });
+            });
+        }
+
+        // Draw character sprite (NEW CHIBI STYLE - Different from Type-1)
+        function drawCharacter(ctx, char, frame) {
+            const c = char.colors;
+            const centerX = 48;
+            const centerY = 48;
+            
+            ctx.clearRect(0, 0, 96, 96);
+            
+            // Animation offsets
+            let bobY = 0;
+            let armSwing = 0;
+            let legOffset = 0;
+            
+            if (currentAnim === 'idle') {
+                bobY = Math.sin(frame * 0.1) * 1;
+            } else if (currentAnim === 'walk') {
+                bobY = Math.sin(frame * 0.2) * 2;
+                legOffset = Math.sin(frame * 0.2) * 3;
+                armSwing = Math.sin(frame * 0.2) * 8;
+            } else if (currentAnim === 'attack') {
+                armSwing = Math.sin(frame * 0.5) * 15;
+            }
+            
+            // Draw shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 35 - bobY, 12, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw legs (behind body)
+            drawLegs(ctx, centerX, centerY, bobY, legOffset, c, char.type);
+            
+            // Draw body
+            drawBody(ctx, centerX, centerY, bobY, c, char.type);
+            
+            // Draw arms
+            drawArms(ctx, centerX, centerY, bobY, armSwing, c, char.type);
+            
+            // Draw head
+            drawHead(ctx, centerX, centerY, bobY, c, char.type);
+            
+            // Draw weapon
+            drawWeapon(ctx, centerX, centerY, bobY, armSwing, c, char.weaponType, char.type);
+        }
+
+        // Draw legs (unique per character type)
+        function drawLegs(ctx, x, y, bobY, offset, colors, type) {
+            const legY = y + 20 - bobY;
+            
+            if (type === 'tank') {
+                // Tank: Thick armored legs
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 8, legY + offset, 6, 14);
+                ctx.fillRect(x + 2, legY - offset, 6, 14);
+                // Boots
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(x - 8, legY + 14 + offset, 6, 4);
+                ctx.fillRect(x + 2, legY + 14 - offset, 6, 4);
+            } else if (type === 'rogue') {
+                // Rogue: Sleek legs
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 6, legY + offset, 4, 12);
+                ctx.fillRect(x + 2, legY - offset, 4, 12);
+            } else {
+                // Standard legs
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 7, legY + offset, 5, 13);
+                ctx.fillRect(x + 2, legY - offset, 5, 13);
+            }
+        }
+
+        // Draw body (unique per character type)
+        function drawBody(ctx, x, y, bobY, colors, type) {
+            const bodyY = y + 8 - bobY;
+            
+            if (type === 'warrior') {
+                // Warrior: Armored torso
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 10, bodyY, 20, 16);
+                // Chest plate
+                ctx.fillStyle = '#2a2a2a';
+                ctx.fillRect(x - 8, bodyY + 2, 16, 8);
+            } else if (type === 'mage') {
+                // Mage: Robe
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 9, bodyY, 18, 18);
+                // Belt
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(x - 7, bodyY + 14, 14, 2);
+            } else if (type === 'tank') {
+                // Tank: Heavy armor
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 12, bodyY, 24, 20);
+                // Armor plates
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(x - 10, bodyY + 2, 20, 6);
+            } else if (type === 'healer') {
+                // Healer: White robes
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 8, bodyY, 16, 18);
+                // Cross symbol
+                ctx.fillStyle = '#ff69b4';
+                ctx.fillRect(x - 1, bodyY + 6, 2, 6);
+                ctx.fillRect(x - 3, bodyY + 8, 6, 2);
+            } else {
+                // Standard body
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 9, bodyY, 18, 16);
+            }
+        }
+
+        // Draw arms (unique per character type)
+        function drawArms(ctx, x, y, bobY, swing, colors, type) {
+            const armY = y + 10 - bobY;
+            
+            if (type === 'tank') {
+                // Tank: Thick arms
+                ctx.fillStyle = colors.skin;
+                ctx.fillRect(x - 14, armY + swing, 5, 12);
+                ctx.fillRect(x + 9, armY - swing, 5, 12);
+            } else if (type === 'mage') {
+                // Mage: Robed arms
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 12, armY + swing, 4, 10);
+                ctx.fillRect(x + 8, armY - swing, 4, 10);
+            } else {
+                // Standard arms
+                ctx.fillStyle = colors.skin;
+                ctx.fillRect(x - 11, armY + swing, 4, 11);
+                ctx.fillRect(x + 7, armY - swing, 4, 11);
+            }
+        }
+
+        // Draw head (unique per character type)
+        function drawHead(ctx, x, y, bobY, colors, type) {
+            const headY = y - 12 - bobY;
+            
+            // Face
+            ctx.fillStyle = colors.skin;
+            ctx.fillRect(x - 8, headY, 16, 16);
+            
+            // Hair (unique styles)
+            ctx.fillStyle = colors.hair;
+            if (type === 'mage') {
+                // Mage: Long flowing hair
+                ctx.fillRect(x - 10, headY, 20, 8);
+                ctx.fillRect(x - 12, headY + 2, 4, 6);
+                ctx.fillRect(x + 8, headY + 2, 4, 6);
+            } else if (type === 'healer') {
+                // Healer: Curly hair
+                ctx.beginPath();
+                ctx.arc(x - 6, headY + 4, 3, 0, Math.PI * 2);
+                ctx.arc(x + 6, headY + 4, 3, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (type === 'rogue') {
+                // Rogue: Hood
+                ctx.fillStyle = colors.clothes;
+                ctx.fillRect(x - 10, headY - 2, 20, 10);
+            } else {
+                // Standard hair
+                ctx.fillRect(x - 9, headY, 18, 6);
+            }
+            
+            // Eyes (2 pixels each)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x - 4, headY + 6, 2, 2);
+            ctx.fillRect(x + 2, headY + 6, 2, 2);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(x - 3, headY + 7, 1, 1);
+            ctx.fillRect(x + 3, headY + 7, 1, 1);
+            
+            // Mouth
+            ctx.fillStyle = '#ff69b4';
+            ctx.fillRect(x - 1, headY + 10, 2, 1);
+        }
+
+        // Draw weapon (unique per weapon type)
+        function drawWeapon(ctx, x, y, bobY, swing, colors, weaponType, charType) {
+            const weaponY = y + 8 - bobY;
+            
+            if (weaponType === 'sword') {
+                // Sword
+                ctx.save();
+                ctx.translate(x + 12, weaponY - swing);
+                ctx.rotate(swing * Math.PI / 180);
+                ctx.fillStyle = colors.weapon;
+                ctx.fillRect(-1, -16, 2, 16);
+                ctx.fillStyle = '#ffd700';
+                ctx.fillRect(-1, -16, 2, 4);
+                ctx.restore();
+            } else if (weaponType === 'staff') {
+                // Staff with orb
+                ctx.save();
+                ctx.translate(x + 10, weaponY - swing);
+                ctx.fillStyle = colors.weapon;
+                ctx.fillRect(-1, -20, 2, 20);
+                // Magic orb
+                ctx.fillStyle = '#ff00ff';
+                ctx.beginPath();
+                ctx.arc(0, -22, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, -22, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            } else if (weaponType === 'bow') {
+                // Bow
+                ctx.save();
+                ctx.translate(x + 10, weaponY);
+                ctx.strokeStyle = colors.weapon;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, 8, 0, Math.PI);
+                ctx.stroke();
+                // Arrow
+                ctx.fillStyle = '#654321';
+                ctx.fillRect(-2, -8, 1, 8);
+                ctx.restore();
+            } else if (weaponType === 'heal_staff') {
+                // Healing staff
+                ctx.save();
+                ctx.translate(x + 10, weaponY - swing);
+                ctx.fillStyle = colors.weapon;
+                ctx.fillRect(-1, -18, 2, 18);
+                // Cross top
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(-3, -20, 6, 2);
+                ctx.fillRect(-1, -22, 2, 4);
+                ctx.restore();
+            } else if (weaponType === 'daggers') {
+                // Dual daggers
+                ctx.save();
+                ctx.translate(x - 12, weaponY - swing);
+                ctx.rotate(swing * Math.PI / 180);
+                ctx.fillStyle = colors.weapon;
+                ctx.fillRect(-1, -12, 2, 12);
+                ctx.restore();
+                ctx.save();
+                ctx.translate(x + 12, weaponY + swing);
+                ctx.rotate(-swing * Math.PI / 180);
+                ctx.fillStyle = colors.weapon;
+                ctx.fillRect(-1, -12, 2, 12);
+                ctx.restore();
+            } else if (weaponType === 'shield_mace') {
+                // Shield and mace
+                ctx.save();
+                ctx.translate(x - 14, weaponY);
+                // Shield
+                ctx.fillStyle = '#2a2a2a';
+                ctx.fillRect(-6, -8, 6, 12);
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(-5, -7, 4, 10);
+                ctx.restore();
+                ctx.save();
+                ctx.translate(x + 12, weaponY - swing);
+                ctx.rotate(swing * Math.PI / 180);
+                // Mace
+                ctx.fillStyle = colors.weapon;
+                ctx.fillRect(-2, -14, 4, 14);
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(-3, -16, 6, 3);
+                ctx.restore();
+            } else if (weaponType === 'hammer') {
+                // Hammer
+                ctx.save();
+                ctx.translate(x + 12, weaponY - swing);
+                ctx.rotate(swing * Math.PI / 180);
+                ctx.fillStyle = colors.weapon;
+                ctx.fillRect(-1, -16, 2, 16);
+                // Hammer head
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(-4, -18, 8, 4);
+                ctx.restore();
+            }
+        }
+
+        // Hire character
+        function hireCharacter(charId) {
+            const char = HPC_CHARACTERS.find(c => c.id === charId);
+            if (!char) return;
+            
+            if (gameState.hired.includes(charId)) {
+                alert('Character already hired!');
+                return;
+            }
+            
+            if (gameState.gold < char.cost) {
+                alert(`Not enough gold! Need ${char.cost} gold.`);
+                return;
+            }
+            
+            gameState.gold -= char.cost;
+            gameState.hired.push(charId);
+            
+            document.getElementById('goldAmount').textContent = gameState.gold;
+            createCharacterCards();
+            
+            alert(`✅ ${char.name} hired for ${char.cost} gold!`);
+        }
+
+        // Animation loop
+        function animate() {
+            HPC_CHARACTERS.forEach(char => {
+                const counter = frameCounters[char.id];
+                counter.timer += 16.67 * animSpeed; // ~60fps
+                
+                const animTime = currentAnim === 'idle' ? 250 : currentAnim === 'walk' ? 125 : 83;
+                
+                if (counter.timer >= animTime) {
+                    counter.timer = 0;
+                    counter.frame = (counter.frame + 1) % 8;
+                }
+                
+                const canvas = document.getElementById(`canvas-${char.id}`);
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    drawCharacter(ctx, char, counter.frame);
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.getElementById('animSelect').addEventListener('change', (e) => {
+            currentAnim = e.target.value;
+            HPC_CHARACTERS.forEach(char => {
+                frameCounters[char.id].frame = 0;
+                frameCounters[char.id].timer = 0;
+            });
+        });
+
+        document.getElementById('speedSelect').addEventListener('change', (e) => {
+            animSpeed = parseFloat(e.target.value);
+        });
+
+        // Initialize
+        createCharacterCards();
+        animate();
+    </script>
+</body>
+</html>
+

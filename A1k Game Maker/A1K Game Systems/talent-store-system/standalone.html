@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talent-Store System - Standalone (No Server Required)</title>
+  <style>
+    /* Inline all CSS for offline use */
+    :root {
+      --primary: #5ba3ff;
+      --secondary: #7B61FF;
+      --success: #36c777;
+      --warning: #ffd56a;
+      --error: #ff7a6a;
+      --bg-dark: #0d1522;
+      --bg-medium: #1f2e47;
+      --bg-light: #28324b;
+      --text-primary: #cfe8ff;
+      --text-secondary: #9abacc;
+      --border: rgba(90, 140, 200, 0.35);
+      --shadow: rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0d1522 0%, #1a2332 100%);
+      color: var(--text-primary);
+      line-height: 1.4;
+      min-height: 100vh;
+      padding: 0.5rem;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      color: white;
+    }
+
+    .hero h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .hero p {
+      font-size: 0.9rem;
+      margin: 0.25rem 0;
+    }
+
+    .system-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.75rem 1.5rem;
+      font-size: 0.95rem;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab-button:hover {
+      color: var(--text-primary);
+      background: rgba(91, 163, 255, 0.1);
+    }
+
+    .tab-button.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: rgba(91, 163, 255, 0.15);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Talent System Styles - COMPACT */
+    .talent-system {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .talent-system h2 {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .talent-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .talent-summary {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+
+    .summary-item {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-reset {
+      background: var(--error);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .btn-reset:hover {
+      background: #ff5a4a;
+      transform: translateY(-2px);
+    }
+
+    .talent-lanes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+
+    .talent-lane {
+      background: var(--bg-medium);
+      border-radius: 6px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+    }
+
+    .lane-title {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .talent-node {
+      background: var(--bg-light);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.3s;
+      font-size: 0.85rem;
+    }
+
+    .talent-node.purchased {
+      border-color: var(--success);
+      background: rgba(54, 199, 119, 0.15);
+    }
+
+    .talent-node.locked {
+      opacity: 0.5;
+    }
+
+    .talent-node.equipped {
+      border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.2);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    .node-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .node-cost {
+      background: var(--primary);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.75rem;
+    }
+
+    .btn-purchase {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 0.4rem;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-purchase:disabled {
+      background: var(--bg-medium);
+      color: var(--text-secondary);
+      cursor: not-allowed;
+    }
+
+    .btn-equip {
+      width: 100%;
+      background: #7B61FF;
+      color: white;
+      padding: 0.4rem;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+
+    .btn-equip.equipped {
+      background: #ffd700;
+      color: #000;
+    }
+
+    .btn-equip:hover {
+      transform: scale(1.05);
+    }
+
+    .talent-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin: 0.25rem 0;
+      padding: 0.25rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 3px;
+    }
+
+    /* Shop System Styles - COMPACT */
+    .shop-system {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .shop-system h2 {
+      font-size: 1.3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .currency-display {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .currency-item {
+      background: var(--bg-medium);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .currency-item div:first-child {
+      font-size: 1.2rem;
+    }
+
+    .currency-item div:nth-child(2) {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .shop-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+
+    .shop-item {
+      background: var(--bg-medium);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+
+    .shop-item h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .shop-item p {
+      font-size: 0.8rem;
+      margin: 0.25rem 0;
+    }
+
+    .shop-item>div {
+      font-size: 0.85rem;
+    }
+
+    .btn-buy {
+      background: var(--success);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      width: 100%;
+    }
+
+    /* Notification */
+    .notification {
+      position: fixed;
+      top: 2rem;
+      right: -400px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      min-width: 300px;
+      z-index: 10000;
+      transition: right 0.3s ease;
+    }
+
+    .notification.show {
+      right: 2rem;
+    }
+
+    .notification-success {
+      border-color: var(--success);
+    }
+
+    .notification-error {
+      border-color: var(--error);
+    }
+
+    .save-buttons {
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: var(--bg-medium);
+      border-radius: 8px;
+    }
+
+    .save-buttons button {
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      margin: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    /* Alchemy Crafting */
+    .craft-slot {
+      width: 90px;
+      height: 100px;
+      background: var(--bg-light);
+      border: 3px dashed var(--border);
+      border-radius: 6px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      font-size: 0.8rem;
+      margin: 0.25rem;
+      vertical-align: top;
+    }
+
+    .craft-slot.filled {
+      border-style: solid;
+      border-color: var(--success);
+      background: rgba(54, 199, 119, 0.1);
+    }
+
+    .craft-slot:hover {
+      border-color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .btn-craft {
+      background: var(--success);
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin: 1rem 0.5rem;
+    }
+
+    .btn-craft:hover:not(:disabled) {
+      background: #2fb66a;
+    }
+
+    .btn-craft:disabled {
+      background: var(--bg-medium);
+      color: var(--text-secondary);
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+      .talent-lanes {
+        grid-template-columns: 1fr;
+      }
+
+      .shop-items {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Info Tab Styles */
+    .info-container {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .info-highlight {
+      color: var(--success);
+      font-size: 1.2rem;
+      margin: 1rem 0;
+    }
+
+    .info-list {
+      color: var(--text-secondary);
+      line-height: 2;
+    }
+
+    .info-section-title {
+      margin-top: 2rem;
+    }
+
+    /* Utility Classes for Dynamic Content */
+    .text-primary-bold {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .text-success-bold {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .text-secondary {
+      color: var(--text-secondary);
+    }
+
+    .text-warning-bold {
+      color: var(--warning);
+      font-weight: 700;
+    }
+
+    .talent-requirement {
+      font-size: 0.75rem;
+      color: var(--warning);
+    }
+
+    .shop-item-unavailable {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>🎮 Talent-Store System</h1>
+      <p>✅ OFFLINE • 59 Talents • 43 Shop Items • Alchemy • 6 Equippable Auto-Skills!</p>
+    </div>
+
+    <div class="system-tabs">
+      <button class="tab-button active" onclick="switchTab('talents')">🌳 Talent Tree</button>
+      <button class="tab-button" onclick="switchTab('mytalents')">⭐ My Talents</button>
+      <button class="tab-button" onclick="switchTab('shop')">🏪 Shop</button>
+      <button class="tab-button" onclick="switchTab('alchemy')">⚗️ Alchemy</button>
+      <button class="tab-button" onclick="switchTab('info')">ℹ️ Info</button>
+    </div>
+
+    <div id="talentsTab" class="tab-pane active">
+      <div id="talentContainer"></div>
+    </div>
+
+    <div id="mytalentsTab" class="tab-pane">
+      <div id="myTalentsContainer"></div>
+    </div>
+
+    <div id="shopTab" class="tab-pane">
+      <div id="shopContainer"></div>
+    </div>
+
+    <div id="alchemyTab" class="tab-pane">
+      <div id="alchemyContainer"></div>
+    </div>
+
+    <div id="infoTab" class="tab-pane">
+      <div class="info-container">
+        <h2>✅ System Information</h2>
+        <p class="info-highlight">
+          <strong>This file works completely OFFLINE!</strong>
+        </p>
+        <ul class="info-list">
+          <li>✅ No server required - double-click to open</li>
+          <li>✅ Works with file:// protocol</li>
+          <li>✅ Auto-saves to localStorage</li>
+          <li>✅ All systems bundled in one file</li>
+          <li>✅ 31 talents across 6 lanes</li>
+          <li>✅ 50+ shop items</li>
+          <li>✅ Currency system (Gold, Essence, Tokens)</li>
+        </ul>
+
+        <h3 class="info-section-title">How to Use:</h3>
+        <ol class="info-list">
+          <li>Open this file by double-clicking (no server needed!)</li>
+          <li>Purchase talents with AP (Ability Points)</li>
+          <li>Buy items from the shop with Gold</li>
+          <li>Progress automatically saves</li>
+          <li>Close and reopen anytime - your progress is saved!</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="save-buttons">
+      <button onclick="saveGame()">💾 Save</button>
+      <button onclick="loadGame()">📂 Load</button>
+      <button onclick="resetGame()">🔄 Reset</button>
+    </div>
+  </div>
+
+  <script>
+    // All code bundled inline for offline use - no modules needed!
+
+    // ===== GAME STATE =====
+    let gameState = {
+      currencies: {
+        gold: 10000,
+        essence: 50,
+        tokens: 10,
+        ap: 0,
+        apTotal: 20,
+        apSpent: 0
+      },
+      talents: {
+        purchased: new Set(),
+        stats: {}
+      },
+      inventory: [],
+      alchemySlots: [null, null, null], // 3 crafting slots
+      equippedSkills: [], // Equipped auto-skill IDs (max 2)
+      maxEquippedSlots: 1 // Unlockable to 2 via talent
+    };
+
+    // ===== TALENT DATA =====
+    const TALENT_LANES = {
+      atk: [
+        { id: 'atk_1', name: '+5% ATK', cost: 1, req: null, fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+        { id: 'atk_2', name: '+8% ATK', cost: 2, req: ['atk_1'], fx: s => s.atkMul = (s.atkMul || 0) + 0.08 },
+        { id: 'atk_3', name: '+12% ATK', cost: 3, req: ['atk_2'], fx: s => s.atkMul = (s.atkMul || 0) + 0.12 },
+        { id: 'atk_4', name: '+15% ATK + Crit', cost: 4, req: ['atk_3'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.15; s.crit = (s.crit || 0) + 0.10; } },
+        { id: 'atk_5', name: 'Berserker', cost: 5, req: ['atk_4'], fx: s => s.berserker = true },
+        { id: 'atk_ultimate', name: 'APEX HUNTER', cost: 8, req: ['atk_5'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.50; s.killRage = true; } }
+      ],
+      def: [
+        { id: 'def_1', name: '+80 HP', cost: 1, req: null, fx: s => s.hpFlat = (s.hpFlat || 0) + 80 },
+        { id: 'def_2', name: '+120 HP', cost: 2, req: ['def_1'], fx: s => s.hpFlat = (s.hpFlat || 0) + 120 },
+        { id: 'def_3', name: '+160 HP', cost: 3, req: ['def_2'], fx: s => s.hpFlat = (s.hpFlat || 0) + 160 },
+        { id: 'def_4', name: '+200 HP + DR', cost: 4, req: ['def_3'], fx: s => { s.hpFlat = (s.hpFlat || 0) + 200; s.damageReduction = (s.damageReduction || 0) + 0.10; } },
+        { id: 'def_5', name: 'Guardian', cost: 5, req: ['def_4'], fx: s => s.guardian = true },
+        { id: 'def_ultimate', name: 'FORTRESS', cost: 8, req: ['def_5'], fx: s => s.fortress = true }
+      ],
+      recovery: [
+        { id: 'rec_1', name: '+6% Lifesteal', cost: 1, req: null, fx: s => s.ls = (s.ls || 0) + 0.06 },
+        { id: 'rec_2', name: '+10% Lifesteal', cost: 2, req: ['rec_1'], fx: s => s.ls = (s.ls || 0) + 0.10 },
+        { id: 'rec_3', name: '+15% LS + Regen', cost: 3, req: ['rec_2'], fx: s => { s.ls = (s.ls || 0) + 0.15; s.regen = (s.regen || 0) + 2; } },
+        { id: 'rec_4', name: 'Vampiric', cost: 4, req: ['rec_3'], fx: s => s.vampiric = true },
+        { id: 'rec_ultimate', name: 'PHOENIX', cost: 7, req: ['rec_4'], fx: s => s.phoenix = true }
+      ],
+      cooldown: [
+        { id: 'cd_1', name: '-8% CD', cost: 1, req: null, fx: s => s.haste = (s.haste || 0) + 8 },
+        { id: 'cd_2', name: '-12% CD', cost: 2, req: ['cd_1'], fx: s => s.haste = (s.haste || 0) + 12 },
+        { id: 'cd_3', name: '-15% CD + Speed', cost: 3, req: ['cd_2'], fx: s => { s.haste = (s.haste || 0) + 15; s.moveSpeed = (s.moveSpeed || 0) + 0.20; } },
+        { id: 'cd_4', name: 'Cascade', cost: 4, req: ['cd_3'], fx: s => s.cascade = true },
+        { id: 'cd_dual_wield', name: '⚔️ Dual Wielding', cost: 3, req: ['cd_3'], fx: s => { s.dualWield = true; } },
+        { id: 'cd_ultimate', name: 'TIME MASTER', cost: 7, req: ['cd_4'], fx: s => s.timeMaster = true }
+      ],
+      luck: [
+        { id: 'luck_1', name: '+8 Luck', cost: 1, req: null, fx: s => s.luck = (s.luck || 0) + 8 },
+        { id: 'luck_2', name: '+15 Luck', cost: 2, req: ['luck_1'], fx: s => s.luck = (s.luck || 0) + 15 },
+        { id: 'luck_3', name: '+25 Luck + Gold', cost: 3, req: ['luck_2'], fx: s => { s.luck = (s.luck || 0) + 25; s.goldFind = (s.goldFind || 0) + 0.30; } },
+        { id: 'luck_4', name: 'Fortune', cost: 4, req: ['luck_3'], fx: s => s.fortune = true },
+        { id: 'luck_5', name: 'Jackpot', cost: 5, req: ['luck_4'], fx: s => s.jackpot = true },
+        { id: 'luck_ultimate', name: 'GOLDEN TOUCH', cost: 8, req: ['luck_5'], fx: s => s.goldenTouch = true }
+      ],
+      shadow: [
+        { id: 'shadow_1', name: '+5% ATK + Dark Affinity', cost: 1, req: null, fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+        { id: 'shadow_2', name: '+10% ATK + Shadow Power', cost: 2, req: ['shadow_1'], fx: s => s.atkMul = (s.atkMul || 0) + 0.10 },
+        { id: 'shadow_3', name: '+15% ATK + Dark Mastery', cost: 3, req: ['shadow_2'], fx: s => s.atkMul = (s.atkMul || 0) + 0.15 },
+        { id: 'shadow_4', name: '+20% ATK + Shadow Form', cost: 4, req: ['shadow_3'], fx: s => s.atkMul = (s.atkMul || 0) + 0.20 },
+        {
+          id: 'shadow_ultimate', name: '⚔️ SHADOW STRIKE', cost: 8, req: ['shadow_4'], equippable: true,
+          desc: '3 shadow clones attack (150% ATK each, 6s CD)',
+          fx: s => { s.shadowStrike = true; s.atkMul = (s.atkMul || 0) + 0.30; s.crit = (s.crit || 0) + 0.15; }
+        }
+      ],
+      spirit: [
+        { id: 'spirit_1', name: '+5% ATK + Spirit Link', cost: 1, req: null, fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+        { id: 'spirit_2', name: '+8% ATK + Ethereal Power', cost: 2, req: ['spirit_1'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.08; s.haste = (s.haste || 0) + 5; } },
+        { id: 'spirit_3', name: '+12% ATK + Soul Weapon', cost: 3, req: ['spirit_2'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.12; s.haste = (s.haste || 0) + 8; } },
+        { id: 'spirit_4', name: '+18% ATK + Spirit Form', cost: 4, req: ['spirit_3'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.18; s.haste = (s.haste || 0) + 12; } },
+        {
+          id: 'spirit_ultimate', name: '⚔️ SPIRIT BLADE', cost: 8, req: ['spirit_4'], equippable: true,
+          desc: '5 floating swords attack continuously (80% ATK/hit)',
+          fx: s => { s.spiritBlade = true; s.atkMul = (s.atkMul || 0) + 0.25; s.haste = (s.haste || 0) + 20; }
+        }
+      ],
+      lightning: [
+        { id: 'lightning_1', name: '+5% ATK + Static Charge', cost: 1, req: null, fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+        { id: 'lightning_2', name: '+10% ATK + Shock Wave', cost: 2, req: ['lightning_1'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.10; s.crit = (s.crit || 0) + 0.05; } },
+        { id: 'lightning_3', name: '+15% ATK + Thunder Strike', cost: 3, req: ['lightning_2'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.15; s.crit = (s.crit || 0) + 0.08; } },
+        { id: 'lightning_4', name: '+22% ATK + Storm Power', cost: 4, req: ['lightning_3'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.22; s.crit = (s.crit || 0) + 0.12; } },
+        {
+          id: 'lightning_ultimate', name: '⚡ LIGHTNING STEP', cost: 8, req: ['lightning_4'], equippable: true,
+          desc: 'Teleport-strike with chain lightning (250% ATK, 8s CD)',
+          fx: s => { s.lightningStep = true; s.atkMul = (s.atkMul || 0) + 0.35; s.crit = (s.crit || 0) + 0.25; }
+        }
+      ],
+      void: [
+        { id: 'void_1', name: '+5% ATK + Void Touch', cost: 1, req: null, fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+        { id: 'void_2', name: '+8% ATK + Dark Drain', cost: 2, req: ['void_1'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.08; s.ls = (s.ls || 0) + 0.03; } },
+        { id: 'void_3', name: '+12% ATK + Void Grasp', cost: 3, req: ['void_2'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.12; s.ls = (s.ls || 0) + 0.05; } },
+        { id: 'void_4', name: '+18% ATK + Shadow Bind', cost: 4, req: ['void_3'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.18; s.ls = (s.ls || 0) + 0.08; } },
+        {
+          id: 'void_ultimate', name: '🌑 VOID CHAINS', cost: 8, req: ['void_4'], equippable: true,
+          desc: 'Dark chains bind enemies (120% ATK/s + 5% drain, 10s)',
+          fx: s => { s.voidChains = true; s.atkMul = (s.atkMul || 0) + 0.28; s.ls = (s.ls || 0) + 0.15; }
+        }
+      ],
+      phoenix: [
+        { id: 'phoenix_1', name: '+5% ATK + Flame Aura', cost: 1, req: null, fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+        { id: 'phoenix_2', name: '+10% ATK + Fire Burst', cost: 2, req: ['phoenix_1'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.10; s.hpFlat = (s.hpFlat || 0) + 50; } },
+        { id: 'phoenix_3', name: '+15% ATK + Burning Soul', cost: 3, req: ['phoenix_2'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.15; s.hpFlat = (s.hpFlat || 0) + 100; } },
+        { id: 'phoenix_4', name: '+20% ATK + Rebirth', cost: 4, req: ['phoenix_3'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.20; s.hpFlat = (s.hpFlat || 0) + 150; } },
+        {
+          id: 'phoenix_ultimate', name: '🔥 PHOENIX WINGS', cost: 8, req: ['phoenix_4'], equippable: true,
+          desc: 'Fire wings burn enemies (180% ATK/s + 15% HP on kill)',
+          fx: s => { s.phoenixWings = true; s.atkMul = (s.atkMul || 0) + 0.32; s.hpFlat = (s.hpFlat || 0) + 300; s.ls = (s.ls || 0) + 0.10; }
+        }
+      ],
+      monarch: [
+        { id: 'monarch_1', name: '+8% ATK + Command Aura', cost: 1, req: null, fx: s => s.atkMul = (s.atkMul || 0) + 0.08 },
+        { id: 'monarch_2', name: '+15% ATK + Army Power', cost: 2, req: ['monarch_1'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.15; s.hpFlat = (s.hpFlat || 0) + 100; } },
+        { id: 'monarch_3', name: '+25% ATK + Legion Might', cost: 3, req: ['monarch_2'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.25; s.hpFlat = (s.hpFlat || 0) + 200; s.crit = (s.crit || 0) + 0.10; } },
+        { id: 'monarch_4', name: '+35% ATK + Shadow Legion', cost: 5, req: ['monarch_3'], fx: s => { s.atkMul = (s.atkMul || 0) + 0.35; s.hpFlat = (s.hpFlat || 0) + 300; s.crit = (s.crit || 0) + 0.15; s.haste = (s.haste || 0) + 15; } },
+        {
+          id: 'monarch_ultimate', name: '👑 MONARCH\'S ARMY', cost: 12, req: ['monarch_4'], equippable: true,
+          desc: 'S-RANK: Command 10 shadow soldiers (200% ATK each) + 100% all stats!',
+          fx: s => { s.monarchsArmy = true; s.atkMul = (s.atkMul || 0) + 1.0; s.hpMul = (s.hpMul || 0) + 1.0; s.crit = (s.crit || 0) + 0.50; s.ls = (s.ls || 0) + 0.30; s.haste = (s.haste || 0) + 50; }
+        }
+      ]
+    };
+
+    // ===== SHOP DATA - ALL ITEMS =====
+    const SHOP_ITEMS = [
+      // Consumables
+      { id: 'hp_potion', name: 'HP Potion', cost: 60, desc: 'Heals 40% HP' },
+      { id: 'rage_pill', name: 'Rage Pill', cost: 90, desc: '+30 Rage' },
+      { id: 'revive_token', name: 'Revive Token', cost: 80, desc: 'Revive hero' },
+      { id: 'wave_skip', name: 'Wave Skip', cost: 100, desc: 'Skip wave' },
+      { id: 'stage_skip', name: 'Stage Skip', cost: 500, desc: 'Skip stage' },
+      { id: 'boss_skip', name: 'Boss Skip', cost: 1000, desc: 'Skip boss' },
+      { id: 'ap_reset', name: 'AP Reset', cost: 400, desc: 'Refund AP' },
+      { id: 'xp_potion', name: 'XP Potion', cost: 350, desc: 'Bonus XP' },
+
+      // Containers
+      { id: 'gold_bag', name: 'Gold Bag', cost: 300, desc: '500-5K gold' },
+      { id: 'big_gold_bag', name: 'Big Gold', cost: 1200, desc: '2K-10K gold' },
+      { id: 'gear_kit', name: 'Gear Kit', cost: 250, desc: '3 random gear' },
+      { id: 'pet_box', name: 'Pet Box', cost: 500, desc: 'Random pet' },
+      { id: 'vehicle_box', name: 'Vehicle Box', cost: 750, desc: 'Random vehicle' },
+      { id: 'big_box', name: 'Big Box', cost: 3000, desc: 'Premium loot' },
+
+      // Weapons
+      { id: 'iron_sword', name: 'Iron Sword', cost: 150, desc: 'C-Rank 10 ATK' },
+      { id: 'steel_blade', name: 'Steel Blade', cost: 300, desc: 'B-Rank 20 ATK' },
+      { id: 'mithril_edge', name: 'Mithril Edge', cost: 600, desc: 'A-Rank 35 ATK' },
+      { id: 'battle_axe', name: 'Battle Axe', cost: 400, desc: '30 ATK +Crit' },
+      { id: 'crystal_staff', name: 'Crystal Staff', cost: 500, desc: '25 ATK 100 MP' },
+      { id: 'twin_daggers', name: 'Twin Daggers', cost: 450, desc: '22 ATK Fast' },
+
+      // Armor
+      { id: 'vanguard_armor', name: 'Vanguard', cost: 500, desc: '50 DEF' },
+      { id: 'mystic_robes', name: 'Mystic Robes', cost: 600, desc: '40 DEF 50 MP' },
+      { id: 'shadow_cloak', name: 'Shadow Cloak', cost: 700, desc: '30 DEF Evasion' },
+      { id: 'dragon_plate', name: 'Dragon Plate', cost: 800, desc: '80 DEF Fire Res' },
+      { id: 'guardian_mail', name: 'Guardian', cost: 650, desc: '60 DEF 100 HP' },
+
+      // Accessories
+      { id: 'strength_ring', name: 'Str Ring', cost: 200, desc: '8 ATK' },
+      { id: 'vitality_amulet', name: 'Vit Amulet', cost: 250, desc: '80 HP' },
+      { id: 'mana_pendant', name: 'Mana Pendant', cost: 220, desc: '60 MP' },
+      { id: 'lucky_charm', name: 'Lucky Charm', cost: 300, desc: '20 Luck' },
+      { id: 'speed_boots', name: 'Speed Boots', cost: 280, desc: '25 Speed' },
+
+      // Scrolls
+      { id: 'scroll_fireball', name: 'Scroll: Fire', cost: 400, desc: 'Learn Fireball' },
+      { id: 'scroll_heal', name: 'Scroll: Heal', cost: 500, desc: 'Learn Heal' },
+      { id: 'scroll_lightning', name: 'Scroll: Lightning', cost: 600, desc: 'Learn Lightning' },
+      { id: 'scroll_ice', name: 'Scroll: Ice', cost: 550, desc: 'Learn Ice Nova' },
+      { id: 'scroll_meteor', name: 'Scroll: Meteor', cost: 800, desc: 'Learn Meteor' },
+      { id: 'scroll_teleport', name: 'Scroll: Teleport', cost: 700, desc: 'Learn Teleport' },
+
+      // S-Rank Premium
+      { id: 'aether_blade', name: 'Aether Blade', cost: 5000, desc: 'S-Rank 55 ATK' },
+      { id: 'starlit_armor', name: 'Starlit Armor', cost: 5000, desc: 'S-Rank 60 DEF' },
+      { id: 'celestial_ring', name: 'Celestial Ring', cost: 5000, desc: 'S-Rank 65 ATK' },
+      { id: 'void_reaper', name: 'Void Reaper', cost: 6000, desc: 'S 75 ATK Crit' },
+      { id: 'eternal_crown', name: 'Eternal Crown', cost: 5500, desc: 'S 45 DEF 200 MP' },
+      { id: 'phoenix_wings', name: 'Phoenix Wings', cost: 7000, desc: 'S Revival' },
+      { id: 'infinity_gauntlet', name: 'Infinity', cost: 10000, desc: 'S Ultimate Power' }
+    ];
+
+    // ===== HELPER FUNCTIONS =====
+    function getTalent(id) {
+      for (const lane of Object.values(TALENT_LANES)) {
+        const talent = lane.find(t => t.id === id);
+        if (talent) return talent;
+      }
+      return null;
+    }
+
+    function canPurchaseTalent(id) {
+      const talent = getTalent(id);
+      if (!talent) return false;
+      if (gameState.talents.purchased.has(id)) return false;
+      if (gameState.currencies.apSpent >= gameState.currencies.apTotal) return false;
+      if (talent.req && !talent.req.every(r => gameState.talents.purchased.has(r))) return false;
+      return true;
+    }
+
+    function purchaseTalent(id) {
+      if (!canPurchaseTalent(id)) {
+        showNotification('Cannot purchase this talent', 'error');
+        return;
+      }
+      const talent = getTalent(id);
+      gameState.talents.purchased.add(id);
+      gameState.currencies.apSpent += talent.cost;
+
+      // Handle special talents
+      if (id === 'cd_dual_wield') {
+        gameState.maxEquippedSlots = 2;
+        showNotification('Unlocked 2nd skill slot!', 'success');
+      }
+
+      calculateStats();
+      renderTalents();
+      saveGame();
+      showNotification(`Purchased: ${talent.name}!`, 'success');
+    }
+
+    function calculateStats() {
+      const stats = { atkMul: 0, hpFlat: 0, ls: 0, haste: 0, luck: 0 };
+      for (const id of gameState.talents.purchased) {
+        const talent = getTalent(id);
+        if (talent && talent.fx) {
+          // Only apply equippable skills if they're equipped
+          if (talent.equippable) {
+            if (gameState.equippedSkills.includes(id)) {
+              talent.fx(stats);
+            }
+          } else {
+            // Non-equippable talents always apply
+            talent.fx(stats);
+          }
+        }
+      }
+      gameState.talents.stats = stats;
+    }
+
+    function toggleEquipSkill(id) {
+      const talent = getTalent(id);
+      if (!talent || !talent.equippable) return;
+      if (!gameState.talents.purchased.has(id)) return;
+
+      const equipped = gameState.equippedSkills.includes(id);
+      if (equipped) {
+        // Unequip
+        gameState.equippedSkills = gameState.equippedSkills.filter(sid => sid !== id);
+        showNotification(`Unequipped: ${talent.name}`, 'success');
+      } else {
+        // Check if slots are full
+        if (gameState.equippedSkills.length >= gameState.maxEquippedSlots) {
+          showNotification(`Max ${gameState.maxEquippedSlots} skill(s) equipped! Unequip one first.`, 'error');
+          return;
+        }
+        // Equip
+        gameState.equippedSkills.push(id);
+        showNotification(`Equipped: ${talent.name}`, 'success');
+      }
+
+      calculateStats();
+      renderTalents();
+      renderMyTalents();
+      saveGame();
+    }
+
+    function resetTalents() {
+      if (!confirm('Reset all talents?')) return;
+      gameState.talents.purchased.clear();
+      gameState.currencies.apSpent = 0;
+      gameState.equippedSkills = [];
+      calculateStats();
+      renderTalents();
+      saveGame();
+      showNotification('Talents reset!', 'success');
+    }
+
+    function buyItem(id) {
+      const item = SHOP_ITEMS.find(i => i.id === id);
+      if (!item) return;
+      if (gameState.currencies.gold < item.cost) {
+        showNotification('Not enough gold!', 'error');
+        return;
+      }
+      gameState.currencies.gold -= item.cost;
+
+      // Handle special items
+      if (id === 'ap_reset') {
+        resetTalents();
+        showNotification('AP Reset! All talents refunded!', 'success');
+      } else if (id === 'gold_bag') {
+        const bonus = Math.floor(Math.random() * 4500) + 500;
+        gameState.currencies.gold += bonus;
+        showNotification(`Gold Bag opened! +${bonus} gold!`, 'success');
+      } else if (id === 'big_gold_bag') {
+        const bonus = Math.floor(Math.random() * 8000) + 2000;
+        gameState.currencies.gold += bonus;
+        showNotification(`Big Gold Bag! +${bonus} gold!`, 'success');
+      } else {
+        // Add to inventory (items stay in shop for unlimited purchases)
+        const inventoryItem = {
+          ...item,
+          id: `item_${Date.now()}_${Math.random()}`,
+          rank: item.rank || 'C',
+          type: item.type || 'gear'
+        };
+        gameState.inventory.push(inventoryItem);
+        showNotification(`Purchased: ${item.name}!`, 'success');
+      }
+
+      renderShop();
+      renderTalents(); // Update currency display
+      if (document.getElementById('alchemyTab').classList.contains('active')) {
+        renderAlchemy(); // Update alchemy if visible
+      }
+      saveGame();
+    }
+
+    // ===== RENDERING =====
+    function renderTalents() {
+      const container = document.getElementById('talentContainer');
+      let html = '<div class="talent-system">';
+      html += '<div class="talent-header">';
+      html += '<h2>🌳 Talent Tree</h2>';
+      html += '<div class="talent-summary">';
+      html += `<div class="summary-item"><span>AP:</span> <span class="text-primary-bold">${gameState.currencies.apSpent}/${gameState.currencies.apTotal}</span></div>`;
+      html += `<div class="summary-item"><span>Talents:</span> <span class="text-success-bold">${gameState.talents.purchased.size}/59</span></div>`;
+      html += '</div>';
+      html += '<button class="btn-reset" onclick="resetTalents()">Reset</button>';
+      html += '</div>';
+
+      html += '<div class="talent-lanes">';
+      for (const [laneName, talents] of Object.entries(TALENT_LANES)) {
+        html += '<div class="talent-lane">';
+        html += `<h3 class="lane-title">${laneName.toUpperCase()}</h3>`;
+        for (const talent of talents) {
+          const purchased = gameState.talents.purchased.has(talent.id);
+          const canBuy = canPurchaseTalent(talent.id);
+          const locked = !purchased && !canBuy;
+          const isEquipped = gameState.equippedSkills.includes(talent.id);
+
+          html += `<div class="talent-node ${purchased ? 'purchased' : ''} ${locked ? 'locked' : ''} ${isEquipped ? 'equipped' : ''}">`;
+          html += '<div class="node-header">';
+          html += `<span>${talent.name}</span>`;
+          html += `<span class="node-cost">${talent.cost}</span>`;
+          html += '</div>';
+          if (talent.req) html += `<div class="talent-requirement">↑ ${talent.req.join(', ')}</div>`;
+          if (talent.desc) html += `<div class="talent-desc">${talent.desc}</div>`;
+
+          // Show purchase button or equipment toggle
+          if (!purchased) {
+            html += `<button class="btn-purchase" onclick="purchaseTalent('${talent.id}')" ${!canBuy ? 'disabled' : ''}>Buy</button>`;
+          } else if (talent.equippable) {
+            html += `<button class="btn-equip ${isEquipped ? 'equipped' : ''}" onclick="toggleEquipSkill('${talent.id}')">${isEquipped ? '✓ Equipped' : 'Equip'}</button>`;
+          } else {
+            html += `<button class="btn-purchase" disabled>✓</button>`;
+          }
+
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+      html += '</div></div>';
+      container.innerHTML = html;
+    }
+
+    function renderShop() {
+      const container = document.getElementById('shopContainer');
+      let html = '<div class="shop-system">';
+      html += '<h2>🏪 Shop - ' + SHOP_ITEMS.length + ' Items</h2>';
+      html += '<div class="currency-display">';
+      html += `<div class="currency-item"><div>💰</div><div>${gameState.currencies.gold}</div><div>Gold</div></div>`;
+      html += `<div class="currency-item"><div>✨</div><div>${gameState.currencies.essence}</div><div>Essence</div></div>`;
+      html += `<div class="currency-item"><div>🎫</div><div>${gameState.currencies.tokens}</div><div>Tokens</div></div>`;
+      html += '</div>';
+
+      html += '<div class="shop-items">';
+      for (const item of SHOP_ITEMS) {
+        const canAfford = gameState.currencies.gold >= item.cost;
+        html += `<div class="shop-item ${!canAfford ? 'shop-item-unavailable' : ''}">`;
+        html += `<h3>${item.name}</h3>`;
+        html += `<p class="text-secondary">${item.desc}</p>`;
+        html += `<div class="text-warning-bold">💰 ${item.cost}</div>`;
+        html += `<button class="btn-buy" onclick="buyItem('${item.id}')" ${!canAfford ? 'disabled' : ''}>Buy</button>`;
+        html += '</div>';
+      }
+      html += '</div></div>';
+      container.innerHTML = html;
+    }
+
+    function renderAlchemy() {
+      const container = document.getElementById('alchemyContainer');
+      let html = '<div class="talent-system">';
+      html += '<h2>⚗️ Alchemy Station</h2>';
+
+      // How to Use section
+      html += '<div style="background: var(--bg-medium); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid var(--primary);">';
+      html += '<h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 0.5rem;">📖 How to Use Alchemy</h3>';
+      html += '<ol style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8; margin-left: 1.5rem;">';
+      html += '<li>Buy items from the <strong style="color: var(--success);">Shop</strong> tab</li>';
+      html += '<li>Items appear in your <strong style="color: var(--warning);">Inventory</strong> below</li>';
+      html += '<li>Buy <strong>3 matching items</strong> to unlock recipes</li>';
+      html += '<li>Example: Buy 3x Iron Sword (450g) → Get B-Rank Sword!</li>';
+      html += '</ol>';
+      html += '</div>';
+
+      // Recipe cards
+      html += '<div style="background: var(--bg-medium); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">';
+      html += '<h3 style="font-size: 1rem; margin-bottom: 0.75rem;">🧪 Crafting Recipes</h3>';
+      html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">';
+
+      html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border: 2px solid var(--primary);">';
+      html += '<strong style="color: var(--primary); font-size: 0.95rem;">🔄 Fusion (Tier Up)</strong><br>';
+      html += '<small style="color: var(--text-secondary); font-size: 0.85rem;">3 same-type/rank → next rank</small><br>';
+      html += '<strong style="color: var(--warning); font-size: 0.85rem; margin-top: 0.5rem; display: block;">Example:</strong>';
+      html += '<small style="color: var(--text-secondary);">3x Iron Sword (C) → B-Rank Sword</small>';
+      html += '</div>';
+
+      html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border: 2px solid var(--success);">';
+      html += '<strong style="color: var(--success); font-size: 0.95rem;">✨ Special Recipe</strong><br>';
+      html += '<small style="color: var(--text-secondary); font-size: 0.85rem;">C gear + B gear + C pet</small><br>';
+      html += '<strong style="color: var(--warning); font-size: 0.85rem; margin-top: 0.5rem; display: block;">Reward:</strong>';
+      html += '<small style="color: var(--text-secondary);">Premium loot (random)</small>';
+      html += '</div>';
+
+      html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border: 2px solid var(--warning);">';
+      html += '<strong style="color: var(--warning); font-size: 0.95rem;">📦 Alchemy (Treasure)</strong><br>';
+      html += '<small style="color: var(--text-secondary); font-size: 0.85rem;">Any 3 items → treasure box</small><br>';
+      html += '<strong style="color: var(--warning); font-size: 0.85rem; margin-top: 0.5rem; display: block;">Rank:</strong>';
+      html += '<small style="color: var(--text-secondary);">Based on highest input rank</small>';
+      html += '</div>';
+
+      html += '</div></div>';
+
+      // Crafting Slots Interface
+      html += '<div style="background: var(--bg-medium); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; border: 2px solid var(--success);">';
+      html += '<h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--success);">⚗️ Crafting Area - Click items below to add</h3>';
+      html += '<div style="margin-bottom: 1rem;">';
+
+      // 3 Crafting Slots
+      for (let i = 0; i < 3; i++) {
+        const slotItem = gameState.alchemySlots[i];
+        html += '<div class="craft-slot ' + (slotItem ? 'filled' : '') + '" onclick="clickSlot(' + i + ')">';
+        if (slotItem) {
+          const rankColor = { C: '#777', B: '#5ba3ff', A: '#7B61FF', S: '#ffd56a' }[slotItem.rank || 'C'];
+          html += '<div style="background: ' + rankColor + '; color: white; padding: 0.2rem 0.4rem; border-radius: 8px; font-size: 0.7rem; margin-bottom: 0.3rem; font-weight: 700;">' + (slotItem.rank || 'C') + '</div>';
+          html += '<div style="font-size: 0.85rem; font-weight: 600; text-align: center;">' + slotItem.name + '</div>';
+          html += '<div onclick="clearSlot(' + i + '); event.stopPropagation();" style="position: absolute; top: 3px; right: 3px; background: var(--error); color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer;">×</div>';
+        } else {
+          html += '<div style="font-size: 2rem; opacity: 0.3;">?</div>';
+          html += '<div style="font-size: 0.7rem; color: var(--text-secondary);">Empty</div>';
+        }
+        html += '</div>';
+      }
+
+      // Arrow + Result Preview
+      html += '<span style="font-size: 2.5rem; margin: 0 1rem; vertical-align: middle; color: var(--primary);">→</span>';
+      html += '<div style="width: 100px; height: 100px; background: var(--bg-light); border: 2px solid var(--border); border-radius: 6px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8rem; vertical-align: middle;">';
+      const preview = getRecipePreview();
+      if (preview) {
+        const previewColor = preview.type === 'Fusion' ? '#5ba3ff' : preview.type === 'Special' ? '#36c777' : '#ffd56a';
+        html += '<div style="font-size: 0.7rem; background: ' + (preview.type === 'Fusion' ? '#5ba3ff' : preview.type === 'Special' ? '#36c777' : '#ffd56a') + '; color: white; padding: 0.2rem 0.4rem; border-radius: 6px; margin-bottom: 0.3rem;">' + preview.type + '</div>';
+        html += '<div style="font-size: 1.2rem; color: var(--warning); font-weight: 700;">' + preview.rank + '</div>';
+        html += '<div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.2rem;">Rank</div>';
+      } else {
+        html += '<div style="font-size: 2.5rem; opacity: 0.2;">?</div>';
+        html += '<div style="font-size: 0.7rem; color: var(--text-secondary);">Result</div>';
+      }
+      html += '</div>';
+
+      html += '</div>';
+
+      // Craft Button
+      const canCraft = gameState.alchemySlots.filter(Boolean).length === 3;
+      html += '<div style="margin-bottom: 1rem;">';
+      html += '<button class="btn-craft" onclick="craftItems()" ' + (canCraft ? '' : 'disabled') + '>⚗️ CRAFT NOW</button>';
+      html += '<button class="btn-reset" onclick="clearAllSlots()" style="margin-left: 0.5rem; padding: 0.75rem 1.5rem;">Clear Slots</button>';
+      html += '</div>';
+      html += '</div>';
+
+      // Inventory display
+      html += '<div style="background: var(--bg-medium); padding: 1rem; border-radius: 8px;">';
+      html += '<h3 style="font-size: 1rem; margin-bottom: 0.75rem;">🎒 Your Inventory (' + gameState.inventory.length + ') - Click to add to slots above</h3>';
+
+      if (gameState.inventory.length === 0) {
+        html += '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">';
+        html += '<div style="font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.3;">📦</div>';
+        html += '<p>No items yet!</p>';
+        html += '<p style="margin-top: 0.5rem; font-size: 0.9rem;">Visit the <strong style="color: var(--success);">Shop</strong> tab to buy items.</p>';
+        html += '<p style="margin-top: 1rem; font-size: 0.85rem; color: var(--warning);">💡 Try: Buy 3x Iron Sword (150g each) → Fusion to B-Rank!</p>';
+        html += '</div>';
+      } else {
+        html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.5rem; max-height: 35vh; overflow-y: auto; padding: 0.5rem;">';
+        for (let i = 0; i < gameState.inventory.length; i++) {
+          const item = gameState.inventory[i];
+          const rankColor = { C: '#777', B: '#5ba3ff', A: '#7B61FF', S: '#ffd56a' }[item.rank || 'C'];
+          const inSlot = gameState.alchemySlots.some(s => s && s.inventoryIndex === i);
+          html += '<div onclick="addToSlot(' + i + ')" style="background: var(--bg-light); padding: 0.6rem; border-radius: 6px; border: 2px solid ' + rankColor + '; text-align: center; cursor: pointer; transition: all 0.2s; ' + (inSlot ? 'opacity: 0.4; border-style: dashed;' : '') + '" onmouseover="if(!this.style.opacity || this.style.opacity===\'1\') this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'">';
+          html += '<div style="background: ' + rankColor + '; color: white; padding: 0.15rem 0.4rem; border-radius: 8px; font-size: 0.7rem; font-weight: 700; margin-bottom: 0.3rem; display: inline-block;">' + (item.rank || 'C') + '</div>';
+          html += '<div style="font-size: 0.85rem; font-weight: 600;">' + item.name + '</div>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+
+      html += '</div>';
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // ===== ALCHEMY LOGIC =====
+    function addToSlot(inventoryIndex) {
+      const item = gameState.inventory[inventoryIndex];
+      if (!item) return;
+
+      // Find empty slot
+      const emptySlotIndex = gameState.alchemySlots.findIndex(s => !s);
+      if (emptySlotIndex === -1) {
+        showNotification('All slots full! Clear a slot first.', 'error');
+        return;
+      }
+
+      // Check if already in slots
+      if (gameState.alchemySlots.some(s => s && s.inventoryIndex === inventoryIndex)) {
+        showNotification('Item already in a slot!', 'error');
+        return;
+      }
+
+      gameState.alchemySlots[emptySlotIndex] = { ...item, inventoryIndex };
+      renderAlchemy();
+    }
+
+    function clearSlot(slotIndex) {
+      gameState.alchemySlots[slotIndex] = null;
+      renderAlchemy();
+    }
+
+    function clearAllSlots() {
+      gameState.alchemySlots = [null, null, null];
+      renderAlchemy();
+    }
+
+    function clickSlot(slotIndex) {
+      // If slot has item, clear it
+      if (gameState.alchemySlots[slotIndex]) {
+        clearSlot(slotIndex);
+      }
+    }
+
+    function getRecipePreview() {
+      const items = gameState.alchemySlots.filter(Boolean);
+      if (items.length !== 3) return null;
+
+      // Check for fusion
+      const firstRank = items[0].rank || 'C';
+      const firstType = items[0].type || 'gear';
+      const isFusion = items.every(it => (it.rank || 'C') === firstRank && (it.type || 'gear') === firstType);
+
+      if (isFusion) {
+        const nextRank = { C: 'B', B: 'A', A: 'S', S: 'S' }[firstRank];
+        return { type: 'Fusion', rank: nextRank };
+      }
+
+      // Check for special (C gear + B gear + C pet)
+      const hasCGear = items.some(it => (it.type === 'gear' || it.id.includes('sword')) && (it.rank || 'C') === 'C');
+      const hasBGear = items.some(it => (it.type === 'gear' || it.id.includes('blade')) && it.rank === 'B');
+      const hasCPet = items.some(it => it.id.includes('pet') && (it.rank || 'C') === 'C');
+
+      if (hasCGear && hasBGear && hasCPet) {
+        return { type: 'Special', rank: 'B' };
+      }
+
+      // Generic alchemy
+      const highestRank = items.reduce((max, it) => {
+        const ranks = ['C', 'B', 'A', 'S'];
+        return ranks.indexOf(it.rank || 'C') > ranks.indexOf(max) ? (it.rank || 'C') : max;
+      }, 'C');
+
+      return { type: 'Alchemy', rank: highestRank };
+    }
+
+    function craftItems() {
+      const items = gameState.alchemySlots.filter(Boolean);
+      if (items.length !== 3) {
+        showNotification('Need 3 items in slots!', 'error');
+        return;
+      }
+
+      const preview = getRecipePreview();
+      if (!preview) return;
+
+      // Remove items from inventory
+      const indicesToRemove = items.map(it => it.inventoryIndex).sort((a, b) => b - a);
+      for (const idx of indicesToRemove) {
+        gameState.inventory.splice(idx, 1);
+      }
+
+      // Create result based on recipe type
+      let result;
+      if (preview.type === 'Fusion') {
+        const baseItem = items[0];
+        result = {
+          ...baseItem,
+          id: `item_${Date.now()}_${Math.random()}`,
+          name: `${preview.rank}-Rank ${baseItem.name.replace(/[CBAS]-Rank\s+/, '')}`,
+          rank: preview.rank
+        };
+        showNotification(`Fusion! Created ${result.rank}-Rank ${result.name}!`, 'success');
+      } else if (preview.type === 'Special') {
+        result = {
+          id: `item_${Date.now()}_${Math.random()}`,
+          name: 'Premium Reward',
+          desc: 'Special recipe reward',
+          rank: 'B',
+          type: 'gear'
+        };
+        showNotification('Special Recipe! Got Premium Reward!', 'success');
+      } else {
+        result = {
+          id: `item_${Date.now()}_${Math.random()}`,
+          name: `${preview.rank}-Rank Treasure Box`,
+          desc: 'Contains gold and items',
+          rank: preview.rank,
+          type: 'treasure_box'
+        };
+        showNotification(`Alchemy! Created ${preview.rank}-Rank Treasure Box!`, 'success');
+      }
+
+      gameState.inventory.push(result);
+      gameState.alchemySlots = [null, null, null];
+      renderAlchemy();
+      saveGame();
+    }
+
+    // ===== SAVE/LOAD =====
+    function saveGame() {
+      try {
+        const data = {
+          currencies: gameState.currencies,
+          talents: {
+            purchased: Array.from(gameState.talents.purchased),
+            stats: gameState.talents.stats
+          },
+          inventory: gameState.inventory,
+          alchemySlots: gameState.alchemySlots,
+          equippedSkills: gameState.equippedSkills,
+          maxEquippedSlots: gameState.maxEquippedSlots
+        };
+        localStorage.setItem('talent_store_standalone', JSON.stringify(data));
+        return true;
+      } catch (e) {
+        console.error('Save failed:', e);
+        return false;
+      }
+    }
+
+    function loadGame() {
+      try {
+        const saved = localStorage.getItem('talent_store_standalone');
+        if (!saved) {
+          showNotification('No save data found', 'error');
+          return false;
+        }
+        const data = JSON.parse(saved);
+        gameState.currencies = data.currencies;
+        gameState.talents.purchased = new Set(data.talents.purchased);
+        gameState.talents.stats = data.talents.stats;
+        gameState.inventory = data.inventory || [];
+        gameState.alchemySlots = data.alchemySlots || [null, null, null];
+        gameState.equippedSkills = data.equippedSkills || [];
+        gameState.maxEquippedSlots = data.maxEquippedSlots || 1;
+        calculateStats();
+        renderTalents();
+        renderShop();
+        renderAlchemy();
+        renderMyTalents();
+        showNotification('Game loaded!', 'success');
+        return true;
+      } catch (e) {
+        console.error('Load failed:', e);
+        showNotification('Load failed!', 'error');
+        return false;
+      }
+    }
+
+    function resetGame() {
+      if (!confirm('Reset ALL progress? This cannot be undone!')) return;
+      gameState = {
+        currencies: { gold: 10000, essence: 50, tokens: 10, ap: 0, apTotal: 20, apSpent: 0 },
+        talents: { purchased: new Set(), stats: {} },
+        inventory: [],
+        alchemySlots: [null, null, null],
+        equippedSkills: [],
+        maxEquippedSlots: 1
+      };
+      calculateStats();
+      renderTalents();
+      renderShop();
+      renderAlchemy();
+      renderMyTalents();
+      saveGame();
+      showNotification('Game reset!', 'success');
+    }
+
+    // ===== TAB SWITCHING =====
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabName + 'Tab').classList.add('active');
+
+      // Render content when switching tabs
+      if (tabName === 'alchemy') {
+        renderAlchemy();
+      } else if (tabName === 'mytalents') {
+        renderMyTalents();
+      }
+    }
+
+    // ===== MY TALENTS RENDERING =====
+    function renderMyTalents() {
+      const container = document.getElementById('myTalentsContainer');
+      const purchasedCount = gameState.talents.purchased.size;
+      const stats = gameState.talents.stats || {};
+
+      let html = '<div class="talent-system">';
+      html += '<h2>⭐ My Talents (' + purchasedCount + '/59)</h2>';
+
+      // Stats Summary
+      html += '<div style="background: var(--bg-medium); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid var(--success);">';
+      html += '<h3 style="color: var(--success); margin-bottom: 1rem;">💪 Active Stats</h3>';
+      html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">';
+
+      if (stats.atkMul) html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border-left: 3px solid var(--primary);"><strong style="color: var(--primary);">⚔️ Attack:</strong> +' + (stats.atkMul * 100).toFixed(0) + '%</div>';
+      if (stats.hpFlat) html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border-left: 3px solid var(--success);"><strong style="color: var(--success);">❤️ HP:</strong> +' + stats.hpFlat + '</div>';
+      if (stats.ls) html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #ff6b9d;"><strong style="color: #ff6b9d;">💉 Lifesteal:</strong> ' + (stats.ls * 100).toFixed(0) + '%</div>';
+      if (stats.haste) html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #5ba3ff;"><strong style="color: #5ba3ff;">⚡ CDR:</strong> -' + stats.haste + '%</div>';
+      if (stats.luck) html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border-left: 3px solid var(--warning);"><strong style="color: var(--warning);">🍀 Luck:</strong> +' + stats.luck + '</div>';
+      if (stats.crit) html += '<div style="background: var(--bg-light); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #ff9500;"><strong style="color: #ff9500);">💥 Crit:</strong> +' + (stats.crit * 100).toFixed(0) + '%</div>';
+
+      html += '</div>';
+
+      // Equipped Skills Section
+      if (gameState.equippedSkills.length > 0) {
+        html += '<div style="background: rgba(123, 97, 255, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 2px solid #7B61FF;">';
+        html += '<h3 style="color: #ffd700; margin-bottom: 0.75rem;">⚡ Equipped Auto-Skills (' + gameState.equippedSkills.length + '/' + gameState.maxEquippedSlots + ')</h3>';
+        html += '<div style="display: grid; gap: 0.75rem;">';
+        for (const skillId of gameState.equippedSkills) {
+          const talent = getTalent(skillId);
+          if (talent) {
+            html += '<div style="background: rgba(255, 215, 0, 0.2); padding: 0.75rem; border-radius: 6px; border-left: 4px solid #ffd700;">';
+            html += '<strong style="color: #ffd700;">' + talent.name + '</strong>';
+            html += '<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">' + (talent.desc || 'Active') + '</div>';
+            html += '</div>';
+          }
+        }
+        html += '</div></div>';
+      } else {
+        html += '<div style="background: rgba(123, 97, 255, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 2px solid #7B61FF; text-align: center; color: var(--text-secondary);">';
+        html += '<p>⚡ No skills equipped yet! Purchase and equip auto-skills from the AUTO lane.</p>';
+        html += '<p style="font-size: 0.85rem; margin-top: 0.5rem;">Max Slots: ' + gameState.maxEquippedSlots + ' (Unlock 2nd slot via "Dual Wielding" in COOLDOWN lane)</p>';
+        html += '</div>';
+      }
+
+      html += '</div>'; // Close stats summary container
+
+      if (purchasedCount === 0) {
+        html += '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No talents purchased yet! Go to Talent Tree tab to buy talents.</div>';
+      }
+
+      // Purchased Talents List
+      if (purchasedCount > 0) {
+        html += '<div style="background: var(--bg-medium); padding: 1rem; border-radius: 8px;">';
+        html += '<h3>🎯 Owned Talents</h3>';
+        html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.75rem; margin-top: 1rem;">';
+
+        for (const [laneName, talents] of Object.entries(TALENT_LANES)) {
+          const ownedInLane = talents.filter(t => gameState.talents.purchased.has(t.id));
+          if (ownedInLane.length > 0) {
+            html += '<div style="background: var(--bg-light); padding: 1rem; border-radius: 6px; border: 2px solid var(--primary);">';
+            html += '<h4 style="color: var(--primary); margin-bottom: 0.75rem; text-align: center;">' + laneName.toUpperCase() + ' (' + ownedInLane.length + ')</h4>';
+            for (const talent of ownedInLane) {
+              html += '<div style="background: rgba(54, 199, 119, 0.15); padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border-left: 3px solid var(--success);">';
+              html += '<div style="display: flex; justify-content: space-between; align-items: center;">';
+              html += '<strong style="font-size: 0.9rem;">' + talent.name + '</strong>';
+              html += '<span style="background: var(--success); color: white; padding: 0.15rem 0.4rem; border-radius: 8px; font-size: 0.7rem;">✓ OWNED</span>';
+              html += '</div>';
+              html += '</div>';
+            }
+            html += '</div>';
+          }
+        }
+
+        html += '</div></div>';
+      }
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // ===== NOTIFICATIONS =====
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.classList.add('show'), 10);
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // ===== INITIALIZATION =====
+    window.onload = function () {
+      // Try to load saved game
+      const loaded = loadGame();
+      if (!loaded) {
+        // First time - initialize
+        calculateStats();
+        renderTalents();
+        renderShop();
+        renderAlchemy();
+      }
+
+      // Auto-save every 30 seconds
+      setInterval(saveGame, 30000);
+
+      console.log('🎮 Talent-Store System loaded!');
+      console.log('✅ Running OFFLINE - no server required!');
+      console.log('📊 31 Talents | 43 Shop Items | Alchemy System');
+      showNotification('System loaded! Works completely offline!', 'success');
+    };
+
+    // Expose for debugging
+    window.gameState = gameState;
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,181 @@
+/**
+ * Modern Dark Theme
+ * Clean, professional dark theme with accent colors
+ */
+
+:root {
+  /* Primary Colors */
+  --theme-bg-primary: #1a1a2e;
+  --theme-bg-secondary: #16213e;
+  --theme-bg-tertiary: #0f1626;
+
+  /* Text Colors */
+  --theme-text-primary: #eee;
+  --theme-text-secondary: #aaa;
+  --theme-text-muted: #777;
+
+  /* Accent Colors */
+  --theme-accent-primary: #00d9ff;
+  --theme-accent-secondary: #ff006e;
+  --theme-accent-success: #06ffa5;
+  --theme-accent-warning: #ffbe0b;
+  --theme-accent-danger: #fb5607;
+
+  /* UI Elements */
+  --theme-border: #2a2a4e;
+  --theme-border-light: #3a3a6e;
+  --theme-shadow: rgba(0, 0, 0, 0.5);
+  --theme-shadow-light: rgba(0, 0, 0, 0.3);
+
+  /* Status Effects */
+  --theme-buff: #00d9ff;
+  --theme-debuff: #ff006e;
+  --theme-neutral: #aaa;
+
+  /* Progress Bars */
+  --theme-xp-bar: linear-gradient(90deg, #00d9ff, #0099ff);
+  --theme-hp-bar: linear-gradient(90deg, #06ffa5, #06cc80);
+  --theme-mana-bar: linear-gradient(90deg, #00d9ff, #0066cc);
+
+  /* Rarity Colors */
+  --rarity-common: #9e9e9e;
+  --rarity-uncommon: #4caf50;
+  --rarity-rare: #2196f3;
+  --rarity-epic: #9c27b0;
+  --rarity-legendary: #ff9800;
+  --rarity-mythic: #f44336;
+  --rarity-ancient: #00bcd4;
+  --rarity-divine: #ffd700;
+  --rarity-celestial: #e1bee7;
+  --rarity-transcendent: #ff1744;
+
+  /* Spacing */
+  --theme-gap-sm: 8px;
+  --theme-gap-md: 16px;
+  --theme-gap-lg: 24px;
+
+  /* Border Radius */
+  --theme-radius-sm: 4px;
+  --theme-radius-md: 8px;
+  --theme-radius-lg: 16px;
+
+  /* Transitions */
+  --theme-transition: 0.3s ease;
+}
+
+body.theme-modern-dark {
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.panel {
+  background: var(--theme-bg-secondary);
+  border: 1px solid var(--theme-border);
+  border-radius: var(--theme-radius-md);
+  padding: var(--theme-gap-md);
+  margin-bottom: var(--theme-gap-md);
+  box-shadow: 0 4px 12px var(--theme-shadow);
+}
+
+.panel h2 {
+  color: var(--theme-accent-primary);
+  margin-top: 0;
+  border-bottom: 2px solid var(--theme-border-light);
+  padding-bottom: var(--theme-gap-sm);
+}
+
+button {
+  background: linear-gradient(
+    135deg,
+    var(--theme-accent-primary),
+    var(--theme-accent-secondary)
+  );
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--theme-radius-sm);
+  cursor: pointer;
+  font-weight: bold;
+  transition: var(--theme-transition);
+  box-shadow: 0 2px 8px var(--theme-shadow-light);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--theme-shadow);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.progress-bar {
+  background: var(--theme-bg-tertiary);
+  border-radius: var(--theme-radius-lg);
+  overflow: hidden;
+  height: 24px;
+  position: relative;
+  border: 1px solid var(--theme-border);
+}
+
+.progress-fill {
+  background: var(--theme-xp-bar);
+  height: 100%;
+  transition: width 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px black;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--theme-gap-sm);
+  background: var(--theme-bg-tertiary);
+  border-radius: var(--theme-radius-sm);
+  margin-bottom: var(--theme-gap-sm);
+  border-left: 3px solid var(--theme-accent-primary);
+}
+
+.status-effect-icon {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--theme-border-light);
+  text-align: center;
+  line-height: 32px;
+  margin: 2px;
+  box-shadow: 0 2px 4px var(--theme-shadow);
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px var(--theme-shadow);
+}
+
+.achievement-unlocked {
+  animation: achievementPop 0.5s ease-out;
+}
+
+@keyframes achievementPop {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}

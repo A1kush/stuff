@@ -1,0 +1,44 @@
+{
+  "id": "grandma",
+  "name": "Grandma",
+  "rank": "S",
+  "role": "support",
+  "summary": {
+    "hook": "Clan matriarch who turns kindness into battlefield shielding.",
+    "gameplay": "Feeds, heals, and trains in a single cascading action so new players feel safe instantly.",
+    "why_it_matters": "Comfort Cascade bridges nurturing loops with combat pacing, teaching the player rhythm management."
+  },
+  "stats": {"attack": 25, "defense": 60, "luck": 55, "support": 95, "speed": 45},
+  "skills": [
+    {
+      "name": "Comfort Cascade",
+      "type": "heal",
+      "cooldown": 12,
+      "aura_cost": 20,
+      "effects": ["party_regen", "xp_boost", "stress_cleanse"],
+      "rationale": "Bundles feed/heal/train so the nurturing fantasy never stalls combat." 
+    },
+    {
+      "name": "Memory Soup",
+      "type": "utility",
+      "cooldown": 60,
+      "aura_cost": 10,
+      "effects": ["status_reroll", "morale_restore"],
+      "rationale": "Daily cleanse balances roguelike randomness without trivializing stakes."
+    }
+  ],
+  "acquisition": {
+    "method": "Story unlock after intro dungeon",
+    "costs": {"bond_sparks": 0},
+    "spawn_logic": "Always available as default mentor companion."
+  },
+  "synergy": {
+    "combos": ["Carestorm (with Shaniqua + Missy)", "Clan Ascension warmup"],
+    "counters": ["Anti-heal curses"]
+  },
+  "visuals": {
+    "palette": ["#f8d9a0", "#f2b880", "#fff7d6"],
+    "aura": "Soft gold constellations forming around apron hems.",
+    "animation_notes": "Use gentle parallax pans with stardust sprites to signal multi-phase buffs."
+  }
+}

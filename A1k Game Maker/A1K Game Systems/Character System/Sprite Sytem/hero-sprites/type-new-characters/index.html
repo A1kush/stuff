@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Character Templates Gallery</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            font-size: 20px;
+            margin-bottom: 50px;
+        }
+        .art-style-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .style-title {
+            font-size: 28px;
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .character-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+        }
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+        .character-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .character-weapons {
+            font-size: 14px;
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+        .character-link {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .character-link:hover {
+            transform: scale(1.05);
+        }
+        .style-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 New Character Templates Gallery</h1>
+        <div class="subtitle">33 Characters Across 11 Art Styles • A1, Unique & Missy</div>
+
+        <!-- Type 1: HD Pixel Art -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 1: HD Pixel Art</h2>
+            <div class="style-description">Soul Knight / Hyper Light Drifter Style • 128×128 • Pixel-perfect with glows</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-1-hd-pixel-art/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-1-hd-pixel-art/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-1-hd-pixel-art/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 2: Vector Cel-Shaded -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 2: Vector Cel-Shaded</h2>
+            <div class="style-description">Castle Crashers / Hollow Knight Style • 256×256 • Bold outlines + gradients</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-2-vector-cel-shaded/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-2-vector-cel-shaded/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-2-vector-cel-shaded/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 3: 3D Prerendered -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 3: 3D Prerendered</h2>
+            <div class="style-description">Donkey Kong Country Style • Realistic depth • Smooth shading</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-3-3d-prerendered/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-3-3d-prerendered/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-3-3d-prerendered/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 5: Hybrid Enhanced -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 5: Hybrid Enhanced</h2>
+            <div class="style-description">HD Pixel + WebGL2 Shaders • Dual-layer • Real-time effects</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-5-hybrid-enhanced/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-5-hybrid-enhanced/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-5-hybrid-enhanced/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 7: Chibi Kawaii -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 7: Chibi/Kawaii Style</h2>
+            <div class="style-description">Super Deformed • Huge heads • Sparkles • 256×256</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-7-chibi-kawaii/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-7-chibi-kawaii/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-7-chibi-kawaii/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 9: Low-Poly 3D -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 9: Low-Poly 3D</h2>
+            <div class="style-description">Three.js Real-Time • 360° rotation • Flat shading • 256×256</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-9-lowpoly-3d/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-9-lowpoly-3d/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-9-lowpoly-3d/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 11: Retro 8-Bit -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 11: Retro 8-Bit</h2>
+            <div class="style-description">NES/Game Boy Style • 160×144 • 4-color palettes • Pixel-perfect</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-11-retro-8bit/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-11-retro-8bit/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-11-retro-8bit/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 13: Stained Glass -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 13: Stained Glass</h2>
+            <div class="style-description">Church Window Style • Vibrant colors • Lead outlines • Geometric shapes</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-13-stained-glass/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-13-stained-glass/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-13-stained-glass/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 14: Comic Halftone -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 14: Comic Halftone</h2>
+            <div class="style-description">Pop Art Style • Ben-Day dots • Bold colors • Comic book aesthetic</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-14-comic-halftone/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-14-comic-halftone/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-14-comic-halftone/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 15: Glitch Art -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 15: Glitch Art</h2>
+            <div class="style-description">Digital Corruption • RGB shift • Datamosh effects • Cyberpunk aesthetic</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-15-glitch-art/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-15-glitch-art/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-15-glitch-art/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 18: Paper Cutout -->
+        <div class="art-style-section">
+            <h2 class="style-title">Type 18: Paper Cutout</h2>
+            <div class="style-description">Paper Mario Style • Layered 2D • Flat textures • Drop shadows</div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Swords</div>
+                    <a href="type-18-paper-cutout/a1-dual-swords.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Pistols</div>
+                    <a href="type-18-paper-cutout/unique-dual-pistols.html" class="character-link">View Character</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol</div>
+                    <a href="type-18-paper-cutout/missy-sword-pistol.html" class="character-link">View Character</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

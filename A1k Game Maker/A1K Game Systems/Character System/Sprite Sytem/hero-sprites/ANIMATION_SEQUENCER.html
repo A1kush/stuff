@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animation Sequencer - Custom Frame Sequences</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%); color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        h1 { font-size: 48px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 15px; }
+        .tagline { color: #999; font-size: 16px; }
+        .workspace { display: grid; grid-template-columns: 300px 1fr 350px; gap: 20px; }
+        .panel { background: rgba(0,0,0,0.5); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 12px; padding: 25px; }
+        .panel h2 { color: #667eea; font-size: 20px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(102, 126, 234, 0.3); }
+        canvas { border: 3px solid #667eea; border-radius: 8px; box-shadow: 0 0 30px rgba(102, 126, 234, 0.4); background: #000; display: block; margin: 0 auto; image-rendering: pixelated; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+        .timeline { background: rgba(102, 126, 234, 0.1); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 8px; padding: 20px; margin-top: 20px; max-height: 200px; overflow-x: auto; overflow-y: hidden; white-space: nowrap; }
+        .frame-slot { display: inline-block; width: 80px; height: 100px; background: rgba(255,255,255,0.05); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 6px; margin-right: 10px; padding: 10px; text-align: center; cursor: pointer; vertical-align: top; }
+        .frame-slot:hover { border-color: #667eea; background: rgba(102, 126, 234, 0.2); }
+        .frame-slot.active { border-color: #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+        .frame-number { font-size: 11px; color: #999; margin-bottom: 5px; }
+        .frame-preview { width: 56px; height: 56px; background: #0a0a0a; border-radius: 4px; margin: 0 auto; }
+        select, input, button { width: 100%; padding: 12px; margin: 5px 0; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); color: #e0e0e0; border-radius: 6px; font-family: inherit; font-size: 14px; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: #fff; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .animation-list { margin-top: 15px; }
+        .animation-preset { background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); padding: 12px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        .animation-preset:hover { background: rgba(102, 126, 234, 0.2); border-color: #667eea; }
+        .preset-name { color: #667eea; font-weight: bold; margin-bottom: 5px; }
+        .preset-desc { font-size: 11px; color: #999; }
+        .playback-controls { display: flex; gap: 10px; margin-top: 15px; }
+        .playback-btn { flex: 1; padding: 10px; background: rgba(102, 126, 234, 0.2); border: 1px solid rgba(102, 126, 234, 0.3); color: #667eea; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .playback-btn:hover { background: rgba(102, 126, 234, 0.3); }
+        .playback-btn.active { background: #667eea; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 ANIMATION SEQUENCER</h1>
+            <div class="tagline">Create Custom Frame Sequences • Timeline Editor • Export Animation Data</div>
+        </div>
+
+        <div class="workspace">
+            <div class="panel">
+                <h2>📚 LIBRARY</h2>
+                <label style="font-size:12px;color:#999;text-transform:uppercase;margin-bottom:8px;display:block;">Source Character</label>
+                <select id="sourceType">
+                    <option value="type-1-hd-pixel-art">Type 1: HD Pixel</option>
+                    <option value="type-7-chibi-kawaii">Type 7: Chibi</option>
+                    <option value="type-11-retro-8bit">Type 11: 8-Bit</option>
+                    <option value="type-15-glitch-art">Type 15: Glitch</option>
+                </select>
+                <select id="sourceChar">
+                    <option value="warrior-dual-swords">⚔️ A1 Warrior</option>
+                    <option value="cat-angel-gunner">👑 Missy Cat Angel</option>
+                    <option value="cyborg-rifle-operative">🔫 Unique Cyborg</option>
+                </select>
+                
+                <h3 style="color:#667eea;font-size:14px;margin:20px 0 10px;">Animation Presets</h3>
+                <div class="animation-list">
+                    <div class="animation-preset" onclick="loadPreset('idle')">
+                        <div class="preset-name">Idle Loop</div>
+                        <div class="preset-desc">8 frames, breathing animation</div>
+                    </div>
+                    <div class="animation-preset" onclick="loadPreset('walk')">
+                        <div class="preset-name">Walk Cycle</div>
+                        <div class="preset-desc">8 frames, 2-step loop</div>
+                    </div>
+                    <div class="animation-preset" onclick="loadPreset('attack')">
+                        <div class="preset-name">Attack Combo</div>
+                        <div class="preset-desc">16 frames, 3-hit sequence</div>
+                    </div>
+                    <div class="animation-preset" onclick="loadPreset('custom')">
+                        <div class="preset-name">Custom Sequence</div>
+                        <div class="preset-desc">Build your own</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🎨 PREVIEW</h2>
+                <canvas id="preview" width="400" height="400"></canvas>
+                
+                <div class="playback-controls">
+                    <div class="playback-btn" id="playBtn" onclick="togglePlay()">▶️ PLAY</div>
+                    <div class="playback-btn" onclick="stepBack()">⏮️</div>
+                    <div class="playback-btn" onclick="stepForward()">⏭️</div>
+                    <div class="playback-btn" onclick="resetSequence()">🔄</div>
+                </div>
+
+                <div style="margin-top:15px;">
+                    <label style="font-size:12px;color:#999;display:block;margin-bottom:8px;">FPS: <span id="fpsValue">8</span></label>
+                    <input type="range" id="fpsSlider" min="1" max="60" value="8" oninput="updateFPS(this.value)">
+                </div>
+
+                <div style="margin-top:20px;text-align:center;padding:15px;background:rgba(102,126,234,0.1);border-radius:6px;">
+                    <div style="font-size:11px;color:#999;margin-bottom:5px;">CURRENT FRAME</div>
+                    <div style="font-size:32px;color:#667eea;font-weight:bold;" id="currentFrame">1</div>
+                    <div style="font-size:11px;color:#999;margin-top:5px;">of <span id="totalFrames">8</span></div>
+                </div>
+
+                <div class="timeline">
+                    <div id="timelineFrames"></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>⚙️ SEQUENCE EDITOR</h2>
+                <label style="font-size:12px;color:#999;margin-bottom:8px;display:block;">Sequence Name</label>
+                <input type="text" id="sequenceName" placeholder="My Custom Animation" value="Custom Sequence">
+                
+                <label style="font-size:12px;color:#999;margin:15px 0 8px;display:block;">Frame Duration (ms)</label>
+                <input type="number" id="frameDuration" min="16" max="500" value="125" step="16">
+                
+                <label style="font-size:12px;color:#999;margin:15px 0 8px;display:block;">Loop Mode</label>
+                <select id="loopMode">
+                    <option value="loop">Loop</option>
+                    <option value="pingpong">Ping-Pong</option>
+                    <option value="once">Play Once</option>
+                </select>
+
+                <h3 style="color:#667eea;font-size:14px;margin:25px 0 15px;">Frame Actions</h3>
+                <div class="btn-group">
+                    <button onclick="addFrame()">➕ Add Frame</button>
+                    <button onclick="removeFrame()">➖ Remove</button>
+                    <button onclick="duplicateFrame()">📋 Duplicate</button>
+                    <button onclick="clearAll()">🗑️ Clear All</button>
+                </div>
+
+                <h3 style="color:#667eea;font-size:14px;margin:25px 0 15px;">Export Options</h3>
+                <button onclick="exportJSON()">💾 Export JSON</button>
+                <button onclick="exportGIF()">🎞️ Export GIF</button>
+                <button onclick="exportSpriteSheet()">🖼️ Export Sheet</button>
+                <button onclick="exportCode()">💻 Export Code</button>
+
+                <div style="margin-top:25px;padding:15px;background:rgba(255,215,0,0.1);border:2px solid rgba(255,215,0,0.3);border-radius:8px;">
+                    <div style="font-size:11px;color:#FFD700;font-weight:bold;text-align:center;">KEYBOARD SHORTCUTS</div>
+                    <div style="font-size:11px;color:#ccc;margin-top:10px;line-height:1.8;">
+                        <div>SPACE - Play/Pause</div>
+                        <div>← → - Step Frame</div>
+                        <div>DELETE - Remove Frame</div>
+                        <div>CTRL+D - Duplicate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('preview');
+        const ctx = canvas.getContext('2d');
+        let sequence = [0, 1, 2, 3, 4, 5, 6, 7]; // Default idle frames
+        let currentFrameIndex = 0;
+        let isPlaying = false;
+        let fps = 8;
+        let lastFrameTime = 0;
+
+        function drawFrame(frameNum) {
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, 400, 400);
+
+            const cx = 200, cy = 220;
+            const bounce = Math.sin(frameNum / 8 * Math.PI * 2) * 5;
+            
+            // Simple placeholder character
+            ctx.fillStyle = '#667eea';
+            ctx.fillRect(cx - 20, cy - 40 + bounce, 40, 40); // Head
+            ctx.fillRect(cx - 25, cy + bounce, 50, 50); // Body
+            ctx.fillRect(cx - 35, cy + 10 + bounce, 15, 40); // Left arm
+            ctx.fillRect(cx + 20, cy + 10 + bounce, 15, 40); // Right arm
+            ctx.fillRect(cx - 20, cy + 50 + bounce, 15, 50); // Left leg
+            ctx.fillRect(cx + 5, cy + 50 + bounce, 15, 50); // Right leg
+            
+            // Frame number overlay
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.8)';
+            ctx.font = 'bold 24px monospace';
+            ctx.fillText(`Frame ${frameNum + 1}`, 20, 40);
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineFrames');
+            container.innerHTML = '';
+            
+            sequence.forEach((frameNum, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'frame-slot';
+                if (index === currentFrameIndex) slot.classList.add('active');
+                slot.innerHTML = `
+                    <div class="frame-number">Frame ${index + 1}</div>
+                    <div class="frame-preview"></div>
+                `;
+                slot.onclick = () => { currentFrameIndex = index; renderTimeline(); };
+                container.appendChild(slot);
+            });
+            
+            document.getElementById('currentFrame').textContent = currentFrameIndex + 1;
+            document.getElementById('totalFrames').textContent = sequence.length;
+        }
+
+        function animate(timestamp) {
+            if (isPlaying) {
+                if (timestamp - lastFrameTime >= 1000 / fps) {
+                    currentFrameIndex = (currentFrameIndex + 1) % sequence.length;
+                    lastFrameTime = timestamp;
+                    renderTimeline();
+                }
+            }
+            
+            drawFrame(sequence[currentFrameIndex]);
+            requestAnimationFrame(animate);
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            document.getElementById('playBtn').innerHTML = isPlaying ? '⏸️ PAUSE' : '▶️ PLAY';
+            document.getElementById('playBtn').classList.toggle('active', isPlaying);
+        }
+
+        function stepForward() {
+            currentFrameIndex = (currentFrameIndex + 1) % sequence.length;
+            renderTimeline();
+        }
+
+        function stepBack() {
+            currentFrameIndex = currentFrameIndex === 0 ? sequence.length - 1 : currentFrameIndex - 1;
+            renderTimeline();
+        }
+
+        function resetSequence() {
+            currentFrameIndex = 0;
+            isPlaying = false;
+            document.getElementById('playBtn').innerHTML = '▶️ PLAY';
+            document.getElementById('playBtn').classList.remove('active');
+            renderTimeline();
+        }
+
+        function addFrame() {
+            sequence.push(sequence.length % 8);
+            renderTimeline();
+        }
+
+        function removeFrame() {
+            if (sequence.length > 1) {
+                sequence.splice(currentFrameIndex, 1);
+                currentFrameIndex = Math.min(currentFrameIndex, sequence.length - 1);
+                renderTimeline();
+            }
+        }
+
+        function duplicateFrame() {
+            sequence.splice(currentFrameIndex + 1, 0, sequence[currentFrameIndex]);
+            currentFrameIndex++;
+            renderTimeline();
+        }
+
+        function clearAll() {
+            if (confirm('Clear all frames?')) {
+                sequence = [0];
+                currentFrameIndex = 0;
+                renderTimeline();
+            }
+        }
+
+        function loadPreset(preset) {
+            if (preset === 'idle') {
+                sequence = [0, 1, 2, 3, 4, 5, 6, 7];
+            } else if (preset === 'walk') {
+                sequence = [0, 1, 2, 3, 4, 5, 6, 7];
+            } else if (preset === 'attack') {
+                sequence = [0, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1];
+            } else if (preset === 'custom') {
+                sequence = [0];
+            }
+            currentFrameIndex = 0;
+            renderTimeline();
+        }
+
+        function updateFPS(value) {
+            fps = parseInt(value);
+            document.getElementById('fpsValue').textContent = value;
+        }
+
+        function exportJSON() {
+            const data = {
+                name: document.getElementById('sequenceName').value,
+                frames: sequence,
+                fps: fps,
+                frameDuration: parseInt(document.getElementById('frameDuration').value),
+                loopMode: document.getElementById('loopMode').value,
+                totalFrames: sequence.length
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = 'animation-sequence.json';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        function exportGIF() {
+            alert('GIF Export: Would render all frames and compile into animated GIF');
+        }
+
+        function exportSpriteSheet() {
+            alert(`Sprite Sheet Export: Would create ${sequence.length}-frame sprite sheet`);
+        }
+
+        function exportCode() {
+            const code = `// Animation: ${document.getElementById('sequenceName').value}
+const animation = {
+  frames: [${sequence.join(', ')}],
+  fps: ${fps},
+  frameDuration: ${document.getElementById('frameDuration').value},
+  loopMode: '${document.getElementById('loopMode').value}',
+  
+  currentFrame: 0,
+  lastUpdate: 0,
+  
+  update(deltaTime) {
+    this.lastUpdate += deltaTime;
+    if (this.lastUpdate >= this.frameDuration) {
+      this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+      this.lastUpdate = 0;
+    }
+    return this.frames[this.currentFrame];
+  }
+};`;
+            const blob = new Blob([code], { type: 'text/javascript' });
+            const link = document.createElement('a');
+            link.download = 'animation-sequence.js';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.code === 'ArrowRight') {
+                stepForward();
+            } else if (e.code === 'ArrowLeft') {
+                stepBack();
+            } else if (e.code === 'Delete') {
+                removeFrame();
+            } else if (e.code === 'KeyD' && e.ctrlKey) {
+                e.preventDefault();
+                duplicateFrame();
+            }
+        });
+
+        renderTimeline();
+        animate(0);
+    </script>
+</body>
+</html>

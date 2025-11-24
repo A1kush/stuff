@@ -1,0 +1,44 @@
+[
+  {
+    "id": "aurora-feast",
+    "name": "Aurora Feast",
+    "description": "Grandma and Vernal feed the dungeon mid-run, spawning feed shrines.",
+    "baseWeight": 0.35,
+    "modifiers": [{ "type": "playstyle", "value": "nurture", "multiplier": 1.8 }],
+    "rewards": { "bond_sparks": 6, "ingredients": 4 },
+    "notes": "Boosts sustain loops and preps Shaniqua contracts."
+  },
+  {
+    "id": "dread-carnival",
+    "name": "Dread Carnival",
+    "description": "Wavii challenges the party to a midnight duel for cosmetics and crit buffs.",
+    "baseWeight": 0.25,
+    "modifiers": [{ "type": "playstyle", "value": "aggressive", "multiplier": 2.0 }],
+    "rewards": { "reputation_shards": 8, "battle_bonds": 1 },
+    "notes": "Encourages flawless clears before recruiting gun strikers."
+  },
+  {
+    "id": "voidgreen-auction",
+    "name": "Voidgreen Auction",
+    "description": "Secret caravan selling contracts for A1 Kush, Shaniqua, and Modelo.",
+    "baseWeight": 0.18,
+    "modifiers": [
+      { "type": "playstyle", "value": "balanced", "multiplier": 1.2 },
+      { "type": "currency", "value": "gold", "threshold": 4000, "multiplier": 1.3 }
+    ],
+    "rewards": { "auction": true },
+    "notes": "Primary gold sink; appears more often when players hoard funds."
+  },
+  {
+    "id": "creators-eclipse",
+    "name": "Creator's Eclipse",
+    "description": "Reality flickers as Jeff inspects the run, offering mythic boons.",
+    "baseWeight": 0.02,
+    "modifiers": [
+      { "type": "playstyle", "value": "honor", "multiplier": 4 },
+      { "type": "currency", "value": "honor_score", "threshold": 80, "multiplier": 3 }
+    ],
+    "rewards": { "clan_relics": 1, "honor_score": 5 },
+    "notes": "Ultra-rare gate for Jeff recruitment."
+  }
+]

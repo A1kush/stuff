@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SGC Sprite Showcase Hub</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+        --bg: radial-gradient(circle at top, #05030a, #0f1118 60%);
+        --panel: rgba(255, 255, 255, 0.04);
+        --stroke: rgba(255, 255, 255, 0.12);
+        --accent: #ff7edb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: #f3f3ff;
+        padding: 2rem clamp(1rem, 5vw, 4rem);
+      }
+
+      header {
+        text-align: center;
+        max-width: 900px;
+        margin: 0 auto 2rem auto;
+      }
+
+      header h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        background: linear-gradient(120deg, #7ef0ff, var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      header p {
+        margin: 0.25rem 0;
+        color: #a5a8c2;
+      }
+
+      .grid {
+        display: grid;
+        gap: 2rem;
+      }
+
+      .module {
+        border: 1px solid var(--stroke);
+        border-radius: 1.5rem;
+        background: var(--panel);
+        padding: 1.5rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .module h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+
+      .module span {
+        font-size: 0.9rem;
+        color: #8b8fb0;
+      }
+
+      .module p {
+        margin: 0;
+        color: #c8cada;
+        line-height: 1.6;
+      }
+
+      iframe {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1rem;
+        min-height: 420px;
+        background: #050505;
+      }
+
+      .note {
+        text-align: center;
+        margin-top: 2.5rem;
+        color: #9ea1c5;
+        font-size: 0.9rem;
+      }
+
+      @media (min-width: 900px) {
+        .grid {
+          grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p>SGC • Character System</p>
+      <h1>Sprite Multiverse Showcase</h1>
+      <p>
+        Every iframe below pulls directly from the hero sprite galleries (HD pixel to stained glass) so you can preview
+        each art direction without opening dozens of files manually.
+      </p>
+    </header>
+
+    <section class="grid">
+      <!-- Iframe sections reuse existing sprite galleries so artists always see the latest files without duplicating assets. -->
+      <article class="module">
+        <h2>Type 1 — HD Pixel Art <span>hyper-polished pixels</span></h2>
+        <p>Perfect for rogue-lite or top-down dungeon crawlers needing crunchy-yet-modern silhouettes.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-1-hd-pixel-art/index.html"
+          loading="lazy"
+          title="Type 1 HD Pixel Art Gallery"
+        ></iframe>
+      </article>
+
+      <article class="module">
+        <h2>Type 2 — Vector Cel-Shaded <span>anime crispness</span></h2>
+        <p>Sharp lines with big color blocks, ideal for UI-friendly, high-resolution hero renders.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-2-vector-cel-shaded/index.html"
+          loading="lazy"
+          title="Type 2 Vector Cel Shaded Gallery"
+        ></iframe>
+      </article>
+
+      <article class="module">
+        <h2>Type 3 — 3D Prerendered <span>cinematic depth</span></h2>
+        <p>Pre-rendered poses with baked lighting for teams who want 3D drama in 2D pipelines.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-3-3d-prerendered/index.html"
+          loading="lazy"
+          title="Type 3 3D Prerendered Gallery"
+        ></iframe>
+      </article>
+
+      <article class="module">
+        <h2>Type 5 — Hybrid Enhanced <span>mixed media</span></h2>
+        <p>Layered gradients plus painterly strokes for AAA-quality story moments and splash screens.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-5-hybrid-enhanced/index.html"
+          loading="lazy"
+          title="Type 5 Hybrid Enhanced Gallery"
+        ></iframe>
+      </article>
+
+      <article class="module">
+        <h2>Type 7 — Chibi Kawaii <span>super-deformed charm</span></h2>
+        <p>Perfect for social hubs, gacha collections, or light-hearted marketing art.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-7-chibi-kawaii/index.html"
+          loading="lazy"
+          title="Type 7 Chibi Kawaii Gallery"
+        ></iframe>
+      </article>
+
+      <article class="module">
+        <h2>Type 9 — Low-Poly 3D <span>stylized minimalism</span></h2>
+        <p>Angular silhouettes with bold gradients that thrive in mobile builds or stylized AR.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-9-lowpoly-3d/index.html"
+          loading="lazy"
+          title="Type 9 Low Poly 3D Gallery"
+        ></iframe>
+      </article>
+
+      <article class="module">
+        <h2>Type 11 — Retro 8-Bit <span>pure nostalgia</span></h2>
+        <p>Classic palettes, chunky pixels, and NES-era timing for authentic throwback modes.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-11-retro-8bit/index.html"
+          loading="lazy"
+          title="Type 11 Retro 8 Bit Gallery"
+        ></iframe>
+      </article>
+
+      <article class="module">
+        <h2>Type 13 — Stained Glass <span>mythic aura</span></h2>
+        <p>Glass-mosaic aesthetic for cosmic events, memorial halls, or collectible lore cards.</p>
+        <iframe
+          src="../../a1%20systems%203/Character%20System/Sprite%20Sytem/hero-sprites/type-13-stained-glass/index.html"
+          loading="lazy"
+          title="Type 13 Stained Glass Gallery"
+        ></iframe>
+      </article>
+    </section>
+
+    <p class="note">
+      Tip: Because each module streams the original gallery HTML via iframe, any sprite update in the Character System
+      folder shows up here instantly—no rebuild required.
+    </p>
+  </body>
+</html>

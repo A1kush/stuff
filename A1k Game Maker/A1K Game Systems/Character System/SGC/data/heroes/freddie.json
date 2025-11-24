@@ -1,0 +1,44 @@
+{
+  "id": "freddie",
+  "name": "Freddie",
+  "rank": "A",
+  "role": "tank",
+  "summary": {
+    "hook": "Granddad mentor who still spars every dawn.",
+    "gameplay": "Shares defense with allies and unlocks counter-training quests.",
+    "why_it_matters": "Raises the skill ceiling without punishing casuals thanks to optional drills."
+  },
+  "stats": {"attack": 70, "defense": 95, "luck": 55, "support": 65, "speed": 50},
+  "skills": [
+    {
+      "name": "Legacy Stance",
+      "type": "buff",
+      "cooldown": 20,
+      "aura_cost": 22,
+      "effects": ["share_defense", "guard_break_resist"],
+      "rationale": "Gives fragile allies breathing room during spike encounters."
+    },
+    {
+      "name": "Old Guard Drill",
+      "type": "utility",
+      "cooldown": 35,
+      "aura_cost": 18,
+      "effects": ["unlock_parry_window", "quest_hook"],
+      "rationale": "Unlockable parry windows reward players who invest time in mastery quests."
+    }
+  ],
+  "acquisition": {
+    "method": "Mentor trial",
+    "costs": {"reputation_shards": 15},
+    "spawn_logic": "Fight him in training pit after assembling three family members."
+  },
+  "synergy": {
+    "combos": ["Clan Ascension", "Brawler Choir"],
+    "counters": ["Armor pierce curse"]
+  },
+  "visuals": {
+    "palette": ["#d7b890", "#4a2e1f", "#f0d7a7"],
+    "aura": "Hexagonal shock tiles on every stomp.",
+    "animation_notes": "Punch impacts should spawn DBZ-style line bursts for nostalgia."
+  }
+}

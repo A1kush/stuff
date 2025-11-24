@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 2: Vector Cel-Shaded - Hero Sprites Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .coming-soon {
+            background: rgba(255, 200, 0, 0.1);
+            border: 2px solid rgba(255, 200, 0, 0.3);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .coming-soon-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .coming-soon h2 {
+            font-size: 28px;
+            color: #ffcc00;
+            margin-bottom: 16px;
+        }
+
+        .coming-soon p {
+            color: #bbb;
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .type-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .type-info h3 {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .type-info p {
+            color: #bbb;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .traits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .trait {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            color: #a0b0ff;
+        }
+
+        .trait::before {
+            content: '✓ ';
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .card-features {
+            list-style: none;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .card-features li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .card-features li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>TYPE 2: VECTOR CEL-SHADED</h1>
+            <p class="subtitle">Castle Crashers / Hollow Knight / BattleBlock Theater Style</p>
+        </header>
+
+  <div class="gallery">
+    <a href="warrior-dual-swords.html" class="card">
+      <div class="card-title">⚔️ Warrior (Dual Swords)</div>
+      <div class="card-desc">
+        Vector-rendered warrior with smooth bezier curves, bold outlines, and gradient-based lighting. 
+        Black curly hair rendered with perfect scalability.
+      </div>
+      <ul class="card-features">
+        <li>Canvas path rendering</li>
+        <li>Vector black hair (locked)</li>
+        <li>Gradient sword glow</li>
+        <li>Bold 3px outlines</li>
+        <li>Infinitely scalable</li>
+      </ul>
+      <span class="btn">Launch Character →</span>
+    </a>
+
+    <a href="cat-angel-gunner.html" class="card">
+      <div class="card-title">😇 Cat Angel Gunner</div>
+      <div class="card-desc">
+        Anthropomorphic cat with vector-based floating halo, smooth wing rendering using bezier curves,
+        and cel-shaded fur textures. Perfectly scalable angelic aesthetic.
+      </div>
+      <ul class="card-features">
+        <li>Bezier wing curves</li>
+        <li>Vector black fur (locked)</li>
+        <li>Floating animated halo</li>
+        <li>Smooth tail curves</li>
+        <li>Green eye with glow</li>
+      </ul>
+      <span class="btn">Launch Character →</span>
+    </a>
+
+    <a href="cyborg-rifle-operative.html" class="card">
+      <div class="card-title">🤖 Cyborg Rifle Operative</div>
+      <div class="card-desc">
+        Vector cel-shaded cyborg with smooth gradient armor plating, glowing energy accents,
+        and perfectly scalable pigtails. Bold outlines separate all layers.
+      </div>
+      <ul class="card-features">
+        <li>Gradient armor plates</li>
+        <li>Vector black pigtails (locked)</li>
+        <li>Glowing energy sections</li>
+        <li>Bold layer separation</li>
+        <li>Rifle muzzle flash effect</li>
+      </ul>
+      <span class="btn">Launch Character →</span>
+    </a>
+  </div>
+
+        <div class="type-info">
+            <h3>📖 About This Style</h3>
+            <p>
+                Vector Cel-Shaded sprites use clean vector geometry built from SVG paths or procedural Canvas rendering.
+                Facial features are drawn using bezier or path curves, making them infinitely scalable with no pixel
+                loss.
+                Bold outlines separate clothing and weapon layers, while soft lighting gradients simulate hand-painted
+                animation without raster textures.
+            </p>
+            <p>
+                This style is ideal for high-resolution games and offline HTML builds that demand both readability
+                and stylized simplicity. Perfect for browser or mobile titles.
+            </p>
+
+            <div class="traits">
+                <div class="trait">SVG/Canvas path-based rendering</div>
+                <div class="trait">Bezier curves for facial features</div>
+                <div class="trait">Bold layer outlines</div>
+                <div class="trait">Soft gradient lighting</div>
+                <div class="trait">Infinite scalability</div>
+                <div class="trait">Skeletal transform animation</div>
+                <div class="trait">No pixel loss at any size</div>
+                <div class="trait">Stylized simplicity</div>
+            </div>
+        </div>
+
+    <div class="type-info" style="background: rgba(102,126,234,0.05); border-color: rgba(102,126,234,0.3);">
+        <h3>🎨 Technical Specifications</h3>
+        <p><strong>All 3 Characters:</strong> ✅ Warrior, Cat Angel Gunner, Cyborg Rifle Operative (COMPLETE)</p>
+        <p><strong>Rendering:</strong> Canvas path rendering + gradient fills</p>
+        <p><strong>Animation Frames:</strong> Idle (8 frames, 250ms each), Walk (8 frames, 125ms each), Attack (6 frames, 83ms each)</p>
+        <p><strong>Resolution:</strong> 256×256 native (infinitely scalable vector graphics)</p>
+        <p><strong>Color Palettes:</strong> Fire, Ice, Shadow, Light, Nature (5 per character)</p>
+        <p><strong>Export:</strong> PNG at any resolution, sprite sheets (horizontal strip), JSON animation data</p>
+        <p><strong>Frame Rate:</strong> 60fps real-time rendering</p>
+        <p><strong>Best For:</strong> Mobile games, browser titles, high-DPI displays, scalable UI</p>
+    </div>
+
+        <div class="back-link">
+            <a href="../START_HERE.html">← Back to Main Gallery</a>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Epic Fantasy Bag System - Production Edition</title>
+  <link rel="stylesheet" href="styles/epic-fantasy.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      background: linear-gradient(135deg, #1a0f0a 0%, #2d1b0e 50%, #3d2815 100%);
+      color: #f5deb3;
+      overflow: hidden;
+      height: 100vh;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(106, 13, 173, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(65, 105, 225, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    #bag-system-root { 
+      width: 100%; 
+      height: 100%; 
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="bag-system-root"></div>
+  
+  <script src="scripts/game-data.js"></script>
+  <script src="scripts/bag-system.js"></script>
+  <script>
+    // Initialize game state
+    window.gameState = {
+      gold: 5000,
+      gems: 100,
+      keys: 5,
+      tickets: 10,
+      level: 1,
+      xp: 0,
+      xpToNext: 100,
+      currentCharacterId: 'A1',
+      inventory: {
+        items: [],
+        gear: [],
+        pets: [],
+        vehicles: [],
+        robots: [],
+        spirits: [],
+        skills: []
+      },
+      equipped: {
+        A1: {
+          weapon: null, offhand: null, head: null, chest: null,
+          gloves: null, pants: null, boots: null,
+          ring1: null, ring2: null, necklace: null
+        },
+        UNIQUE: {
+          weapon: null, offhand: null, head: null, chest: null,
+          gloves: null, pants: null, boots: null,
+          ring1: null, ring2: null, necklace: null
+        },
+        MISSY: {
+          weapon: null, offhand: null, head: null, chest: null,
+          gloves: null, pants: null, boots: null,
+          ring1: null, ring2: null, necklace: null
+        }
+      },
+      equippedSkills: {
+        A1: { S1: null, S2: null, S3: null },
+        UNIQUE: { S1: null, S2: null, S3: null },
+        MISSY: { S1: null, S2: null, S3: null }
+      },
+      characters: {
+        A1: { name: 'A1', title: 'Boss Slayer', color: '#ff6b6b', level: 1, stats: { hp: 500, mp: 100, attack: 50, defense: 30 } },
+        UNIQUE: { name: 'UNIQUE', title: 'Tech Support', color: '#00e5ff', level: 1, stats: { hp: 400, mp: 200, attack: 40, defense: 25 } },
+        MISSY: { name: 'MISSY', title: 'Cat Angel', color: '#a78bfa', level: 1, stats: { hp: 350, mp: 250, attack: 35, defense: 20 } }
+      }
+    };
+
+    // Seed initial data
+    if (window.NeoGameData) {
+      // Add starter items
+      window.gameState.inventory.items = [
+        { id: 'item_hp_potion', name: 'Health Potion', icon: '🧪', category: 'consumable', quantity: 10, rarity: 'common', price: 50, effect: { hp: 100 } },
+        { id: 'item_mp_potion', name: 'Mana Potion', icon: '💙', category: 'consumable', quantity: 8, rarity: 'common', price: 60, effect: { mp: 80 } }
+      ];
+
+      // Add starter gear
+      const gearData = window.NeoGameData.gear;
+      if (gearData && gearData.length > 0) {
+        window.gameState.inventory.gear = gearData.slice(0, 8).map(g => ({
+          ...g,
+          upgradeLevel: 0,
+          locked: false
+        }));
+      }
+
+      // Add starter pets
+      const petsData = window.NeoGameData.pets;
+      if (petsData && petsData.length > 0) {
+        window.gameState.inventory.pets = petsData.slice(0, 2).map(p => ({
+          ...p,
+          level: 1,
+          xp: 0
+        }));
+      }
+
+      // Add starter vehicles
+      const vehiclesData = window.NeoGameData.vehicles;
+      if (vehiclesData && vehiclesData.length > 0) {
+        window.gameState.inventory.vehicles = vehiclesData.slice(0, 1).map(v => ({
+          ...v,
+          level: 1
+        }));
+      }
+
+      // Add starter robots/AI
+      const robotsData = window.NeoGameData.robots;
+      if (robotsData && robotsData.length > 0) {
+        window.gameState.inventory.robots = robotsData.slice(0, 1).map(r => ({
+          ...r,
+          level: 1
+        }));
+      }
+
+      // Add all skills
+      const skillsData = window.NeoGameData.skills;
+      if (skillsData && skillsData.length > 0) {
+        window.gameState.inventory.skills = skillsData.map(s => ({
+          ...s,
+          unlocked: s.unlockLevel <= 1
+        }));
+
+        // Auto-equip default skills
+        const a1Skills = skillsData.filter(s => s.characterId === 'A1' && s.slot <= 3);
+        const uniqueSkills = skillsData.filter(s => s.characterId === 'UNIQUE' && s.slot <= 3);
+        const missySkills = skillsData.filter(s => s.characterId === 'MISSY' && s.slot <= 3);
+
+        if (a1Skills.length >= 3) {
+          window.gameState.equippedSkills.A1 = {
+            S1: a1Skills[0], S2: a1Skills[1], S3: a1Skills[2]
+          };
+        }
+        if (uniqueSkills.length >= 3) {
+          window.gameState.equippedSkills.UNIQUE = {
+            S1: uniqueSkills[0], S2: uniqueSkills[1], S3: uniqueSkills[2]
+          };
+        }
+        if (missySkills.length >= 3) {
+          window.gameState.equippedSkills.MISSY = {
+            S1: missySkills[0], S2: missySkills[1], S3: missySkills[2]
+          };
+        }
+      }
+    }
+
+    // Initialize bag system
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.NeoBagSystem) {
+        const bagSystem = new window.NeoBagSystem({
+          containerId: 'bag-system-root'
+        });
+        bagSystem.init();
+        bagSystem.open();
+        window.neoBagSystem = bagSystem;
+        window.bagSystem = bagSystem; // Alias for compatibility
+        console.log('✅ Epic Fantasy Bag System initialized');
+      } else {
+        console.error('❌ NeoBagSystem not found');
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'b' && window.neoBagSystem) {
+        window.neoBagSystem.toggle();
+      } else if (e.key === 'Escape' && window.neoBagSystem) {
+        window.neoBagSystem.close();
+      }
+    });
+  </script>
+</body>
+</html>
+

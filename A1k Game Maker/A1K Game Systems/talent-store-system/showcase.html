@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talent-Store System - Interactive Showcase</title>
+  <link rel="stylesheet" href="src/style.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 12px;
+      margin-bottom: 3rem;
+      color: white;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .hero p {
+      font-size: 1.3rem;
+      opacity: 0.95;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .feature-card {
+      background: var(--bg-medium);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(91, 163, 255, 0.3);
+    }
+
+    .feature-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .stats-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .stat-card {
+      background: var(--bg-medium);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>🎮 Talent-Store System</h1>
+      <p>Complete RPG progression system with 31 talents, 50+ shop items, and alchemy crafting</p>
+      <p style="margin-top: 1rem; font-size: 1rem; opacity: 0.8;">Production-ready • Modular • Save/Load • No Dependencies</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌳</div>
+        <h3>Talent System</h3>
+        <p>31 unique talents across 6 specialized lanes with dependencies, ultimates, and real-time stat calculation</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏪</div>
+        <h3>Shop System</h3>
+        <p>50+ items with categories, currency exchange, bundle packs with scaling prices, and purchase history</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚗️</div>
+        <h3>Alchemy System</h3>
+        <p>3 crafting modes (Fusion, Special, Alchemy) with drag-and-drop interface and treasure boxes</p>
+      </div>
+    </div>
+
+    <div style="background: var(--bg-dark); border: 2px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 3rem;">
+      <h2 style="text-align: center; margin-bottom: 2rem;">📊 Live Statistics</h2>
+      <div class="stats-dashboard" id="statsDisplay"></div>
+    </div>
+
+    <div class="system-tabs">
+      <button class="tab-button active" data-tab="talents">🌳 Talents (31)</button>
+      <button class="tab-button" data-tab="shop">🏪 Shop (50+)</button>
+      <button class="tab-button" data-tab="alchemy">⚗️ Alchemy</button>
+      <button class="tab-button" data-tab="info">ℹ️ Info</button>
+    </div>
+
+    <div class="tab-content">
+      <div id="talentsTab" class="tab-pane active">
+        <div id="talentContainer"></div>
+      </div>
+
+      <div id="shopTab" class="tab-pane" style="display: none;">
+        <div id="shopContainer"></div>
+      </div>
+
+      <div id="alchemyTab" class="tab-pane" style="display: none;">
+        <div id="alchemyContainer"></div>
+      </div>
+
+      <div id="infoTab" class="tab-pane" style="display: none;">
+        <div style="background: var(--bg-dark); border: 1px solid var(--border); border-radius: 12px; padding: 2rem;">
+          <h2>System Information</h2>
+          
+          <h3 style="margin-top: 2rem;">Talent Lanes</h3>
+          <ul style="color: var(--text-secondary); line-height: 2;">
+            <li><strong style="color: var(--primary);">Attack:</strong> 6 talents (+5% to +50% ATK, Berserker, Apex Hunter)</li>
+            <li><strong style="color: var(--primary);">Defense:</strong> 6 talents (+80 to +200 HP, Guardian, Fortress)</li>
+            <li><strong style="color: var(--primary);">Recovery:</strong> 5 talents (Lifesteal, Vampiric, Phoenix)</li>
+            <li><strong style="color: var(--primary);">Cooldown:</strong> 5 talents (-8% to -50% CD, Cascade, Time Master)</li>
+            <li><strong style="color: var(--primary);">Luck:</strong> 6 talents (+8 to +48 Luck, Fortune, Golden Touch)</li>
+          </ul>
+
+          <h3 style="margin-top: 2rem;">Shop Categories</h3>
+          <ul style="color: var(--text-secondary); line-height: 2;">
+            <li><strong style="color: var(--success);">Consumables:</strong> HP Potions, Rage Pills, Revive Tokens, Wave/Stage Skips</li>
+            <li><strong style="color: var(--success);">Gear:</strong> Weapons, Accessories, Equipment Kits</li>
+            <li><strong style="color: var(--success);">Armor:</strong> Defensive equipment with stat bonuses</li>
+            <li><strong style="color: var(--success);">Scrolls:</strong> Skill learning scrolls</li>
+            <li><strong style="color: var(--success);">S-Rank:</strong> Legendary premium items</li>
+          </ul>
+
+          <h3 style="margin-top: 2rem;">Alchemy Recipes</h3>
+          <ul style="color: var(--text-secondary); line-height: 2;">
+            <li><strong style="color: var(--warning);">Fusion:</strong> 3 same-type/rank items → tier up (C→B, B→A, A→S)</li>
+            <li><strong style="color: var(--warning);">Special:</strong> C gear + B gear + C pet → premium reward</li>
+            <li><strong style="color: var(--warning);">Alchemy:</strong> Any 3 items → treasure box (rank based on highest input)</li>
+          </ul>
+
+          <h3 style="margin-top: 2rem;">Features</h3>
+          <ul style="color: var(--text-secondary); line-height: 2;">
+            <li>✅ Save/Load with LocalStorage persistence</li>
+            <li>✅ Export/Import to file</li>
+            <li>✅ Auto-save every 30 seconds</li>
+            <li>✅ Currency exchange system</li>
+            <li>✅ Bundle packs with price scaling</li>
+            <li>✅ Drag-and-drop alchemy interface</li>
+            <li>✅ Real-time stat calculation</li>
+            <li>✅ Validation & error handling</li>
+            <li>✅ Responsive design</li>
+            <li>✅ No external dependencies (except Vite for dev)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: var(--bg-medium); border-radius: 8px;">
+      <h3>💾 Save Management</h3>
+      <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap;">
+        <button id="btnSave" class="btn-exchange">💾 Save Game</button>
+        <button id="btnLoad" class="btn-exchange">📂 Load Game</button>
+        <button id="btnExport" class="btn-exchange">📤 Export</button>
+        <button id="btnImport" class="btn-exchange">📥 Import</button>
+        <button id="btnCreateBackup" class="btn-exchange">🔒 Create Backup</button>
+        <button id="btnReset" class="btn-reset">🔄 Reset All</button>
+      </div>
+      <div id="saveInfo" style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;"></div>
+    </div>
+
+    <footer style="text-align: center; padding: 2rem; margin-top: 3rem; color: var(--text-secondary);">
+      <p>🎮 Talent-Store System v1.0.0</p>
+      <p>Production-ready game systems for any web-based game</p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { createGameState } from './src/core/GameState.js';
+    import { createSaveSystem } from './src/core/SaveSystem.js';
+    import { createTalentController } from './src/talents/TalentController.js';
+    import { createShopController } from './src/shop/ShopController.js';
+    import { createAlchemyController } from './src/alchemy/AlchemyController.js';
+    import { createTalentUI } from './src/ui/TalentUI.js';
+    import { createShopUI } from './src/ui/ShopUI.js';
+    import { createAlchemyUI } from './src/ui/AlchemyUI.js';
+
+    const gameState = createGameState();
+    const saveSystem = createSaveSystem(gameState);
+
+    const talentController = createTalentController(gameState);
+    const shopController = createShopController(gameState);
+    const alchemyController = createAlchemyController(gameState);
+
+    const talentUI = createTalentUI(talentController);
+    const shopUI = createShopUI(shopController, gameState);
+    const alchemyUI = createAlchemyUI(alchemyController, gameState);
+
+    talentUI.render('talentContainer');
+    shopUI.render('shopContainer');
+    alchemyUI.render('alchemyContainer');
+
+    const loadResult = saveSystem.load();
+    if (loadResult.success) {
+      talentUI.update();
+      shopUI.update();
+      alchemyUI.update();
+      showNotification('Game loaded!', 'success');
+    }
+
+    saveSystem.enableAutoSave(30000);
+    updateStats();
+    updateSaveInfo();
+
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabName = button.dataset.tab;
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        tabPanes.forEach(pane => pane.style.display = 'none');
+        document.getElementById(`${tabName}Tab`).style.display = 'block';
+      });
+    });
+
+    // Update stats display
+    function updateStats() {
+      const stats = gameState.getStats();
+      const talentSummary = talentController.getPurchaseSummary();
+      const shopStats = shopController.getShopStats();
+      const alchemyStats = alchemyController.getStatistics();
+
+      const statsDisplay = document.getElementById('statsDisplay');
+      statsDisplay.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${stats.currencies.gold}</div>
+          <div class="stat-label">💰 Gold</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.currencies.essence}</div>
+          <div class="stat-label">✨ Essence</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.currencies.tokens}</div>
+          <div class="stat-label">🎫 Tokens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${talentSummary.purchased}</div>
+          <div class="stat-label">🌳 Talents Owned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.totalPurchases}</div>
+          <div class="stat-label">🛒 Items Bought</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${alchemyStats.totalCrafts}</div>
+          <div class="stat-label">⚗️ Items Crafted</div>
+        </div>
+      `;
+    }
+
+    function updateSaveInfo() {
+      const info = saveSystem.getSaveInfo();
+      const saveInfoEl = document.getElementById('saveInfo');
+      if (info) {
+        saveInfoEl.textContent = `Last saved: ${info.date} (${info.sizeKB} KB)`;
+      } else {
+        saveInfoEl.textContent = 'No save data found';
+      }
+    }
+
+    // Save/Load buttons
+    document.getElementById('btnSave').addEventListener('click', () => {
+      saveSystem.save();
+      updateSaveInfo();
+      showNotification('Game saved!', 'success');
+    });
+
+    document.getElementById('btnLoad').addEventListener('click', () => {
+      const result = saveSystem.load();
+      if (result.success) {
+        talentUI.update();
+        shopUI.update();
+        alchemyUI.update();
+        updateStats();
+        updateSaveInfo();
+        showNotification('Game loaded!', 'success');
+      } else {
+        showNotification('Load failed!', 'error');
+      }
+    });
+
+    document.getElementById('btnExport').addEventListener('click', () => {
+      saveSystem.exportToFile();
+      showNotification('Exported to file!', 'success');
+    });
+
+    document.getElementById('btnImport').addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          try {
+            await saveSystem.importFromFile(file);
+            talentUI.update();
+            shopUI.update();
+            alchemyUI.update();
+            updateStats();
+            updateSaveInfo();
+            showNotification('Imported!', 'success');
+          } catch (error) {
+            showNotification('Import failed!', 'error');
+          }
+        }
+      };
+      input.click();
+    });
+
+    document.getElementById('btnCreateBackup').addEventListener('click', () => {
+      const result = saveSystem.createBackup();
+      if (result.success) {
+        showNotification('Backup created!', 'success');
+      } else {
+        showNotification('Backup failed!', 'error');
+      }
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      if (confirm('Reset all progress? This cannot be undone!')) {
+        gameState.reset();
+        talentUI.update();
+        shopUI.update();
+        alchemyUI.update();
+        updateStats();
+        saveSystem.save();
+        updateSaveInfo();
+        showNotification('All progress reset!', 'warning');
+      }
+    });
+
+    // Subscribe to state changes
+    gameState.subscribe(() => {
+      updateStats();
+    });
+
+    // Auto-update stats every 5 seconds
+    setInterval(updateStats, 5000);
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.classList.add('show'), 10);
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    window.gameState = gameState;
+    window.saveSystem = saveSystem;
+    window.talentController = talentController;
+    window.shopController = shopController;
+    window.alchemyController = alchemyController;
+
+    console.log('🎮 Talent-Store System Showcase loaded!');
+  </script>
+</body>
+</html>
+

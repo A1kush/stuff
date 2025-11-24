@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Dual Pistols - Chibi</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {min-height: 100vh; background: linear-gradient(135deg, #FFE5F0 0%, #E5F0FF 100%); display: flex; align-items: center; justify-content: center; padding: 20px;}
+        canvas {border: 3px solid #FFB6D9; background: #FFF; border-radius: 20px;}
+        #controls {background: rgba(255,255,255,0.9); border: 3px solid #FFB6D9; border-radius: 20px; padding: 25px; width: 350px;}
+        h1 {font-size: 18px; color: #FF69B4; border-bottom: 3px solid #FFB6D9; padding-bottom: 10px;}
+        select, button {width: 100%; padding: 10px; background: #FFF0F5; border: 2px solid #FFB6D9; border-radius: 10px; cursor: pointer;}
+        button {background: linear-gradient(135deg, #FFB6D9 0%, #FF69B4 100%); color: #FFF;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="256" height="256"></canvas>
+    <div id="controls">
+        <h1>🔫 UNIQUE CHIBI</h1>
+        <select id="a"><option>Idle</option><option>Walk</option><option>Attack</option></select>
+        <select id="p"><option>Fire</option><option>Ice</option></select>
+        <button id="e">Export PNG</button>
+    </div>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        let fr = 0;
+        const ps = {Fire: {s: '#FFD4A3', c: '#FF4444', w: '#FF0000'}, Ice: {s: '#FFD4A3', c: '#4444FF', w: '#00FFFF'}};
+        let p = ps.Fire;
+        function dr() {x.clearRect(0, 0, 256, 256); x.fillStyle = '#FFF'; x.fillRect(0, 0, 256, 256); x.fillStyle = p.c; x.beginPath(); x.arc(113, 168, 18, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(143, 168, 18, 0, Math.PI * 2); x.fill(); x.fillStyle = p.s; x.beginPath(); x.arc(128, 98, 50, 0, Math.PI * 2); x.fill(); x.fillStyle = '#000'; x.fillRect(78, 73, 100, 15); x.fillRect(75, 90, 5, 18); x.fillRect(175, 90, 5, 18); x.fillStyle = '#FFF'; x.beginPath(); x.arc(113, 98, 18, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(143, 98, 18, 0, Math.PI * 2); x.fill(); x.fillStyle = '#FFF'; x.beginPath(); x.arc(113, 98, 14, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(143, 98, 14, 0, Math.PI * 2); x.fill(); x.fillStyle = p.w; x.fillRect(73, 142, 10, 6); x.fillRect(173, 142, 10, 6);}
+        function lp() {fr++; if (fr > 100) fr = 0; dr(); requestAnimationFrame(lp);}
+        document.getElementById('p').addEventListener('change', (e) => p = ps[e.target.value]);
+        document.getElementById('e').addEventListener('click', () => {const l = document.createElement('a'); l.download = 'unique-chibi.png'; l.href = c.toDataURL(); l.click();});
+        c.style.width = '512px'; c.style.height = '512px'; lp();
+    </script>
+</body>
+</html>

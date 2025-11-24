@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Pixel System - Standalone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+/* Full CSS bundled inline */
+:root {
+    --pix-bg: #050505;
+    --pix-panel: #0a0a0a;
+    --pix-border: #333;
+    --pix-neon-green: #00ff41;
+    --pix-neon-pink: #ff00ff;
+    --pix-neon-cyan: #00f3ff;
+    --pix-text: #e0e0e0;
+    --pix-dim: #555;
+    --font-main: 'VT323', monospace;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #000;
+    font-family: var(--font-main);
+    color: var(--pix-text);
+}
+
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+#game-hud {
+    position: relative;
+    z-index: 10;
+    padding: 20px;
+    height: 100vh;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hud-top-left, .hud-bottom-right {
+    pointer-events: auto;
+}
+
+.pixel-box {
+    background: var(--pix-panel);
+    border: 2px solid var(--pix-neon-green);
+    box-shadow: 0 0 5px var(--pix-neon-green), inset 0 0 10px rgba(0, 255, 65, 0.1);
+    padding: 10px;
+    image-rendering: pixelated;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.pixel-btn {
+    background: black;
+    color: var(--pix-neon-cyan);
+    border: 2px solid var(--pix-neon-cyan);
+    font-family: var(--font-main);
+    font-size: 24px;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.1s;
+    box-shadow: 0 0 5px var(--pix-neon-cyan);
+}
+
+.pixel-btn:hover {
+    background: var(--pix-neon-cyan);
+    color: black;
+    box-shadow: 0 0 15px var(--pix-neon-cyan);
+}
+
+.pixel-btn:active {
+    transform: translateY(2px);
+}
+
+#pixel-system-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+    display: none;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(2px);
+    justify-content: center;
+    align-items: center;
+}
+
+#pixel-system-root.open {
+    display: flex;
+}
+
+.sys-window {
+    width: 90%;
+    max-width: 1000px;
+    height: 80vh;
+    background: var(--pix-bg);
+    border: 4px solid var(--pix-neon-pink);
+    box-shadow: 0 0 20px var(--pix-neon-pink), inset 0 0 20px rgba(255, 0, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.sys-window::after {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.sys-header {
+    height: 60px;
+    border-bottom: 2px solid var(--pix-neon-pink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: rgba(255, 0, 255, 0.1);
+}
+
+.sys-title {
+    font-size: 32px;
+    color: var(--pix-neon-pink);
+    text-shadow: 2px 2px 0px #000;
+}
+
+.sys-close {
+    font-size: 32px;
+    color: var(--pix-neon-pink);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: var(--font-main);
+}
+
+.sys-close:hover {
+    text-shadow: 0 0 10px var(--pix-neon-pink);
+}
+
+.sys-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.sys-sidebar {
+    width: 220px;
+    border-right: 2px solid var(--pix-neon-pink);
+    overflow-y: auto;
+    background: rgba(0,0,0,0.5);
+    scrollbar-width: thin;
+    scrollbar-color: var(--pix-neon-pink) #000;
+}
+
+.sys-tab {
+    padding: 12px 15px;
+    cursor: pointer;
+    color: var(--pix-dim);
+    font-size: 22px;
+    border-bottom: 1px solid #222;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sys-tab:hover {
+    color: var(--pix-neon-green);
+    padding-left: 20px;
+}
+
+.sys-tab.active {
+    color: #000;
+    background: var(--pix-neon-green);
+    box-shadow: 0 0 10px var(--pix-neon-green);
+}
+
+.sys-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    color: white;
+}
+
+.pixel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 10px;
+}
+
+.pixel-slot {
+    width: 60px;
+    height: 60px;
+    border: 2px solid var(--pix-dim);
+    background: rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    position: relative;
+}
+
+.pixel-slot:hover {
+    border-color: var(--pix-neon-cyan);
+    box-shadow: 0 0 5px var(--pix-neon-cyan);
+}
+
+.pixel-slot .qty {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 14px;
+    color: var(--pix-neon-cyan);
+}
+
+.team-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.char-card {
+    width: 200px;
+    border: 2px solid var(--pix-neon-cyan);
+    padding: 10px;
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.char-card.leader {
+    border-color: var(--pix-neon-green);
+    box-shadow: 0 0 10px var(--pix-neon-green);
+    background: rgba(0, 255, 65, 0.05);
+}
+
+.char-portrait {
+    width: 100%;
+    height: 100px;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin-bottom: 10px;
+    border: 1px solid #444;
+}
+
+.char-name {
+    font-size: 24px;
+    color: white;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.char-stats {
+    font-size: 18px;
+    color: #aaa;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.btn-make-leader {
+    width: 100%;
+    margin-top: 10px;
+    background: none;
+    border: 1px solid var(--pix-dim);
+    color: var(--pix-dim);
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 16px;
+    padding: 5px;
+}
+
+.btn-make-leader:hover {
+    border-color: var(--pix-neon-green);
+    color: var(--pix-neon-green);
+}
+
+.skill-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.skill-row {
+    border: 1px solid #333;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.3);
+}
+
+.skill-info h4 {
+    margin: 0;
+    color: var(--pix-neon-pink);
+    font-size: 20px;
+}
+
+.skill-desc {
+    font-size: 16px;
+    color: #888;
+}
+
+.skill-level {
+    font-size: 24px;
+    color: var(--pix-neon-green);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--pix-dim);
+    border: 1px solid #000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--pix-neon-pink);
+}
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="game-hud">
+        <div class="hud-top-left">
+            <div class="pixel-box">
+                <div>❤️ HP: 100/100</div>
+                <div>🔋 MP: 50/50</div>
+            </div>
+        </div>
+        
+        <div class="hud-bottom-right">
+            <button id="btn-menu" class="pixel-btn">SYSTEM MENU (TAB)</button>
+        </div>
+    </div>
+
+    <div id="pixel-system-root"></div>
+
+    <script>
+// All JavaScript bundled inline - no modules needed
+
+// Party Data
+const PartyData = [
+    { id: 'a1', name: 'A1', role: 'Protagonist', color: '#3498db', stats: { hp: 120, mp: 40, str: 15, def: 10 }, desc: "The Blue Swordsman.", portraitChar: "🧔" },
+    { id: 'missy', name: 'Missy', role: 'Mage', color: '#9b59b6', stats: { hp: 80, mp: 150, str: 5, def: 8 }, desc: "Purple Magic user.", portraitChar: "👩‍🎤" },
+    { id: 'unique', name: 'Unique', role: 'Rogue', color: '#e67e22', stats: { hp: 100, mp: 60, str: 12, def: 9 }, desc: "Orange Speedster.", portraitChar: "🥷" }
+];
+
+const SkillData = {
+    a1: [
+        { id: 's1', name: 'Slash', level: 1, max: 5, desc: "Basic sword attack." },
+        { id: 's2', name: 'Dash', level: 0, max: 3, desc: "Quick movement." },
+        { id: 's3', name: 'Blue Aura', level: 0, max: 1, desc: "Ultimate power up." }
+    ],
+    missy: [
+        { id: 'm1', name: 'Fireball', level: 1, max: 5, desc: "Shoots fire." },
+        { id: 'm2', name: 'Heal', level: 0, max: 5, desc: "Restores HP." },
+        { id: 'm3', name: 'Void', level: 0, max: 1, desc: "Creates a black hole." }
+    ],
+    unique: [
+        { id: 'u1', name: 'Stab', level: 1, max: 5, desc: "Critical hit chance." },
+        { id: 'u2', name: 'Stealth', level: 0, max: 3, desc: "Become invisible." }
+    ]
+};
+
+// Pixel System Core
+class PixelSystem {
+    constructor() {
+        this.isOpen = false;
+        this.activeTabId = 'items';
+        this.tabs = [];
+        this.renderers = {};
+        this.toggle = this.toggle.bind(this);
+        this.open = this.open.bind(this);
+        this.close = this.close.bind(this);
+        this.switchTab = this.switchTab.bind(this);
+    }
+
+    init(config) {
+        this.container = document.getElementById('pixel-system-root');
+        if (!this.container.innerHTML.trim()) {
+            this.createDOMStructure();
+        }
+
+        this.tabs = config.tabs || [];
+        this.defaultTab = config.defaultTab || 'items';
+        this.activeTabId = this.defaultTab;
+
+        this.renderSidebar();
+        this.setupEvents();
+        this.renderActiveTab();
+    }
+
+    createDOMStructure() {
+        this.container.innerHTML = `
+            <div class="sys-window">
+                <header class="sys-header">
+                    <div class="sys-title" id="sys-title-text">SYSTEM</div>
+                    <button class="sys-close" id="sys-btn-close">X</button>
+                </header>
+                <div class="sys-body">
+                    <nav class="sys-sidebar" id="sys-sidebar-list"></nav>
+                    <main class="sys-content" id="sys-view-container"></main>
+                </div>
+            </div>
+        `;
+    }
+
+    renderSidebar() {
+        const sidebar = document.getElementById('sys-sidebar-list');
+        sidebar.innerHTML = '';
+
+        this.tabs.forEach(tab => {
+            const btn = document.createElement('div');
+            btn.className = `sys-tab ${tab.id === this.activeTabId ? 'active' : ''}`;
+            btn.dataset.tabId = tab.id;
+            btn.innerHTML = `<span>${tab.icon}</span><span>${tab.label}</span>`;
+            btn.onclick = () => this.switchTab(tab.id);
+            sidebar.appendChild(btn);
+        });
+    }
+
+    setupEvents() {
+        document.getElementById('sys-btn-close').onclick = this.close;
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                this.toggle();
+            }
+        });
+    }
+
+    registerRenderer(type, rendererInstance) {
+        this.renderers[type] = rendererInstance;
+    }
+
+    switchTab(tabId) {
+        if (this.activeTabId === tabId) return;
+
+        this.activeTabId = tabId;
+        
+        document.querySelectorAll('.sys-tab').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tabId === tabId);
+        });
+
+        this.renderActiveTab();
+    }
+
+    renderActiveTab() {
+        const tabConfig = this.tabs.find(t => t.id === this.activeTabId);
+        if (!tabConfig) return;
+
+        document.getElementById('sys-title-text').innerText = `SYSTEM // ${tabConfig.label.toUpperCase()}`;
+
+        const container = document.getElementById('sys-view-container');
+        container.innerHTML = '';
+
+        let renderer = this.renderers[tabConfig.id];
+        if (!renderer) {
+            renderer = this.renderers[tabConfig.type];
+        }
+
+        if (renderer) {
+            renderer.render(container, tabConfig);
+        } else {
+            container.innerHTML = `<div style="padding:20px; color:#555;">NO MODULE FOUND FOR [${tabConfig.id}]</div>`;
+        }
+    }
+
+    toggle() {
+        this.isOpen ? this.close() : this.open();
+    }
+
+    open() {
+        this.isOpen = true;
+        this.container.classList.add('open');
+        this.renderActiveTab();
+    }
+
+    close() {
+        this.isOpen = false;
+        this.container.classList.remove('open');
+    }
+}
+
+// Renderers
+class TeamRenderer {
+    constructor() {
+        this.activeLeader = 'a1';
+    }
+
+    render(container, tabConfig) {
+        const wrap = document.createElement('div');
+        wrap.className = 'team-container';
+
+        PartyData.forEach(char => {
+            const card = document.createElement('div');
+            card.className = `char-card ${this.activeLeader === char.id ? 'leader' : ''}`;
+            
+            card.innerHTML = `
+                <div class="char-portrait" style="color:${char.color}">${char.portraitChar}</div>
+                <div class="char-name">${char.name}</div>
+                <div class="char-stats">
+                    <div class="stat-row"><span>HP</span> <span>${char.stats.hp}</span></div>
+                    <div class="stat-row"><span>MP</span> <span>${char.stats.mp}</span></div>
+                    <div class="stat-row"><span>STR</span> <span>${char.stats.str}</span></div>
+                </div>
+                ${this.activeLeader !== char.id ? `<button class="btn-make-leader" data-id="${char.id}">MAKE LEADER</button>` : `<div style="text-align:center; color:#0f0; margin-top:10px;">[ LEADER ]</div>`}
+            `;
+
+            const btn = card.querySelector('.btn-make-leader');
+            if (btn) {
+                btn.onclick = () => {
+                    this.activeLeader = char.id;
+                    this.render(container, tabConfig);
+                };
+            }
+
+            wrap.appendChild(card);
+        });
+
+        container.appendChild(wrap);
+    }
+}
+
+class SkillsRenderer {
+    render(container, tabConfig) {
+        const list = document.createElement('div');
+        list.className = 'skill-list';
+
+        Object.keys(SkillData).forEach(charKey => {
+            const charName = PartyData.find(p => p.id === charKey).name;
+            
+            const header = document.createElement('h3');
+            header.style.color = PartyData.find(p => p.id === charKey).color;
+            header.style.borderBottom = '1px solid #333';
+            header.style.marginTop = '20px';
+            header.innerText = `${charName} SKILLS`;
+            list.appendChild(header);
+
+            SkillData[charKey].forEach(skill => {
+                const row = document.createElement('div');
+                row.className = 'skill-row';
+                row.innerHTML = `
+                    <div class="skill-info">
+                        <h4>${skill.name}</h4>
+                        <div class="skill-desc">${skill.desc}</div>
+                    </div>
+                    <div class="skill-level">${skill.level}/${skill.max}</div>
+                `;
+                list.appendChild(row);
+            });
+        });
+
+        container.appendChild(list);
+    }
+}
+
+class PixelGridRenderer {
+    render(container, tabConfig) {
+        const grid = document.createElement('div');
+        grid.className = 'pixel-grid';
+        
+        for(let i=0; i<30; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'pixel-slot';
+            if (Math.random() > 0.7) {
+                slot.innerHTML = `⚔️ <span class="qty">${Math.ceil(Math.random()*5)}</span>`;
+            }
+            grid.appendChild(slot);
+        }
+        container.appendChild(grid);
+    }
+}
+
+class GenericPixelRenderer {
+    render(container, tabConfig) {
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px;">
+                <h1 style="font-size: 60px; color: #333;">${tabConfig.icon}</h1>
+                <h2 style="color: var(--pix-neon-pink);">${tabConfig.label}</h2>
+                <p>NO DATA SIGNAL...</p>
+            </div>
+        `;
+    }
+}
+
+// Tabs Config
+const TABS_CONFIG = [
+    { id: "items", label: "Items", icon: "📦", type: "grid" },
+    { id: "gear", label: "Gear", icon: "⚔️", type: "grid" },
+    { id: "team", label: "Team", icon: "👥", type: "team" },
+    { id: "pets", label: "Pets", icon: "🐾", type: "grid" },
+    { id: "skins", label: "Skins", icon: "👤", type: "grid" },
+    { id: "talents", label: "Talents", icon: "⭐", type: "list" },
+    { id: "vehicles", label: "Vehicles", icon: "🚗", type: "list" },
+    { id: "ai", label: "AI", icon: "🤖", type: "info" },
+    { id: "alchemy", label: "Alchemy", icon: "⚗️", type: "list" },
+    { id: "skills", label: "Skills", icon: "🔰", type: "skills" },
+    { id: "spirit", label: "Spirit", icon: "✨", type: "info" },
+    { id: "supernatural", label: "Supernatural", icon: "🔮", type: "info" },
+    { id: "quests", label: "Quests", icon: "📜", type: "list" },
+    { id: "drops", label: "Drop Systems", icon: "🎁", type: "info" },
+    { id: "bestiary", label: "Bestiary", icon: "📖", type: "list" },
+    { id: "missions", label: "Mission Board", icon: "🗺️", type: "list" },
+    { id: "map", label: "Map", icon: "🗺️", type: "info" },
+    { id: "shop", label: "Shop", icon: "🏪", type: "grid" },
+    { id: "settings", label: "Settings", icon: "⚙️", type: "info" },
+    { id: "controls", label: "Controls", icon: "🕹️", type: "info" }
+];
+
+// Initialize
+const sys = new PixelSystem();
+
+sys.registerRenderer('team', new TeamRenderer());
+sys.registerRenderer('skills', new SkillsRenderer());
+sys.registerRenderer('grid', new PixelGridRenderer());
+sys.registerRenderer('list', new GenericPixelRenderer());
+sys.registerRenderer('info', new GenericPixelRenderer());
+
+sys.init({
+    tabs: TABS_CONFIG,
+    defaultTab: 'team'
+});
+
+window.PixelSystem = sys;
+
+document.getElementById('btn-menu').onclick = () => sys.toggle();
+
+// Cyberpunk Grid Animation
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let w, h;
+
+function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+let offset = 0;
+function animate() {
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = '#00ff41';
+    ctx.lineWidth = 1;
+    
+    const horizon = h * 0.4;
+    const speed = 0.5;
+    
+    offset = (offset + speed) % 40;
+
+    ctx.beginPath();
+    for (let x = -w; x < w * 2; x += 40) {
+        ctx.moveTo(x, h);
+        ctx.lineTo((x - w/2) * 0.1 + w/2, horizon);
+    }
+    for (let y = h; y > horizon; y -= 40) {
+        let drawY = y - (40 - offset);
+        if(drawY > horizon) {
+            ctx.moveTo(0, drawY);
+            ctx.lineTo(w, drawY);
+        }
+    }
+    ctx.stroke();
+    
+    ctx.fillStyle = 'rgba(0, 255, 65, 0.05)';
+    ctx.fillRect(0, horizon, w, h-horizon);
+
+    requestAnimationFrame(animate);
+}
+animate();
+    </script>
+</body>
+</html>

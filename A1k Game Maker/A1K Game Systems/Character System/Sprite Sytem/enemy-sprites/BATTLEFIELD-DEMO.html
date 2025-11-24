@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1K Battlefield Demo - Enemy Sprites in Action</title>
+    <script src="shared/enemy-sprite-data.js"></script>
+    <script src="shared/enemy-sprite-renderer.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+        #battlefield {
+            display: block;
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2a 50%, #0a0a0a 100%);
+        }
+        .ui-overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 24px;
+            color: #00ffff;
+            margin-bottom: 15px;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #00ffff, #00aaff);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ffff;
+        }
+        .stats {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+        .stat-line {
+            color: #888;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .stat-value {
+            color: #00ffff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="battlefield" width="1280" height="720"></canvas>
+    
+    <div class="ui-overlay">
+        <h1>⚔️ BATTLEFIELD DEMO</h1>
+        
+        <div class="control-group">
+            <button onclick="spawnRandomEnemy()">Spawn Random Enemy</button>
+            <button onclick="spawnWave()">Spawn Wave (5)</button>
+            <button onclick="clearBattlefield()">Clear All</button>
+        </div>
+        
+        <div class="control-group">
+            <button onclick="spawnBoss()">Spawn Boss</button>
+            <button onclick="testAllEnemies()">Test All Types</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-line">Enemies: <span class="stat-value" id="enemyCount">0</span></div>
+            <div class="stat-line">FPS: <span class="stat-value" id="fps">60</span></div>
+            <div class="stat-line">Renderer: <span class="stat-value">A1K Sprite System</span></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('battlefield');
+        const ctx = canvas.getContext('2d');
+        const enemies = [];
+        const renderer = new EnemySpriteRenderer();
+        
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fpsTime = 0;
+
+        // Spawn random enemy
+        function spawnRandomEnemy() {
+            const allEnemies = window.EnemySpriteAPI.getAllEnemies();
+            const enemyData = allEnemies[Math.floor(Math.random() * allEnemies.length)];
+            
+            const enemy = {
+                ...enemyData,
+                x: Math.random() * (canvas.width - 100) + 50,
+                y: Math.random() * (canvas.height - 100) + 50,
+                vx: (Math.random() - 0.5) * 100,
+                vy: (Math.random() - 0.5) * 50,
+                currentHp: enemyData.hp,
+                tier: enemyData.tier
+            };
+            
+            enemies.push(enemy);
+            updateStats();
+        }
+
+        // Spawn wave of 5 enemies
+        function spawnWave() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => spawnRandomEnemy(), i * 200);
+            }
+        }
+
+        // Spawn boss
+        function spawnBoss() {
+            const bosses = window.EnemySpriteAPI.getEnemiesByTier('SS');
+            if (bosses.length > 0) {
+                const bossData = bosses[Math.floor(Math.random() * bosses.length)];
+                const boss = {
+                    ...bossData,
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 50,
+                    vy: (Math.random() - 0.5) * 25,
+                    currentHp: bossData.hp
+                };
+                enemies.push(boss);
+                updateStats();
+            }
+        }
+
+        // Test all enemy types
+        function testAllEnemies() {
+            clearBattlefield();
+            const allEnemies = window.EnemySpriteAPI.getAllEnemies();
+            const spacing = 150;
+            const cols = Math.ceil(Math.sqrt(allEnemies.length));
+            
+            allEnemies.forEach((enemyData, index) => {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                const enemy = {
+                    ...enemyData,
+                    x: col * spacing + 100,
+                    y: row * spacing + 100,
+                    vx: 0,
+                    vy: 0,
+                    currentHp: enemyData.hp
+                };
+                enemies.push(enemy);
+            });
+            
+            updateStats();
+        }
+
+        // Clear all enemies
+        function clearBattlefield() {
+            enemies.length = 0;
+            updateStats();
+        }
+
+        // Update stats display
+        function updateStats() {
+            document.getElementById('enemyCount').textContent = enemies.length;
+        }
+
+        // Animation loop
+        function animate(currentTime) {
+            const dt = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+
+            // FPS calculation
+            frameCount++;
+            fpsTime += dt;
+            if (fpsTime >= 1) {
+                document.getElementById('fps').textContent = frameCount;
+                frameCount = 0;
+                fpsTime = 0;
+            }
+
+            // Clear canvas
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = 'rgba(0,255,255,0.1)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Update and draw enemies
+            enemies.forEach((enemy, index) => {
+                // Update position
+                enemy.x += enemy.vx * dt;
+                enemy.y += enemy.vy * dt;
+
+                // Bounce off walls
+                if (enemy.x < 50 || enemy.x > canvas.width - 50) {
+                    enemy.vx *= -1;
+                    enemy.x = Math.max(50, Math.min(canvas.width - 50, enemy.x));
+                }
+                if (enemy.y < 50 || enemy.y > canvas.height - 50) {
+                    enemy.vy *= -1;
+                    enemy.y = Math.max(50, Math.min(canvas.height - 50, enemy.y));
+                }
+
+                // Render enemy
+                try {
+                    const scale = enemy.tier === 'SS' ? 1.5 : enemy.tier === 'S' ? 1.2 : 1.0;
+                    renderer.renderEnemy(ctx, enemy, enemy.x, enemy.y, scale);
+                } catch (e) {
+                    // Fallback rendering
+                    ctx.fillStyle = '#ff0088';
+                    ctx.fillRect(enemy.x - 15, enemy.y - 15, 30, 30);
+                }
+
+                // Draw HP bar
+                const hpRatio = enemy.currentHp / enemy.hp;
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(enemy.x - 30, enemy.y - 40, 60, 6);
+                ctx.fillStyle = hpRatio > 0.5 ? '#00ff00' : hpRatio > 0.25 ? '#ffaa00' : '#ff0000';
+                ctx.fillRect(enemy.x - 30, enemy.y - 40, 60 * hpRatio, 6);
+
+                // Draw name
+                ctx.fillStyle = '#00ffff';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(enemy.name, enemy.x, enemy.y - 45);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Start animation
+        animate(performance.now());
+
+        // Spawn initial wave
+        setTimeout(() => spawnWave(), 500);
+    </script>
+</body>
+</html>
+

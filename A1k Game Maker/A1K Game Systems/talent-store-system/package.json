@@ -1,0 +1,27 @@
+{
+  "name": "talent-store-system",
+  "version": "1.0.0",
+  "description": "Production-ready talent tree, shop, and alchemy crafting system extracted from A1K Runner",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "dev:showcase": "vite showcase.html",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "talent-tree",
+    "shop-system",
+    "alchemy",
+    "crafting",
+    "game-system",
+    "rpg",
+    "progression"
+  ],
+  "author": "A1K",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
+

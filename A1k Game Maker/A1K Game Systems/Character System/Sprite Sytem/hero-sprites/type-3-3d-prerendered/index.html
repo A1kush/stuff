@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 3: 3D Pre-rendered - Hero Sprites Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .coming-soon {
+            background: rgba(255, 200, 0, 0.1);
+            border: 2px solid rgba(255, 200, 0, 0.3);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .coming-soon-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .coming-soon h2 {
+            font-size: 28px;
+            color: #ffcc00;
+            margin-bottom: 16px;
+        }
+
+        .coming-soon p {
+            color: #bbb;
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .type-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .type-info h3 {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .type-info p {
+            color: #bbb;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .traits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .trait {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            color: #a0b0ff;
+        }
+
+        .trait::before {
+            content: '✓ ';
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .template-section {
+            margin-top: 60px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .template-section h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .template-section p {
+            color: #b5b5c9;
+            margin-bottom: 24px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .template-card {
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            background: rgba(19, 21, 32, 0.65);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .template-card header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .template-card h3 {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .template-card small {
+            color: #7ad5ff;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+        }
+
+        .template-card .cost {
+            font-size: 14px;
+            color: #f5d67a;
+        }
+
+        .template-card .status {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            align-self: flex-start;
+        }
+
+        .template-card .status.locked {
+            color: #ff7a7a;
+            border-color: rgba(255, 122, 122, 0.35);
+        }
+
+        .template-card .status.unlocked {
+            color: #7affaf;
+            border-color: rgba(122, 255, 175, 0.45);
+        }
+
+        .template-card button {
+            margin-top: auto;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .template-card button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .template-footnote {
+            margin-top: 18px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .card-features {
+            list-style: none;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .card-features li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .card-features li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>TYPE 3: 3D PRE-RENDERED</h1>
+            <p class="subtitle">Octopath Traveler / FF Tactics / Brotato 3D Style</p>
+        </header>
+
+        <div class="gallery">
+            <a href="warrior-dual-swords.html" class="card">
+                <div class="card-title">⚔️ Warrior (Dual Swords)</div>
+                <div class="card-desc">
+                    Cinematic 3D-style rendering with baked shadows, volumetric bloom on energy swords, and directional
+                    lighting.
+                    Black curly hair with subtle specular highlights for depth.
+                </div>
+                <ul class="card-features">
+                    <li>Simulated 3D directional lighting</li>
+                    <li>Black hair with depth (locked)</li>
+                    <li>Volumetric weapon bloom</li>
+                    <li>Baked ambient occlusion</li>
+                    <li>Rim bloom effects</li>
+                </ul>
+                <span class="btn">Launch Character →</span>
+            </a>
+
+            <a href="cat-angel-gunner.html" class="card">
+                <div class="card-title">😇 Cat Angel Gunner</div>
+                <div class="card-desc">
+                    Volumetric halo with 3D bloom, black fur with realistic lighting falloff, and feathered wing
+                    with specular highlights. Cinematic quality floating animation.
+                </div>
+                <ul class="card-features">
+                    <li>Volumetric halo lighting</li>
+                    <li>3D shaded black fur (locked)</li>
+                    <li>Feather structure with speculars</li>
+                    <li>Muzzle flash bloom effect</li>
+                    <li>Natural light falloff</li>
+                </ul>
+                <span class="btn">Launch Character →</span>
+            </a>
+
+            <a href="cyborg-rifle-operative.html" class="card">
+                <div class="card-title">🤖 Cyborg Rifle Operative</div>
+                <div class="card-desc">
+                    Metallic armor with baked reflections, energy conduits with volumetric glow, and black pigtails
+                    with 3D shading. Maximum cinematic impact with specular highlights.
+                </div>
+                <ul class="card-features">
+                    <li>Metallic armor speculars</li>
+                    <li>3D shaded pigtails (locked)</li>
+                    <li>Energy conduit bloom</li>
+                    <li>Baked shadow layers</li>
+                    <li>Rifle beam volumetrics</li>
+                </ul>
+                <span class="btn">Launch Character →</span>
+            </a>
+        </div>
+
+        <section class="template-section">
+            <h2>🎯 Summon-Ready Templates</h2>
+            <p>Auto-detects unlocked skins via Bag data and previews the new 3D Mode templates. Each summon spends
+                20k–200k gold and bundles pets, vehicles, and spirits.</p>
+            <div id="bag-template-grid" class="template-grid"></div>
+            <div class="template-footnote">Tap a template to open it in the 3D Mode workspace. Summons will deduct the
+                listed gold within A1k World.</div>
+        </section>
+
+        <div class="type-info">
+            <h3>📖 About This Style</h3>
+            <p>
+                3D Pre-rendered sprites simulate full 3D rendering using Canvas2D with advanced lighting techniques.
+                Features include baked shadows, specular highlights on armor and weapons, rim bloom effects, and natural
+                light falloff that creates depth perception. Full facial features are rendered with dynamic lighting.
+            </p>
+            <p>
+                This style bridges the gap between 2D and 3D, offering cinematic quality while maintaining the
+                performance
+                characteristics of 2D sprites. Perfect for hybrid games that blend pixel or 2D style with environmental
+                realism.
+            </p>
+
+            <div class="traits">
+                <div class="trait">256×256 high-resolution</div>
+                <div class="trait">Simulated 3D lighting</div>
+                <div class="trait">Baked shadows & highlights</div>
+                <div class="trait">Specular reflections</div>
+                <div class="trait">Rim bloom effects</div>
+                <div class="trait">Natural light falloff</div>
+                <div class="trait">Depth perception</div>
+                <div class="trait">Cinematic quality</div>
+            </div>
+        </div>
+
+        <div class="type-info" style="background: rgba(102,126,234,0.05); border-color: rgba(102,126,234,0.3);">
+            <h3>🎨 Technical Specifications</h3>
+            <p><strong>All 3 Characters:</strong> ✅ Warrior, Cat Angel Gunner, Cyborg Rifle Operative (COMPLETE)</p>
+            <p><strong>Rendering:</strong> Canvas2D with simulated 3D lighting techniques</p>
+            <p><strong>Resolution:</strong> 256×256 native (high-quality soft HD finish)</p>
+            <p><strong>Lighting:</strong> Directional lighting, baked ambient occlusion, specular reflections, rim bloom</p>
+            <p><strong>Animation Frames:</strong> Idle (8 frames, 250ms each), Walk (8 frames, 125ms each), Attack (6 frames, 83ms each)</p>
+            <p><strong>Color Palettes:</strong> Fire, Ice, Shadow, Light, Nature (5 per character)</p>
+            <p><strong>Export:</strong> PNG with alpha transparency, high-res sprite sheets (horizontal strip), JSON animation data</p>
+            <p><strong>Frame Rate:</strong> 60fps real-time rendering</p>
+            <p><strong>Best For:</strong> JRPGs, tactical RPGs, cinematic side-scrollers, premium visual quality games</p>
+        </div>
+
+        <div class="back-link">
+            <a href="../START_HERE.html">← Back to Main Gallery</a>
+        </div>
+    </div>
+</body>
+<script>
+    const TEMPLATE_LINKS = [
+        {
+            slug: 'missy-aurora-halo',
+            hero: 'Cat Angel Gunner',
+            description: 'Golden rail beam with halo pet + hover bike bundle.',
+            cost: 45000,
+            spriteIds: ['MISSY_S3', 'skin_default_a1'],
+            path: '../../../../../x%20one/3d%20mode/templates/type-3/missy-aurora-halo.html'
+        },
+        {
+            slug: 'a1-crimson-phantom',
+            hero: 'Warrior (Dual Swords)',
+            description: 'Crimson blink combo with hover bike finisher.',
+            cost: 65000,
+            spriteIds: ['A1_S4', 'skin_default_a1'],
+            path: '../../../../../x%20one/3d%20mode/templates/type-3/a1-crimson-phantom.html'
+        }
+    ];
+
+    function getUnlockedSprites() {
+        if (window.SpriteAssetManager && typeof window.SpriteAssetManager.getSummonReadySprites === 'function') {
+            return window.SpriteAssetManager.getSummonReadySprites({ limit: 20 });
+        }
+        const inventorySkins = window.gameState?.inventory?.skins || [];
+        return inventorySkins.map((skin) => ({ id: skin.id, name: skin.name, unlocked: skin.unlocked !== false }));
+    }
+
+    function renderTemplateCards() {
+        const container = document.getElementById('bag-template-grid');
+        if (!container) return;
+        const unlockedIds = new Set(getUnlockedSprites().filter(item => item.unlocked !== false).map(item => item.id));
+
+        TEMPLATE_LINKS.forEach((template) => {
+            const unlocked = template.spriteIds.some((id) => unlockedIds.has(id)) || unlockedIds.size === 0;
+            const card = document.createElement('div');
+            card.className = 'template-card';
+            card.innerHTML = `
+                <header>
+                    <div>
+                        <h3>${template.hero}</h3>
+                        <small>${template.slug}</small>
+                    </div>
+                    <div class="cost">💰 ${template.cost.toLocaleString()} g</div>
+                </header>
+                <p>${template.description}</p>
+                <span class="status ${unlocked ? 'unlocked' : 'locked'}">
+                    ${unlocked ? 'Unlocked in Bag' : 'Requires skin unlock'}
+                </span>
+            `;
+            const button = document.createElement('button');
+            button.textContent = 'Open Template';
+            button.onclick = () => window.open(template.path, '_blank');
+            if (!unlocked) {
+                button.disabled = true;
+                button.style.opacity = '0.5';
+                button.style.cursor = 'not-allowed';
+            }
+            card.appendChild(button);
+            container.appendChild(card);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderTemplateCards);
+</script>
+
+</html>

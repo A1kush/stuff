@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC and Enemy System Integration Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="../dist/bundle.js" defer></script>
+</head>
+<body>
+    <h1>NPC and Enemy System Integration Demo</h1>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+    <script>
+        // Initialize the game integration
+        const gameIntegration = new GameIntegration();
+        gameIntegration.initialize();
+
+        // Example of adding NPCs and enemies
+        const npc1 = new NPC("Friendly Villager", "C rank NPC");
+        const enemy1 = new Enemy("Goblin", "C rank villain", 100, 10);
+
+        gameIntegration.addEntity(npc1);
+        gameIntegration.addEntity(enemy1);
+
+        // Start the game loop
+        function gameLoop() {
+            gameIntegration.update();
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    </script>
+</body>
+</html>

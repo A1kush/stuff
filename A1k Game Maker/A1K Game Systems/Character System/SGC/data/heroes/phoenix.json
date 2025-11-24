@@ -1,0 +1,44 @@
+{
+  "id": "phoenix",
+  "name": "Phoenix",
+  "rank": "A",
+  "role": "pet",
+  "summary": {
+    "hook": "Flame-touched feline partner to Missy.",
+    "gameplay": "Stacks burns, repositions allies, and amplifies when Shaniqua is nearby.",
+    "why_it_matters": "Provides elemental variety for pet squads without external dependencies."
+  },
+  "stats": {"attack": 75, "defense": 55, "luck": 65, "support": 50, "speed": 85},
+  "skills": [
+    {
+      "name": "Sunrise Reverb",
+      "type": "attack",
+      "cooldown": 9,
+      "aura_cost": 14,
+      "effects": ["burn_trail", "DoT"],
+      "rationale": "Persistent burn trails make arenas feel alive and reward kiting."
+    },
+    {
+      "name": "Molten Leap",
+      "type": "utility",
+      "cooldown": 14,
+      "aura_cost": 16,
+      "effects": ["ally_reposition", "shockwave_knockback"],
+      "rationale": "Movement assist keeps slow supports safe without complex pathfinding."
+    }
+  ],
+  "acquisition": {
+    "method": "Pet bond quest",
+    "costs": {"bond_sparks": 12},
+    "spawn_logic": "Complete Shaniqua drone upgrade mission."
+  },
+  "synergy": {
+    "combos": ["Pet Nova", "Carestorm variants"],
+    "counters": ["Water seals"]
+  },
+  "visuals": {
+    "palette": ["#ffb347", "#ff512f", "#ffd479"],
+    "aura": "Ash trails that form kanji-inspired motifs.",
+    "animation_notes": "Trail particles should linger for 0.5s to emphasize burn pathing."
+  }
+}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SGC Hero Compendium</title>
+  <link rel="stylesheet" href="ui.css" />
+</head>
+
+<body>
+  <header class="layout-header">
+    <div>
+      <p class="eyebrow">Jeff Clan Archives</p>
+      <h1>Special Game Characters</h1>
+      <p class="lede">
+        Offline-ready roster viewer. Load the page in any browser and meet the
+        caretakers, brawlers, and pets powering the SGC loop.
+      </p>
+    </div>
+    <div class="controls">
+      <label>
+        Rank Filter
+        <select id="rankFilter">
+          <option value="all">All Ranks</option>
+          <option value="E">E</option>
+          <option value="C">C</option>
+          <option value="A">A</option>
+          <option value="S">S</option>
+          <option value="SS">SS</option>
+          <option value="SSS">SSS</option>
+          <option value="SSSS">SSSS</option>
+        </select>
+      </label>
+      <label>
+        Role Filter
+        <select id="roleFilter">
+          <option value="all">All Roles</option>
+          <option value="support">Support</option>
+          <option value="striker">Striker</option>
+          <option value="tank">Tank</option>
+          <option value="pet">Pet</option>
+          <option value="hybrid">Hybrid</option>
+        </select>
+      </label>
+      <label class="toggle">
+        <input id="colorblindToggle" type="checkbox" />
+        Colorblind Palette
+      </label>
+      <label class="toggle">
+        <input id="autoFeedToggle" type="checkbox" />
+        Auto-Feed Assist
+      </label>
+      <label class="slider">
+        Cinematic Intensity
+        <input id="cinematicSlider" type="range" min="0.5" max="1.5" step="0.1" value="1" />
+      </label>
+      <button id="rerollBtn" type="button">Roll Surprise Encounter</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="statusPanel" class="status-panel" aria-live="polite"></section>
+
+    <section class="ribbon-panel">
+      <div>
+        <h2>Action Ribbon Prototype</h2>
+        <p>
+          Visualizes how feed/heal beats weave with damage skills. Works
+          entirely offline—perfect for verifying pacing before wiring combat.
+        </p>
+        <div class="ribbon-panel__controls">
+          <button id="pauseRibbon" type="button">Pause</button>
+          <button id="playRibbon" type="button">Play</button>
+        </div>
+      </div>
+      <canvas id="ribbonCanvas" width="900" height="260" aria-label="Action ribbon timeline"></canvas>
+    </section>
+
+    <section class="economy-panel">
+      <div>
+        <h2>Economy & Event Sandbox</h2>
+        <p>
+          Seeded RNG ensures QA can replay Bond Spark gains, Reputation spikes,
+          and auction spawns without a backend.
+        </p>
+      </div>
+      <form id="economyForm" class="economy-panel__controls">
+        <label>
+          Seed
+          <input id="seedInput" type="text" value="sgc-default" />
+        </label>
+        <label>
+          Playstyle Bias
+          <select id="playstyleSelect">
+            <option value="balanced">Balanced</option>
+            <option value="nurture">Nurture</option>
+            <option value="aggressive">Aggressive</option>
+            <option value="honor">Honor</option>
+          </select>
+        </label>
+        <button id="rollEventBtn" type="button">Roll Event</button>
+      </form>
+      <div class="economy-panel__readout">
+        <div>
+          <h3>Currency Snapshot</h3>
+          <ul id="currencyReadout"></ul>
+        </div>
+        <div>
+          <h3>Event Log</h3>
+          <div id="eventLog" class="event-log"></div>
+        </div>
+      </div>
+      <div class="snapshot-panel">
+        <label>
+          Seed Snapshot
+          <textarea id="snapshotInput" placeholder="Click export to capture currencies + seed"></textarea>
+        </label>
+        <div class="snapshot-panel__buttons">
+          <button id="exportSnapshot" type="button">Export Snapshot</button>
+          <button id="importSnapshot" type="button">Import Snapshot</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="heroGrid" class="hero-grid" aria-live="polite"></section>
+  </main>
+
+  <template id="heroCardTemplate">
+    <article class="hero-card">
+      <div class="hero-card__aura">
+        <canvas width="180" height="180" data-canvas></canvas>
+      </div>
+      <div class="hero-card__body">
+        <header>
+          <p class="hero-card__rank"></p>
+          <h2 class="hero-card__name"></h2>
+          <p class="hero-card__summary"></p>
+        </header>
+        <dl class="hero-card__stats"></dl>
+        <div class="hero-card__skills"></div>
+        <footer>
+          <p class="hero-card__acquisition"></p>
+          <p class="hero-card__synergy"></p>
+        </footer>
+      </div>
+    </article>
+  </template>
+
+  <script type="module" src="ui.js"></script>
+</body>
+
+</html>

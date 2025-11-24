@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1K Enemy Sprite System - Home</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a1220 0%, #1a2332 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        h1 {
+            font-size: 56px;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff;
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            font-size: 24px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        .status {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        .card {
+            background: rgba(0,0,0,0.6);
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,255,255,0.5);
+            border-color: #00ffff;
+        }
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-size: 24px;
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .card-desc {
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .card-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ffff, #00aaff);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .card-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,255,255,0.5);
+        }
+        .features {
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+        }
+        .features h2 {
+            color: #00ffff;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .feature-item {
+            background: rgba(0,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,255,255,0.3);
+        }
+        .feature-item h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .feature-item p {
+            color: #aaa;
+            font-size: 14px;
+        }
+        .quick-start {
+            background: rgba(0,255,0,0.1);
+            border: 2px solid #00ff00;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+        .quick-start h2 {
+            color: #00ff00;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .quick-start p {
+            color: #aaa;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .big-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+            padding: 20px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+        .big-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,255,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 A1K ENEMY SPRITE SYSTEM</h1>
+            <p class="subtitle">Universal Enemy Sprite Solution for HTML5 Games</p>
+            <div class="status">✅ PRODUCTION READY</div>
+        </div>
+
+        <div class="quick-start">
+            <h2>🚀 Get Started Now</h2>
+            <p>Try the demos or read the documentation to integrate into your game!</p>
+            <div class="button-group">
+                <a href="BATTLEFIELD-DEMO.html" class="big-button">⚔️ Battlefield Demo</a>
+                <a href="ENEMY-SHOWCASE.html" class="big-button">📖 Enemy Showcase</a>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; color: #00ffff; font-size: 32px; margin: 60px 0 30px;">📚 Documentation & Demos</h2>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">⚔️</div>
+                <div class="card-title">Battlefield Demo</div>
+                <div class="card-desc">
+                    See enemy sprites in action! Interactive combat simulation with spawning,
+                    animations, and performance testing.
+                </div>
+                <a href="BATTLEFIELD-DEMO.html" class="card-link">Launch Demo →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📖</div>
+                <div class="card-title">Enemy Showcase</div>
+                <div class="card-desc">
+                    Browse all available enemy sprites. Filter by tier, view stats, and
+                    explore the complete enemy catalog.
+                </div>
+                <a href="ENEMY-SHOWCASE.html" class="card-link">View Catalog →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📘</div>
+                <div class="card-title">Integration Guide</div>
+                <div class="card-desc">
+                    Complete API reference, code examples, and step-by-step integration
+                    instructions for your game.
+                </div>
+                <a href="INTEGRATION-GUIDE.md" class="card-link">Read Guide →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📋</div>
+                <div class="card-title">Enemy List</div>
+                <div class="card-desc">
+                    Full catalog of all enemies with detailed stats, behaviors, loot tables,
+                    and sprite locations.
+                </div>
+                <a href="ENEMY-LIST.md" class="card-link">View List →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🍬</div>
+                <div class="card-title">Candy Slime (Chibi)</div>
+                <div class="card-desc">
+                    View the Candy Slime Villain sprite with animations and color variants.
+                    Cute chibi-style enemy sprite.
+                </div>
+                <a href="type-7-chibi-kawaii/candy-slime-villain.html" class="card-link">View Sprite →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🥷</div>
+                <div class="card-title">Shadow Ninja (Pixel)</div>
+                <div class="card-desc">
+                    View the Shadow Ninja Assassin sprite. HD pixel art style with
+                    teleportation effects and dual kunai.
+                </div>
+                <a href="type-1-hd-pixel-art/shadow-ninja-assassin.html" class="card-link">View Sprite →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">😈</div>
+                <div class="card-title">Demon Lord (Boss)</div>
+                <div class="card-desc">
+                    View the Demon Lord Boss sprite. Massive hybrid-enhanced style with
+                    wings, flames, and dramatic effects.
+                </div>
+                <a href="type-5-hybrid-enhanced/demon-lord-boss.html" class="card-link">View Sprite →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">✅</div>
+                <div class="card-title">Project Complete</div>
+                <div class="card-desc">
+                    Full implementation summary with all files created, integrations
+                    complete, and system status.
+                </div>
+                <a href="PROJECT-COMPLETE.md" class="card-link">View Summary →</a>
+            </div>
+        </div>
+
+        <div class="features">
+            <h2>✨ System Features</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h3>🎨 Full-Body Sprites</h3>
+                    <p>Complete character sprites with arms, legs, weapons, and accessories</p>
+                </div>
+                <div class="feature-item">
+                    <h3>🎭 3 Art Styles</h3>
+                    <p>Chibi Kawaii, HD Pixel Art, and Hybrid Enhanced styles</p>
+                </div>
+                <div class="feature-item">
+                    <h3>⚡ Dynamic Rendering</h3>
+                    <p>Canvas-based procedural sprite generation</p>
+                </div>
+                <div class="feature-item">
+                    <h3>📊 7+ Enemies</h3>
+                    <p>Across all tiers (C, B, A, S, SS) with extensible database</p>
+                </div>
+                <div class="feature-item">
+                    <h3>🗂️ Bestiary System</h3>
+                    <p>Track discoveries, defeats, and collection progress</p>
+                </div>
+                <div class="feature-item">
+                    <h3>🔧 Universal Compatible</h3>
+                    <p>Works with any HTML5 game - plug and play</p>
+                </div>
+                <div class="feature-item">
+                    <h3>✅ Integrated</h3>
+                    <p>Already working in runner game and bag system</p>
+                </div>
+                <div class="feature-item">
+                    <h3>📖 Documented</h3>
+                    <p>Complete guides, API reference, and examples</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; color: #888; padding: 40px 0;">
+            <p style="font-size: 18px; margin-bottom: 10px;">Made with ❤️ for the A1K Game Systems</p>
+            <p style="font-size: 14px;">A universal enemy sprite solution for 20+ games</p>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candy Slime Villain - Chibi Enemy (C-Rank)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a0033 0%, #330066 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        canvas {
+            border: 3px solid #ff00ff;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255,0,255,0.5);
+        }
+        #controls {
+            background: rgba(0,0,0,0.8);
+            border: 3px solid #ff00ff;
+            border-radius: 20px;
+            padding: 25px;
+            width: 400px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ff00ff;
+            border-bottom: 3px solid #ff00ff;
+            padding-bottom: 15px;
+        }
+        .control-group { margin-bottom: 18px; }
+        label {
+            display: block;
+            font-size: 13px;
+            color: #ff66ff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px 15px;
+            background: #1a0033;
+            border: 2px solid #ff00ff;
+            color: #ff66ff;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        button {
+            background: linear-gradient(135deg, #ff00ff 0%, #8800ff 100%);
+            color: #FFF;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .stat {
+            background: #1a0033;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #ff00ff;
+        }
+        .stat-label { font-size: 11px; color: #ff66ff; }
+        .stat-value { font-size: 18px; color: #ff00ff; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="enemyCanvas" width="256" height="256"></canvas>
+        <div id="controls">
+            <h1>🍬 CANDY SLIME VILLAIN</h1>
+            <div class="control-group">
+                <label>Animation</label>
+                <select id="animState">
+                    <option value="idle">Idle Bounce</option>
+                    <option value="attack">Candy Whip Attack</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Color Variant</label>
+                <select id="variant">
+                    <option value="pink">Pink Strawberry</option>
+                    <option value="purple">Purple Grape</option>
+                    <option value="blue">Blue Raspberry</option>
+                </select>
+            </div>
+            <button onclick="download()">Download PNG</button>
+            <div class="stats">
+                <div class="stat"><div class="stat-label">TIER</div><div class="stat-value">C-RANK</div></div>
+                <div class="stat"><div class="stat-label">HP</div><div class="stat-value">100</div></div>
+                <div class="stat"><div class="stat-label">ATK</div><div class="stat-value">15</div></div>
+                <div class="stat"><div class="stat-label">DEF</div><div class="stat-value">5</div></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('enemyCanvas');
+        const ctx = canvas.getContext('2d');
+        let animState = 'idle', variant = 'pink', time = 0;
+        const COLORS = {
+            pink: { body: '#ff69b4', dark: '#ff1493', light: '#ffb6d9', accent: '#ff00ff' },
+            purple: { body: '#9370db', dark: '#6a0dad', light: '#dda0dd', accent: '#8b00ff' },
+            blue: { body: '#00bfff', dark: '#0080ff', light: '#87ceeb', accent: '#0040ff' }
+        };
+        document.getElementById('animState').onchange = e => animState = e.target.value;
+        document.getElementById('variant').onchange = e => variant = e.target.value;
+        function draw() {
+            ctx.clearRect(0, 0, 256, 256);
+            const colors = COLORS[variant], cx = 128, cy = 150;
+            let bounceY = animState === 'idle' ? Math.sin(time * 2) * 8 : Math.sin(time * 8) * 5;
+            let squish = 1 + Math.sin(time * 2) * 0.1;
+            let armAngle = animState === 'attack' ? Math.sin(time * 8) * 0.8 : 0;
+            ctx.save(); ctx.translate(cx, cy + bounceY);
+            ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(0, 50, 40, 10, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.save(); ctx.scale(1, squish);
+            ctx.beginPath(); ctx.ellipse(0, 0, 50, 45, 0, 0, Math.PI * 2); ctx.fillStyle = colors.body; ctx.fill();
+            ctx.strokeStyle = colors.dark; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = colors.light;
+            ctx.beginPath(); ctx.arc(-15, -10, 8, 0, Math.PI * 2); ctx.arc(18, 5, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.ellipse(-12, -18, 15, 10, -0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(-18, -8, 12, 14, 0, 0, Math.PI * 2); ctx.ellipse(18, -8, 12, 14, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = colors.dark; ctx.beginPath(); ctx.ellipse(-18, -5, 7, 9, 0, 0, Math.PI * 2); ctx.ellipse(18, -5, 7, 9, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = colors.dark; ctx.lineWidth = 4; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(-28, -18); ctx.lineTo(-10, -15); ctx.moveTo(10, -15); ctx.lineTo(28, -18); ctx.stroke();
+            ctx.strokeStyle = colors.dark; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 5, 20, 0.2, Math.PI - 0.2); ctx.stroke();
+            ctx.fillStyle = '#fff'; for (let i = -15; i <= 15; i += 8) { ctx.beginPath(); ctx.moveTo(i - 3, 8); ctx.lineTo(i, 16); ctx.lineTo(i + 3, 8); ctx.fill(); }
+            ctx.save(); ctx.translate(-40, 10); ctx.rotate(armAngle - 0.3);
+            ctx.strokeStyle = colors.body; ctx.lineWidth = 15; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-15, 10, -25, 20); ctx.stroke();
+            ctx.save(); ctx.translate(-25, 20); ctx.rotate(armAngle * 1.5);
+            ctx.strokeStyle = colors.accent; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 0);
+            for (let i = 0; i < 5; i++) ctx.lineTo(-i * 12, Math.sin(i + time * 3) * 8);
+            ctx.stroke(); ctx.restore(); ctx.restore();
+            ctx.save(); ctx.translate(40, 10); ctx.rotate(-armAngle + 0.3);
+            ctx.strokeStyle = colors.body; ctx.lineWidth = 15; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(15, 10, 25, 20); ctx.stroke();
+            ctx.fillStyle = colors.body; ctx.beginPath(); ctx.arc(25, 20, 8, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+            ctx.save(); ctx.translate(0, -48);
+            ctx.fillStyle = colors.accent; ctx.beginPath(); ctx.moveTo(-20, 5); ctx.lineTo(-15, -8); ctx.lineTo(-10, 2); ctx.lineTo(0, -12); ctx.lineTo(10, 2); ctx.lineTo(15, -8); ctx.lineTo(20, 5); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#ffff00'; ctx.beginPath(); ctx.arc(-15, -5, 3, 0, Math.PI * 2); ctx.arc(0, -9, 4, 0, Math.PI * 2); ctx.arc(15, -5, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.restore(); ctx.restore();
+        }
+        function animate() { time += 0.016; draw(); requestAnimationFrame(animate); }
+        function download() { const a = document.createElement('a'); a.download = `candy-slime-${variant}-${animState}.png`; a.href = canvas.toDataURL(); a.click(); }
+        animate();
+    </script>
+</body>
+</html>
+

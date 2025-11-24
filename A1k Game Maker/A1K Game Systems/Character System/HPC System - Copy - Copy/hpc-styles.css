@@ -1,0 +1,529 @@
+/**
+ * HPC SYSTEM STYLES
+ * CSS for HPC hiring and party management UI
+ */
+
+/* Hiring Modal */
+.hpc-hiring-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hpc-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+.hpc-modal-content {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 3px solid #00e5ff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 229, 255, 0.3);
+}
+
+.hpc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 229, 255, 0.1);
+  border-bottom: 2px solid #00e5ff;
+}
+
+.hpc-modal-header h2 {
+  margin: 0;
+  color: #00e5ff;
+  font-size: 24px;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+}
+
+.hpc-modal-close {
+  background: transparent;
+  border: 2px solid #00e5ff;
+  color: #00e5ff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hpc-modal-close:hover {
+  background: rgba(0, 229, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.hpc-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Filters */
+.hpc-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hpc-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.hpc-filter-group label {
+  font-size: 12px;
+  color: #00e5ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hpc-filter-group select,
+.hpc-filter-group input {
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #00e5ff;
+  border-radius: 6px;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.hpc-filter-group select:focus,
+.hpc-filter-group input:focus {
+  outline: none;
+  border-color: #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Gold Display */
+.hpc-gold-display {
+  background: rgba(255, 215, 0, 0.1);
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.hpc-gold-amount {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Character Grid */
+.hpc-character-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Character Card */
+.hpc-character-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid #00e5ff;
+  border-radius: 10px;
+  padding: 15px;
+  transition: all 0.3s;
+}
+
+.hpc-character-card:hover {
+  border-color: #00ffff;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.hpc-card-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.hpc-card-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.hpc-card-name-section {
+  flex: 1;
+}
+
+.hpc-card-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.hpc-card-rank {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.hpc-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.hpc-badge.hired {
+  background: rgba(16, 185, 129, 0.3);
+  border: 1px solid #10b981;
+  color: #10b981;
+}
+
+.hpc-badge.party {
+  background: rgba(59, 130, 246, 0.3);
+  border: 1px solid #3b82f6;
+  color: #3b82f6;
+}
+
+.hpc-card-stats {
+  margin-bottom: 15px;
+}
+
+.hpc-stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.hpc-stat-label {
+  color: #aaa;
+}
+
+.hpc-stat-value {
+  color: #fff;
+  font-weight: bold;
+}
+
+.hpc-card-xp {
+  margin-bottom: 15px;
+}
+
+.hpc-level-label {
+  font-size: 14px;
+  color: #00e5ff;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.hpc-xp-bar-container {
+  position: relative;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #00e5ff;
+  border-radius: 4px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.hpc-xp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00e5ff 0%, #00ffff 100%);
+  transition: width 0.3s;
+}
+
+.hpc-xp-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+}
+
+.hpc-card-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.hpc-action-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.hpc-action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.hpc-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hpc-action-btn.hire-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.hpc-action-btn.add-party-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.hpc-action-btn.remove-party-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.hpc-empty-message {
+  text-align: center;
+  color: #666;
+  padding: 40px;
+  font-size: 16px;
+}
+
+.hpc-message {
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.hpc-message-success {
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid #10b981;
+  color: #10b981;
+}
+
+.hpc-message-error {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+/* Party Panel */
+.hpc-party-panel {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 350px;
+  max-height: 80vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 3px solid #00e5ff;
+  border-radius: 12px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 229, 255, 0.3);
+}
+
+.hpc-party-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: rgba(0, 229, 255, 0.1);
+  border-bottom: 2px solid #00e5ff;
+}
+
+.hpc-party-header h3 {
+  margin: 0;
+  color: #00e5ff;
+  font-size: 20px;
+}
+
+.hpc-party-close {
+  background: transparent;
+  border: 2px solid #00e5ff;
+  color: #00e5ff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hpc-party-close:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+
+.hpc-party-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.hpc-party-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.hpc-party-slot {
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid #00e5ff;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 80px;
+}
+
+.hpc-party-slot.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+  opacity: 0.5;
+}
+
+.hpc-slot-empty {
+  color: #666;
+  font-size: 14px;
+}
+
+.hpc-party-member-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hpc-party-icon {
+  font-size: 32px;
+}
+
+.hpc-party-name {
+  font-weight: bold;
+  color: #fff;
+  flex: 1;
+}
+
+.hpc-party-level {
+  font-size: 12px;
+  color: #00e5ff;
+}
+
+.hpc-party-stats {
+  font-size: 11px;
+  color: #aaa;
+  display: flex;
+  gap: 10px;
+}
+
+.hpc-party-remove-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.hpc-party-available h4 {
+  color: #00e5ff;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.hpc-available-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hpc-available-item {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #00e5ff;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.hpc-available-item:hover {
+  border-color: #00ffff;
+  background: rgba(0, 229, 255, 0.1);
+}
+
+.hpc-available-icon {
+  font-size: 24px;
+}
+
+.hpc-available-info {
+  flex: 1;
+}
+
+.hpc-available-name {
+  font-weight: bold;
+  color: #fff;
+  font-size: 14px;
+}
+
+.hpc-available-level {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.hpc-available-add-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.hpc-available-add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* Compact card variant */
+.hpc-character-card.compact {
+  padding: 10px;
+}
+
+.hpc-character-card.compact .hpc-card-icon {
+  font-size: 32px;
+}
+
+.hpc-character-card.compact .hpc-card-name {
+  font-size: 14px;
+}
+

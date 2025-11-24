@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Warrior - Stained Glass</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #canvas-wrapper { flex-shrink: 0; }
+        canvas {
+            border: 3px solid #3a3a5e;
+            background: #0f0f1e;
+            box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
+        }
+        #controls {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #3a3a5e;
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+        }
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 2px solid #3a3a5e;
+            padding-bottom: 10px;
+        }
+        .control-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        select, button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1a1a2e;
+            border: 1px solid #3a3a5e;
+            color: #e0e0e0;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        select:hover, button:hover {
+            border-color: #6666cc;
+            background: #2a2a3e;
+        }
+        button { margin-top: 8px; background: #2a2a3e; }
+        button:active { transform: translateY(1px); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .info {
+            font-size: 11px;
+            color: #999;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a5e;
+            line-height: 1.6;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .stat {
+            background: rgba(255,255,255,0.03);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #3a3a5e;
+        }
+        .stat-label { font-size: 10px; color: #666; text-transform: uppercase; }
+        .stat-value { font-size: 14px; color: #6cf; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="glassCanvas" width="320" height="320"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>🪟 A1 Warrior - Stained Glass</h1>
+
+            <div class="control-group">
+                <label>Animation State</label>
+                <select id="animState">
+                    <option value="idle">Idle (Breathing)</option>
+                    <option value="walk">Walk Cycle</option>
+                    <option value="attack">Attack Swing</option>
+                    <option value="jump">Jump</option>
+                    <option value="hurt">Hurt</option>
+                    <option value="victory">Victory Pose</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Glass Palette</label>
+                <select id="palette">
+                    <option value="fire">Fire Cathedral (Red/Gold)</option>
+                    <option value="ice">Ice Cathedral (Blue/Cyan)</option>
+                    <option value="forest">Forest Cathedral (Green/Amber)</option>
+                    <option value="royal">Royal Cathedral (Purple/Gold)</option>
+                    <option value="sunset">Sunset Cathedral (Orange/Pink)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Light Intensity</label>
+                <select id="lightIntensity">
+                    <option value="0.3">Dim</option>
+                    <option value="0.5" selected>Medium</option>
+                    <option value="0.7">Bright</option>
+                    <option value="0.9">Very Bright</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Animation Speed</label>
+                <select id="speed">
+                    <option value="0.5">0.5x Slow</option>
+                    <option value="1" selected>1x Normal</option>
+                    <option value="1.5">1.5x Fast</option>
+                    <option value="2">2x Very Fast</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Display Scale</label>
+                <select id="scale">
+                    <option value="1">1x (320px)</option>
+                    <option value="1.5">1.5x (480px)</option>
+                    <option value="2" selected>2x (640px)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Export</label>
+                <div class="btn-group">
+                    <button id="exportFrame">PNG Frame</button>
+                    <button id="exportSheet">Sprite Sheet</button>
+                </div>
+                <button id="exportJSON">Export JSON Data</button>
+            </div>
+
+            <div class="info">
+                <strong>TYPE 13: STAINED GLASS</strong><br>
+                Cathedral Mosaic with Light Transmission<br><br>
+                • Resolution: 320×320<br>
+                • Technique: Canvas2D glass panels + leading<br>
+                • Black leading (grout lines)<br>
+                • Translucent colored glass<br>
+                • Hair: Black (locked)<br><br>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Frame</div>
+                        <div class="stat-value" id="frameCount">0/8</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">FPS</div>
+                        <div class="stat-value" id="fpsCount">60</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('glassCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let currentAnim = 'idle';
+        let currentFrame = 0;
+        let frameTimer = 0;
+        let animSpeed = 1;
+        let palette = 'fire';
+        let lightIntensity = 0.5;
+        let lastTime = 0;
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        const palettes = {
+            fire: {
+                glass1: 'rgba(220, 20, 60, ALPHA)',
+                glass2: 'rgba(255, 140, 0, ALPHA)',
+                glass3: 'rgba(255, 215, 0, ALPHA)',
+                glass4: 'rgba(139, 0, 0, ALPHA)'
+            },
+            ice: {
+                glass1: 'rgba(0, 191, 255, ALPHA)',
+                glass2: 'rgba(70, 130, 180, ALPHA)',
+                glass3: 'rgba(176, 224, 230, ALPHA)',
+                glass4: 'rgba(0, 0, 139, ALPHA)'
+            },
+            forest: {
+                glass1: 'rgba(34, 139, 34, ALPHA)',
+                glass2: 'rgba(154, 205, 50, ALPHA)',
+                glass3: 'rgba(255, 193, 37, ALPHA)',
+                glass4: 'rgba(85, 107, 47, ALPHA)'
+            },
+            royal: {
+                glass1: 'rgba(138, 43, 226, ALPHA)',
+                glass2: 'rgba(147, 112, 219, ALPHA)',
+                glass3: 'rgba(255, 215, 0, ALPHA)',
+                glass4: 'rgba(75, 0, 130, ALPHA)'
+            },
+            sunset: {
+                glass1: 'rgba(255, 99, 71, ALPHA)',
+                glass2: 'rgba(255, 140, 0, ALPHA)',
+                glass3: 'rgba(255, 192, 203, ALPHA)',
+                glass4: 'rgba(255, 20, 147, ALPHA)'
+            }
+        };
+
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true },
+            walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false },
+            jump: { frames: 6, frameTime: 100, loop: false },
+            hurt: { frames: 4, frameTime: 150, loop: false },
+            victory: { frames: 8, frameTime: 200, loop: true }
+        };
+
+        function getGlassColor(baseColor, alpha = null) {
+            if (alpha === null) alpha = lightIntensity;
+            return baseColor.replace('ALPHA', alpha);
+        }
+
+        function drawGlassPanel(x, y, w, h, color, leadingWidth = 3) {
+            // Glass fill
+            ctx.fillStyle = getGlassColor(color);
+            ctx.fillRect(x, y, w, h);
+            
+            // Inner glow
+            const gradient = ctx.createRadialGradient(x + w/2, y + h/2, 0, x + w/2, y + h/2, Math.max(w, h)/2);
+            gradient.addColorStop(0, getGlassColor(color, lightIntensity + 0.2));
+            gradient.addColorStop(1, getGlassColor(color, lightIntensity - 0.2));
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x, y, w, h);
+            
+            // Black leading (grout)
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = leadingWidth;
+            ctx.strokeRect(x, y, w, h);
+        }
+
+        function drawMosaicCircle(x, y, r, color, segments = 8) {
+            for (let i = 0; i < segments; i++) {
+                const angle1 = (i / segments) * Math.PI * 2;
+                const angle2 = ((i + 1) / segments) * Math.PI * 2;
+                
+                ctx.fillStyle = getGlassColor(color, lightIntensity + (Math.random() * 0.2 - 0.1));
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.arc(x, y, r, angle1, angle2);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y, r, angle1, angle2);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawWarriorGlass(frame, anim) {
+            const pal = palettes[palette];
+            const centerX = 160;
+            const centerY = 180;
+            
+            let bobY = 0, legAngle = 0, armAngle = 0, jumpHeight = 0, hurtOffset = 0;
+            
+            if (anim === 'idle') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 3;
+            } else if (anim === 'walk') {
+                bobY = Math.abs(Math.sin(frame / 4 * Math.PI)) * 5;
+                legAngle = Math.sin(frame / 4 * Math.PI) * 15;
+            } else if (anim === 'attack') {
+                armAngle = (frame / 6) * 45;
+            } else if (anim === 'jump') {
+                jumpHeight = frame < 3 ? frame * 15 : (6 - frame) * 15;
+            } else if (anim === 'hurt') {
+                hurtOffset = frame < 2 ? 5 : 0;
+            } else if (anim === 'victory') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 4;
+                armAngle = 15;
+            }
+
+            // Background gradient (backlit effect)
+            const bgGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 200);
+            bgGrad.addColorStop(0, 'rgba(50, 50, 80, 0.8)');
+            bgGrad.addColorStop(1, 'rgba(10, 10, 20, 1)');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const y = centerY - bobY - jumpHeight;
+
+            // Legs (mosaic panels)
+            const legW = 15, legH = 40;
+            for (let i = 0; i < 5; i++) {
+                drawGlassPanel(centerX - 25 + hurtOffset, y + 30 + i * 8, legW, 8, pal.glass4);
+                drawGlassPanel(centerX + 10 + hurtOffset, y + 30 + i * 8, legW, 8, pal.glass4);
+            }
+
+            // Body (larger mosaic panels)
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 6; col++) {
+                    const glassType = (row + col) % 2 === 0 ? pal.glass1 : pal.glass2;
+                    drawGlassPanel(centerX - 30 + col * 10 + hurtOffset, y + row * 9, 10, 9, glassType);
+                }
+            }
+
+            // Head (circular mosaic)
+            drawMosaicCircle(centerX + hurtOffset, y - 30, 25, pal.glass3, 12);
+
+            // Black hair (dark glass, cap style)
+            for (let i = 0; i < 6; i++) {
+                drawGlassPanel(centerX - 30 + i * 10 + hurtOffset, y - 55, 10, 20, 'rgba(0, 0, 0, 0.9)');
+            }
+            // Side curls
+            for (let i = 0; i < 3; i++) {
+                drawGlassPanel(centerX - 35 + hurtOffset, y - 40 + i * 8, 8, 8, 'rgba(0, 0, 0, 0.9)');
+                drawGlassPanel(centerX + 27 + hurtOffset, y - 40 + i * 8, 8, 8, 'rgba(0, 0, 0, 0.9)');
+            }
+
+            // Eyes (small bright glass)
+            drawGlassPanel(centerX - 12 + hurtOffset, y - 32, 6, 6, pal.glass3, 2);
+            drawGlassPanel(centerX + 6 + hurtOffset, y - 32, 6, 6, pal.glass3, 2);
+
+            // Arms (mosaic panels)
+            ctx.save();
+            ctx.translate(centerX - 40 + hurtOffset, y + 15);
+            ctx.rotate((Math.sin(armAngle * Math.PI / 180) * 0.2) * Math.PI / 180);
+            for (let i = 0; i < 4; i++) {
+                drawGlassPanel(0, i * 9, 12, 9, pal.glass3);
+            }
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(centerX + 28 + hurtOffset, y + 15);
+            ctx.rotate((Math.sin(armAngle * Math.PI / 180) * 0.2) * Math.PI / 180);
+            for (let i = 0; i < 4; i++) {
+                drawGlassPanel(0, i * 9, 12, 9, pal.glass3);
+            }
+            ctx.restore();
+
+            // Swords (elongated glass panels with glow)
+            const swordOffsetL = Math.sin(armAngle * Math.PI / 180) * 10;
+            const swordOffsetR = Math.sin(armAngle * Math.PI / 180) * 10;
+            
+            // Left sword
+            for (let i = 0; i < 6; i++) {
+                drawGlassPanel(centerX - 48 + hurtOffset, y + 20 + i * 8 + swordOffsetL, 8, 8, pal.glass1);
+            }
+            
+            // Right sword
+            for (let i = 0; i < 6; i++) {
+                drawGlassPanel(centerX + 40 + hurtOffset, y + 20 + i * 8 + swordOffsetR, 8, 8, pal.glass1);
+            }
+
+            // Add glow effect
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = getGlassColor(pal.glass1);
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0;
+                currentFrame++;
+                if (currentFrame >= anim.frames) {
+                    currentFrame = anim.loop ? 0 : anim.frames - 1;
+                }
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            drawWarriorGlass(currentFrame, currentAnim);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', (e) => {
+            currentAnim = e.target.value;
+            currentFrame = 0;
+            frameTimer = 0;
+        });
+
+        document.getElementById('palette').addEventListener('change', (e) => {
+            palette = e.target.value;
+        });
+
+        document.getElementById('lightIntensity').addEventListener('change', (e) => {
+            lightIntensity = parseFloat(e.target.value);
+        });
+
+        document.getElementById('speed').addEventListener('change', (e) => {
+            animSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('scale').addEventListener('change', (e) => {
+            const scale = parseFloat(e.target.value);
+            canvas.style.width = (320 * scale) + 'px';
+            canvas.style.height = (320 * scale) + 'px';
+        });
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `warrior-glass-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            const anim = animations[currentAnim];
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 320 * anim.frames;
+            tempCanvas.height = 320;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            for (let i = 0; i < anim.frames; i++) {
+                drawWarriorGlass(i, currentAnim);
+                tempCtx.drawImage(canvas, i * 320, 0);
+            }
+
+            const link = document.createElement('a');
+            link.download = `warrior-glass-${currentAnim}-sheet-${palette}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+
+            drawWarriorGlass(currentFrame, currentAnim);
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = {
+                character: 'A1 Warrior (Dual Swords)',
+                type: 'Stained Glass',
+                resolution: '320x320',
+                animations: animations,
+                palettes: Object.keys(palettes),
+                currentState: {
+                    animation: currentAnim,
+                    frame: currentFrame,
+                    palette: palette,
+                    lightIntensity: lightIntensity
+                },
+                metadata: {
+                    hairColor: '#000000 (locked)',
+                    weaponType: 'Dual Energy Swords',
+                    style: 'Cathedral mosaic with black leading'
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `warrior-glass-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+
+        canvas.style.width = '640px';
+        canvas.style.height = '640px';
+        animate(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assassin Sprite Generator - NPC & Enemy Rank System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #8b5cf6;
+            text-shadow: 0 0 20px #8b5cf6;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a78bfa;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .assassin-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .controls-panel {
+            background: rgba(26, 26, 46, 0.9);
+            border: 2px solid #8b5cf6;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .canvas-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #8b5cf6;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: inset 0 0 30px rgba(139, 92, 246, 0.1);
+        }
+
+        .assassin-card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid #8b5cf6;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .assassin-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .assassin-card canvas {
+            border: 1px solid #8b5cf6;
+            background: #000000;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-optimize-contrast: true;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .assassin-card h3 {
+            color: #8b5cf6;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #8b5cf6;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #8b5cf6;
+            border: 1px solid #8b5cf6;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            background: #8b5cf6;
+            color: #000000;
+        }
+
+        button {
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .generate-btn {
+            background: #8b5cf6 !important;
+            color: #000000 !important;
+            font-weight: bold;
+            border: 2px solid #8b5cf6 !important;
+        }
+
+        .generate-btn:hover {
+            background: #000000 !important;
+            color: #8b5cf6 !important;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #8b5cf6;
+        }
+
+        .export-section h3 {
+            color: #8b5cf6;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(26, 26, 46, 0.6);
+            border: 1px solid #8b5cf6;
+        }
+
+        .stats-title {
+            color: #8b5cf6;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: #a78bfa;
+        }
+
+        .stat-value {
+            color: #8b5cf6;
+            font-weight: bold;
+        }
+
+        .controls-title {
+            color: #8b5cf6;
+            margin-bottom: 20px;
+        }
+
+        .animation-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🗡️ Assassin Sprite Generator</h1>
+        <p class="subtitle">Generate stealthy assassin sprites with deadly precision • Shadow, Poison, Blade, Night
+            assassins</p>
+
+        <div class="assassin-grid">
+            <div class="controls-panel">
+                <h2 class="controls-title">⚙️ Assassin Controls</h2>
+
+                <div class="control-group">
+                    <label for="assassin-type">Assassin Type</label>
+                    <select id="assassin-type">
+                        <option value="shadow-assassin">🌑 Shadow Assassin</option>
+                        <option value="poison-assassin">🧪 Poison Assassin</option>
+                        <option value="blade-assassin">⚔️ Blade Assassin</option>
+                        <option value="night-assassin">🌙 Night Assassin</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="stealth-level">Stealth Level</label>
+                    <select id="stealth-level">
+                        <option value="apprentice">Apprentice (Level 1-10)</option>
+                        <option value="adept">Adept (Level 11-25)</option>
+                        <option value="master">Master (Level 26-50)</option>
+                        <option value="legendary">Legendary (Level 51+)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="combat-style">Combat Style</label>
+                    <select id="combat-style">
+                        <option value="stealth">👤 Stealth Focus</option>
+                        <option value="agile">🏃 Agile Combat</option>
+                        <option value="brutal">💀 Brutal Strikes</option>
+                        <option value="technical">⚙️ Technical Precision</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="weapon-choice">Weapon Choice</label>
+                    <select id="weapon-choice">
+                        <option value="dual-daggers">Dual Daggers</option>
+                        <option value="throwing-knives">Throwing Knives</option>
+                        <option value="garrote">Garrote Wire</option>
+                        <option value="blowgun">Blowgun</option>
+                    </select>
+                </div>
+
+                <button class="generate-btn" onclick="generateAssassin()">🗡️ Generate Assassin</button>
+
+                <div class="export-section">
+                    <h3>💾 Export Options</h3>
+                    <div class="btn-grid">
+                        <button onclick="exportPNG()">📷 PNG</button>
+                        <button onclick="exportSheet()">📄 Sprite Sheet</button>
+                    </div>
+                    <button onclick="exportJSON()">💾 JSON Data</button>
+                </div>
+
+                <div class="stats-panel">
+                    <h3 class="stats-title">📊 Assassin Stats</h3>
+                    <div class="stats-grid" id="stats-display">
+                        <div class="stat-item">
+                            <span class="stat-label">HP:</span>
+                            <span class="stat-value" id="stat-hp">110</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">MP:</span>
+                            <span class="stat-value" id="stat-mp">90</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Attack:</span>
+                            <span class="stat-value" id="stat-attack">75</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Defense:</span>
+                            <span class="stat-value" id="stat-defense">25</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Crit Rate:</span>
+                            <span class="stat-value" id="stat-crit">85</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Speed:</span>
+                            <span class="stat-value" id="stat-speed">70</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-panel">
+                <div class="assassin-card">
+                    <h3>Assassin Sprite Preview</h3>
+                    <canvas id="assassin-canvas" width="512" height="512"></canvas>
+                    <div class="animation-buttons">
+                        <button onclick="setAnimation('idle')">😌 Idle</button>
+                        <button onclick="setAnimation('stealth')">👤 Stealth</button>
+                        <button onclick="setAnimation('strike')">⚡ Strike</button>
+                        <button onclick="setAnimation('special')">💫 Special</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./hd-sprite-engine.js"></script>
+    <script>
+        let assassinSystem;
+        let currentAnimation = 'idle';
+
+        const assassinStats = {
+            'shadow-assassin': {
+                apprentice: { hp: 100, mp: 80, attack: 65, defense: 20, crit: 75, speed: 65 },
+                adept: { hp: 140, mp: 100, attack: 75, defense: 25, crit: 85, speed: 70 },
+                master: { hp: 180, mp: 120, attack: 85, defense: 30, crit: 95, speed: 75 },
+                legendary: { hp: 220, mp: 140, attack: 95, defense: 35, crit: 105, speed: 80 }
+            },
+            'poison-assassin': {
+                apprentice: { hp: 95, mp: 100, attack: 60, defense: 15, crit: 70, speed: 60 },
+                adept: { hp: 135, mp: 120, attack: 70, defense: 20, crit: 80, speed: 65 },
+                master: { hp: 175, mp: 140, attack: 80, defense: 25, crit: 90, speed: 70 },
+                legendary: { hp: 215, mp: 160, attack: 90, defense: 30, crit: 100, speed: 75 }
+            },
+            'blade-assassin': {
+                apprentice: { hp: 105, mp: 70, attack: 70, defense: 25, crit: 80, speed: 68 },
+                adept: { hp: 145, mp: 90, attack: 80, defense: 30, crit: 90, speed: 73 },
+                master: { hp: 185, mp: 110, attack: 90, defense: 35, crit: 100, speed: 78 },
+                legendary: { hp: 225, mp: 130, attack: 100, defense: 40, crit: 110, speed: 83 }
+            },
+            'night-assassin': {
+                apprentice: { hp: 115, mp: 85, attack: 72, defense: 22, crit: 82, speed: 72 },
+                adept: { hp: 155, mp: 105, attack: 82, defense: 27, crit: 92, speed: 77 },
+                master: { hp: 195, mp: 125, attack: 92, defense: 32, crit: 102, speed: 82 },
+                legendary: { hp: 235, mp: 145, attack: 102, defense: 37, crit: 112, speed: 87 }
+            }
+        };
+
+        function init() {
+            const canvas = document.getElementById('assassin-canvas');
+            assassinSystem = new HDSpriteSystem();
+            assassinSystem.setCanvas(canvas);
+            assassinSystem.setCharacter('assassin', 'shadow-assassin');
+            assassinSystem.setPalette('shadow');
+            assassinSystem.setScale(4);
+            assassinSystem.draw();
+
+            updateStats();
+        }
+
+        function generateAssassin() {
+            const assassinType = document.getElementById('assassin-type').value;
+            const stealthLevel = document.getElementById('stealth-level').value;
+            const combatStyle = document.getElementById('combat-style').value;
+            const weaponChoice = document.getElementById('weapon-choice').value;
+
+            assassinSystem.setCharacter('assassin', assassinType);
+            assassinSystem.setPalette('shadow');
+            assassinSystem.setScale(4);
+
+            // Apply customizations based on selections
+            if (weaponChoice === 'throwing-knives') {
+                assassinSystem.addAccessory('multiple-weapons');
+            } else if (weaponChoice === 'garrote') {
+                assassinSystem.addAccessory('tool-belt');
+            } else if (weaponChoice === 'blowgun') {
+                assassinSystem.addAccessory('exotic-weapon');
+            }
+
+            assassinSystem.draw();
+            updateStats();
+        }
+
+        function setAnimation(animation) {
+            currentAnimation = animation;
+            assassinSystem.setAnimation(animation);
+            assassinSystem.draw();
+        }
+
+        function updateStats() {
+            const assassinType = document.getElementById('assassin-type').value;
+            const stealthLevel = document.getElementById('stealth-level').value;
+
+            const stats = assassinStats[assassinType][stealthLevel];
+
+            document.getElementById('stat-hp').textContent = stats.hp;
+            document.getElementById('stat-mp').textContent = stats.mp;
+            document.getElementById('stat-attack').textContent = stats.attack;
+            document.getElementById('stat-defense').textContent = stats.defense;
+            document.getElementById('stat-crit').textContent = stats.crit;
+            document.getElementById('stat-speed').textContent = stats.speed;
+        }
+
+        function exportPNG() {
+            const dataURL = assassinSystem.exportPNG();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `assassin-${document.getElementById('assassin-type').value}-${currentAnimation}.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportSheet() {
+            const dataURL = assassinSystem.exportSpriteSheet();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `assassin-${document.getElementById('assassin-type').value}-sheet.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportJSON() {
+            const data = assassinSystem.exportJSON();
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `assassin-${document.getElementById('assassin-type').value}-data.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

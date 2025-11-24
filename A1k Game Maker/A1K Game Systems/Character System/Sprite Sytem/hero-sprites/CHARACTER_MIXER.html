@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Style Mixer - Mix & Match Rendering Styles</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #000428 0%, #004e92 100%); color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+        .header { background: rgba(0,0,0,0.5); padding: 30px 20px; border-bottom: 2px solid rgba(102, 126, 234, 0.5); text-align: center; }
+        h1 { font-size: 48px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .tagline { color: #bbb; font-size: 16px; }
+        .main { display: grid; grid-template-columns: 350px 1fr 350px; max-width: 1600px; margin: 0 auto; gap: 20px; padding: 30px 20px; }
+        .panel { background: rgba(0,0,0,0.6); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 12px; padding: 25px; }
+        .panel h2 { color: #667eea; font-size: 20px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid rgba(102, 126, 234, 0.3); }
+        .canvas-container { display: flex; flex-direction: column; gap: 20px; }
+        canvas { width: 100%; border: 3px solid #667eea; border-radius: 8px; box-shadow: 0 0 30px rgba(102, 126, 234, 0.4); background: #000; image-rendering: pixelated; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+        .option-group { margin-bottom: 20px; }
+        .option-label { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; font-weight: 600; }
+        select, input { width: 100%; padding: 12px; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); color: #e0e0e0; border-radius: 6px; font-family: inherit; font-size: 14px; }
+        input[type="range"] { padding: 0; height: 40px; }
+        input[type="color"] { height: 50px; cursor: pointer; }
+        button { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: #fff; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; margin-top: 10px; transition: all 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5); }
+        .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .preset-btn { padding: 10px; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); color: #bbb; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.3s; }
+        .preset-btn:hover { background: rgba(102, 126, 234, 0.3); border-color: #667eea; color: #fff; }
+        .stat-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 13px; }
+        .stat-value { color: #667eea; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 CHARACTER STYLE MIXER</h1>
+        <div class="tagline">Mix & Match 19 Rendering Styles • Custom Colors • Real-Time Preview</div>
+    </div>
+    <div class="main">
+        <div class="panel">
+            <h2>⚙️ CUSTOMIZE</h2>
+            <div class="option-group">
+                <label class="option-label">Character</label>
+                <select id="character">
+                    <option value="warrior">⚔️ A1 Warrior</option>
+                    <option value="catAngel">👑 Missy Cat Angel</option>
+                    <option value="cyborg">🔫 Unique Cyborg</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label class="option-label">Rendering Style</label>
+                <select id="renderStyle">
+                    <option value="pixel">HD Pixel Art</option>
+                    <option value="vector">Vector Cel-Shaded</option>
+                    <option value="3d">3D Pre-rendered</option>
+                    <option value="shader">Procedural Shader</option>
+                    <option value="hybrid">Hybrid Enhanced</option>
+                    <option value="voxel">Voxel/Minecraft</option>
+                    <option value="chibi">Chibi/Kawaii</option>
+                    <option value="neon">Neon Cyberpunk</option>
+                    <option value="lowpoly">Low-Poly 3D</option>
+                    <option value="hires">Metroidvania Hi-Res</option>
+                    <option value="8bit">Retro 8-Bit</option>
+                    <option value="sketch">Hand-Drawn Sketch</option>
+                    <option value="glass">Stained Glass</option>
+                    <option value="comic">Comic Halftone</option>
+                    <option value="glitch">Glitch Art</option>
+                    <option value="watercolor">Watercolor Paint</option>
+                    <option value="ascii">ASCII/Terminal</option>
+                    <option value="paper">Paper Cut-Out</option>
+                    <option value="hologram">Hologram/Wireframe</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label class="option-label">Animation</label>
+                <select id="animation">
+                    <option value="idle">Idle</option>
+                    <option value="walk">Walk</option>
+                    <option value="attack">Attack</option>
+                    <option value="jump">Jump</option>
+                    <option value="hurt">Hurt</option>
+                    <option value="victory">Victory</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label class="option-label">Primary Color</label>
+                <input type="color" id="color1" value="#FF4500">
+            </div>
+            <div class="option-group">
+                <label class="option-label">Secondary Color</label>
+                <input type="color" id="color2" value="#FFD700">
+            </div>
+            <div class="option-group">
+                <label class="option-label">Scale: <span id="scaleValue">100%</span></label>
+                <input type="range" id="scale" min="50" max="200" value="100">
+            </div>
+            <div class="option-group">
+                <label class="option-label">Outline Width: <span id="outlineValue">2px</span></label>
+                <input type="range" id="outline" min="0" max="8" value="2">
+            </div>
+            <button id="apply">APPLY CHANGES</button>
+            <button id="randomize" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🎲 RANDOMIZE</button>
+            <button id="export">EXPORT PNG</button>
+        </div>
+
+        <div class="panel" style="grid-column: span 1;">
+            <h2>🎨 PREVIEW</h2>
+            <div class="canvas-container">
+                <canvas id="preview" width="400" height="400"></canvas>
+            </div>
+            <div style="margin-top:20px;">
+                <div class="stat-row"><span>Style:</span><span class="stat-value" id="styleDisplay">HD Pixel Art</span></div>
+                <div class="stat-row"><span>Character:</span><span class="stat-value" id="charDisplay">A1 Warrior</span></div>
+                <div class="stat-row"><span>Animation:</span><span class="stat-value" id="animDisplay">Idle</span></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>⭐ PRESETS</h2>
+            <div class="preset-grid">
+                <div class="preset-btn" onclick="loadPreset('fire')">🔥 Fire</div>
+                <div class="preset-btn" onclick="loadPreset('ice')">❄️ Ice</div>
+                <div class="preset-btn" onclick="loadPreset('shadow')">🌑 Shadow</div>
+                <div class="preset-btn" onclick="loadPreset('light')">✨ Light</div>
+                <div class="preset-btn" onclick="loadPreset('nature')">🌿 Nature</div>
+                <div class="preset-btn" onclick="loadPreset('cyber')">🤖 Cyber</div>
+                <div class="preset-btn" onclick="loadPreset('retro')">👾 Retro</div>
+                <div class="preset-btn" onclick="loadPreset('neon')">💫 Neon</div>
+            </div>
+            <h2 style="margin-top:30px;">💾 EXPORT</h2>
+            <button onclick="exportConfig()">Export Config JSON</button>
+            <button onclick="exportSpriteSheet()">Export Sprite Sheet</button>
+            <button onclick="exportAllFrames()">Export All Frames (48)</button>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('preview');
+        const ctx = canvas.getContext('2d');
+        let config = { character: 'warrior', style: 'pixel', animation: 'idle', color1: '#FF4500', color2: '#FFD700', scale: 1.0, outline: 2 };
+        let frame = 0;
+
+        const presets = {
+            fire: { color1: '#FF4500', color2: '#FFD700' },
+            ice: { color1: '#00CED1', color2: '#87CEEB' },
+            shadow: { color1: '#8B00FF', color2: '#9370DB' },
+            light: { color1: '#FFD700', color2: '#FFFFE0' },
+            nature: { color1: '#228B22', color2: '#90EE90' },
+            cyber: { color1: '#00FFFF', color2: '#FF00FF' },
+            retro: { color1: '#FF1493', color2: '#00FF00' },
+            neon: { color1: '#00FF41', color2: '#FF073A' }
+        };
+
+        function drawCharacter() {
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, 400, 400);
+
+            const cx = 200, cy = 220;
+            const bounce = config.animation === 'idle' ? Math.sin(frame / 20) * 3 : 0;
+            const walk = config.animation === 'walk' ? Math.sin(frame / 5) * 5 : 0;
+            const attack = config.animation === 'attack' && frame % 30 < 15 ? (frame % 30) : 0;
+            const jump = config.animation === 'jump' ? -Math.abs(Math.sin(frame / 15)) * 40 : 0;
+            const y = cy + bounce + jump;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(config.scale, config.scale);
+            ctx.translate(-cx, -cy);
+
+            if (config.style === 'pixel' || config.style === '8bit') {
+                drawPixelStyle(cx, y, walk, attack);
+            } else if (config.style === 'vector' || config.style === 'neon') {
+                drawVectorStyle(cx, y, walk, attack);
+            } else if (config.style === 'glitch') {
+                drawGlitchStyle(cx, y, walk, attack);
+            } else if (config.style === 'watercolor') {
+                drawWatercolorStyle(cx, y, walk, attack);
+            } else if (config.style === 'hologram') {
+                drawHologramStyle(cx, y, walk, attack);
+            } else {
+                drawPixelStyle(cx, y, walk, attack);
+            }
+
+            ctx.restore();
+            frame++;
+        }
+
+        function drawPixelStyle(x, y, walk, attack) {
+            ctx.fillStyle = config.color1;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = config.outline;
+
+            // Head
+            ctx.fillRect(x - 15, y - 40, 30, 30);
+            if (config.outline > 0) ctx.strokeRect(x - 15, y - 40, 30, 30);
+
+            // Hair
+            ctx.fillStyle = '#000';
+            ctx.fillRect(x - 15, y - 40, 30, 8);
+
+            // Eyes
+            ctx.fillStyle = config.color2;
+            ctx.fillRect(x - 10, y - 30, 6, 6);
+            ctx.fillRect(x + 4, y - 30, 6, 6);
+
+            // Body
+            ctx.fillStyle = config.color1;
+            ctx.fillRect(x - 20, y - 10, 40, 35);
+            if (config.outline > 0) ctx.strokeRect(x - 20, y - 10, 40, 35);
+
+            // Arms
+            ctx.fillRect(x - 28, y, 8, 25);
+            ctx.fillRect(x + 20, y, 8, 25);
+
+            // Legs
+            ctx.fillRect(x - 15 + walk, y + 25, 10, 30);
+            ctx.fillRect(x + 5 - walk, y + 25, 10, 30);
+        }
+
+        function drawVectorStyle(x, y, walk, attack) {
+            ctx.strokeStyle = config.color1;
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(x, y - 25, 18, 0, Math.PI * 2);
+            ctx.fillStyle = config.color2 + '40';
+            ctx.fill();
+            ctx.stroke();
+
+            // Body
+            ctx.beginPath();
+            ctx.moveTo(x, y - 10);
+            ctx.lineTo(x, y + 25);
+            ctx.stroke();
+
+            // Arms
+            ctx.beginPath();
+            ctx.moveTo(x - 20, y);
+            ctx.lineTo(x, y - 5);
+            ctx.lineTo(x + 20, y);
+            ctx.stroke();
+
+            // Legs
+            ctx.beginPath();
+            ctx.moveTo(x, y + 25);
+            ctx.lineTo(x - 10 + walk, y + 55);
+            ctx.moveTo(x, y + 25);
+            ctx.lineTo(x + 10 - walk, y + 55);
+            ctx.stroke();
+        }
+
+        function drawGlitchStyle(x, y, walk, attack) {
+            const glitch = frame % 20 < 3;
+            const offset = glitch ? (Math.random() - 0.5) * 10 : 0;
+
+            if (glitch) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.globalAlpha = 0.5;
+                drawPixelStyle(x + 2, y, walk, attack);
+                ctx.fillStyle = '#00FF00';
+                drawPixelStyle(x - 2, y, walk, attack);
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1;
+                ctx.restore();
+            }
+
+            drawPixelStyle(x + offset, y, walk, attack);
+        }
+
+        function drawWatercolorStyle(x, y, walk, attack) {
+            function waterBlob(bx, by, w, h) {
+                for (let i = 0; i < 3; i++) {
+                    ctx.globalAlpha = 0.4 - i * 0.1;
+                    const grad = ctx.createRadialGradient(bx, by, 0, bx, by, w);
+                    grad.addColorStop(0, config.color1);
+                    grad.addColorStop(1, config.color1 + '00');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(bx - w/2 + Math.random() * 3, by - h/2 + Math.random() * 3, w + Math.random() * 4, h + Math.random() * 4);
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            waterBlob(x, y - 25, 35, 35);
+            waterBlob(x, y, 40, 35);
+            waterBlob(x - 20, y + 5, 10, 25);
+            waterBlob(x + 20, y + 5, 10, 25);
+            waterBlob(x - 13 + walk, y + 35, 10, 30);
+            waterBlob(x + 5 - walk, y + 35, 10, 30);
+        }
+
+        function drawHologramStyle(x, y, walk, attack) {
+            ctx.globalCompositeOperation = 'lighter';
+            const alpha = 0.6 + Math.sin(frame / 10) * 0.2;
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = config.color1;
+            ctx.lineWidth = 2;
+
+            ctx.strokeRect(x - 15, y - 40, 30, 30);
+            ctx.strokeRect(x - 20, y - 10, 40, 35);
+            ctx.strokeRect(x - 28, y, 8, 25);
+            ctx.strokeRect(x + 20, y, 8, 25);
+            ctx.strokeRect(x - 15 + walk, y + 25, 10, 30);
+            ctx.strokeRect(x + 5 - walk, y + 25, 10, 30);
+
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
+        function animate() {
+            drawCharacter();
+            requestAnimationFrame(animate);
+        }
+
+        function loadPreset(preset) {
+            const colors = presets[preset];
+            document.getElementById('color1').value = colors.color1;
+            document.getElementById('color2').value = colors.color2;
+            applyChanges();
+        }
+
+        function applyChanges() {
+            config.character = document.getElementById('character').value;
+            config.style = document.getElementById('renderStyle').value;
+            config.animation = document.getElementById('animation').value;
+            config.color1 = document.getElementById('color1').value;
+            config.color2 = document.getElementById('color2').value;
+            config.scale = parseInt(document.getElementById('scale').value) / 100;
+            config.outline = parseInt(document.getElementById('outline').value);
+
+            document.getElementById('styleDisplay').textContent = document.getElementById('renderStyle').options[document.getElementById('renderStyle').selectedIndex].text;
+            document.getElementById('charDisplay').textContent = document.getElementById('character').options[document.getElementById('character').selectedIndex].text;
+            document.getElementById('animDisplay').textContent = config.animation.toUpperCase();
+        }
+
+        function exportConfig() {
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = 'character-config.json';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        function exportSpriteSheet() {
+            alert('Sprite sheet export: Would capture all 6 animations × 8 frames = 48 frames');
+        }
+
+        function exportAllFrames() {
+            alert('All frames export: Would generate 48 individual PNG files');
+        }
+
+        document.getElementById('scale').addEventListener('input', (e) => {
+            document.getElementById('scaleValue').textContent = e.target.value + '%';
+        });
+
+        document.getElementById('outline').addEventListener('input', (e) => {
+            document.getElementById('outlineValue').textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('apply').addEventListener('click', applyChanges);
+        document.getElementById('randomize').addEventListener('click', () => {
+            const styles = ['pixel', 'vector', '3d', 'shader', 'hybrid', 'voxel', 'chibi', 'neon', 'lowpoly', 'hires', '8bit', 'sketch', 'glass', 'comic', 'glitch', 'watercolor', 'ascii', 'paper', 'hologram'];
+            const chars = ['warrior', 'catAngel', 'cyborg'];
+            const anims = ['idle', 'walk', 'attack', 'jump', 'hurt', 'victory'];
+            const presetKeys = Object.keys(presets);
+
+            document.getElementById('renderStyle').value = styles[Math.floor(Math.random() * styles.length)];
+            document.getElementById('character').value = chars[Math.floor(Math.random() * chars.length)];
+            document.getElementById('animation').value = anims[Math.floor(Math.random() * anims.length)];
+            
+            const preset = presets[presetKeys[Math.floor(Math.random() * presetKeys.length)]];
+            document.getElementById('color1').value = preset.color1;
+            document.getElementById('color2').value = preset.color2;
+            
+            document.getElementById('scale').value = 80 + Math.floor(Math.random() * 60);
+            document.getElementById('outline').value = Math.floor(Math.random() * 5);
+
+            applyChanges();
+        });
+
+        document.getElementById('export').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `character-custom-${config.character}-${config.style}-${config.animation}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        applyChanges();
+        animate();
+    </script>
+</body>
+</html>

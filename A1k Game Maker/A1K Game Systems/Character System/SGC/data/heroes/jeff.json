@@ -1,0 +1,52 @@
+{
+  "id": "jeff",
+  "name": "Jeff",
+  "rank": "SSSS",
+  "role": "hybrid",
+  "summary": {
+    "hook": "Origin architect who rewrites arenas mid-battle.",
+    "gameplay": "Controls time, overrides AI, and mirrors A1 Kush with godlike authority.",
+    "why_it_matters": "His scarcity and power justify the late-game grind while rewarding honorable play."
+  },
+  "stats": {"attack": 100, "defense": 95, "luck": 100, "support": 85, "speed": 90},
+  "skills": [
+    {
+      "name": "Creator Override",
+      "type": "utility",
+      "cooldown": 45,
+      "aura_cost": 50,
+      "effects": ["rewrite_ai", "arena_freeze"],
+      "rationale": "Lets devs script jaw-dropping set pieces without touching enemy code."
+    },
+    {
+      "name": "Codeblaze",
+      "type": "attack",
+      "cooldown": 20,
+      "aura_cost": 35,
+      "effects": ["time_stop_strike", "debug_damage"],
+      "rationale": "Visualizes his status as the game's creator through glitch-flame slashes."
+    },
+    {
+      "name": "Founder's Blessing",
+      "type": "buff",
+      "cooldown": 60,
+      "aura_cost": 40,
+      "effects": ["developer_debug_boost", "party_invuln_short"],
+      "rationale": "Acts as a victory lap ability once players prove mastery."
+    }
+  ],
+  "acquisition": {
+    "method": "Mythic spawn",
+    "costs": {"gold": 10000, "clan_relics": 5, "honor_score": 100},
+    "spawn_logic": "1% chance after five flawless days with no failed citizens or hungry pets."
+  },
+  "synergy": {
+    "combos": ["Clan Ascension", "Creator's Eclipse event"],
+    "counters": ["None—balance handled via scarcity"]
+  },
+  "visuals": {
+    "palette": ["#ffffff", "#00f6ff", "#ff6ad5"],
+    "aura": "Circuit glyph cloak with four spectral quills orbiting.",
+    "animation_notes": "Trigger mild camera shake on every entrance frame to signal meta power."
+  }
+}

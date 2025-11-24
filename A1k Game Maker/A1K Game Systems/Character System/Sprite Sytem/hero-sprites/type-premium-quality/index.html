@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>★ PREMIUM Character Templates Gallery ★</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000000 0%, #1a0033 25%, #330066 50%, #1a0033 75%, #000000 100%);
+            font-family: 'Orbitron', sans-serif;
+            padding: 60px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-section {
+            text-align: center;
+            margin-bottom: 80px;
+            position: relative;
+        }
+        h1 {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF6B6B, #C71585);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)); }
+            50% { filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)); }
+        }
+        .subtitle {
+            font-size: 24px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 900;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 60px 0;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+            border-color: rgba(255, 215, 0, 0.8);
+        }
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .feature-title {
+            font-size: 18px;
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .feature-desc {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+        .art-style-section {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        .style-title {
+            font-size: 36px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-weight: 900;
+        }
+        .style-description {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        .character-card {
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(26,0,51,0.6));
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .character-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        .character-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.5);
+            border-color: rgba(255, 215, 0, 0.9);
+        }
+        .character-name {
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .character-weapons {
+            font-size: 16px;
+            color: #C71585;
+            margin-bottom: 20px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        .character-link {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B6B 100%);
+            color: #000;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 900;
+            font-size: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            position: relative;
+            z-index: 1;
+        }
+        .character-link:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 35px rgba(255, 215, 0, 0.7);
+        }
+        .premium-star {
+            color: #FFD700;
+            font-size: 20px;
+            margin: 0 5px;
+            animation: twinkle 1.5s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .quality-badge {
+            display: inline-block;
+            background: rgba(255, 0, 0, 0.8);
+            color: #FFF;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 10px;
+            margin-left: 10px;
+            font-weight: 900;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section">
+            <h1><span class="premium-star">★</span> PREMIUM QUALITY <span class="premium-star">★</span></h1>
+            <div class="subtitle">Next-Generation Character Templates<span class="quality-badge">PHASE 2</span></div>
+            <div class="version-badge">★ VERSION 2.0 PREMIUM ★</div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">Enhanced Animations</div>
+                <div class="feature-desc">8-12 frames per animation with smoother transitions and special attack moves</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <div class="feature-title">Advanced Effects</div>
+                <div class="feature-desc">Glow effects, particle systems, energy bursts, and aura animations</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌈</div>
+                <div class="feature-title">More Palettes</div>
+                <div class="feature-desc">6+ color palettes including exclusive Virtual Boy and custom themes</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💎</div>
+                <div class="feature-title">Premium Polish</div>
+                <div class="feature-desc">Professional UI, better controls, and enhanced export options</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔥</div>
+                <div class="feature-title">Character Details</div>
+                <div class="feature-desc">Accurate to reference images with all specific visual features</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚔️</div>
+                <div class="feature-title">Combat Ready</div>
+                <div class="feature-desc">Weapons perfectly positioned in hands with realistic attack animations</div>
+            </div>
+        </div>
+
+        <!-- Type 11: Retro 8-Bit PREMIUM -->
+        <div class="art-style-section">
+            <h2 class="style-title">★ Type 11: Retro 8-Bit PREMIUM ★</h2>
+            <div class="style-description">
+                <strong>NES/Game Boy Authentic Style</strong> • 160×144 Resolution • 4-Color Palettes • Pixel-Perfect<br>
+                ✨ Enhanced with special attack animations, advanced glow effects, and Virtual Boy palette
+            </div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Red Glowing Swords</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">Baseball cap • RED eyes • Dark hoodie • Energy burst ultimate</div>
+                    <a href="type-11-retro-8bit/a1-dual-swords-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Cyan Energy Pistols</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">Pigtails • WHITE eyes • Cyan armor accents • Tech operative</div>
+                    <a href="type-11-retro-8bit/unique-dual-pistols-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Sword + Pistol Hybrid</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">Cat angel • Orange halo • Pink wings • GREEN eye • Hybrid fighter</div>
+                    <a href="type-11-retro-8bit/missy-sword-pistol-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 1: HD Pixel Art PREMIUM -->
+        <div class="art-style-section">
+            <h2 class="style-title">★ Type 1: HD Pixel Art PREMIUM ★</h2>
+            <div class="style-description">
+                <strong>Soul Knight / Hyper Light Drifter Elite Style</strong> • 256×256 Resolution • Advanced Rendering<br>
+                ✨ Enhanced with real-time lighting, particle effects, and cinematic animations
+            </div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Dual Red Energy Blades</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">HD baseball cap • Glowing RED eyes • Sword trails • Energy particles</div>
+                    <a href="type-1-hd-pixel-art/a1-dual-swords-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Dual Plasma Pistols</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">HD pigtails • Cyan tech armor • Advanced cyborg design • Plasma effects</div>
+                    <a href="type-1-hd-pixel-art/unique-dual-pistols-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Divine Hybrid Arsenal</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">HD cat features • Animated halo • Wing flutter • Hybrid combat master</div>
+                    <a href="type-1-hd-pixel-art/missy-sword-pistol-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Type 2: Vector Cel-Shaded PREMIUM -->
+        <div class="art-style-section">
+            <h2 class="style-title">★ Type 2: Vector Cel-Shaded PREMIUM ★</h2>
+            <div class="style-description">
+                <strong>Castle Crashers / Hollow Knight Master Class</strong> • Infinite Resolution • Dynamic Lighting<br>
+                ✨ Enhanced with rim lighting, dynamic shadows, and cinematic effects
+            </div>
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-name">A1</div>
+                    <div class="character-weapons">⚔️⚔️ Vector Energy Blades</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">Infinite res • Dynamic lighting • Cel-shaded perfection • Bold outlines</div>
+                    <a href="type-2-vector-cel-shaded/a1-dual-swords-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Unique</div>
+                    <div class="character-weapons">🔫🔫 Vector Plasma Guns</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">Smooth vectors • Cyan tech glow • Professional grade • Infinite scaling</div>
+                    <a href="type-2-vector-cel-shaded/unique-dual-pistols-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+                <div class="character-card">
+                    <div class="character-name">Missy</div>
+                    <div class="character-weapons">⚔️🔫 Divine Vector Arsenal</div>
+                    <div class="feature-desc" style="margin-bottom: 20px;">Cat angel vectors • Glowing halo • Wing animation • Hybrid perfection</div>
+                    <a href="type-2-vector-cel-shaded/missy-sword-pistol-PREMIUM.html" class="character-link">VIEW PREMIUM</a>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 80px; color: rgba(255,255,255,0.6); font-size: 12px;">
+            <p><strong>PREMIUM EDITION</strong> • Phase 2 Enhanced Templates</p>
+            <p>Featuring: A1 (Dual Swords) • Unique (Dual Pistols) • Missy (Sword + Pistol)</p>
+            <p>All characters with black hair locked • Weapons properly in hands • Enhanced quality</p>
+            <p style="margin-top: 20px;">★★★★★ PREMIUM QUALITY ★★★★★</p>
+        </div>
+    </div>
+
+    <script>
+        // Animated background particles
+        const bgCanvas = document.createElement('canvas');
+        bgCanvas.style.position = 'fixed';
+        bgCanvas.style.top = '0';
+        bgCanvas.style.left = '0';
+        bgCanvas.style.width = '100%';
+        bgCanvas.style.height = '100%';
+        bgCanvas.style.pointerEvents = 'none';
+        bgCanvas.style.zIndex = '0';
+        document.body.insertBefore(bgCanvas, document.body.firstChild);
+        
+        bgCanvas.width = window.innerWidth;
+        bgCanvas.height = window.innerHeight;
+        const bgCtx = bgCanvas.getContext('2d');
+        
+        const particles = [];
+        for (let i = 0; i < 50; i++) {
+            particles.push({
+                x: Math.random() * bgCanvas.width,
+                y: Math.random() * bgCanvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.random() * 3 + 1
+            });
+        }
+        
+        function animateBackground() {
+            bgCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+            
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                if (p.x < 0 || p.x > bgCanvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > bgCanvas.height) p.vy *= -1;
+                
+                bgCtx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                bgCtx.fill();
+            });
+            
+            requestAnimationFrame(animateBackground);
+        }
+        
+        animateBackground();
+    </script>
+</body>
+</html>

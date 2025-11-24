@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1 Combat System V2 - Standalone Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #gameCanvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border: 3px solid #4fc3f7;
+      background: #0a0a0a;
+      box-shadow: 0 0 30px rgba(79, 195, 247, 0.5);
+    }
+
+    #hud {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 12px;
+      z-index: 1000;
+      min-width: 200px;
+    }
+
+    .hud-bar {
+      margin: 8px 0;
+      height: 20px;
+      background: rgba(79, 195, 247, 0.2);
+      border: 1px solid #4fc3f7;
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hud-fill {
+      height: 100%;
+      background: #4fc3f7;
+      transition: width 0.3s;
+    }
+
+    .hud-fill.rage {
+      background: #fbbf24;
+    }
+
+    .hud-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 11px;
+      font-weight: bold;
+      z-index: 1;
+    }
+
+    #info {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 12px;
+      z-index: 1000;
+      max-width: 250px;
+    }
+
+    #info h3 {
+      margin-bottom: 10px;
+      color: #4fc3f7;
+    }
+
+    #info p {
+      margin: 5px 0;
+      color: #aaa;
+    }
+
+    #info kbd {
+      background: #1a1a2a;
+      border: 1px solid #4fc3f7;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      color: #4fc3f7;
+    }
+
+    #controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90%;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 14px;
+      background: rgba(79, 195, 247, 0.2);
+      border: 2px solid #4fc3f7;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 80px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: rgba(79, 195, 247, 0.4);
+      border-color: #fbbf24;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    button.cooldown {
+      opacity: 0.5;
+      position: relative;
+    }
+
+    .combo-display {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: bold;
+      color: #fbbf24;
+      text-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .combo-display.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas" width="1200" height="800"></canvas>
+    
+    <!-- HUD -->
+    <div id="hud">
+      <div style="font-weight: bold; color: #4fc3f7; margin-bottom: 10px;">HP</div>
+      <div class="hud-bar">
+        <div class="hud-fill" id="hp-bar" style="width: 100%;"></div>
+        <div class="hud-label" id="hp-text">1000/1000</div>
+      </div>
+      
+      <div style="font-weight: bold; color: #fbbf24; margin-top: 15px; margin-bottom: 10px;">RAGE</div>
+      <div class="hud-bar">
+        <div class="hud-fill rage" id="rage-bar" style="width: 0%;"></div>
+        <div class="hud-label" id="rage-text">0/100</div>
+      </div>
+      
+      <div style="margin-top: 15px;">
+        <div style="color: #34d399;">Combo: <span id="combo">0</span></div>
+        <div style="color: #4fc3f7; margin-top: 5px;">Character: <span id="character">A1</span></div>
+      </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div id="info">
+      <h3>🎮 Controls</h3>
+      <p><kbd>WASD</kbd> / <kbd>Arrows</kbd> - Move</p>
+      <p><kbd>1-5</kbd> - Skills S1-S5</p>
+      <p><kbd>X</kbd> - Ultimate (X1)</p>
+      <p><kbd>Space</kbd> - Basic Attack</p>
+      <p><kbd>C</kbd> - Switch Character</p>
+      <p><kbd>R</kbd> - Rage Mode</p>
+      <p><kbd>Click</kbd> - Attack at cursor</p>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <button id="btnS1">S1</button>
+      <button id="btnS2">S2</button>
+      <button id="btnS3">S3</button>
+      <button id="btnS4">S4</button>
+      <button id="btnS5">S5</button>
+      <button id="btnATK">ATK</button>
+      <button id="btnX1">X1</button>
+      <button id="btnSWITCH">SWITCH (C)</button>
+      <button id="btnRAGE">RAGE (R)</button>
+    </div>
+
+    <!-- Combo Display -->
+    <div class="combo-display" id="combo-display">0</div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // EMBEDDED SKILL DATABASE (Simplified - Core 30 skills per character)
+    // ═══════════════════════════════════════════════════════════════
+    
+    const SKILL_DATABASE = {
+      // A1 Skills (Slots 1-5, X)
+      'A1_S1': { id: 'A1_S1', name: 'Crimson Slash', characterId: 'A1', slot: 1, damage: 150, cooldown: 2500, icon: '⚔️' },
+      'A1_S2': { id: 'A1_S2', name: 'Shadow Clone', characterId: 'A1', slot: 2, damage: 0, cooldown: 15000, icon: '👥' },
+      'A1_S3': { id: 'A1_S3', name: 'Power Wave', characterId: 'A1', slot: 3, damage: 250, cooldown: 4000, icon: '💨' },
+      'A1_S4': { id: 'A1_S4', name: 'Phantom Strike', characterId: 'A1', slot: 4, damage: 320, cooldown: 20000, icon: '🌙' },
+      'A1_S5': { id: 'A1_S5', name: 'Crimson Cyclone', characterId: 'A1', slot: 5, damage: 300, cooldown: 24000, icon: '🌪️' },
+      'A1_X1': { id: 'A1_X1', name: 'Rift Cutter', characterId: 'A1', slot: 'X', damage: 380, cooldown: 28000, icon: '🌌' },
+      
+      // UNIQUE Skills
+      'UNIQUE_S1': { id: 'UNIQUE_S1', name: 'Plasma Blast', characterId: 'UNIQUE', slot: 1, damage: 120, cooldown: 2000, icon: '⚡' },
+      'UNIQUE_S2': { id: 'UNIQUE_S2', name: 'Combat Drone', characterId: 'UNIQUE', slot: 2, damage: 0, cooldown: 15000, icon: '🤖' },
+      'UNIQUE_S3': { id: 'UNIQUE_S3', name: 'Power Beam', characterId: 'UNIQUE', slot: 3, damage: 400, cooldown: 8000, icon: '💥' },
+      'UNIQUE_S4': { id: 'UNIQUE_S4', name: 'Cryo Rail', characterId: 'UNIQUE', slot: 4, damage: 180, cooldown: 20000, icon: '❄️' },
+      'UNIQUE_S5': { id: 'UNIQUE_S5', name: 'Ion Drill', characterId: 'UNIQUE', slot: 5, damage: 220, cooldown: 24000, icon: '🌀' },
+      'UNIQUE_X1': { id: 'UNIQUE_X1', name: 'Hyper Beam', characterId: 'UNIQUE', slot: 'X', damage: 300, cooldown: 28000, icon: '🌊' },
+      
+      // MISSY Skills
+      'MISSY_S1': { id: 'MISSY_S1', name: 'Crescent Slash', characterId: 'MISSY', slot: 1, damage: 130, cooldown: 2500, icon: '🌙' },
+      'MISSY_S2': { id: 'MISSY_S2', name: 'Spirit Pet', characterId: 'MISSY', slot: 2, damage: 0, cooldown: 15000, icon: '🐾' },
+      'MISSY_S3': { id: 'MISSY_S3', name: 'Rapid Fire', characterId: 'MISSY', slot: 3, damage: 200, cooldown: 4000, icon: '🔫' },
+      'MISSY_S4': { id: 'MISSY_S4', name: 'Starlight Rail', characterId: 'MISSY', slot: 4, damage: 180, cooldown: 6000, icon: '💫' },
+      'MISSY_S5': { id: 'MISSY_S5', name: 'Storm Vortex', characterId: 'MISSY', slot: 5, damage: 720, cooldown: 8000, icon: '🌪️' },
+      'MISSY_X1': { id: 'MISSY_X1', name: 'Fortune Cannon', characterId: 'MISSY', slot: 'X', damage: 2800, cooldown: 20000, icon: '💰' }
+    };
+
+    function getSkillForCharacter(charId, slot) {
+      const skillId = `${charId}_S${slot}`;
+      if (slot === 'X') {
+        return SKILL_DATABASE[`${charId}_X1`] || null;
+      }
+      return SKILL_DATABASE[skillId] || null;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SIMPLIFIED COMBAT SYSTEM (Standalone - No Bag Dependency)
+    // ═══════════════════════════════════════════════════════════════
+    
+    class StandaloneCombatSystem {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.ctx.imageSmoothingEnabled = false;
+        
+        // Character state
+        this.activeCharacter = 'A1';
+        this.characters = {
+          A1: { maxHP: 1000, attackPower: 1.0, color: '#ef4444', icon: '⚔️' },
+          UNIQUE: { maxHP: 900, attackPower: 1.2, color: '#60a5fa', icon: '⚡' },
+          MISSY: { maxHP: 850, attackPower: 1.3, color: '#f472b6', icon: '🌙' }
+        };
+        
+        // Combat stats
+        this.currentHP = this.characters[this.activeCharacter].maxHP;
+        this.maxHP = this.characters[this.activeCharacter].maxHP;
+        this.rage = 0;
+        this.rageActive = false;
+        this.combo = 0;
+        this.lastHitTime = 0;
+        
+        // Position
+        this.x = 400;
+        this.y = 400;
+        this.speed = 3;
+        
+        // Skills cooldowns
+        this.skillCooldowns = {};
+        
+        // Projectiles
+        this.projectiles = [];
+        
+        // Enemies
+        this.enemies = [];
+        this.enemySpawnTimer = 0;
+        
+        // Input
+        this.keys = {};
+        this.mouseX = 0;
+        this.mouseY = 0;
+        
+        this.setupInput();
+      }
+      
+      setupInput() {
+        document.addEventListener('keydown', (e) => {
+          this.keys[e.key.toLowerCase()] = true;
+          if (e.key === ' ') e.preventDefault();
+          
+          // Skill keys
+          if (e.key >= '1' && e.key <= '5') {
+            this.useSkill(parseInt(e.key));
+          }
+          if (e.key === 'x' || e.key === 'X') {
+            this.useSkill('X');
+          }
+          if (e.key === 'c' || e.key === 'C') {
+            this.switchCharacter();
+          }
+          if (e.key === 'r' || e.key === 'R') {
+            this.activateRage();
+          }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+          this.keys[e.key.toLowerCase()] = false;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+          const rect = this.canvas.getBoundingClientRect();
+          this.mouseX = e.clientX - rect.left;
+          this.mouseY = e.clientY - rect.top;
+        });
+        
+        document.addEventListener('click', (e) => {
+          this.basicAttack(this.mouseX, this.mouseY);
+        });
+        
+        // Button handlers
+        document.getElementById('btnS1').onclick = () => this.useSkill(1);
+        document.getElementById('btnS2').onclick = () => this.useSkill(2);
+        document.getElementById('btnS3').onclick = () => this.useSkill(3);
+        document.getElementById('btnS4').onclick = () => this.useSkill(4);
+        document.getElementById('btnS5').onclick = () => this.useSkill(5);
+        document.getElementById('btnX1').onclick = () => this.useSkill('X');
+        document.getElementById('btnATK').onclick = () => this.basicAttack(this.mouseX, this.mouseY);
+        document.getElementById('btnSWITCH').onclick = () => this.switchCharacter();
+        document.getElementById('btnRAGE').onclick = () => this.activateRage();
+      }
+      
+      switchCharacter() {
+        const chars = Object.keys(this.characters);
+        const currentIndex = chars.indexOf(this.activeCharacter);
+        const nextIndex = (currentIndex + 1) % chars.length;
+        this.activeCharacter = chars[nextIndex];
+        
+        // Update HP for new character
+        this.maxHP = this.characters[this.activeCharacter].maxHP;
+        this.currentHP = Math.min(this.currentHP, this.maxHP);
+        
+        this.updateHUD();
+        this.updateButtons();
+        console.log(`Switched to ${this.activeCharacter}`);
+      }
+      
+      useSkill(slot) {
+        const skill = getSkillForCharacter(this.activeCharacter, slot);
+        if (!skill) return;
+        
+        // Check cooldown
+        const now = Date.now();
+        if (this.skillCooldowns[skill.id] && now < this.skillCooldowns[skill.id]) {
+          return;
+        }
+        
+        // Set cooldown
+        this.skillCooldowns[skill.id] = now + skill.cooldown;
+        this.updateButtons();
+        
+        // Use skill
+        this.executeSkill(skill);
+        console.log(`Used ${skill.name}`);
+      }
+      
+      executeSkill(skill) {
+        // Create projectiles based on skill
+        const char = this.characters[this.activeCharacter];
+        const damage = skill.damage * char.attackPower * (this.rageActive ? 2 : 1);
+        
+        if (skill.damage > 0) {
+          // Create projectile towards mouse
+          const dx = this.mouseX - this.x;
+          const dy = this.mouseY - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const angle = Math.atan2(dy, dx);
+          
+          this.projectiles.push({
+            x: this.x,
+            y: this.y,
+            vx: Math.cos(angle) * 8,
+            vy: Math.sin(angle) * 8,
+            damage: damage,
+            color: char.color,
+            icon: skill.icon,
+            lifetime: 60,
+            owner: this.activeCharacter
+          });
+          
+          // Hit enemies
+          this.checkProjectileHits();
+        }
+      }
+      
+      basicAttack(x, y) {
+        const char = this.characters[this.activeCharacter];
+        const dx = x - this.x;
+        const dy = y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
+        const damage = 50 * char.attackPower * (this.rageActive ? 2 : 1);
+        
+        this.projectiles.push({
+          x: this.x,
+          y: this.y,
+          vx: Math.cos(angle) * 10,
+          vy: Math.sin(angle) * 10,
+          damage: damage,
+          color: char.color,
+          icon: '⚔️',
+          lifetime: 30,
+          owner: this.activeCharacter
+        });
+        
+        this.checkProjectileHits();
+      }
+      
+      activateRage() {
+        if (this.rage >= 100 && !this.rageActive) {
+          this.rageActive = true;
+          this.rage = 0;
+          setTimeout(() => {
+            this.rageActive = false;
+          }, 10000); // 10 seconds
+          console.log('RAGE MODE ACTIVATED!');
+        }
+      }
+      
+      checkProjectileHits() {
+        this.projectiles.forEach(proj => {
+          this.enemies.forEach(enemy => {
+            const dx = proj.x - enemy.x;
+            const dy = proj.y - enemy.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < 30 && !enemy.hit) {
+              enemy.hp -= proj.damage;
+              enemy.hit = true;
+              
+              // Add rage and combo
+              this.addRage(2);
+              this.incrementCombo();
+              
+              // Remove projectile
+              proj.lifetime = 0;
+            }
+          });
+        });
+      }
+      
+      addRage(amount) {
+        if (!this.rageActive) {
+          this.rage = Math.min(100, this.rage + amount);
+        }
+      }
+      
+      incrementCombo() {
+        this.combo++;
+        this.lastHitTime = Date.now();
+        
+        // Show combo display
+        const comboDisplay = document.getElementById('combo-display');
+        comboDisplay.textContent = `${this.combo}x COMBO!`;
+        comboDisplay.classList.add('show');
+        setTimeout(() => comboDisplay.classList.remove('show'), 500);
+        
+        // Reset combo after 3 seconds
+        setTimeout(() => {
+          if (Date.now() - this.lastHitTime > 3000) {
+            this.combo = 0;
+          }
+        }, 3000);
+      }
+      
+      spawnEnemy() {
+        const side = Math.random() < 0.5 ? -1 : 1;
+        this.enemies.push({
+          x: side > 0 ? -50 : this.canvas.width + 50,
+          y: 200 + Math.random() * 400,
+          vx: side * (1 + Math.random()),
+          vy: (Math.random() - 0.5) * 2,
+          hp: 100,
+          maxHp: 100,
+          size: 20 + Math.random() * 20,
+          color: '#ef4444',
+          hit: false
+        });
+      }
+      
+      update(deltaTime) {
+        // Movement
+        if (this.keys['w'] || this.keys['arrowup']) this.y -= this.speed;
+        if (this.keys['s'] || this.keys['arrowdown']) this.y += this.speed;
+        if (this.keys['a'] || this.keys['arrowleft']) this.x -= this.speed;
+        if (this.keys['d'] || this.keys['arrowright']) this.x += this.speed;
+        
+        // Boundaries
+        this.x = Math.max(0, Math.min(this.canvas.width, this.x));
+        this.y = Math.max(0, Math.min(this.canvas.height, this.y));
+        
+        // Spawn enemies
+        this.enemySpawnTimer += deltaTime;
+        if (this.enemySpawnTimer > 3000 && this.enemies.length < 10) {
+          this.spawnEnemy();
+          this.enemySpawnTimer = 0;
+        }
+        
+        // Update enemies
+        this.enemies.forEach(enemy => {
+          enemy.x += enemy.vx;
+          enemy.y += enemy.vy;
+          enemy.hit = false; // Reset hit flag
+          
+          // Bounce off walls
+          if (enemy.x < 0 || enemy.x > this.canvas.width) enemy.vx *= -1;
+          if (enemy.y < 0 || enemy.y > this.canvas.height) enemy.vy *= -1;
+        });
+        
+        // Remove dead enemies
+        this.enemies = this.enemies.filter(e => e.hp > 0);
+        
+        // Update projectiles
+        this.projectiles.forEach(proj => {
+          proj.x += proj.vx;
+          proj.y += proj.vy;
+          proj.lifetime--;
+        });
+        
+        // Remove expired projectiles
+        this.projectiles = this.projectiles.filter(p => p.lifetime > 0 && 
+          p.x > -50 && p.x < this.canvas.width + 50 &&
+          p.y > -50 && p.y < this.canvas.height + 50);
+        
+        // Update cooldowns
+        this.updateButtons();
+      }
+      
+      render() {
+        // Clear canvas
+        this.ctx.fillStyle = '#0a0a0a';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw grid
+        this.ctx.strokeStyle = '#1a1a2a';
+        this.ctx.lineWidth = 1;
+        for (let i = 0; i < this.canvas.width; i += 50) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(i, 0);
+          this.ctx.lineTo(i, this.canvas.height);
+          this.ctx.stroke();
+        }
+        for (let i = 0; i < this.canvas.height; i += 50) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(0, i);
+          this.ctx.lineTo(this.canvas.width, i);
+          this.ctx.stroke();
+        }
+        
+        // Draw enemies
+        this.enemies.forEach(enemy => {
+          this.ctx.fillStyle = enemy.color;
+          this.ctx.beginPath();
+          this.ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+          this.ctx.fill();
+          
+          // HP bar
+          const hpPercent = enemy.hp / enemy.maxHp;
+          this.ctx.fillStyle = '#ef4444';
+          this.ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 10, enemy.size * 2, 4);
+          this.ctx.fillStyle = '#34d399';
+          this.ctx.fillRect(enemy.x - enemy.size, enemy.y - enemy.size - 10, enemy.size * 2 * hpPercent, 4);
+        });
+        
+        // Draw projectiles
+        this.projectiles.forEach(proj => {
+          this.ctx.fillStyle = proj.color;
+          this.ctx.font = '20px Arial';
+          this.ctx.fillText(proj.icon, proj.x - 10, proj.y + 10);
+        });
+        
+        // Draw player
+        const char = this.characters[this.activeCharacter];
+        this.ctx.fillStyle = char.color;
+        this.ctx.beginPath();
+        this.ctx.arc(this.x, this.y, 25, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Draw character icon
+        this.ctx.font = '30px Arial';
+        this.ctx.fillText(char.icon, this.x - 15, this.y + 10);
+        
+        // Draw line to mouse
+        if (this.rageActive) {
+          this.ctx.strokeStyle = '#fbbf24';
+          this.ctx.lineWidth = 3;
+        } else {
+          this.ctx.strokeStyle = char.color;
+          this.ctx.lineWidth = 2;
+        }
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.x, this.y);
+        this.ctx.lineTo(this.mouseX, this.mouseY);
+        this.ctx.stroke();
+      }
+      
+      updateHUD() {
+        const hpPercent = (this.currentHP / this.maxHP) * 100;
+        document.getElementById('hp-bar').style.width = hpPercent + '%';
+        document.getElementById('hp-text').textContent = `${Math.floor(this.currentHP)}/${this.maxHP}`;
+        
+        document.getElementById('rage-bar').style.width = this.rage + '%';
+        document.getElementById('rage-text').textContent = `${this.rage}/100`;
+        
+        document.getElementById('combo').textContent = this.combo;
+        document.getElementById('character').textContent = this.activeCharacter;
+      }
+      
+      updateButtons() {
+        const now = Date.now();
+        [1, 2, 3, 4, 5, 'X'].forEach(slot => {
+          const skill = getSkillForCharacter(this.activeCharacter, slot);
+          const btnId = slot === 'X' ? 'btnX1' : `btnS${slot}`;
+          const btn = document.getElementById(btnId);
+          
+          if (!btn) return;
+          
+          if (!skill) {
+            btn.disabled = true;
+            btn.textContent = slot === 'X' ? 'X1' : `S${slot}`;
+            return;
+          }
+          
+          const cooldownRemaining = (this.skillCooldowns[skill.id] || 0) - now;
+          if (cooldownRemaining > 0) {
+            btn.disabled = true;
+            btn.textContent = `${skill.name} (${Math.ceil(cooldownRemaining / 1000)}s)`;
+          } else {
+            btn.disabled = false;
+            btn.textContent = `${slot === 'X' ? 'X1' : `S${slot}`}: ${skill.name}`;
+          }
+        });
+      }
+      
+      gameLoop() {
+        const now = performance.now();
+        const deltaTime = (now - (this.lastTime || now)) / 1000;
+        this.lastTime = now;
+        
+        this.update(deltaTime);
+        this.render();
+        this.updateHUD();
+        
+        requestAnimationFrame(() => this.gameLoop());
+      }
+      
+      start() {
+        this.lastTime = performance.now();
+        this.gameLoop();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // INITIALIZE GAME
+    // ═══════════════════════════════════════════════════════════════
+    
+    let game = null;
+    
+    window.addEventListener('load', () => {
+      const canvas = document.getElementById('gameCanvas');
+      game = new StandaloneCombatSystem(canvas);
+      game.start();
+      
+      console.log('✅ A1K Combat System V2 - Standalone Demo Loaded');
+      console.log('   • 3 Characters: A1, UNIQUE, MISSY');
+      console.log('   • 6 Skills per character (18 total)');
+      console.log('   • No bag system dependencies');
+      console.log('   • Full standalone functionality');
+    });
+  </script>
+</body>
+</html>
+

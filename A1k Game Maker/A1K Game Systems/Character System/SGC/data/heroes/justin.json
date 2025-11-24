@@ -1,0 +1,44 @@
+{
+  "id": "justin",
+  "name": "Justin",
+  "rank": "C",
+  "role": "support",
+  "summary": {
+    "hook": "Middle sibling who rallies the clan with charisma.",
+    "gameplay": "Buffers Jeff descendants and shields allied pets.",
+    "why_it_matters": "Bridges the power gap between rookies and legends via morale play."
+  },
+  "stats": {"attack": 55, "defense": 45, "luck": 50, "support": 80, "speed": 60},
+  "skills": [
+    {
+      "name": "Clan Rally",
+      "type": "buff",
+      "cooldown": 15,
+      "aura_cost": 18,
+      "effects": ["descendant_attack_buff", "stacking_with_party_size"],
+      "rationale": "Encourages players to field multiple Jeff relatives to see narrative payoffs."
+    },
+    {
+      "name": "Pulse Guard",
+      "type": "utility",
+      "cooldown": 25,
+      "aura_cost": 16,
+      "effects": ["pet_barrier", "lethal_save_once"],
+      "rationale": "Protects Missy/Phoenix builds so support mains remain viable."
+    }
+  ],
+  "acquisition": {
+    "method": "Hero quest",
+    "costs": {"bond_sparks": 5},
+    "spawn_logic": "Reward for completing three citizen rescues."
+  },
+  "synergy": {
+    "combos": ["Clan Ascension", "Pet Nova"],
+    "counters": ["Anti-buff sigils"]
+  },
+  "visuals": {
+    "palette": ["#ffb347", "#ffccff", "#2b2b2b"],
+    "aura": "Floating diagrams projecting his battle plans.",
+    "animation_notes": "Overlay translucent HUD elements during skill casts to show tactics."
+  }
+}

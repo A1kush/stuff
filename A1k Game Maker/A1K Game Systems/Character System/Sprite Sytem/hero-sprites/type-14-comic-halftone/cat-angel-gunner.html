@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missy Cat Angel - Comic Book Halftone</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #fffacd;
+            color: #000;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #canvas-wrapper { flex-shrink: 0; }
+        canvas {
+            border: 4px solid #000;
+            background: #fff;
+            box-shadow: 8px 8px 0 #000;
+        }
+        #controls {
+            background: #fff;
+            border: 4px solid #000;
+            padding: 20px;
+            width: 400px;
+            box-shadow: 6px 6px 0 #000;
+        }
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #ff1493;
+            border-bottom: 4px solid #000;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .control-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 11px;
+            color: #000;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            background: #fff;
+            border: 3px solid #000;
+            color: #000;
+            font-family: 'Impact', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        select:hover, button:hover {
+            background: #ffb6c1;
+        }
+        button { margin-top: 8px; background: #ff1493; color: #fff; }
+        button:active { transform: translate(2px, 2px); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .info {
+            font-size: 10px;
+            color: #000;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 3px solid #000;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .stat {
+            background: #ffffe0;
+            padding: 8px;
+            border: 3px solid #000;
+        }
+        .stat-label { font-size: 9px; color: #666; text-transform: uppercase; font-weight: bold; }
+        .stat-value { font-size: 16px; color: #ff1493; font-weight: bold; font-family: 'Impact', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="comicCanvas" width="320" height="320"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>💥 MISSY CAT ANGEL - POP ART!</h1>
+
+            <div class="control-group">
+                <label>Animation</label>
+                <select id="animState">
+                    <option value="idle">IDLE</option>
+                    <option value="walk">WALK</option>
+                    <option value="attack">ATTACK</option>
+                    <option value="jump">JUMP</option>
+                    <option value="hurt">HURT</option>
+                    <option value="victory">VICTORY</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Comic Style</label>
+                <select id="palette">
+                    <option value="classic">CLASSIC (Red/Yellow)</option>
+                    <option value="noir">NOIR (B&W High Contrast)</option>
+                    <option value="pop">POP ART (Warhol)</option>
+                    <option value="manga">MANGA (Speed Lines)</option>
+                    <option value="silver">SILVER AGE</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Halftone Density</label>
+                <select id="dotDensity">
+                    <option value="4">COARSE</option>
+                    <option value="6" selected>MEDIUM</option>
+                    <option value="8">FINE</option>
+                    <option value="10">VERY FINE</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Speed</label>
+                <select id="speed">
+                    <option value="0.5">0.5X</option>
+                    <option value="1" selected>1X</option>
+                    <option value="1.5">1.5X</option>
+                    <option value="2">2X</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Scale</label>
+                <select id="scale">
+                    <option value="1">1X (320PX)</option>
+                    <option value="1.5">1.5X (480PX)</option>
+                    <option value="2" selected>2X (640PX)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Export</label>
+                <div class="btn-group">
+                    <button id="exportFrame">PNG</button>
+                    <button id="exportSheet">SHEET</button>
+                </div>
+                <button id="exportJSON">JSON</button>
+            </div>
+
+            <div class="info">
+                <strong>TYPE 14: COMIC HALFTONE</strong><br>
+                Ben-Day Dots + Bold Lines<br><br>
+                • RES: 320×320<br>
+                • TECH: Canvas2D halftone<br>
+                • Ben-Day dot patterns<br>
+                • Bold black outlines<br>
+                • Fur: Black (locked)<br><br>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Frame</div>
+                        <div class="stat-value" id="frameCount">0/8</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">FPS</div>
+                        <div class="stat-value" id="fpsCount">60</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('comicCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let currentAnim = 'idle';
+        let currentFrame = 0;
+        let frameTimer = 0;
+        let animSpeed = 1;
+        let comicStyle = 'classic';
+        let dotDensity = 6;
+        let lastTime = 0;
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        const styles = {
+            classic: {
+                primary: '#FF0000',
+                secondary: '#FFFF00',
+                accent: '#FFD700',
+                outline: '#000000',
+                bg: '#FFFFFF',
+                halftone: '#FF0000',
+                halo: '#FFFF00',
+                wing: '#FFB6C1'
+            },
+            noir: {
+                primary: '#000000',
+                secondary: '#FFFFFF',
+                accent: '#666666',
+                outline: '#000000',
+                bg: '#FFFFFF',
+                halftone: '#000000',
+                halo: '#CCCCCC',
+                wing: '#AAAAAA'
+            },
+            pop: {
+                primary: '#FF1493',
+                secondary: '#00FFFF',
+                accent: '#FFFF00',
+                outline: '#000000',
+                bg: '#FFFFFF',
+                halftone: '#FF1493',
+                halo: '#FFFF00',
+                wing: '#FFB6C1'
+            },
+            manga: {
+                primary: '#000000',
+                secondary: '#FFFFFF',
+                accent: '#FF0000',
+                outline: '#000000',
+                bg: '#FFFFFF',
+                halftone: '#000000',
+                halo: '#FFFFFF',
+                wing: '#CCCCCC'
+            },
+            silver: {
+                primary: '#4169E1',
+                secondary: '#FFD700',
+                accent: '#FF4500',
+                outline: '#000000',
+                bg: '#FFFFFF',
+                halftone: '#4169E1',
+                halo: '#FFD700',
+                wing: '#87CEEB'
+            }
+        };
+
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true },
+            walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false },
+            jump: { frames: 6, frameTime: 100, loop: false },
+            hurt: { frames: 4, frameTime: 150, loop: false },
+            victory: { frames: 8, frameTime: 200, loop: true }
+        };
+
+        function drawHalftone(x, y, w, h, color, density) {
+            ctx.fillStyle = color;
+            const spacing = density;
+            const dotSize = Math.max(1, density / 2);
+            
+            for (let dy = 0; dy < h; dy += spacing) {
+                for (let dx = 0; dx < w; dx += spacing) {
+                    const offset = (dy / spacing) % 2 === 0 ? 0 : spacing / 2;
+                    ctx.beginPath();
+                    ctx.arc(x + dx + offset, y + dy, dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function drawBoldOutline(x, y, w, h, lineWidth = 4) {
+            ctx.strokeStyle = styles[comicStyle].outline;
+            ctx.lineWidth = lineWidth;
+            ctx.strokeRect(x, y, w, h);
+        }
+
+        function drawActionLines(cx, cy, count = 8, length = 30) {
+            ctx.strokeStyle = styles[comicStyle].outline;
+            ctx.lineWidth = 3;
+            
+            for (let i = 0; i < count; i++) {
+                const angle = (i / count) * Math.PI * 2;
+                const x1 = cx + Math.cos(angle) * 50;
+                const y1 = cy + Math.sin(angle) * 50;
+                const x2 = cx + Math.cos(angle) * (50 + length);
+                const y2 = cy + Math.sin(angle) * (50 + length);
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+
+        function drawCatAngelComic(frame, anim) {
+            const style = styles[comicStyle];
+            const centerX = 160;
+            const centerY = 180;
+            
+            let bobY = 0, wingFlap = 0, gunRecoil = 0, jumpHeight = 0, hurtOffset = 0;
+            
+            if (anim === 'idle') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 4;
+                wingFlap = Math.sin(frame / 4 * Math.PI) * 5;
+            } else if (anim === 'walk') {
+                bobY = Math.abs(Math.sin(frame / 4 * Math.PI)) * 3;
+            } else if (anim === 'attack') {
+                gunRecoil = frame < 2 ? 8 : 0;
+            } else if (anim === 'jump') {
+                jumpHeight = frame < 3 ? frame * 15 : (6 - frame) * 15;
+            } else if (anim === 'hurt') {
+                hurtOffset = frame < 2 ? 5 : 0;
+            } else if (anim === 'victory') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 6;
+                wingFlap = Math.abs(Math.sin(frame / 2 * Math.PI)) * 8;
+            }
+
+            ctx.fillStyle = style.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const y = centerY - bobY - jumpHeight;
+
+            // Halo (floating ring with glow)
+            const haloFloat = Math.abs(Math.sin(frame / 4 * Math.PI)) * 2;
+            ctx.strokeStyle = style.outline;
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(centerX + hurtOffset, y - 70 - haloFloat, 25, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = style.halo;
+            ctx.beginPath();
+            ctx.arc(centerX + hurtOffset, y - 70 - haloFloat, 20, 0, Math.PI * 2);
+            ctx.fill();
+            drawHalftone(centerX - 15 + hurtOffset, y - 85 - haloFloat, 30, 30, style.accent, dotDensity + 2);
+
+            // Wings (feathered with dots)
+            ctx.fillStyle = style.wing;
+            ctx.fillRect(centerX - 45 + hurtOffset, y + 10 + wingFlap, 20, 25);
+            drawHalftone(centerX - 43 + hurtOffset, y + 12 + wingFlap, 16, 21, style.accent, dotDensity);
+            drawBoldOutline(centerX - 45 + hurtOffset, y + 10 + wingFlap, 20, 25);
+
+            // Legs (black cat)
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(centerX - 22 + hurtOffset, y + 30, 12, 38);
+            ctx.fillRect(centerX + 10 + hurtOffset, y + 30, 12, 38);
+            drawBoldOutline(centerX - 22 + hurtOffset, y + 30, 12, 38);
+            drawBoldOutline(centerX + 10 + hurtOffset, y + 30, 12, 38);
+
+            // Body (suit with halftone)
+            ctx.fillStyle = style.primary;
+            ctx.fillRect(centerX - 25 + hurtOffset, y, 50, 33);
+            drawHalftone(centerX - 23 + hurtOffset, y + 2, 46, 29, style.halftone, dotDensity);
+            drawBoldOutline(centerX - 25 + hurtOffset, y, 50, 33, 5);
+
+            // Left arm (black paw, holding gun)
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(centerX - 32 + hurtOffset, y + 8, 10, 25);
+            drawBoldOutline(centerX - 32 + hurtOffset, y + 8, 10, 25);
+
+            // Right arm (black paw, holding sword)
+            ctx.fillRect(centerX + 22 + hurtOffset, y + 8, 10, 25);
+            drawBoldOutline(centerX + 22 + hurtOffset, y + 8, 10, 25);
+
+            // Gun (left hand with bold outline)
+            ctx.fillStyle = style.outline;
+            ctx.fillRect(centerX - 42 - gunRecoil + hurtOffset, y + 15, 15, 10);
+            ctx.fillStyle = style.accent;
+            ctx.fillRect(centerX - 40 - gunRecoil + hurtOffset, y + 17, 11, 6);
+            drawBoldOutline(centerX - 42 - gunRecoil + hurtOffset, y + 15, 15, 10, 3);
+
+            // Sword (right hand with bold outline)
+            ctx.fillStyle = style.accent;
+            ctx.fillRect(centerX + 26 + hurtOffset, y + 10, 6, 35);
+            ctx.fillStyle = style.outline;
+            ctx.fillRect(centerX + 24 + hurtOffset, y + 20, 10, 5);
+            drawBoldOutline(centerX + 26 + hurtOffset, y + 10, 6, 35, 3);
+
+            // Muzzle flash - BANG!
+            if (anim === 'attack' && frame < 2) {
+                ctx.strokeStyle = style.outline;
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 4; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - 45 - gunRecoil + hurtOffset, y + 20);
+                    ctx.lineTo(centerX - 55 - gunRecoil + hurtOffset + i * 2, y + 18 + i * 2);
+                    ctx.stroke();
+                }
+                
+                ctx.font = 'bold 20px Impact';
+                ctx.fillStyle = style.accent;
+                ctx.strokeStyle = style.outline;
+                ctx.lineWidth = 3;
+                ctx.strokeText('BANG!', centerX - 90 - gunRecoil, y + 10);
+                ctx.fillText('BANG!', centerX - 90 - gunRecoil, y + 10);
+            }
+
+            // Head (black cat with bold outline)
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(centerX + hurtOffset, y - 20, 22, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = style.outline;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(centerX + hurtOffset, y - 20, 22, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Cat ears (pointy triangles)
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 18 + hurtOffset, y - 38);
+            ctx.lineTo(centerX - 10 + hurtOffset, y - 50);
+            ctx.lineTo(centerX - 5 + hurtOffset, y - 38);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(centerX + 5 + hurtOffset, y - 38);
+            ctx.lineTo(centerX + 10 + hurtOffset, y - 50);
+            ctx.lineTo(centerX + 18 + hurtOffset, y - 38);
+            ctx.fill();
+            
+            ctx.strokeStyle = style.outline;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 18 + hurtOffset, y - 38);
+            ctx.lineTo(centerX - 10 + hurtOffset, y - 50);
+            ctx.lineTo(centerX - 5 + hurtOffset, y - 38);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX + 5 + hurtOffset, y - 38);
+            ctx.lineTo(centerX + 10 + hurtOffset, y - 50);
+            ctx.lineTo(centerX + 18 + hurtOffset, y - 38);
+            ctx.stroke();
+
+            // Two green eyes (bright dots)
+            ctx.fillStyle = '#00FF00';
+            ctx.beginPath();
+            ctx.arc(centerX - 8 + hurtOffset, y - 22, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 8 + hurtOffset, y - 22, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = style.outline;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX - 8 + hurtOffset, y - 22, 5, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX + 8 + hurtOffset, y - 22, 5, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Tail (curved with outline)
+            ctx.strokeStyle = style.outline;
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(centerX + 20 + hurtOffset, y + 25);
+            ctx.bezierCurveTo(
+                centerX + 35 + hurtOffset, y + 20,
+                centerX + 40 + hurtOffset, y + 35,
+                centerX + 35 + hurtOffset, y + 45
+            );
+            ctx.stroke();
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0;
+                currentFrame++;
+                if (currentFrame >= anim.frames) {
+                    currentFrame = anim.loop ? 0 : anim.frames - 1;
+                }
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            drawCatAngelComic(currentFrame, currentAnim);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', (e) => {
+            currentAnim = e.target.value;
+            currentFrame = 0;
+            frameTimer = 0;
+        });
+
+        document.getElementById('palette').addEventListener('change', (e) => {
+            comicStyle = e.target.value;
+        });
+
+        document.getElementById('dotDensity').addEventListener('change', (e) => {
+            dotDensity = parseInt(e.target.value);
+        });
+
+        document.getElementById('speed').addEventListener('change', (e) => {
+            animSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('scale').addEventListener('change', (e) => {
+            const scale = parseFloat(e.target.value);
+            canvas.style.width = (320 * scale) + 'px';
+            canvas.style.height = (320 * scale) + 'px';
+        });
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `cat-angel-comic-${currentAnim}-f${currentFrame}-${comicStyle}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            const anim = animations[currentAnim];
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 320 * anim.frames;
+            tempCanvas.height = 320;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            for (let i = 0; i < anim.frames; i++) {
+                drawCatAngelComic(i, currentAnim);
+                tempCtx.drawImage(canvas, i * 320, 0);
+            }
+
+            const link = document.createElement('a');
+            link.download = `cat-angel-comic-${currentAnim}-sheet-${comicStyle}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+
+            drawCatAngelComic(currentFrame, currentAnim);
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = {
+                character: 'Missy Cat Angel Gunner',
+                type: 'Comic Book Halftone',
+                resolution: '320x320',
+                animations: animations,
+                styles: Object.keys(styles),
+                currentState: {
+                    animation: currentAnim,
+                    frame: currentFrame,
+                    style: comicStyle,
+                    dotDensity: dotDensity
+                },
+                metadata: {
+                    furColor: '#000000 (locked)',
+                    weaponType: 'Gun + Sword',
+                    technique: 'Ben-Day dots + bold outlines'
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `cat-angel-comic-data-${comicStyle}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+
+        canvas.style.width = '640px';
+        canvas.style.height = '640px';
+        animate(0);
+    </script>
+</body>
+</html>

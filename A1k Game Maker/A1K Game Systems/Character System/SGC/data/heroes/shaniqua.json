@@ -1,0 +1,60 @@
+{
+  "id": "shaniqua",
+  "name": "Shaniqua",
+  "rank": "S",
+  "role": "hybrid",
+  "summary": {
+    "hook": "Technomancer with a mirrored light spirit.",
+    "gameplay": "Feeds, heals, blesses luck, and deploys drones tied to pets and robots.",
+    "why_it_matters": "She is the lynchpin for pet/tech builds, making rare drops predictable without servers."
+  },
+  "stats": {"attack": 60, "defense": 50, "luck": 100, "support": 90, "speed": 75},
+  "skills": [
+    {
+      "name": "Photon Pantry",
+      "type": "feed",
+      "cooldown": 14,
+      "aura_cost": 18,
+      "effects": ["nanite_feed", "stamina_overheal"],
+      "rationale": "Ties nutrition to sci-fi visuals so feed loops look as hype as attacks."
+    },
+    {
+      "name": "Halo Heal",
+      "type": "heal",
+      "cooldown": 20,
+      "aura_cost": 28,
+      "effects": ["instant_mass_heal", "cleanse"],
+      "rationale": "Instant top-offs let designers script bullet-hell patterns without soft-locking casual players."
+    },
+    {
+      "name": "Lucky Lattice",
+      "type": "buff",
+      "cooldown": 25,
+      "aura_cost": 24,
+      "effects": ["drop_rate_increase", "diversity_scaling"],
+      "rationale": "Rewards mixed parties so players sample the whole roster."
+    },
+    {
+      "name": "Servo Surge",
+      "type": "utility",
+      "cooldown": 18,
+      "aura_cost": 26,
+      "effects": ["deploy_drones", "inherit_pet_buffs"],
+      "rationale": "Allows designers to reuse pet logic for temporary drones, saving dev time."
+    }
+  ],
+  "acquisition": {
+    "method": "Light contract auction",
+    "costs": {"gold": 2500, "reputation_shards": 40},
+    "spawn_logic": "Higher odds after three consecutive feed missions are completed."
+  },
+  "synergy": {
+    "combos": ["Carestorm", "Pet Nova"],
+    "counters": ["Drone EMPs"]
+  },
+  "visuals": {
+    "palette": ["#ffec85", "#ffe2ff", "#7ef0ff"],
+    "aura": "Dual silhouettes—physical body plus light spirit offset by 10px.",
+    "animation_notes": "Mirror every keyframe with a translucent duplicate to sell the guardian spirit."
+  }
+}

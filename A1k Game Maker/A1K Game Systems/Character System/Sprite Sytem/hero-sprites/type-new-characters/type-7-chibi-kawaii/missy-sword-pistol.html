@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missy Chibi</title>
+    <style>
+        * {margin: 0; padding: 0;}
+        body {min-height: 100vh; background: linear-gradient(135deg, #FFE5F0, #E5F0FF); display: flex; align-items: center; justify-content: center;}
+        canvas {border: 3px solid #FFB6D9; background: #FFF; border-radius: 20px;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="256" height="256"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        let f = 0;
+        function d() {x.clearRect(0, 0, 256, 256); x.fillStyle = '#FFF'; x.fillRect(0, 0, 256, 256); let b = Math.sin(f / 20) * 8; x.fillStyle = '#FF4444'; x.beginPath(); x.arc(113, 168 - b, 18, 0, 7); x.fill(); x.beginPath(); x.arc(143, 168 - b, 18, 0, 7); x.fill(); x.fillStyle = '#000'; x.beginPath(); x.arc(128, 98 - b, 50, 0, 7); x.fill(); x.fillStyle = '#FF8800'; x.beginPath(); x.ellipse(128, 48 - b, 45, 10, 0, 0, 7); x.fill(); x.fillStyle = '#FFD4E0'; x.beginPath(); x.ellipse(78, 105 - b, 15, 25, -0.3, 0, 7); x.fill(); x.strokeStyle = '#000'; x.lineWidth = 6; x.beginPath(); x.moveTo(165, 130 - b); x.bezierCurveTo(175, 135 - b, 180, 145 - b, 178, 155 - b); x.stroke(); x.fillStyle = '#000'; x.fillRect(78, 73 - b, 100, 15); x.beginPath(); x.moveTo(85, 73 - b); x.lineTo(78, 60 - b); x.lineTo(92, 73 - b); x.fill(); x.beginPath(); x.moveTo(170, 73 - b); x.lineTo(177, 60 - b); x.lineTo(163, 73 - b); x.fill(); x.fillStyle = '#FFF'; x.beginPath(); x.arc(113, 98 - b, 12, 0, 7); x.fill(); x.fillStyle = '#00FF00'; x.beginPath(); x.arc(113, 98 - b, 9, 0, 7); x.fill(); x.fillStyle = '#FF0000'; x.fillRect(73, 142 - b, 10, 6); x.fillRect(173, 131 - b, 3, 12);}
+        function l() {f++; d(); requestAnimationFrame(l);}
+        c.style.width = '512px'; c.style.height = '512px'; l();
+    </script>
+</body>
+</html>

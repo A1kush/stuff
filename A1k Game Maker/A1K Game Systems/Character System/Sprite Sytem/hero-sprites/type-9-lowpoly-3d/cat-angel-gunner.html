@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missy Cat Angel - Low-Poly 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); font-family: 'Arial', sans-serif; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #viewport { border: 3px solid #e74c3c; border-radius: 10px; box-shadow: 0 10px 40px rgba(231,76,60,0.5); }
+        #controls { background: rgba(255,255,255,0.95); border: 3px solid #e74c3c; border-radius: 10px; padding: 25px; width: 400px; }
+        h1 { font-size: 20px; margin-bottom: 20px; color: #c0392b; border-bottom: 3px solid #e74c3c; padding-bottom: 12px; font-weight: bold; }
+        .control-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: #c0392b; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        select, button { width: 100%; padding: 10px 15px; background: #ecf0f1; border: 2px solid #e74c3c; color: #c0392b; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; }
+        button { margin-top: 8px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: #FFF; border: none; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info { font-size: 12px; color: #c0392b; margin-top: 25px; padding-top: 25px; border-top: 2px solid #e74c3c; line-height: 1.8; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat { background: #ecf0f1; padding: 12px; border-radius: 8px; border: 2px solid #e74c3c; }
+        .stat-label { font-size: 11px; color: #c0392b; font-weight: bold; }
+        .stat-value { font-size: 18px; color: #c0392b; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="viewport"></div>
+        <div id="controls">
+            <h1>😇 MISSY CAT ANGEL - LOW-POLY 3D</h1>
+            <div class="control-group"><label>Animation</label>
+                <select id="animState">
+                    <option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option>
+                    <option value="jump">Jump</option><option value="hurt">Hurt</option><option value="victory">Victory</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Material Color</label>
+                <select id="palette">
+                    <option value="fire">🔥 Fire</option><option value="ice">❄️ Ice</option><option value="shadow">🌑 Shadow</option>
+                    <option value="light">✨ Light</option><option value="nature">🌿 Nature</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Camera</label><select id="cameraView"><option value="front">Front</option><option value="side">Side</option><option value="back">Back</option><option value="top">Top</option><option value="free" selected>Free</option></select></div>
+            <div class="control-group"><label>Speed</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
+            <div class="control-group"><label>Export</label><div class="btn-group"><button id="exportFrame">PNG</button><button id="exportSheet">Sheet</button></div><button id="exportJSON">JSON</button></div>
+            <div class="info">
+                <strong>TYPE 9: LOW-POLY 3D</strong><br>Cat Angel with Halo & Wings<br><br>
+                • Three.js rendering<br>• 360° rotation<br>• Flat-shaded polygons<br>• Fur: Black (locked)<br><br>
+                <div class="stats">
+                    <div class="stat"><div class="stat-label">Frame</div><div class="stat-value" id="frameCount">0/8</div></div>
+                    <div class="stat"><div class="stat-label">FPS</div><div class="stat-value" id="fpsCount">60</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, catAngel;
+        let currentAnim = 'idle', currentFrame = 0, frameTimer = 0, animSpeed = 1, palette = 'fire';
+        let lastTime = 0, fps = 60, frameCount = 0, lastFpsTime = 0, autoRotate = true;
+
+        const palettes = { fire: 0xff4444, ice: 0x44ffff, shadow: 0xaa44ff, light: 0xffdd44, nature: 0x44ff44 };
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true }, walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false }, jump: { frames: 6, frameTime: 100, loop: false },
+            hurt: { frames: 4, frameTime: 150, loop: false }, victory: { frames: 8, frameTime: 200, loop: true }
+        };
+
+        function init() {
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x2c3e50);
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera.position.set(0, 1.5, 4); camera.lookAt(0, 1, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(512, 512);
+            document.getElementById('viewport').appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 5); scene.add(dirLight);
+
+            createCatAngel();
+        }
+
+        function createCatAngel() {
+            catAngel = new THREE.Group();
+
+            // Black cat head
+            const headGeo = new THREE.SphereGeometry(0.35, 6, 6);
+            const headMat = new THREE.MeshPhongMaterial({ color: 0x000000, flatShading: true });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.4; catAngel.add(head);
+
+            // Cat ears
+            const earGeo = new THREE.ConeGeometry(0.1, 0.3, 3);
+            const leftEar = new THREE.Mesh(earGeo, headMat);
+            leftEar.position.set(-0.2, 1.7, 0); catAngel.add(leftEar);
+            const rightEar = new THREE.Mesh(earGeo, headMat);
+            rightEar.position.set(0.2, 1.7, 0); catAngel.add(rightEar);
+
+            // Halo (gold ring)
+            const haloGeo = new THREE.TorusGeometry(0.4, 0.05, 4, 8);
+            const haloMat = new THREE.MeshPhongMaterial({ color: 0xffdd44, flatShading: true, emissive: 0xffdd44, emissiveIntensity: 0.5 });
+            const halo = new THREE.Mesh(haloGeo, haloMat);
+            halo.position.y = 2; halo.rotation.x = Math.PI / 2; catAngel.add(halo);
+
+            // Body (suit)
+            const bodyGeo = new THREE.BoxGeometry(0.5, 0.7, 0.4);
+            const bodyMat = new THREE.MeshPhongMaterial({ color: palettes[palette], flatShading: true });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.7; catAngel.add(body);
+
+            // Wing (left)
+            const wingGeo = new THREE.BoxGeometry(0.05, 0.6, 0.4);
+            const wingMat = new THREE.MeshPhongMaterial({ color: 0xffddee, flatShading: true });
+            const wing = new THREE.Mesh(wingGeo, wingMat);
+            wing.position.set(-0.4, 0.7, 0); catAngel.add(wing);
+
+            // Black legs
+            const legGeo = new THREE.BoxGeometry(0.2, 0.5, 0.2);
+            const legMat = new THREE.MeshPhongMaterial({ color: 0x000000, flatShading: true });
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.15, 0.15, 0); catAngel.add(leftLeg);
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.15, 0.15, 0); catAngel.add(rightLeg);
+
+            // Arms (black paws)
+            const armGeo = new THREE.BoxGeometry(0.15, 0.4, 0.15);
+            const armMat = new THREE.MeshPhongMaterial({ color: 0x000000, flatShading: true });
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.4, 0.7, 0); catAngel.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.4, 0.7, 0); catAngel.add(rightArm);
+
+            // Gun (left hand)
+            const gunGeo = new THREE.BoxGeometry(0.5, 0.1, 0.1);
+            const gunMat = new THREE.MeshPhongMaterial({ color: 0x1a1a1a, flatShading: true });
+            const gun = new THREE.Mesh(gunGeo, gunMat);
+            gun.position.set(-0.5, 0.7, 0); catAngel.add(gun);
+
+            // Sword (right hand)
+            const swordGeo = new THREE.BoxGeometry(0.08, 0.6, 0.04);
+            const swordMat = new THREE.MeshPhongMaterial({ color: 0xffdd44, flatShading: true, emissive: 0xffdd44, emissiveIntensity: 0.3 });
+            const sword = new THREE.Mesh(swordGeo, swordMat);
+            sword.position.set(0.5, 0.7, 0);
+            sword.rotation.z = 0.5;
+            catAngel.add(sword);
+
+            catAngel.position.y = 0.5; scene.add(catAngel);
+        }
+
+        function updateCat() {
+            if (!catAngel) return;
+            const f = currentFrame;
+            if (currentAnim === 'idle') catAngel.position.y = 0.5 + Math.sin(f / 4 * Math.PI) * 0.1;
+            else if (currentAnim === 'victory') {
+                catAngel.position.y = 0.5 + Math.abs(Math.sin(f / 2 * Math.PI)) * 0.2;
+                catAngel.rotation.y = Math.sin(f / 4 * Math.PI) * 0.3;
+            }
+            if (autoRotate) catAngel.rotation.y += 0.01;
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime; lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount; frameCount = 0; lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0; currentFrame++;
+                if (currentFrame >= anim.frames) currentFrame = anim.loop ? 0 : anim.frames - 1;
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            updateCat();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', e => { currentAnim = e.target.value; currentFrame = 0; frameTimer = 0; });
+        document.getElementById('palette').addEventListener('change', e => { palette = e.target.value; scene.remove(catAngel); createCatAngel(); });
+        document.getElementById('cameraView').addEventListener('change', e => {
+            const view = e.target.value; autoRotate = view === 'free';
+            if (view === 'front') { camera.position.set(0, 1.5, 4); camera.lookAt(0, 1, 0); }
+            else if (view === 'side') { camera.position.set(4, 1.5, 0); camera.lookAt(0, 1, 0); }
+            else if (view === 'back') { camera.position.set(0, 1.5, -4); camera.lookAt(0, 1, 0); }
+            else if (view === 'top') { camera.position.set(0, 5, 0.1); camera.lookAt(0, 1, 0); }
+        });
+        document.getElementById('speed').addEventListener('change', e => animSpeed = parseFloat(e.target.value));
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `cat-angel-lowpoly-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = renderer.domElement.toDataURL('image/png'); link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => alert('Sheet export: Capture frames manually'));
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = { character: 'Missy Cat Angel', type: 'Low-Poly 3D', resolution: '512x512', animations, palettes: Object.keys(palettes),
+                currentState: { animation: currentAnim, frame: currentFrame, palette }, metadata: { furColor: '#000000 (locked)', style: 'Three.js Low-Poly' }
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a'); link.download = `cat-angel-lowpoly-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob); link.click();
+        });
+
+        init(); animate(0);
+    </script>
+</body>
+</html>

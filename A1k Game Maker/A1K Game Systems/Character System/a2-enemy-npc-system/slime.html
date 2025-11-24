@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candy Slime Villain - Chibi Enemy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a0033 0%, #330066 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #canvas-wrapper { flex-shrink: 0; }
+        canvas {
+            border: 3px solid #ff00ff;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255,0,255,0.5);
+        }
+        #controls {
+            background: rgba(0,0,0,0.8);
+            border: 3px solid #ff00ff;
+            border-radius: 20px;
+            padding: 25px;
+            width: 400px;
+            box-shadow: 0 10px 40px rgba(255,0,255,0.3);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ff00ff;
+            border-bottom: 3px solid #ff00ff;
+            padding-bottom: 15px;
+            font-weight: bold;
+        }
+        .control-group { margin-bottom: 18px; }
+        label {
+            display: block;
+            font-size: 13px;
+            color: #ff66ff;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px 15px;
+            background: #1a0033;
+            border: 2px solid #ff00ff;
+            color: #ff66ff;
+            border-radius: 10px;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button {
+            margin-top: 8px;
+            background: linear-gradient(135deg, #ff00ff 0%, #8800ff 100%);
+            color: #FFF;
+            border: none;
+        }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .stat {
+            background: #1a0033;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #ff00ff;
+        }
+        .stat-label { font-size: 11px; color: #ff66ff; font-weight: bold; }
+        .stat-value { font-size: 18px; color: #ff00ff; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="enemyCanvas" width="256" height="256"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>🍬 CANDY SLIME VILLAIN</h1>
+
+            <div class="control-group">
+                <label>Animation State</label>
+                <select id="animState">
+                    <option value="idle">😈 Idle (Bounce)</option>
+                    <option value="walk">🚶 Slime Walk</option>
+                    <option value="attack">⚔️ Candy Whip Attack</option>
+                    <option value="hurt">💢 Hurt</option>
+                    <option value="death">💀 Death</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Candy Color Variant</label>
+                <select id="variant">
+                    <option value="pink">💗 Pink Strawberry</option>
+                    <option value="purple">💜 Purple Grape</option>
+                    <option value="blue">💙 Blue Raspberry</option>
+                    <option value="green">💚 Green Apple</option>
+                    <option value="orange">🧡 Orange Cream</option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button onclick="downloadSprite()">💾 Download PNG</button>
+                <button onclick="exportSpritesheet()">📦 Sprite Sheet</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Enemy Type</div>
+                    <div class="stat-value">SLIME</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Tier</div>
+                    <div class="stat-value">C-RANK</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">HP</div>
+                    <div class="stat-value">100</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">ATK</div>
+                    <div class="stat-value">15</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('enemyCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let animState = 'idle';
+        let variant = 'pink';
+        let time = 0;
+
+        const COLORS = {
+            pink: { body: '#ff69b4', dark: '#ff1493', light: '#ffb6d9', accent: '#ff00ff' },
+            purple: { body: '#9370db', dark: '#6a0dad', light: '#dda0dd', accent: '#8b00ff' },
+            blue: { body: '#00bfff', dark: '#0080ff', light: '#87ceeb', accent: '#0040ff' },
+            green: { body: '#00ff7f', dark: '#00c957', light: '#7fffd4', accent: '#00ff00' },
+            orange: { body: '#ffa500', dark: '#ff8c00', light: '#ffd700', accent: '#ff6600' }
+        };
+
+        document.getElementById('animState').addEventListener('change', (e) => {
+            animState = e.target.value;
+        });
+
+        document.getElementById('variant').addEventListener('change', (e) => {
+            variant = e.target.value;
+        });
+
+        function drawCandySlimeVillain() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const colors = COLORS[variant];
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 + 20;
+
+            // Animation offsets
+            let bounceY = 0;
+            let squish = 1;
+            let armAngle = 0;
+            let weaponSwing = 0;
+
+            if (animState === 'idle') {
+                bounceY = Math.sin(time * 2) * 8;
+                squish = 1 + Math.sin(time * 2) * 0.1;
+            } else if (animState === 'walk') {
+                bounceY = Math.abs(Math.sin(time * 4)) * 12;
+                squish = 1 + Math.sin(time * 4) * 0.15;
+            } else if (animState === 'attack') {
+                armAngle = Math.sin(time * 8) * 0.8;
+                weaponSwing = Math.sin(time * 8) * 1.2;
+                bounceY = Math.sin(time * 8) * 5;
+            } else if (animState === 'hurt') {
+                bounceY = Math.sin(time * 10) * 4;
+                squish = 1 + Math.sin(time * 10) * 0.2;
+            }
+
+            ctx.save();
+            ctx.translate(centerX, centerY + bounceY);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.ellipse(0, 50, 40, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // BODY - Slime blob with candy texture
+            ctx.save();
+            ctx.scale(1, squish);
+            
+            // Main slime body
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 50, 45, 0, 0, Math.PI * 2);
+            ctx.fillStyle = colors.body;
+            ctx.fill();
+            ctx.strokeStyle = colors.dark;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Candy spots
+            ctx.fillStyle = colors.light;
+            ctx.beginPath();
+            ctx.arc(-15, -10, 8, 0, Math.PI * 2);
+            ctx.arc(18, 5, 10, 0, Math.PI * 2);
+            ctx.arc(-5, 15, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Glossy shine
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.beginPath();
+            ctx.ellipse(-12, -18, 15, 10, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+
+            // EVIL FACE
+            // Eyes
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.ellipse(-18, -8, 12, 14, 0, 0, Math.PI * 2);
+            ctx.ellipse(18, -8, 12, 14, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Pupils (angry)
+            ctx.fillStyle = colors.dark;
+            ctx.beginPath();
+            ctx.ellipse(-18, -5, 7, 9, 0, 0, Math.PI * 2);
+            ctx.ellipse(18, -5, 7, 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Evil eyebrows
+            ctx.strokeStyle = colors.dark;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-28, -18);
+            ctx.lineTo(-10, -15);
+            ctx.moveTo(10, -15);
+            ctx.lineTo(28, -18);
+            ctx.stroke();
+
+            // Evil grin
+            ctx.strokeStyle = colors.dark;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(0, 5, 20, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+
+            // Sharp teeth
+            ctx.fillStyle = '#fff';
+            for (let i = -15; i <= 15; i += 8) {
+                ctx.beginPath();
+                ctx.moveTo(i - 3, 8);
+                ctx.lineTo(i, 16);
+                ctx.lineTo(i + 3, 8);
+                ctx.fill();
+            }
+
+            // LEFT ARM with candy whip weapon
+            ctx.save();
+            ctx.translate(-40, 10);
+            ctx.rotate(armAngle - 0.3);
+            
+            // Slime arm
+            ctx.fillStyle = colors.body;
+            ctx.strokeStyle = colors.dark;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(-15, 10, -25, 20);
+            ctx.lineWidth = 15;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Candy whip weapon
+            ctx.save();
+            ctx.translate(-25, 20);
+            ctx.rotate(weaponSwing);
+            
+            ctx.strokeStyle = colors.accent;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            for (let i = 0; i < 5; i++) {
+                const x = -i * 12;
+                const y = Math.sin(i + time * 3) * 8;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Whip tip star
+            ctx.fillStyle = colors.accent;
+            const tipX = -48;
+            const tipY = Math.sin(4 + time * 3) * 8;
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * Math.PI * 2 / 5) + time * 5;
+                const x = tipX + Math.cos(angle) * 8;
+                const y = tipY + Math.sin(angle) * 8;
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.restore();
+            ctx.restore();
+
+            // RIGHT ARM
+            ctx.save();
+            ctx.translate(40, 10);
+            ctx.rotate(-armAngle + 0.3);
+            
+            ctx.fillStyle = colors.body;
+            ctx.strokeStyle = colors.dark;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(15, 10, 25, 20);
+            ctx.lineWidth = 15;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            // Slime hand
+            ctx.fillStyle = colors.body;
+            ctx.strokeStyle = colors.dark;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(25, 20, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.restore();
+
+            // Crown (villain accessory)
+            ctx.save();
+            ctx.translate(0, -48);
+            ctx.fillStyle = colors.accent;
+            ctx.strokeStyle = colors.dark;
+            ctx.lineWidth = 2;
+            
+            // Crown base
+            ctx.beginPath();
+            ctx.moveTo(-20, 5);
+            ctx.lineTo(-15, -8);
+            ctx.lineTo(-10, 2);
+            ctx.lineTo(0, -12);
+            ctx.lineTo(10, 2);
+            ctx.lineTo(15, -8);
+            ctx.lineTo(20, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Crown gems
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(-15, -5, 3, 0, Math.PI * 2);
+            ctx.arc(0, -9, 4, 0, Math.PI * 2);
+            ctx.arc(15, -5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        function animate() {
+            time += 0.016;
+            drawCandySlimeVillain();
+            requestAnimationFrame(animate);
+        }
+
+        function downloadSprite() {
+            const link = document.createElement('a');
+            link.download = `candy-slime-villain-${variant}-${animState}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function exportSpritesheet() {
+            alert('Spritesheet export: Capture all animation frames in sequence!');
+        }
+
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Missy - Paper</title>
+    <style>
+        body {margin: 0; background: linear-gradient(135deg, #87CEEB, #98D8E8); display: flex; align-items: center; justify-content: center; height: 100vh;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        x.clearRect(0, 0, 512, 512);
+        x.fillStyle = '#FF6B6B'; x.fillRect(200, 250, 112, 150);
+        x.fillStyle = '#FFB380'; x.fillRect(200, 150, 112, 100);
+        x.fillStyle = '#FF8800'; x.beginPath(); x.ellipse(256, 130, 38, 9, 0, 0, 7); x.fill(); x.fillStyle = '#000'; x.fillRect(200, 150, 112, 30); x.beginPath(); x.moveTo(205, 155); x.lineTo(195, 138); x.lineTo(215, 150); x.fill(); x.beginPath(); x.moveTo(307, 155); x.lineTo(317, 138); x.lineTo(297, 150); x.fill(); x.fillStyle = '#00FF00'; x.fillRect(230, 185, 15, 15); x.fillStyle = '#FFD4E0'; x.beginPath(); x.ellipse(180, 200, 16, 28, -0.3, 0, 7); x.fill();
+        x.fillStyle = '#8B4513'; x.fillRect(150, 285, 45, 25);
+        x.fillStyle = '#FFD700'; x.fillRect(152, 287, 20, 21);
+        x.save(); x.translate(337, 300); x.rotate(0.3); x.fillStyle = '#FFD700'; x.fillRect(-10, -60, 20, 120); x.restore();
+    </script>
+</body>
+</html>

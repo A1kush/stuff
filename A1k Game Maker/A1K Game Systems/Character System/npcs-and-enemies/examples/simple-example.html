@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Rank Game Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0f172a;
+            color: #f1f5f9;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            color: #06b6d4;
+        }
+
+        #game-container {
+            width: 800px;
+            height: 600px;
+            background: #1e293b;
+            margin: 20px auto;
+            position: relative;
+            border: 3px solid #334155;
+            border-radius: 8px;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 0 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        .info {
+            text-align: center;
+            margin: 20px;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 6px;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 0 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎮 Simple Rank System Example</h1>
+
+    <div class="controls">
+        <button onclick="addHero()">Add C Rank Hero</button>
+        <button onclick="addEnemy()">Add B Rank Enemy</button>
+        <button onclick="addBoss()">Add S Rank Boss</button>
+        <button onclick="clearAll()" class="danger">Clear All</button>
+    </div>
+
+    <div id="game-container"></div>
+
+    <div class="info">
+        <h3>Entity Count: <span id="count">0</span></h3>
+        <div>
+            <span class="rank-badge" style="border-color: #a5b4fc; color: #a5b4fc">C Rank</span>
+            <span class="rank-badge" style="border-color: #fbcfe8; color: #fbcfe8">B Rank</span>
+            <span class="rank-badge" style="border-color: #fca5a5; color: #fca5a5">S Rank</span>
+        </div>
+        <p style="margin-top: 10px; color: #94a3b8;">Click entities to see their info in console</p>
+    </div>
+
+    <script type="module">
+        import { createGame, entityManager } from '../dist/index.js';
+
+        // Initialize game
+        const game = createGame({
+            containerSelector: '#game-container',
+            autoUpdate: true
+        });
+
+        game.start();
+
+        // Helper to get random position
+        function randomPos() {
+            return {
+                x: Math.random() * 700 + 50,
+                y: Math.random() * 500 + 50
+            };
+        }
+
+        // Update count display
+        function updateCount() {
+            document.getElementById('count').textContent = entityManager.getEntityCount();
+        }
+
+        // Add C Rank Hero
+        window.addHero = function () {
+            const hero = game.addNPC({
+                name: 'C Rank Hero Scout',
+                rank: { tier: 'C', category: 'hero' },
+                interactionType: 'quest_giver',
+                dialogue: ['Need help with a mission?', 'I can guide you!'],
+                position: randomPos(),
+                visuals: {
+                    assetPath: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="%2306b6d4"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">H</text></svg>',
+                    assetKey: 'hero',
+                    scale: 1.0
+                }
+            });
+
+            console.log('Added:', hero.getInfo());
+            updateCount();
+        };
+
+        // Add B Rank Enemy
+        window.addEnemy = function () {
+            const enemy = game.addEnemy({
+                name: 'B Rank Shadow Warrior',
+                rank: { tier: 'B', category: 'elite' },
+                enemyType: 'elite',
+                behavior: 'aggressive',
+                position: randomPos(),
+                visuals: {
+                    assetPath: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="%23ef4444"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">E</text></svg>',
+                    assetKey: 'enemy',
+                    scale: 1.0
+                }
+            });
+
+            console.log('Added:', enemy.getInfo());
+            updateCount();
+        };
+
+        // Add S Rank Boss
+        window.addBoss = function () {
+            const boss = game.addEnemy({
+                name: 'S Rank Dragon Lord',
+                rank: { tier: 'S', category: 'villain' },
+                enemyType: 'boss',
+                behavior: 'aggressive',
+                position: randomPos(),
+                visuals: {
+                    assetPath: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="%238b5cf6"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">B</text></svg>',
+                    assetKey: 'boss',
+                    scale: 1.2
+                }
+            });
+
+            console.log('Added:', boss.getInfo());
+            updateCount();
+        };
+
+        // Clear all
+        window.clearAll = function () {
+            game.clearAll();
+            updateCount();
+            console.log('Cleared all entities');
+        };
+
+        // Handle clicks
+        document.getElementById('game-container').addEventListener('click', (e) => {
+            const entityEl = e.target.closest('.entity');
+            if (entityEl) {
+                const id = entityEl.dataset.entityId;
+                const entity = entityManager.getEntity(id);
+                if (entity) {
+                    console.log('========================================');
+                    console.log('Entity Info:', entity.getInfo());
+                    console.log('Rank:', entity.rank.displayName);
+                    console.log('Stats:', entity.stats);
+                    console.log('Position:', entity.position);
+                    console.log('========================================');
+                }
+            }
+        });
+
+        // Add a few starter entities
+        addHero();
+        addEnemy();
+
+        console.log('🎮 Game initialized! Click the buttons to add more entities.');
+        console.log('Click on entities to see their details.');
+    </script>
+</body>
+
+</html>

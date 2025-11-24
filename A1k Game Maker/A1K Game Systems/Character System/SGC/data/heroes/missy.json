@@ -1,0 +1,52 @@
+{
+  "id": "missy",
+  "name": "Missy",
+  "rank": "SS",
+  "role": "pet",
+  "summary": {
+    "hook": "Reality-warping feline sentinel.",
+    "gameplay": "Stacks shields, assassinates targets, and heals via astral purrs.",
+    "why_it_matters": "Pet mains get end-game relevance without juggling server logic."
+  },
+  "stats": {"attack": 85, "defense": 80, "luck": 75, "support": 70, "speed": 90},
+  "skills": [
+    {
+      "name": "Ninefold Horizon",
+      "type": "buff",
+      "cooldown": 16,
+      "aura_cost": 20,
+      "effects": ["nine_stack_shield", "barrier_pulses"],
+      "rationale": "Nine-stack shield telegraphs her mythic status while being easy to parse."
+    },
+    {
+      "name": "Purrfect Execution",
+      "type": "attack",
+      "cooldown": 12,
+      "aura_cost": 22,
+      "effects": ["priority_strike", "bleed"],
+      "rationale": "Assassin bursts prevent support-heavy parties from feeling passive."
+    },
+    {
+      "name": "Astral Comfort",
+      "type": "heal",
+      "cooldown": 20,
+      "aura_cost": 18,
+      "effects": ["HoT", "pet_synergy"],
+      "rationale": "Adds regen that fits her comforting aura while supporting Phoenix builds."
+    }
+  ],
+  "acquisition": {
+    "method": "Glyph puzzle",
+    "costs": {"bond_sparks": 30},
+    "spawn_logic": "Decode cat-scratch riddles scattered across towns."
+  },
+  "synergy": {
+    "combos": ["Pet Nova", "Carestorm"],
+    "counters": ["Curse collars"]
+  },
+  "visuals": {
+    "palette": ["#f8f6ff", "#ff96d5", "#6b5bff"],
+    "aura": "Nebula fur with diagonal energy slashes.",
+    "animation_notes": "Use screen-splitting claw effects to nod at demon-slayer inspirations."
+  }
+}

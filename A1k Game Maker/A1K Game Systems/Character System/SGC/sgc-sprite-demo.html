@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGC Hero Sprite Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #fff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.8;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .control-group label {
+      font-weight: bold;
+    }
+
+    .control-group select,
+    .control-group input {
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: 2px solid #4a90e2;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 30px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .hero-card {
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, currentColor, transparent);
+      opacity: 0.6;
+    }
+
+    .hero-canvas-container {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-canvas {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-name {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px currentColor;
+    }
+
+    .hero-rank {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9em;
+      margin-bottom: 8px;
+    }
+
+    .hero-role {
+      font-size: 0.9em;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .hero-stats {
+      font-size: 0.8em;
+      opacity: 0.7;
+      margin-top: 10px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      font-size: 1.5em;
+    }
+
+    .error {
+      color: #ff4444;
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 68, 68, 0.2);
+      border-radius: 10px;
+      margin: 20px;
+    }
+
+    /* Rank-specific colors */
+    .rank-E { color: #999999; }
+    .rank-C { color: #64c8ff; }
+    .rank-A { color: #ffd700; }
+    .rank-S { color: #ff64c8; }
+    .rank-SS { color: #c864ff; }
+    .rank-SSS { color: #ff3232; }
+    .rank-SSSS { color: #ffffff; }
+
+    /* Role-specific border colors */
+    .role-support { border-left-color: #4a90e2; }
+    .role-striker { border-left-color: #ff4444; }
+    .role-tank { border-left-color: #44ff44; }
+    .role-pet { border-left-color: #ff44ff; }
+    .role-hybrid { border-left-color: #ffff44; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌟 SGC Hero Sprite Showcase 🌟</h1>
+    <p>Special Game Characters - Animated Sprite Demo</p>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="rankFilter">Filter by Rank:</label>
+      <select id="rankFilter">
+        <option value="all">All Ranks</option>
+        <option value="E">E Rank</option>
+        <option value="C">C Rank</option>
+        <option value="A">A Rank</option>
+        <option value="S">S Rank</option>
+        <option value="SS">SS Rank</option>
+        <option value="SSS">SSS Rank</option>
+        <option value="SSSS">SSSS Rank</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="roleFilter">Filter by Role:</label>
+      <select id="roleFilter">
+        <option value="all">All Roles</option>
+        <option value="support">Support</option>
+        <option value="striker">Striker</option>
+        <option value="tank">Tank</option>
+        <option value="pet">Pet</option>
+        <option value="hybrid">Hybrid</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="animationState">Animation:</label>
+      <select id="animationState">
+        <option value="idle">Idle</option>
+        <option value="walk">Walk</option>
+        <option value="attack">Attack</option>
+        <option value="skill">Skill</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="heroGrid" class="hero-grid">
+    <div class="loading">Loading heroes...</div>
+  </div>
+
+  <script src="sgc-sprite-renderer.js"></script>
+  <script>
+    // Embedded hero data to avoid CORS issues with file:// protocol
+    const EMBEDDED_HEROES = [
+      {"id":"grandma","name":"Grandma","rank":"S","role":"support","summary":{"hook":"Clan matriarch who turns kindness into battlefield shielding.","gameplay":"Feeds, heals, and trains in a single cascading action so new players feel safe instantly.","why_it_matters":"Comfort Cascade bridges nurturing loops with combat pacing, teaching the player rhythm management."},"stats":{"attack":25,"defense":60,"luck":55,"support":95,"speed":45},"skills":[{"name":"Comfort Cascade","type":"heal","cooldown":12,"aura_cost":20,"effects":["party_regen","xp_boost","stress_cleanse"],"rationale":"Bundles feed/heal/train so the nurturing fantasy never stalls combat."},{"name":"Memory Soup","type":"utility","cooldown":60,"aura_cost":10,"effects":["status_reroll","morale_restore"],"rationale":"Daily cleanse balances roguelike randomness without trivializing stakes."}],"acquisition":{"method":"Story unlock after intro dungeon","costs":{"bond_sparks":0},"spawn_logic":"Always available as default mentor companion."},"synergy":{"combos":["Carestorm (with Shaniqua + Missy)","Clan Ascension warmup"],"counters":["Anti-heal curses"]},"visuals":{"palette":["#f8d9a0","#f2b880","#fff7d6"],"aura":"Soft gold constellations forming around apron hems.","animation_notes":"Use gentle parallax pans with stardust sprites to signal multi-phase buffs."}},
+      {"id":"vernal-moody","name":"Vernal Moody","rank":"S","role":"support","summary":{"hook":"Spring-walking grandmother who answers morale dips with blossoms.","gameplay":"Random healer that pauses boss rage timers and feeds the party mid-chaos.","why_it_matters":"Her surprise entrances keep tension spikes fair and teach players to watch morale meters."},"stats":{"attack":20,"defense":50,"luck":80,"support":90,"speed":60},"skills":[{"name":"Bloom Drop","type":"feed","cooldown":20,"aura_cost":18,"effects":["full_party_feed","stamina_restore"],"rationale":"Full-coverage feed prevents wipe spirals during marathon fights."},{"name":"Sundial Blessing","type":"utility","cooldown":45,"aura_cost":25,"effects":["rage_pause","debuff_cleanse"],"rationale":"Briefly freezing enemy enrages gives designers room for difficulty spikes without frustration."}],"acquisition":{"method":"Random field encounter","costs":{"bond_sparks":10},"spawn_logic":"Trigger if morale < 40% and player finished two rooms without rest."},"synergy":{"combos":["Carestorm","Morale-first runs"],"counters":["Anti-randomizers"]},"visuals":{"palette":["#e8f8ff","#c8e6c9","#ffe0f7"],"aura":"Pastel petals spiraling from sky fractures.","animation_notes":"Paint falling petals as additive sprites so even low-end canvas builds feel lush."}},
+      {"id":"jannesica-moody","name":"Jannesica Moody","rank":"S","role":"hybrid","summary":{"hook":"Scholar aunt who weaponizes luminous ledgers.","gameplay":"Teaches mechanics, rains gold, and heals through knowledge rituals.","why_it_matters":"Tutorializes advanced systems diegetically so onboarding feels epic."},"stats":{"attack":45,"defense":55,"luck":70,"support":85,"speed":65},"skills":[{"name":"Glyph Lessons","type":"utility","cooldown":30,"aura_cost":22,"effects":["unlock_passive","knowledge_rune_spend"],"rationale":"Lets designers gate mechanics behind narrative progress while rewarding curiosity."},{"name":"Golden Thesis","type":"buff","cooldown":18,"aura_cost":15,"effects":["perfect_parry_gold_rain","timing_indicator"],"rationale":"Encourages players to master parries by tying economy gains to skill expression."}],"acquisition":{"method":"Knowledge contract","costs":{"bond_sparks":15,"reputation_shards":20},"spawn_logic":"Appears after player completes three tutorial scrolls without damage."},"synergy":{"combos":["Clan Ascension","Economy rush setups"],"counters":["Silence debuffs"]},"visuals":{"palette":["#bba3ff","#fcecc9","#4d3aff"],"aura":"Orbiting holographic books synchronized with beats.","animation_notes":"Flip book pages as sequential sprite layers to emulate techno-calligraphy."}},
+      {"id":"shaniqua","name":"Shaniqua","rank":"S","role":"hybrid","summary":{"hook":"Technomancer with a mirrored light spirit.","gameplay":"Feeds, heals, blesses luck, and deploys drones tied to pets and robots.","why_it_matters":"She is the lynchpin for pet/tech builds, making rare drops predictable without servers."},"stats":{"attack":60,"defense":50,"luck":100,"support":90,"speed":75},"skills":[{"name":"Photon Pantry","type":"feed","cooldown":14,"aura_cost":18,"effects":["nanite_feed","stamina_overheal"],"rationale":"Ties nutrition to sci-fi visuals so feed loops look as hype as attacks."},{"name":"Halo Heal","type":"heal","cooldown":20,"aura_cost":28,"effects":["instant_mass_heal","cleanse"],"rationale":"Instant top-offs let designers script bullet-hell patterns without soft-locking casual players."},{"name":"Lucky Lattice","type":"buff","cooldown":25,"aura_cost":24,"effects":["drop_rate_increase","diversity_scaling"],"rationale":"Rewards mixed parties so players sample the whole roster."},{"name":"Servo Surge","type":"utility","cooldown":18,"aura_cost":26,"effects":["deploy_drones","inherit_pet_buffs"],"rationale":"Allows designers to reuse pet logic for temporary drones, saving dev time."}],"acquisition":{"method":"Light contract auction","costs":{"gold":2500,"reputation_shards":40},"spawn_logic":"Higher odds after three consecutive feed missions are completed."},"synergy":{"combos":["Carestorm","Pet Nova"],"counters":["Drone EMPs"]},"visuals":{"palette":["#ffec85","#ffe2ff","#7ef0ff"],"aura":"Dual silhouettes—physical body plus light spirit offset by 10px.","animation_notes":"Mirror every keyframe with a translucent duplicate to sell the guardian spirit."}},
+      {"id":"wavii","name":"Wavii","rank":"S","role":"striker","summary":{"hook":"Twin-gun drifter who bends light and shadow.","gameplay":"High burst DPS with rhythm-linked crit windows and stealth dashes.","why_it_matters":"Enables stylish no-hit clears and teaches players to chase performance bonuses."},"stats":{"attack":95,"defense":45,"luck":70,"support":30,"speed":90},"skills":[{"name":"Eclipse Volley","type":"attack","cooldown":10,"aura_cost":30,"effects":["charged_barrage","crit_scaling"],"rationale":"Lets players dump aura into spectacular bursts that feel anime-tier."},{"name":"Hat Trick Feint","type":"utility","cooldown":16,"aura_cost":12,"effects":["teleport_dash","stealth_brief"],"rationale":"Stealth moments justify his mercenary mystique and reward precision."},{"name":"Dreadlock Anthem","type":"buff","cooldown":22,"aura_cost":20,"effects":["rhythm_damage_buff","music_sync"],"rationale":"Encourages players to align attacks with soundtrack beats for higher skill ceiling."}],"acquisition":{"method":"Mercenary duel","costs":{"battle_bonds":3},"spawn_logic":"Chance spikes after a flawless room clear."},"synergy":{"combos":["Gun Eclipse (with Jae Reload + A1 Kush)","Brawler Choir setups"],"counters":["Anti-crit armor"]},"visuals":{"palette":["#1b1b1b","#ffcc00","#6be4ff"],"aura":"Yin-yang muzzle flashes trailing from dual pistols.","animation_notes":"Layer dreadlocks as separate sprites to exaggerate motion arcs."}},
+      {"id":"jae-reload","name":"Jae Reload","rank":"S","role":"striker","summary":{"hook":"Mirrored gunner who resonates with A1 Kush's destiny.","gameplay":"Synchronizes dual shots, freezes time zones, and amplifies when allies share his sprite DNA.","why_it_matters":"Gives designers a lever to reward duo compositions without coding bespoke encounters."},"stats":{"attack":90,"defense":50,"luck":65,"support":35,"speed":85},"skills":[{"name":"Reload Rapture","type":"buff","cooldown":14,"aura_cost":18,"effects":["instant_ammo","attack_boost"],"rationale":"Keeps gunner rotations fluid so canvas demos never feel sluggish."},{"name":"Crossfire Fate","type":"attack","cooldown":12,"aura_cost":26,"effects":["dual_line_pierce","armor_shred"],"rationale":"Wide piercing shots make mob waves cinematic without extra enemy logic."},{"name":"Pulse Jam","type":"utility","cooldown":28,"aura_cost":24,"effects":["bullet_time_field","enemy_slow"],"rationale":"Localized slow zones let players appreciate sprite effects at full detail."}],"acquisition":{"method":"Event recruit","costs":{"reputation_shards":35},"spawn_logic":"Chance rises when Wavii or A1 Kush already ride along."},"synergy":{"combos":["Gun Eclipse","Echo of A1 passive"],"counters":["Time-lock traps"]},"visuals":{"palette":["#ff9c54","#5630ff","#151515"],"aura":"Neon copper line art overlaying the A1 rig.","animation_notes":"Reuse A1 sprite sheet but recolor via shader mask for production speed."}},
+      {"id":"a1-kush","name":"A1 Kush","rank":"S","role":"striker","summary":{"hook":"Gun-sword legend who can secretly reach SSS rank.","gameplay":"Transforms at 50% HP, unleashing five insane skills that shred timelines.","why_it_matters":"Acts as the aspirational DPS for auction economy loops and hidden evolutions."},"stats":{"attack":98,"defense":70,"luck":60,"support":40,"speed":80},"skills":[{"name":"Meteoric Slide","type":"attack","cooldown":8,"aura_cost":20,"effects":["gap_close","trail_damage"],"rationale":"Keeps melee pressure high despite canvas grid limitations."},{"name":"Blade Sonata","type":"attack","cooldown":14,"aura_cost":28,"effects":["combo_hits","stance_swap"],"rationale":"Defines his hybrid gun-sword identity so players feel the weapon fusion."},{"name":"Singularity Burst","type":"attack","cooldown":25,"aura_cost":40,"effects":["aoe_implosion","armor_break"],"rationale":"Provides the late-game nuke designers expect from a secret evolution."},{"name":"Kush Counterseal","type":"utility","cooldown":18,"aura_cost":22,"effects":["perfect_parry","reflect"],"rationale":"Rewards skillful defense to trigger his evolution faster."},{"name":"Nebula Metamorph","type":"buff","cooldown":60,"aura_cost":50,"effects":["sss_transform","afterimage"],"rationale":"Transformation at 50% HP sells the anime surge moment without new sprites."}],"acquisition":{"method":"Secret auction","costs":{"gold":5000,"clan_relics":2},"spawn_logic":"Low odds caravan event; guarantee after clearing Voidgreen stealth challenge."},"synergy":{"combos":["Gun Eclipse","Brawler Choir","Solo Resonance with Modelo"],"counters":["Anti-transform seals"]},"visuals":{"palette":["#8233ff","#ff4d88","#1b0036"],"aura":"Violet energy ribs that flare into translucent afterimages at 50% HP.","animation_notes":"Blend modes should shift to additive when transformation triggers."}},
+      {"id":"jeff","name":"Jeff","rank":"SSSS","role":"hybrid","summary":{"hook":"Origin architect who rewrites arenas mid-battle.","gameplay":"Controls time, overrides AI, and mirrors A1 Kush with godlike authority.","why_it_matters":"His scarcity and power justify the late-game grind while rewarding honorable play."},"stats":{"attack":100,"defense":95,"luck":100,"support":85,"speed":90},"skills":[{"name":"Creator Override","type":"utility","cooldown":45,"aura_cost":50,"effects":["rewrite_ai","arena_freeze"],"rationale":"Lets devs script jaw-dropping set pieces without touching enemy code."},{"name":"Codeblaze","type":"attack","cooldown":20,"aura_cost":35,"effects":["time_stop_strike","debug_damage"],"rationale":"Visualizes his status as the game's creator through glitch-flame slashes."},{"name":"Founder's Blessing","type":"buff","cooldown":60,"aura_cost":40,"effects":["developer_debug_boost","party_invuln_short"],"rationale":"Acts as a victory lap ability once players prove mastery."}],"acquisition":{"method":"Mythic spawn","costs":{"gold":10000,"clan_relics":5,"honor_score":100},"spawn_logic":"1% chance after five flawless days with no failed citizens or hungry pets."},"synergy":{"combos":["Clan Ascension","Creator's Eclipse event"],"counters":["None—balance handled via scarcity"]},"visuals":{"palette":["#ffffff","#00f6ff","#ff6ad5"],"aura":"Circuit glyph cloak with four spectral quills orbiting.","animation_notes":"Trigger mild camera shake on every entrance frame to signal meta power."}},
+      {"id":"liam","name":"Liam","rank":"E","role":"striker","summary":{"hook":"Jeff's hunter son chasing his first big break.","gameplay":"Early ranged unit that scales with morale and Jeff's mentorship.","why_it_matters":"Child-friendly entry point that also seeds twin synergy tutorials."},"stats":{"attack":45,"defense":30,"luck":40,"support":25,"speed":55},"skills":[{"name":"Ambition Shot","type":"attack","cooldown":6,"aura_cost":8,"effects":["morale_scaled_damage"],"rationale":"Helps new players understand morale without reading heavy tooltips."},{"name":"Twin Spark","type":"buff","cooldown":18,"aura_cost":12,"effects":["share_damage_with_leo"],"rationale":"Promotes deploying Liam + Leo together for emotional payoff."}],"acquisition":{"method":"Tutorial reward","costs":{"bond_sparks":0},"spawn_logic":"Auto-joins once player crafts first wooden bow."},"synergy":{"combos":["Twin Guard","Clan Rally"],"counters":["Fear debuffs"]},"visuals":{"palette":["#ffdf7e","#6fb1ff","#333333"],"aura":"Scarf trailing light to show motion study.","animation_notes":"Animate scarf separately to help depict youthful energy."}},
+      {"id":"leo","name":"Leo","rank":"E","role":"striker","summary":{"hook":"Calm twin who maps weak points before striking.","gameplay":"Marks targets and halves damage taken by Liam when both are deployed.","why_it_matters":"Teaches debuffing and protection within a single family story beat."},"stats":{"attack":40,"defense":35,"luck":35,"support":30,"speed":50},"skills":[{"name":"Precision Slash","type":"attack","cooldown":7,"aura_cost":9,"effects":["mark_target","weakspot_multiplier"],"rationale":"Introduces mark mechanics early so late-game enemies can leverage them."},{"name":"Twin Guard","type":"utility","cooldown":16,"aura_cost":10,"effects":["share_damage","counter_window"],"rationale":"Protects Liam while showcasing counter tutorials."}],"acquisition":{"method":"Story unlock","costs":{"bond_sparks":0},"spawn_logic":"Joins alongside Liam but becomes playable after counter tutorial."},"synergy":{"combos":["Twin Guard","Clan Rally"],"counters":["Silence traps"]},"visuals":{"palette":["#8fd1ff","#ffe29a","#1f1f1f"],"aura":"Twin blade arcs forming minimalist chakra patterns.","animation_notes":"Use thin-line energy trails to hint at ninja inspiration without copying."}},
+      {"id":"justin","name":"Justin","rank":"C","role":"support","summary":{"hook":"Middle sibling who rallies the clan with charisma.","gameplay":"Buffers Jeff descendants and shields allied pets.","why_it_matters":"Bridges the power gap between rookies and legends via morale play."},"stats":{"attack":55,"defense":45,"luck":50,"support":80,"speed":60},"skills":[{"name":"Clan Rally","type":"buff","cooldown":15,"aura_cost":18,"effects":["descendant_attack_buff","stacking_with_party_size"],"rationale":"Encourages players to field multiple Jeff relatives to see narrative payoffs."},{"name":"Pulse Guard","type":"utility","cooldown":25,"aura_cost":16,"effects":["pet_barrier","lethal_save_once"],"rationale":"Protects Missy/Phoenix builds so support mains remain viable."}],"acquisition":{"method":"Hero quest","costs":{"bond_sparks":5},"spawn_logic":"Reward for completing three citizen rescues."},"synergy":{"combos":["Clan Ascension","Pet Nova"],"counters":["Anti-buff sigils"]},"visuals":{"palette":["#ffb347","#ffccff","#2b2b2b"],"aura":"Floating diagrams projecting his battle plans.","animation_notes":"Overlay translucent HUD elements during skill casts to show tactics."}},
+      {"id":"freddie","name":"Freddie","rank":"A","role":"tank","summary":{"hook":"Granddad mentor who still spars every dawn.","gameplay":"Shares defense with allies and unlocks counter-training quests.","why_it_matters":"Raises the skill ceiling without punishing casuals thanks to optional drills."},"stats":{"attack":70,"defense":95,"luck":55,"support":65,"speed":50},"skills":[{"name":"Legacy Stance","type":"buff","cooldown":20,"aura_cost":22,"effects":["share_defense","guard_break_resist"],"rationale":"Gives fragile allies breathing room during spike encounters."},{"name":"Old Guard Drill","type":"utility","cooldown":35,"aura_cost":18,"effects":["unlock_parry_window","quest_hook"],"rationale":"Unlockable parry windows reward players who invest time in mastery quests."}],"acquisition":{"method":"Mentor trial","costs":{"reputation_shards":15},"spawn_logic":"Fight him in training pit after assembling three family members."},"synergy":{"combos":["Clan Ascension","Brawler Choir"],"counters":["Armor pierce curse"]},"visuals":{"palette":["#d7b890","#4a2e1f","#f0d7a7"],"aura":"Hexagonal shock tiles on every stomp.","animation_notes":"Punch impacts should spawn DBZ-style line bursts for nostalgia."}},
+      {"id":"missy","name":"Missy","rank":"SS","role":"pet","summary":{"hook":"Reality-warping feline sentinel.","gameplay":"Stacks shields, assassinates targets, and heals via astral purrs.","why_it_matters":"Pet mains get end-game relevance without juggling server logic."},"stats":{"attack":85,"defense":80,"luck":75,"support":70,"speed":90},"skills":[{"name":"Ninefold Horizon","type":"buff","cooldown":16,"aura_cost":20,"effects":["nine_stack_shield","barrier_pulses"],"rationale":"Nine-stack shield telegraphs her mythic status while being easy to parse."},{"name":"Purrfect Execution","type":"attack","cooldown":12,"aura_cost":22,"effects":["priority_strike","bleed"],"rationale":"Assassin bursts prevent support-heavy parties from feeling passive."},{"name":"Astral Comfort","type":"heal","cooldown":20,"aura_cost":18,"effects":["HoT","pet_synergy"],"rationale":"Adds regen that fits her comforting aura while supporting Phoenix builds."}],"acquisition":{"method":"Glyph puzzle","costs":{"bond_sparks":30},"spawn_logic":"Decode cat-scratch riddles scattered across towns."},"synergy":{"combos":["Pet Nova","Carestorm"],"counters":["Curse collars"]},"visuals":{"palette":["#f8f6ff","#ff96d5","#6b5bff"],"aura":"Nebula fur with diagonal energy slashes.","animation_notes":"Use screen-splitting claw effects to nod at demon-slayer inspirations."}},
+      {"id":"phoenix","name":"Phoenix","rank":"A","role":"pet","summary":{"hook":"Flame-touched feline partner to Missy.","gameplay":"Stacks burns, repositions allies, and amplifies when Shaniqua is nearby.","why_it_matters":"Provides elemental variety for pet squads without external dependencies."},"stats":{"attack":75,"defense":55,"luck":65,"support":50,"speed":85},"skills":[{"name":"Sunrise Reverb","type":"attack","cooldown":9,"aura_cost":14,"effects":["burn_trail","DoT"],"rationale":"Persistent burn trails make arenas feel alive and reward kiting."},{"name":"Molten Leap","type":"utility","cooldown":14,"aura_cost":16,"effects":["ally_reposition","shockwave_knockback"],"rationale":"Movement assist keeps slow supports safe without complex pathfinding."}],"acquisition":{"method":"Pet bond quest","costs":{"bond_sparks":12},"spawn_logic":"Complete Shaniqua drone upgrade mission."},"synergy":{"combos":["Pet Nova","Carestorm variants"],"counters":["Water seals"]},"visuals":{"palette":["#ffb347","#ff512f","#ffd479"],"aura":"Ash trails that form kanji-inspired motifs.","animation_notes":"Trail particles should linger for 0.5s to emphasize burn pathing."}},
+      {"id":"phantom-phoenix","name":"Phantom Phoenix","rank":"A","role":"pet","summary":{"hook":"Ethereal evolution that slips between realms.","gameplay":"Only two skills, both devastating aura amplifiers.","why_it_matters":"Shows how minimal kits can still feel legendary through aura manipulation."},"stats":{"attack":80,"defense":60,"luck":85,"support":55,"speed":95},"skills":[{"name":"Spectral Rift","type":"buff","cooldown":18,"aura_cost":24,"effects":["double_aura_rates","phase_shift"],"rationale":"Doubles aura gains briefly so feed/heal beats can keep pace with S-tier damage."},{"name":"Oblivion Wings","type":"attack","cooldown":16,"aura_cost":26,"effects":["armor_ignore","phase_strike"],"rationale":"Piercing damage justifies its rarity without bloating skill counts."}],"acquisition":{"method":"Pet evolution","costs":{"bond_sparks":20,"phoenix_essence":1},"spawn_logic":"Evolve Phoenix after completing aura resonance trial."},"synergy":{"combos":["Pet Nova","Aura rush builds"],"counters":["Phase-lock totems"]},"visuals":{"palette":["#d2f1ff","#9f7bff","#ffffff"],"aura":"Prismatic ghost outline flickering like glitch film.","animation_notes":"Alternate opacity every other frame to sell ethereal movement."}},
+      {"id":"modelo","name":"Modelo","rank":"S","role":"tank","summary":{"hook":"Bare-knuckle sage channeling kaleidoscope auras.","gameplay":"Momentum striker who strengthens near A1 Kush and roots bosses.","why_it_matters":"Delivers the solo-leveling x DBZ brawler fantasy using pure canvas particles."},"stats":{"attack":85,"defense":85,"luck":55,"support":50,"speed":70},"skills":[{"name":"Chromatic Barrage","type":"attack","cooldown":10,"aura_cost":25,"effects":["combo_counter","shield_convert"],"rationale":"Combo counters convert into shields so players feel rewarded for aggression."},{"name":"Solo Resonance","type":"buff","cooldown":22,"aura_cost":18,"effects":["stat_boost_when_no_melee","a1_kush_synergy"],"rationale":"Creates drama when he fights alone yet still encourages pairing with A1 Kush."},{"name":"Starlit Anchor","type":"utility","cooldown":24,"aura_cost":30,"effects":["root_boss","aura_lock"],"rationale":"Rooting bosses keeps cinematic combos centered on screen for canvas setups."}],"acquisition":{"method":"Auction + duel","costs":{"gold":3200,"battle_bonds":2},"spawn_logic":"Appears in Voidgreen auction rotation when Kush is in party."},"synergy":{"combos":["Brawler Choir","Gun Eclipse support"],"counters":["Knockback immunity"]},"visuals":{"palette":["#ff73fa","#6af0ff","#ffe66d"],"aura":"Kaleidoscope hex tiles erupting with each punch.","animation_notes":"Fists leave hex trails reminiscent of DBZ impact frames merged with hero academia lighting."}}
+    ];
+
+    // Game state
+    const gameState = {
+      heroes: [],
+      renderer: null,
+      animationState: 'idle',
+      frameCount: 0
+    };
+
+    // Initialize renderer
+    gameState.renderer = new SGCSpriteRenderer();
+
+    /**
+     * Load all hero data (using embedded data)
+     */
+    function loadHeroes() {
+      try {
+        // Use embedded hero data
+        gameState.heroes = EMBEDDED_HEROES;
+        
+        console.log(`Loaded ${gameState.heroes.length} heroes`);
+        renderHeroGrid();
+      } catch (error) {
+        console.error('Error loading heroes:', error);
+        document.getElementById('heroGrid').innerHTML = 
+          `<div class="error">Error loading heroes: ${error.message}</div>`;
+      }
+    }
+
+    /**
+     * Render hero grid
+     */
+    function renderHeroGrid() {
+      const grid = document.getElementById('heroGrid');
+      const rankFilter = document.getElementById('rankFilter').value;
+      const roleFilter = document.getElementById('roleFilter').value;
+
+      // Filter heroes
+      let filteredHeroes = gameState.heroes;
+      if (rankFilter !== 'all') {
+        filteredHeroes = filteredHeroes.filter(h => h.rank === rankFilter);
+      }
+      if (roleFilter !== 'all') {
+        filteredHeroes = filteredHeroes.filter(h => h.role === roleFilter);
+      }
+
+      // Clear grid
+      grid.innerHTML = '';
+
+      // Create cards for each hero
+      filteredHeroes.forEach((hero, index) => {
+        const card = createHeroCard(hero, index);
+        grid.appendChild(card);
+      });
+
+      if (filteredHeroes.length === 0) {
+        grid.innerHTML = '<div class="error">No heroes match the selected filters.</div>';
+      }
+    }
+
+    /**
+     * Create hero card element
+     */
+    function createHeroCard(hero, index) {
+      const card = document.createElement('div');
+      card.className = `hero-card role-${hero.role}`;
+
+      // Calculate position for grid layout
+      const cols = Math.ceil(Math.sqrt(gameState.heroes.length));
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+      const spacing = 250;
+      const startX = 150;
+      const startY = 150;
+
+      // Create canvas
+      const canvasContainer = document.createElement('div');
+      canvasContainer.className = 'hero-canvas-container';
+      const canvas = document.createElement('canvas');
+      canvas.className = 'hero-canvas';
+      canvas.width = 150;
+      canvas.height = 150;
+      canvasContainer.appendChild(canvas);
+
+      // Hero info
+      const name = document.createElement('div');
+      name.className = 'hero-name';
+      name.textContent = hero.name;
+
+      const rank = document.createElement('div');
+      rank.className = `hero-rank rank-${hero.rank}`;
+      rank.textContent = `[${hero.rank}]`;
+
+      const role = document.createElement('div');
+      role.className = 'hero-role';
+      role.textContent = hero.role.toUpperCase();
+
+      const stats = document.createElement('div');
+      stats.className = 'hero-stats';
+      if (hero.stats) {
+        stats.textContent = `ATK: ${hero.stats.attack} | DEF: ${hero.stats.defense} | SPD: ${hero.stats.speed}`;
+      }
+
+      // Assemble card
+      card.appendChild(canvasContainer);
+      card.appendChild(name);
+      card.appendChild(rank);
+      card.appendChild(role);
+      card.appendChild(stats);
+
+      // Setup hero object for rendering
+      const heroObj = {
+        ...hero,
+        x: startX + col * spacing,
+        y: startY + row * spacing,
+        state: gameState.animationState,
+        direction: 'down',
+        scale: 1.0,
+        animFrame: 0
+      };
+
+      // Render loop for this hero
+      const ctx = canvas.getContext('2d');
+      const camera = { x: 0, y: 0 };
+      let animFrame = 0;
+
+      function renderHero() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Center the hero in the canvas
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        heroObj.x = centerX;
+        heroObj.y = centerY;
+        heroObj.animFrame = animFrame;
+        heroObj.state = gameState.animationState;
+        
+        gameState.renderer.render(ctx, heroObj, camera);
+        
+        animFrame++;
+        requestAnimationFrame(renderHero);
+      }
+
+      renderHero();
+
+      return card;
+    }
+
+    /**
+     * Setup event listeners
+     */
+    function setupEventListeners() {
+      document.getElementById('rankFilter').addEventListener('change', renderHeroGrid);
+      document.getElementById('roleFilter').addEventListener('change', renderHeroGrid);
+      document.getElementById('animationState').addEventListener('change', (e) => {
+        gameState.animationState = e.target.value;
+        renderHeroGrid();
+      });
+    }
+
+    /**
+     * Initialize
+     */
+    function init() {
+      setupEventListeners();
+      loadHeroes();
+    }
+
+    // Start when page loads
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
+

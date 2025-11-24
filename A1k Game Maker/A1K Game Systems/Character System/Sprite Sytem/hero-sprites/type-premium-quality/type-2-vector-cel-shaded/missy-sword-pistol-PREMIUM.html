@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missy Sword & Pistol - PREMIUM Vector Cel-Shaded</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #2a1a0a 50%, #0a0a0a 100%);
+    color: #ffaa00;
+    font-family: 'Orbitron', 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #container { display: flex; gap: 40px; max-width: 1600px; position: relative; }
+  #canvas-wrapper {
+    flex-shrink: 0;
+    position: relative;
+    filter: drop-shadow(0 20px 60px rgba(255, 136, 0, 0.5));
+  }
+  canvas {
+    border: 3px solid #ff8800;
+    background: #000;
+    box-shadow: 0 0 40px rgba(255, 136, 0, 0.4), inset 0 0 20px rgba(255, 136, 0, 0.1);
+  }
+  #controls {
+    background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(42, 26, 10, 0.95) 100%);
+    border: 3px solid #ff8800;
+    padding: 30px;
+    width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  }
+  h1 {
+    font-size: 16px;
+    margin-bottom: 25px;
+    color: #ff8800;
+    border-bottom: 3px solid #ff8800;
+    padding-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.8);
+    letter-spacing: 2px;
+  }
+  .control-group { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 10px;
+    color: #cc8800;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  select, button {
+    width: 100%;
+    padding: 12px;
+    background: #1a1a0a;
+    border: 2px solid #cc6600;
+    color: #ffaa00;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  select:hover, button:hover {
+    border-color: #ff8800;
+    background: #2a1a0a;
+    box-shadow: 0 0 10px rgba(255, 136, 0, 0.3);
+  }
+  button { margin-top: 10px; background: #2a1a0a; }
+  button:active { transform: scale(0.98); }
+  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info {
+    font-size: 9px;
+    color: #cc8800;
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 2px solid #cc6600;
+    line-height: 1.8;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 15px;
+  }
+  .stat {
+    background: rgba(255, 136, 0, 0.05);
+    padding: 10px;
+    border: 2px solid #cc6600;
+  }
+  .stat-label { font-size: 8px; color: #cc8800; }
+  .stat-value { font-size: 14px; color: #ff8800; font-weight: bold; margin-top: 4px; }
+  .premium-badge {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    padding: 8px 16px;
+    font-size: 9px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.8);
+    z-index: 10;
+    animation: pulse 2s infinite;
+    font-weight: bold;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-wrapper">
+      <div class="premium-badge">★ PREMIUM ★</div>
+      <canvas id="canvas" width="200" height="200"></canvas>
+    </div>
+    <div id="controls">
+      <h1>😺 MISSY SWORD PISTOL VECTOR PREMIUM</h1>
+      <div class="control-group">
+        <label>⚡ ANIMATION STATE</label>
+        <select id="animState">
+          <option value="idle">IDLE - Breathing</option>
+          <option value="walk">WALK - 8-Frame Cycle</option>
+          <option value="attack">ATTACK - Dual Combo</option>
+          <option value="jump">JUMP - Air Dash</option>
+          <option value="hurt">HURT - Damage React</option>
+          <option value="victory">VICTORY - Pose</option>
+          <option value="special">SPECIAL - Angel Strike</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>🎨 COLOR PALETTE</label>
+        <select id="palette">
+          <option value="angelic">👼 Angelic (Orange/Pink)</option>
+          <option value="shadow">🌙 Shadow (Purple/Dark)</option>
+          <option value="divine">✨ Divine (Gold/White)</option>
+          <option value="forest">🌲 Forest (Green/Brown)</option>
+          <option value="flame">🔥 Flame (Red/Orange)</option>
+          <option value="frost">❄️ Frost (Cyan/White)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>⚙️ SPEED CONTROL</label>
+        <select id="speed">
+          <option value="0.25">0.25X Ultra Slow</option>
+          <option value="0.5">0.5X Slow</option>
+          <option value="1" selected>1X Normal</option>
+          <option value="1.5">1.5X Fast</option>
+          <option value="2">2X Turbo</option>
+          <option value="3">3X Ultra</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>🔍 DISPLAY SCALE</label>
+        <select id="scale">
+          <option value="2">2X (400px)</option>
+          <option value="2.5">2.5X (500px)</option>
+          <option value="3" selected>3X (600px)</option>
+          <option value="3.5">3.5X (700px)</option>
+          <option value="4">4X (800px)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>💾 EXPORT OPTIONS</label>
+        <div class="btn-group">
+          <button id="exportFrame">PNG Frame</button>
+          <button id="exportSheet">Sprite Sheet</button>
+        </div>
+        <button id="exportJSON">Export JSON Data</button>
+        <button id="exportGIF">Export Animated GIF</button>
+      </div>
+      <div class="info">
+        <strong>★ PREMIUM TYPE 2 VECTOR CEL-SHADED ★</strong><br>
+        Cat Angel Hybrid Style<br><br>
+        ✓ RESOLUTION: 200×200 Vector<br>
+        ✓ BLACK CAT + ORANGE HALO<br>
+        ✓ PINK WINGS WITH ANIMATION<br>
+        ✓ BRIGHT GREEN GLOWING EYE<br>
+        ✓ CURVED TAIL + CAT EARS<br>
+        ✓ PISTOL (LEFT) + SWORD (RIGHT)<br>
+        ✓ ENHANCED ANIMATIONS (12 FRAMES)<br>
+        ✓ CEL-SHADED OUTLINES<br>
+        ✓ FRAME RATE: 60FPS<br><br>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">FRAME</div>
+            <div class="stat-value" id="frameCount">0/12</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">FPS</div>
+            <div class="stat-value" id="fpsCount">60</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">QUALITY</div>
+            <div class="stat-value">★★★★★</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let currentAnim = 'idle';
+    let currentFrame = 0;
+    let frameTimer = 0;
+    let animSpeed = 1;
+    let palette = 'angelic';
+    let lastTime = 0;
+    let fps = 60;
+    let frameCount = 0;
+    let lastFpsTime = 0;
+
+    const palettes = {
+      angelic: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#1a1a1a', '#2a2a2a', '#3a3a3a'], weapon: ['#884400', '#ff8800', '#ffaa66'], halo: '#FF8800', wings: '#FFD4E0' },
+      shadow: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#0a0a0a', '#1a1a2a', '#2a2a3a'], weapon: ['#330033', '#9900ff', '#cc66ff'], halo: '#9900ff', wings: '#6633cc' },
+      divine: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#3a3a2a', '#5a5a4a', '#7a7a6a'], weapon: ['#cc9900', '#ffcc00', '#ffee66'], halo: '#ffcc00', wings: '#ffffcc' },
+      forest: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#1a3a1a', '#2a5a2a', '#3a7a3a'], weapon: ['#336633', '#00ff00', '#66ff66'], halo: '#88cc00', wings: '#ccffaa' },
+      flame: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#2a0a0a', '#4a1a1a', '#6a2a2a'], weapon: ['#880000', '#ff0000', '#ff6666'], halo: '#ff4400', wings: '#ffaa88' },
+      frost: { skin: ['#8B4513', '#A0522D', '#CD853F'], clothes: ['#1a2a3a', '#2a4a6a', '#3a6a9a'], weapon: ['#0066aa', '#00ccff', '#66ffff'], halo: '#00ddff', wings: '#ccffff' }
+    };
+
+    const animations = {
+      idle: { frames: 8, frameTime: 400, loop: true },
+      walk: { frames: 8, frameTime: 100, loop: true },
+      attack: { frames: 6, frameTime: 80, loop: false },
+      jump: { frames: 8, frameTime: 100, loop: false },
+      hurt: { frames: 4, frameTime: 150, loop: false },
+      victory: { frames: 8, frameTime: 200, loop: true },
+      special: { frames: 12, frameTime: 60, loop: false }
+    };
+
+    function drawMissyPremium(frame, anim) {
+      const pal = palettes[palette];
+      const centerX = 100;
+      const centerY = 100;
+      
+      let bobY = 0, legOffset = 0, gunRecoil = 0, swordSwing = 0, jumpHeight = 0;
+      let wingFlap = 0, tailSway = 0, haloGlow = 0;
+      
+      if (anim === 'idle') {
+        bobY = Math.sin(frame / 4 * Math.PI) * 3;
+        wingFlap = Math.sin(frame / 4 * Math.PI) * 3;
+        tailSway = Math.sin(frame / 4 * Math.PI + Math.PI/2) * 5;
+        haloGlow = (Math.sin(frame / 3 * Math.PI) + 1) * 0.5;
+      } else if (anim === 'walk') {
+        bobY = Math.abs(Math.sin(frame / 4 * Math.PI)) * 4;
+        legOffset = Math.sin(frame / 4 * Math.PI) * 6;
+        wingFlap = Math.sin(frame / 2 * Math.PI) * 5;
+        tailSway = Math.sin(frame / 4 * Math.PI) * 6;
+      } else if (anim === 'attack') {
+        gunRecoil = frame < 3 ? 5 : 0;
+        swordSwing = Math.sin((frame / 6) * Math.PI) * 50;
+        haloGlow = 0.8;
+      } else if (anim === 'jump') {
+        jumpHeight = frame < 4 ? frame * 12 : (8 - frame) * 12;
+        wingFlap = Math.sin(frame / 2 * Math.PI) * 6;
+      } else if (anim === 'hurt') {
+        bobY = (frame % 2) * 5;
+        wingFlap = -4;
+      } else if (anim === 'victory') {
+        bobY = Math.sin(frame / 4 * Math.PI) * 4;
+        wingFlap = 4;
+        haloGlow = 1;
+      } else if (anim === 'special') {
+        swordSwing = Math.sin((frame / 12) * Math.PI * 2) * 70;
+        gunRecoil = frame % 3 === 0 ? 6 : 0;
+        wingFlap = Math.sin(frame / 3 * Math.PI) * 7;
+        haloGlow = 1;
+        bobY = Math.sin(frame / 6 * Math.PI) * 5;
+      }
+
+      ctx.clearRect(0, 0, 200, 200);
+      const y = centerY - bobY - jumpHeight;
+
+      // Angelic aura
+      if (haloGlow > 0.5) {
+        ctx.fillStyle = pal.halo;
+        ctx.globalAlpha = 0.2;
+        ctx.beginPath();
+        ctx.arc(centerX, y, 60, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // Legs
+      const legGrad = ctx.createLinearGradient(centerX - 15, y + 30, centerX + 15, y + 30);
+      legGrad.addColorStop(0, pal.clothes[0]);
+      legGrad.addColorStop(0.5, pal.clothes[1]);
+      legGrad.addColorStop(1, pal.clothes[0]);
+      ctx.fillStyle = legGrad;
+      ctx.fillRect(centerX - 15, y + 30 + legOffset, 12, 35);
+      ctx.fillRect(centerX + 3, y + 30 - legOffset, 12, 35);
+      
+      // Pink wings
+      ctx.fillStyle = pal.wings;
+      ctx.shadowColor = pal.wings;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.ellipse(centerX - 35, y + 15 + wingFlap, 15, 25, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Torso
+      const torsoGrad = ctx.createLinearGradient(centerX - 25, y + 5, centerX + 25, y + 5);
+      torsoGrad.addColorStop(0, pal.clothes[0]);
+      torsoGrad.addColorStop(0.5, pal.clothes[2]);
+      torsoGrad.addColorStop(1, pal.clothes[0]);
+      ctx.fillStyle = torsoGrad;
+      ctx.beginPath();
+      ctx.roundRect(centerX - 25, y + 5, 50, 30, 5);
+      ctx.fill();
+      
+      // Orange chest detail
+      ctx.fillStyle = pal.halo;
+      if (haloGlow > 0.5) {
+        ctx.shadowColor = pal.halo;
+        ctx.shadowBlur = 10;
+      }
+      ctx.fillRect(centerX - 10, y + 15, 20, 10);
+      ctx.shadowBlur = 0;
+      
+      // Orange halo
+      ctx.fillStyle = pal.halo;
+      if (haloGlow > 0.5) {
+        ctx.shadowColor = pal.halo;
+        ctx.shadowBlur = 15;
+      }
+      ctx.beginPath();
+      ctx.ellipse(centerX, y - 45, 35, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Cat head (black)
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(centerX, y - 10, 25, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Pointed cat ears
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.moveTo(centerX - 22, y - 25);
+      ctx.lineTo(centerX - 28, y - 38);
+      ctx.lineTo(centerX - 15, y - 30);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(centerX + 22, y - 25);
+      ctx.lineTo(centerX + 28, y - 38);
+      ctx.lineTo(centerX + 15, y - 30);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Bright GREEN eye
+      ctx.fillStyle = '#00FF00';
+      ctx.shadowColor = '#00FF00';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(centerX - 8, y - 5, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Black curved tail
+      const tailX = centerX + 20 + tailSway;
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.bezierCurveTo(tailX, y + 25, tailX + 15, y + 40, tailX + 10, y + 60);
+      ctx.stroke();
+      
+      // Arms (black paws)
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(centerX - 40, y + 12, 10, 22);
+      ctx.fillRect(centerX + 30, y + 12 + Math.floor(swordSwing/7), 10, 22);
+      
+      // PISTOL (left hand)
+      ctx.fillStyle = pal.weapon[0];
+      ctx.fillRect(centerX - 58 - gunRecoil, y + 20, 12, 8);
+      ctx.fillStyle = pal.weapon[2];
+      ctx.fillRect(centerX - 56 - gunRecoil, y + 22, 2, 4);
+      
+      // Muzzle flash
+      if (anim === 'attack' && frame < 3) {
+        ctx.fillStyle = pal.weapon[2];
+        ctx.fillRect(centerX - 62 - gunRecoil, y + 20, 4, 8);
+      }
+      
+      // SWORD (right hand)
+      ctx.save();
+      ctx.translate(centerX + 45, y + 15);
+      ctx.rotate((45 - swordSwing) * Math.PI / 180);
+      const swordGrad = ctx.createLinearGradient(0, -45, 0, 5);
+      swordGrad.addColorStop(0, pal.weapon[2]);
+      swordGrad.addColorStop(0.5, pal.weapon[1]);
+      swordGrad.addColorStop(1, pal.weapon[0]);
+      ctx.fillStyle = swordGrad;
+      ctx.fillRect(-3, -45, 6, 50);
+      ctx.fillStyle = pal.clothes[0];
+      ctx.fillRect(-4, 5, 8, 10);
+      ctx.restore();
+      
+      // Special angel strike
+      if (anim === 'special' && frame > 3 && frame < 9) {
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2 + (frame * 0.5);
+          const dist = 32 + (frame - 3) * 7;
+          const px = centerX + Math.cos(angle) * dist;
+          const py = y + Math.sin(angle) * dist;
+          ctx.fillStyle = pal.halo;
+          ctx.beginPath();
+          ctx.arc(px, py, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      // Outlines
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(centerX, y - 10, 25, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function animate(timestamp) {
+      if (!lastTime) lastTime = timestamp;
+      const deltaTime = timestamp - lastTime;
+      lastTime = timestamp;
+
+      frameCount++;
+      if (timestamp - lastFpsTime >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        lastFpsTime = timestamp;
+        document.getElementById('fpsCount').textContent = fps;
+      }
+
+      const anim = animations[currentAnim];
+      frameTimer += deltaTime * animSpeed;
+
+      if (frameTimer >= anim.frameTime) {
+        frameTimer = 0;
+        currentFrame++;
+        if (currentFrame >= anim.frames) {
+          currentFrame = anim.loop ? 0 : anim.frames - 1;
+        }
+        document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+      }
+
+      drawMissyPremium(currentFrame, currentAnim);
+      requestAnimationFrame(animate);
+    }
+
+    document.getElementById('animState').addEventListener('change', (e) => {
+      currentAnim = e.target.value;
+      currentFrame = 0;
+      frameTimer = 0;
+    });
+
+    document.getElementById('palette').addEventListener('change', (e) => {
+      palette = e.target.value;
+    });
+
+    document.getElementById('speed').addEventListener('change', (e) => {
+      animSpeed = parseFloat(e.target.value);
+    });
+
+    document.getElementById('scale').addEventListener('change', (e) => {
+      const scale = parseFloat(e.target.value);
+      canvas.style.width = (200 * scale) + 'px';
+      canvas.style.height = (200 * scale) + 'px';
+    });
+
+    document.getElementById('exportFrame').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `missy-swordpistol-PREMIUM-vector-${currentAnim}-f${currentFrame}-${palette}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    document.getElementById('exportSheet').addEventListener('click', () => {
+      const anim = animations[currentAnim];
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 200 * anim.frames;
+      tempCanvas.height = 200;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      for (let i = 0; i < anim.frames; i++) {
+        drawMissyPremium(i, currentAnim);
+        tempCtx.drawImage(canvas, i * 200, 0);
+      }
+
+      const link = document.createElement('a');
+      link.download = `missy-swordpistol-PREMIUM-vector-${currentAnim}-sheet-${palette}.png`;
+      link.href = tempCanvas.toDataURL('image/png');
+      link.click();
+
+      drawMissyPremium(currentFrame, currentAnim);
+    });
+
+    document.getElementById('exportJSON').addEventListener('click', () => {
+      const data = {
+        character: 'Missy (Sword & Pistol) - PREMIUM VECTOR CEL-SHADED',
+        type: 'Vector Cel-Shaded Enhanced',
+        version: '2.0 Premium',
+        resolution: '200x200',
+        animations: animations,
+        palettes: Object.keys(palettes),
+        currentState: {
+          animation: currentAnim,
+          frame: currentFrame,
+          palette: palette,
+          speed: animSpeed
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.download = `missy-swordpistol-PREMIUM-vector-data-${palette}.json`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    });
+
+    document.getElementById('exportGIF').addEventListener('click', () => {
+      alert('GIF export feature coming soon!');
+    });
+
+    canvas.style.width = '600px';
+    canvas.style.height = '600px';
+    animate(0);
+  </script>
+</body>
+</html>
+

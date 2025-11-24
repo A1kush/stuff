@@ -1,0 +1,122 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║              ⚗️ ALCHEMY SYSTEM - QUICK REFERENCE ⚗️              ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ HOW ALCHEMY WORKS:
+
+1. Buy items from 🏪 SHOP tab
+2. Items go to your 🎒 INVENTORY
+3. Items STAY in shop (buy unlimited!)
+4. Collect 3 items
+5. View in ⚗️ ALCHEMY tab
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔄 FUSION RECIPE (Tier Up):
+
+   Requirements: 3 SAME items (same type & rank)
+   
+   Example:
+   ┌─────────────────────────────────────────┐
+   │ Buy from Shop:                          │
+   │   • Iron Sword (150g) - C-Rank          │
+   │   • Iron Sword (150g) - C-Rank          │
+   │   • Iron Sword (150g) - C-Rank          │
+   │ Total: 450 gold                         │
+   │                                         │
+   │ Result: 1x B-Rank Sword (better stats!)│
+   └─────────────────────────────────────────┘
+
+   Progression:
+   C + C + C → B-Rank (stats x1.5)
+   B + B + B → A-Rank (stats x2.0)
+   A + A + A → S-Rank (stats x3.0)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ SPECIAL RECIPE (Premium):
+
+   Requirements: 
+   ┌─────────────────────────────────────────┐
+   │ Buy from Shop:                          │
+   │   • Iron Sword (150g) - C-Rank Gear     │
+   │   • Steel Blade (300g) - B-Rank Gear    │
+   │   • Pet Box (500g) - C-Rank Pet         │
+   │ Total: 950 gold                         │
+   │                                         │
+   │ Result: RANDOM premium reward!          │
+   │   • 30% B-Rank Gear                     │
+   │   • 30% B-Rank Pet                      │
+   │   • 20% Gift Key                        │
+   │   • 20% B-Rank Treasure Box             │
+   └─────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 ALCHEMY RECIPE (Treasure Box):
+
+   Requirements: ANY 3 items
+   
+   Example:
+   ┌─────────────────────────────────────────┐
+   │ Buy from Shop:                          │
+   │   • Str Ring (200g) - C-Rank            │
+   │   • Mana Pendant (220g) - C-Rank        │
+   │   • Iron Sword (150g) - C-Rank          │
+   │ Total: 570 gold                         │
+   │                                         │
+   │ Result: C-Rank Treasure Box             │
+   │   • 100-500 gold inside                 │
+   │   • 1-2 random items                    │
+   └─────────────────────────────────────────┘
+
+   Box Quality:
+   • Highest input C → C-Rank Box
+   • Highest input B → B-Rank Box
+   • Highest input A → A-Rank Box
+   • Highest input S → S-Rank Box (5K-15K gold!)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 BEGINNER'S GUIDE:
+
+   Step 1: Start with 10,000 gold
+   
+   Step 2: Try Fusion first!
+      • Go to Shop
+      • Buy 3x Iron Sword (150g each = 450g)
+      • Go to Alchemy tab
+      • See your 3 swords in inventory!
+   
+   Step 3: (Future update will add craft button)
+      • For now, inventory shows what you have
+      • Items are saved automatically
+      • Buy more to experiment!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ KEY FEATURES:
+
+   ✓ Items STAY in shop (unlimited purchases!)
+   ✓ Each purchase creates new inventory item
+   ✓ Inventory saves automatically
+   ✓ Rank-colored display (C=gray, B=blue, A=purple, S=gold)
+   ✓ Clear instructions in Alchemy tab
+   ✓ Works 100% offline!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 SEE ALSO:
+
+   • ALCHEMY_GUIDE.md - Full documentation
+   • TEST_RESULTS.md - Test verification
+   • QUICK_START.txt - How to run
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎮 DOUBLE-CLICK standalone.html TO TRY IT! 🎮
+

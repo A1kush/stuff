@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC and Enemy Showcase</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>NPC and Enemy Showcase</h1>
+    </header>
+    <main>
+        <section id="npc-showcase">
+            <h2>NPC Showcase</h2>
+            <div class="npc" id="npc1">
+                <h3>Name: Friendly Villager</h3>
+                <p>Rank: C Rank NPC</p>
+                <p>Description: A helpful villager who provides quests.</p>
+            </div>
+            <div class="npc" id="npc2">
+                <h3>Name: Wise Old Man</h3>
+                <p>Rank: B Rank NPC</p>
+                <p>Description: Offers sage advice and rare items.</p>
+            </div>
+        </section>
+        <section id="enemy-showcase">
+            <h2>Enemy Showcase</h2>
+            <div class="enemy" id="enemy1">
+                <h3>Name: Goblin Thief</h3>
+                <p>Rank: C Rank Villain</p>
+                <p>Description: A sneaky goblin that steals from travelers.</p>
+            </div>
+            <div class="enemy" id="enemy2">
+                <h3>Name: Dark Sorcerer</h3>
+                <p>Rank: A Rank Villain</p>
+                <p>Description: A powerful sorcerer who commands dark magic.</p>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 NPC and Enemy System</p>
+    </footer>
+    <script src="../src/utils/SpriteLoader.js"></script>
+    <script src="../src/core/GameIntegration.js"></script>
+    <script>
+        // Initialize the NPC and Enemy system
+        const gameIntegration = new GameIntegration();
+        gameIntegration.initialize();
+    </script>
+</body>
+</html>

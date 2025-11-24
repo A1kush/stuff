@@ -1,0 +1,29 @@
+{
+  "name": "npcs-and-enemies-system",
+  "version": "1.0.0",
+  "description": "Universal NPC and Enemy rank system that can be integrated into any HTML game",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc && npm run bundle",
+    "bundle": "node scripts/bundle.js",
+    "dev": "tsc --watch",
+    "serve": "npx http-server -p 8080 -c-1 .",
+    "demo": "npm run serve"
+  },
+  "keywords": [
+    "game",
+    "npc",
+    "enemy",
+    "rank-system",
+    "game-entities",
+    "html-games"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "http-server": "^14.1.1"
+  }
+}

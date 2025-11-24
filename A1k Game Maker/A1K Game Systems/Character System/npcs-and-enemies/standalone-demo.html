@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC & Enemy Rank System - Production Ready</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            color: #00ff00;
+            min-height: 100vh;
+            padding: 20px;
+            background-image:
+                radial-gradient(circle at 25% 25%, #001100 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, #001100 2px, transparent 2px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 2px solid #00ff00;
+            background: #000000;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #00aa00;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            text-shadow: 0 0 5px #00aa00;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .demo-card {
+            background: #001100;
+            border: 2px solid #00aa00;
+            padding: 25px;
+            border-radius: 0;
+            box-shadow: 0 0 10px rgba(0, 170, 0, 0.5);
+            position: relative;
+        }
+
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff00, #00aa00, #00ff00);
+        }
+
+        .demo-card h3 {
+            color: #00ff00;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-shadow: 0 0 5px #00ff00;
+            border-bottom: 1px solid #00aa00;
+            padding-bottom: 5px;
+        }
+
+        .demo-card p {
+            color: #00dd00;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 0.9em;
+        }
+
+        .game-area {
+            width: 100%;
+            height: 400px;
+            background: #000000;
+            border: 3px solid #00ff00;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #001100;
+            color: #00ff00;
+            border: 2px solid #00aa00;
+            padding: 12px 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            border-radius: 0;
+            font-size: 0.9em;
+        }
+
+        button:hover {
+            background: #00aa00;
+            color: #000000;
+            box-shadow: 0 0 10px rgba(0, 170, 0, 0.8);
+            transform: translateY(-1px);
+        }
+
+        button.secondary {
+            border-color: #aaaa00;
+            color: #ffff00;
+        }
+
+        button.secondary:hover {
+            background: #aaaa00;
+            color: #000000;
+        }
+
+        button.danger {
+            border-color: #aa0000;
+            color: #ff0000;
+        }
+
+        button.danger:hover {
+            background: #aa0000;
+            color: #000000;
+        }
+
+        .stats {
+            background: #001100;
+            padding: 15px;
+            border: 2px solid #00aa00;
+            margin-top: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 10px rgba(0, 170, 0, 0.3);
+        }
+
+        .stats h4 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px #00ff00;
+            font-size: 1.2em;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 2px 4px;
+            border: 2px solid;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: #000000;
+        }
+
+        .entity {
+            position: absolute;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .entity img {
+            width: 48px;
+            height: 48px;
+            border: 2px solid #00aa00;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 5px rgba(0, 170, 0, 0.5));
+        }
+
+        .entity:hover img {
+            border-color: #00ff00;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+            transform: scale(1.1);
+        }
+
+        .entity-info {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #001100;
+            padding: 8px 12px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            border: 2px solid #00aa00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 0 10px rgba(0, 170, 0, 0.5);
+        }
+
+        .entity:hover .entity-info {
+            opacity: 1;
+        }
+
+        .integration-code {
+            background: #001100;
+            border: 2px solid #00aa00;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+            box-shadow: inset 0 0 10px rgba(0, 170, 0, 0.3);
+        }
+
+        .integration-code pre {
+            margin: 0;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .copy-btn {
+            background: #00aa00 !important;
+            border: 2px solid #00ff00 !important;
+            color: #000000 !important;
+            margin-left: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn:hover {
+            background: #00ff00 !important;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8) !important;
+        }
+
+        /* HD Pixel Art Canvas Styling */
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Retro Gaming Effects */
+        @keyframes flicker {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .demo-card {
+            animation: flicker 4s infinite;
+        }
+
+        /* Scanlines Effect */
+        .game-area::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.03) 2px,
+                    rgba(0, 255, 0, 0.03) 4px);
+            pointer-events: none;
+        }
+
+        /* Control Groups for Advanced Features */
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #00ff00;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        select {
+            background: #000000;
+            color: #00ff00;
+            border: 2px solid #00aa00;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            width: 100%;
+            border-radius: 0;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        select:hover {
+            border-color: #00ff00;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .export-buttons button {
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
+            font-size: 0.8em;
+        }
+
+        /* Canvas Controls */
+        .canvas-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .canvas-controls button {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        #fps-counter,
+        #frame-counter {
+            color: #00aa00;
+            font-size: 0.9em;
+            font-family: 'Courier New', monospace;
+            margin-left: auto;
+            text-shadow: 0 0 5px #00aa00;
+        }
+
+        /* Rank Badge Colors */
+        .rank-badge.rank-c {
+            border-color: #a5b4fc;
+            color: #a5b4fc;
+        }
+
+        .rank-badge.rank-b {
+            border-color: #fbcfe8;
+            color: #fbcfe8;
+        }
+
+        .rank-badge.rank-s {
+            border-color: #fca5a5;
+            color: #fca5a5;
+        }
+    </style>
+    }
+
+    .copy-btn:hover {
+    background: #059669 !important;
+    }
+
+    @media (max-width: 768px) {
+    .demo-grid {
+    grid-template-columns: 1fr;
+    }
+
+    .controls {
+    flex-direction: column;
+    }
+
+    button {
+    width: 100%;
+    }
+    }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎮 NPC & Enemy Rank System</h1>
+        <p class="subtitle">Production-ready rank system for any HTML game • Works completely offline</p>
+
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h3>🎯 Quick Integration</h3>
+                <p>Add this system to any HTML game with just 3 lines of code. No server required, works offline.</p>
+                <div class="integration-code">
+                    <pre>&lt;script src="npc-rank-system.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const game = NPCRankSystem.createGame({ containerSelector: '#game' });
+  game.start();
+&lt;/script&gt;</pre>
+                    <button class="copy-btn" onclick="copyCode(this.previousElementSibling)">Copy</button>
+                </div>
+            </div>
+
+            <div class="demo-card">
+                <h3>⚡ Features</h3>
+                <p>• 7 Rank Tiers (E→SS)<br>• 15 Entity Categories<br>• Auto Stat Scaling<br>• 8 AI Behaviors<br>• Zero
+                    Dependencies<br>• TypeScript Ready</p>
+            </div>
+
+            <div class="demo-card">
+                <h3>🎮 Live Demo</h3>
+                <p>Try it out below! Click buttons to spawn entities, click entities to see their info.</p>
+                <div class="controls">
+                    <button onclick="spawnHero()">C Rank Hero</button>
+                    <button onclick="spawnEnemy()" class="secondary">B Rank Elite</button>
+                    <button onclick="spawnBoss()">S Rank Boss</button>
+                    <button onclick="clearAll()" class="danger">Clear All</button>
+                </div>
+            </div>
+            <div class="demo-card">
+                <h3>🎨 HD Pixel Art Controls</h3>
+                <p>Advanced sprite features with animations, palettes, scaling & export</p>
+
+                <!-- Animation Controls -->
+                <div class="control-group">
+                    <label for="animation-state">Animation State:</label>
+                    <select id="animation-state" aria-label="Animation State" onchange="changeAnimation(this.value)">
+                        <option value="idle">Idle</option>
+                        <option value="walk">Walk</option>
+                        <option value="attack">Attack</option>
+                    </select>
+                </div>
+
+                <!-- Color Palette Controls -->
+                <div class="control-group">
+                    <label for="color-palette">Color Palette:</label>
+                    <select id="color-palette" aria-label="Color Palette" onchange="changePalette(this.value)">
+                        <option value="default">Default</option>
+                        <option value="fire">Fire</option>
+                        <option value="ice">Ice</option>
+                        <option value="shadow">Shadow</option>
+                        <option value="light">Light</option>
+                        <option value="nature">Nature</option>
+                    </select>
+                </div>
+
+                <!-- Scale Controls -->
+                <div class="control-group">
+                    <label for="display-scale">Display Scale:</label>
+                    <select id="display-scale" aria-label="Display Scale" onchange="changeScale(this.value)">
+                        <option value="2">2x</option>
+                        <option value="3">3x</option>
+                        <option value="4">4x</option>
+                        <option value="5">5x</option>
+                    </select>
+                </div>
+
+                <!-- Export Controls -->
+                <div class="control-group">
+                    <label>Export Options:</label>
+                    <div class="export-buttons">
+                        <button onclick="exportPNG()" class="secondary">Export PNG</button>
+                        <button onclick="exportSpriteSheet()" class="secondary">Sprite Sheet</button>
+                        <button onclick="exportJSON()" class="secondary">JSON Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HD Pixel Art Canvas Demo -->
+        <div class="demo-card">
+            <h3>🎮 HD Pixel Art Canvas</h3>
+            <p>Real-time sprite rendering with 128x128 HD pixel art</p>
+            <div class="canvas-controls">
+                <button onclick="startAnimation()">Start Animation</button>
+                <button onclick="stopAnimation()" class="danger">Stop</button>
+                <button onclick="resetSprite()" class="secondary">Reset</button>
+                <span id="fps-counter">FPS: 0</span>
+                <span id="frame-counter">Frame: 0</span>
+            </div>
+            <canvas id="pixel-canvas" width="512" height="512"></canvas>
+        </div>
+
+        <div class="game-area" id="game-area">
+            <!-- Entities will spawn here -->
+        </div>
+
+        <div class="stats">
+            <h4>📊 Stats</h4>
+            <div>
+                <span class="rank-badge rank-c">C Rank</span>
+                <span class="rank-badge rank-b">B Rank</span>
+                <span class="rank-badge rank-s">S Rank</span>
+            </div>
+            <p id="entity-count">Entities: 0</p>
+        </div>
+    </div>
+
+    <!-- NPC & Enemy Rank System Bundle -->
+    <script>
+        // ===== RANK CONFIG =====
+        const RANK_TIERS = {
+            E: { id: 'E', label: 'E Rank', accentColor: '#cffafe', speedMultiplier: 0.75, powerMultiplier: 0.6, healthMultiplier: 0.7, rarityWeight: 1 },
+            D: { id: 'D', label: 'D Rank', accentColor: '#bae6fd', speedMultiplier: 0.85, powerMultiplier: 0.8, healthMultiplier: 0.85, rarityWeight: 2 },
+            C: { id: 'C', label: 'C Rank', accentColor: '#a5b4fc', speedMultiplier: 0.95, powerMultiplier: 1.0, healthMultiplier: 1.0, rarityWeight: 3 },
+            B: { id: 'B', label: 'B Rank', accentColor: '#fbcfe8', speedMultiplier: 1.05, powerMultiplier: 1.3, healthMultiplier: 1.2, rarityWeight: 5 },
+            A: { id: 'A', label: 'A Rank', accentColor: '#fcd34d', speedMultiplier: 1.15, powerMultiplier: 1.6, healthMultiplier: 1.5, rarityWeight: 8 },
+            S: { id: 'S', label: 'S Rank', accentColor: '#fca5a5', speedMultiplier: 1.25, powerMultiplier: 2.0, healthMultiplier: 1.8, rarityWeight: 13 },
+            SS: { id: 'SS', label: 'SS Rank', accentColor: '#f472b6', speedMultiplier: 1.35, powerMultiplier: 2.5, healthMultiplier: 2.2, rarityWeight: 21 }
+        };
+
+        const CATEGORY_CONFIG = {
+            hero: { label: 'Hero', color: '#60a5fa', icon: '⚔️' },
+            villain: { label: 'Villain', color: '#dc2626', icon: '☠️' },
+            npc: { label: 'NPC', color: '#10b981', icon: '👤' },
+            slayer: { label: 'Slayer', color: '#f59e0b', icon: '🗡️' },
+            hunter: { label: 'Hunter', color: '#84cc16', icon: '🏹' },
+            guardian: { label: 'Guardian', color: '#0ea5e9', icon: '🛡️' },
+            mage: { label: 'Mage', color: '#8b5cf6', icon: '🔮' },
+            assassin: { label: 'Assassin', color: '#6b7280', icon: '🗡️' },
+            support: { label: 'Support', color: '#06b6d4', icon: '💚' },
+            minion: { label: 'Minion', color: '#78716c', icon: '👾' },
+            elite: { label: 'Elite', color: '#ea580c', icon: '💀' },
+            boss: { label: 'Boss', color: '#dc2626', icon: '👹' },
+            pet: { label: 'Pet', color: '#ec4899', icon: '🐾' },
+            merchant: { label: 'Merchant', color: '#eab308', icon: '💰' },
+            crafter: { label: 'Crafter', color: '#a855f7', icon: '⚒️' }
+        };
+
+        function createRank(tier, category) {
+            const tierConfig = RANK_TIERS[tier];
+            const categoryConfig = CATEGORY_CONFIG[category];
+            return { tier, category, displayName: `${tierConfig.label} ${categoryConfig.label}` };
+        }
+
+        function getRankTierConfig(tier) { return RANK_TIERS[tier]; }
+        function getCategoryConfig(category) { return CATEGORY_CONFIG[category]; }
+
+        // ===== RANK SYSTEM =====
+        class RankSystem {
+            constructor() { }
+
+            static getInstance() {
+                if (!RankSystem.instance) RankSystem.instance = new RankSystem();
+                return RankSystem.instance;
+            }
+
+            createRank(tier, category) { return createRank(tier, category); }
+            getAllTiers() { return ['E', 'D', 'C', 'B', 'A', 'S', 'SS']; }
+            getAllCategories() { return ['hero', 'villain', 'npc', 'slayer', 'hunter', 'guardian', 'mage', 'assassin', 'support', 'minion', 'elite', 'boss', 'pet', 'merchant', 'crafter']; }
+
+            calculatePowerLevel(tier, baseLevel = 100) {
+                const config = getRankTierConfig(tier);
+                return Math.floor(baseLevel * config.powerMultiplier);
+            }
+
+            calculateHealth(tier, baseHealth = 100) {
+                const config = getRankTierConfig(tier);
+                return Math.floor(baseHealth * config.healthMultiplier);
+            }
+
+            calculateSpeed(tier, baseSpeed = 100) {
+                const config = getRankTierConfig(tier);
+                return Math.floor(baseSpeed * config.speedMultiplier);
+            }
+
+            compareRanks(tier1, tier2) {
+                const tiers = this.getAllTiers();
+                return tiers.indexOf(tier1) - tiers.indexOf(tier2);
+            }
+
+            formatRankName(tier, category) {
+                const rank = this.createRank(tier, category);
+                return rank.displayName;
+            }
+
+            getRankColor(tier) { return getRankTierConfig(tier).accentColor; }
+            getCategoryColor(category) { return getCategoryConfig(category).color; }
+        }
+
+        const rankSystem = RankSystem.getInstance();
+
+        // ===== ENTITY =====
+        class Entity {
+            constructor(config) {
+                this.id = config.id;
+                this.name = config.name;
+                this.rank = config.rank;
+                this.stats = { ...config.stats };
+                this.visuals = { ...config.visuals };
+                this.tags = config.tags || [];
+                this.description = config.description || '';
+                this.metadata = config.metadata || {};
+                this.position = { x: 0, y: 0 };
+                this.isActive = true;
+            }
+
+            applyRankModifiers() {
+                const tier = this.rank.tier;
+                const baseStats = { ...this.stats };
+                this.stats.health = rankSystem.calculateHealth(tier, baseStats.maxHealth);
+                this.stats.maxHealth = this.stats.health;
+                this.stats.power = rankSystem.calculatePowerLevel(tier, baseStats.power);
+                this.stats.speed = rankSystem.calculateSpeed(tier, baseStats.speed);
+            }
+
+            takeDamage(amount) {
+                const actualDamage = Math.max(0, amount - this.stats.defense);
+                this.stats.health = Math.max(0, this.stats.health - actualDamage);
+                if (this.stats.health <= 0) this.onDeath();
+            }
+
+            heal(amount) {
+                this.stats.health = Math.min(this.stats.maxHealth, this.stats.health + amount);
+            }
+
+            isAlive() { return this.stats.health > 0; }
+            onDeath() { this.isActive = false; }
+
+            update(deltaTime) { }
+
+            render(container) {
+                if (!this.element) this.element = this.createElement();
+                if (!container.contains(this.element)) container.appendChild(this.element);
+                this.updateElement();
+            }
+
+            createElement() {
+                const element = document.createElement('div');
+                element.className = `entity`;
+                element.dataset.entityId = this.id;
+                element.dataset.rank = this.rank.tier;
+                element.dataset.category = this.rank.category;
+
+                const img = document.createElement('img');
+                img.src = this.visuals.assetPath;
+                img.alt = this.name;
+                img.style.width = '48px';
+                img.style.height = '48px';
+                element.appendChild(img);
+
+                const info = document.createElement('div');
+                info.className = 'entity-info';
+                info.textContent = this.getInfo();
+                element.appendChild(info);
+
+                return element;
+            }
+
+            updateElement() {
+                if (!this.element) return;
+                this.element.style.transform = `translate(${this.position.x}px, ${this.position.y}px)`;
+                this.element.style.display = this.isActive ? 'block' : 'none';
+            }
+
+            destroy() {
+                if (this.element && this.element.parentNode) {
+                    this.element.parentNode.removeChild(this.element);
+                }
+                this.isActive = false;
+            }
+
+            getInfo() {
+                return `${this.rank.displayName} - ${this.name} (HP: ${this.stats.health}/${this.stats.maxHealth})`;
+            }
+        }
+
+        // ===== NPC =====
+        class NPC extends Entity {
+            constructor(config) {
+                super(config);
+                this.interactionType = config.interactionType || 'quest_giver';
+                this.dialogue = config.dialogue || [];
+                this.questIds = config.questIds || [];
+                this.inventory = config.inventory || [];
+                this.services = config.services || [];
+            }
+
+            interact() {
+                return this.dialogue[Math.floor(Math.random() * this.dialogue.length)] || 'Hello!';
+            }
+        }
+
+        // ===== ENEMY =====
+        class Enemy extends Entity {
+            constructor(config) {
+                super(config);
+                this.enemyType = config.enemyType || 'minion';
+                this.behavior = config.behavior || 'aggressive';
+                this.attackPower = config.attackPower || this.stats.power;
+                this.attackRange = config.attackRange || 50;
+                this.attackSpeed = config.attackSpeed || 1000;
+                this.detectionRange = config.detectionRange || 150;
+                this.lootTable = config.lootTable || [];
+                this.experienceValue = config.experienceValue || 10;
+                this.abilities = config.abilities || [];
+            }
+
+            update(deltaTime) {
+                // Simple AI behavior
+                switch (this.behavior) {
+                    case 'patrol':
+                        this.position.x += Math.sin(Date.now() * 0.001) * 0.5;
+                        break;
+                    case 'chase':
+                        // Would implement chasing logic here
+                        break;
+                }
+            }
+
+            attack(target) {
+                if (target && target.takeDamage) {
+                    target.takeDamage(this.attackPower);
+                }
+            }
+
+            getLoot() {
+                return this.lootTable[Math.floor(Math.random() * this.lootTable.length)] || null;
+            }
+
+            onDeath() {
+                super.onDeath();
+                // Drop loot, emit events, etc.
+            }
+        }
+
+        // ===== ENTITY MANAGER =====
+        class EntityManager {
+            constructor() {
+                this.entities = new Map();
+                this.entityIdCounter = 0;
+            }
+
+            static getInstance() {
+                if (!EntityManager.instance) EntityManager.instance = new EntityManager();
+                return EntityManager.instance;
+            }
+
+            generateId(prefix = 'entity') {
+                return `${prefix}_${++this.entityIdCounter}_${Date.now()}`;
+            }
+
+            createNPC(config) {
+                const id = config.id || this.generateId('npc');
+                const fullConfig = {
+                    id,
+                    name: config.name || 'Unknown NPC',
+                    rank: config.rank || rankSystem.createRank('C', 'npc'),
+                    stats: config.stats || this.getDefaultStats('npc'),
+                    visuals: config.visuals || this.getDefaultVisuals(),
+                    interactionType: config.interactionType || 'quest_giver',
+                    dialogue: config.dialogue,
+                    questIds: config.questIds,
+                    inventory: config.inventory,
+                    services: config.services,
+                    tags: config.tags,
+                    description: config.description,
+                    metadata: config.metadata
+                };
+
+                const npc = new NPC(fullConfig);
+                npc.applyRankModifiers();
+                this.entities.set(id, npc);
+                return npc;
+            }
+
+            createEnemy(config) {
+                const id = config.id || this.generateId('enemy');
+                const fullConfig = {
+                    id,
+                    name: config.name || 'Unknown Enemy',
+                    rank: config.rank || rankSystem.createRank('C', 'minion'),
+                    stats: config.stats || this.getDefaultStats('enemy'),
+                    visuals: config.visuals || this.getDefaultVisuals(),
+                    enemyType: config.enemyType || 'minion',
+                    behavior: config.behavior || 'aggressive',
+                    attackPower: config.attackPower,
+                    attackRange: config.attackRange,
+                    attackSpeed: config.attackSpeed,
+                    detectionRange: config.detectionRange,
+                    lootTable: config.lootTable,
+                    experienceValue: config.experienceValue,
+                    abilities: config.abilities,
+                    tags: config.tags,
+                    description: config.description,
+                    metadata: config.metadata
+                };
+
+                const enemy = new Enemy(fullConfig);
+                enemy.applyRankModifiers();
+                this.entities.set(id, enemy);
+                return enemy;
+            }
+
+            getDefaultStats(type) {
+                const base = { health: 100, maxHealth: 100, power: 10, speed: 5, defense: 5, luck: 1 };
+                return type === 'enemy' ? { ...base, power: 15, defense: 3 } : base;
+            }
+
+            getDefaultVisuals() {
+                return {
+                    assetPath: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="#666" stroke="#333" stroke-width="4"/><text x="32" y="40" text-anchor="middle" font-size="24" fill="white">?</text></svg>'),
+                    assetKey: 'default',
+                    scale: 1.0
+                };
+            }
+
+            getEntity(id) { return this.entities.get(id); }
+            getAllEntities() { return Array.from(this.entities.values()); }
+            getEntityCount() { return this.entities.size; }
+
+            removeEntity(id) {
+                const entity = this.entities.get(id);
+                if (entity) {
+                    entity.destroy();
+                    this.entities.delete(id);
+                }
+            }
+
+            clearAll() {
+                this.entities.forEach(entity => entity.destroy());
+                this.entities.clear();
+            }
+        }
+
+        const entityManager = EntityManager.getInstance();
+
+        // ===== GAME INTEGRATION =====
+        class GameIntegration {
+            constructor(config) {
+                this.container = document.querySelector(config.containerSelector);
+                this.entities = [];
+                this.isRunning = false;
+                this.lastTime = 0;
+
+                if (!this.container) {
+                    throw new Error(`Container not found: ${config.containerSelector}`);
+                }
+
+                this.injectBaseStyles();
+            }
+
+            start() {
+                this.isRunning = true;
+                this.gameLoop = (currentTime) => {
+                    if (!this.isRunning) return;
+
+                    const deltaTime = currentTime - this.lastTime;
+                    this.lastTime = currentTime;
+
+                    this.update(deltaTime);
+                    this.render();
+
+                    requestAnimationFrame(this.gameLoop);
+                };
+
+                requestAnimationFrame(this.gameLoop);
+                console.log('🎮 Game started!');
+            }
+
+            stop() {
+                this.isRunning = false;
+                console.log('🎮 Game stopped!');
+            }
+
+            update(deltaTime) {
+                this.entities.forEach(entity => {
+                    if (entity.isActive) {
+                        entity.update(deltaTime);
+                    }
+                });
+            }
+
+            render() {
+                this.entities.forEach(entity => {
+                    if (entity.isActive) {
+                        entity.render(this.container);
+                    }
+                });
+            }
+
+            addEntity(entity) {
+                this.entities.push(entity);
+                return entity;
+            }
+
+            addNPC(config) {
+                const npc = entityManager.createNPC(config);
+                return this.addEntity(npc);
+            }
+
+            addEnemy(config) {
+                const enemy = entityManager.createEnemy(config);
+                return this.addEntity(enemy);
+            }
+
+            clearAll() {
+                this.entities.forEach(entity => entity.destroy());
+                this.entities = [];
+                entityManager.clearAll();
+            }
+
+            injectBaseStyles() {
+                const style = document.createElement('style');
+                style.textContent = `
+                    .entity { position: absolute; transition: all 0.3s ease; cursor: pointer; user-select: none; }
+                    .entity img { border-radius: 50%; border: 3px solid #334155; transition: all 0.3s ease; }
+                    .entity:hover img { border-color: #06b6d4; transform: scale(1.1); }
+                    .entity-info {
+                        position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+                        background: #1e293b; padding: 8px 12px; border-radius: 6px; font-size: 12px;
+                        white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+                        border: 1px solid #334155; color: #f1f5f9;
+                    }
+                    .entity:hover .entity-info { opacity: 1; }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function createGame(config) {
+            return new GameIntegration(config);
+        }
+
+        // ===== EXPORTS =====
+        window.NPCRankSystem = {
+            Entity, NPC, Enemy,
+            RANK_TIERS, CATEGORY_CONFIG,
+            createRank, getRankTierConfig, getCategoryConfig,
+            RankSystem, rankSystem,
+            EntityManager, entityManager,
+            GameIntegration, createGame,
+            VERSION: '1.0.0'
+        };
+
+        console.log('🎮 NPC & Enemy Rank System loaded! Version 1.0.0');
+        console.log('Available as: window.NPCRankSystem');
+    </script>
+
+    <!-- Demo Script -->
+    <script>
+        let game;
+
+        function initGame() {
+            try {
+                game = NPCRankSystem.createGame({ containerSelector: '#game-area' });
+                game.start();
+                console.log('✅ Game initialized successfully!');
+            } catch (error) {
+                console.error('❌ Failed to initialize game:', error);
+            }
+        }
+
+        function spawnHero() {
+            if (!game) return;
+
+            const hero = game.addNPC({
+                name: 'C Rank Hero',
+                rank: NPCRankSystem.createRank('C', 'hero'),
+                position: { x: Math.random() * 500 + 50, y: Math.random() * 300 + 50 },
+                visuals: {
+                    assetPath: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="#06b6d4"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">H</text></svg>'),
+                    assetKey: 'hero',
+                    scale: 1.0
+                },
+                dialogue: ['Ready for adventure!', 'I can help you on your quest!']
+            });
+
+            updateStats();
+            console.log('Spawned:', hero.getInfo());
+        }
+
+        function spawnEnemy() {
+            if (!game) return;
+
+            const enemy = game.addEnemy({
+                name: 'B Rank Elite',
+                rank: NPCRankSystem.createRank('B', 'elite'),
+                position: { x: Math.random() * 500 + 50, y: Math.random() * 300 + 50 },
+                visuals: {
+                    assetPath: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="#ea580c"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">E</text></svg>'),
+                    assetKey: 'enemy',
+                    scale: 1.0
+                },
+                behavior: 'patrol'
+            });
+
+            updateStats();
+            console.log('Spawned:', enemy.getInfo());
+        }
+
+        function spawnBoss() {
+            if (!game) return;
+
+            const boss = game.addEnemy({
+                name: 'S Rank Boss',
+                rank: NPCRankSystem.createRank('S', 'boss'),
+                position: { x: Math.random() * 500 + 50, y: Math.random() * 300 + 50 },
+                visuals: {
+                    assetPath: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="#dc2626"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">B</text></svg>'),
+                    assetKey: 'boss',
+                    scale: 1.2
+                },
+                behavior: 'aggressive'
+            });
+
+            updateStats();
+            console.log('Spawned:', boss.getInfo());
+        }
+
+        function clearAll() {
+            if (!game) return;
+            game.clearAll();
+            updateStats();
+            console.log('Cleared all entities');
+        }
+
+        function updateStats() {
+            const count = NPCRankSystem.entityManager.getEntityCount();
+            document.getElementById('entity-count').textContent = `Entities: ${count}`;
+        }
+
+        function copyCode(preElement) {
+            const code = preElement.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#059669';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // ===== HD PIXEL ART SPRITE SYSTEM =====
+        class HDPixelArtSprite {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = 128; // HD resolution
+                this.height = 128;
+                this.scale = 4; // Default 4x scale for visibility
+                this.animationState = 'idle';
+                this.colorPalette = 'default';
+                this.frameIndex = 0;
+                this.frameCount = 0;
+                this.fps = 0;
+                this.lastFrameTime = 0;
+                this.isAnimating = false;
+
+                // Color palettes
+                this.palettes = {
+                    default: {
+                        skin: '#FFB366',
+                        hair: '#8B4513',
+                        eyes: '#000000',
+                        clothes: '#4169E1',
+                        weapon: '#C0C0C0'
+                    },
+                    fire: {
+                        skin: '#FF6B35',
+                        hair: '#FF4500',
+                        eyes: '#FFD700',
+                        clothes: '#DC143C',
+                        weapon: '#FFA500'
+                    },
+                    ice: {
+                        skin: '#E0FFFF',
+                        hair: '#87CEEB',
+                        eyes: '#00CED1',
+                        clothes: '#4682B4',
+                        weapon: '#B0E0E6'
+                    },
+                    shadow: {
+                        skin: '#2F2F2F',
+                        hair: '#000000',
+                        eyes: '#FF0000',
+                        clothes: '#1C1C1C',
+                        weapon: '#696969'
+                    },
+                    light: {
+                        skin: '#FFFFE0',
+                        hair: '#FFD700',
+                        eyes: '#FFFFFF',
+                        clothes: '#F0E68C',
+                        weapon: '#FFFACD'
+                    },
+                    nature: {
+                        skin: '#90EE90',
+                        hair: '#228B22',
+                        eyes: '#32CD32',
+                        clothes: '#006400',
+                        weapon: '#8FBC8F'
+                    }
+                };
+
+                this.resizeCanvas();
+                this.drawFrame();
+            }
+
+            resizeCanvas() {
+                this.canvas.width = this.width * this.scale;
+                this.canvas.height = this.height * this.scale;
+                this.ctx.imageSmoothingEnabled = false; // Pixel perfect
+            }
+
+            changeScale(newScale) {
+                this.scale = parseInt(newScale);
+                this.resizeCanvas();
+                this.drawFrame();
+            }
+
+            changePalette(paletteName) {
+                this.colorPalette = paletteName;
+                this.drawFrame();
+            }
+
+            changeAnimation(state) {
+                this.animationState = state;
+                this.frameIndex = 0;
+                this.drawFrame();
+            }
+
+            drawPixel(x, y, color) {
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(x * this.scale, y * this.scale, this.scale, this.scale);
+            }
+
+            drawSprite() {
+                const palette = this.palettes[this.colorPalette];
+
+                // Clear canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw based on animation state
+                switch (this.animationState) {
+                    case 'idle':
+                        this.drawIdleSprite(palette);
+                        break;
+                    case 'walk':
+                        this.drawWalkSprite(palette, this.frameIndex);
+                        break;
+                    case 'attack':
+                        this.drawAttackSprite(palette, this.frameIndex);
+                        break;
+                }
+            }
+
+            drawIdleSprite(palette) {
+                // Head
+                for (let y = 20; y < 40; y++) {
+                    for (let x = 44; x < 84; x++) {
+                        if (Math.random() > 0.7) this.drawPixel(x, y, palette.skin);
+                    }
+                }
+
+                // Body
+                for (let y = 40; y < 80; y++) {
+                    for (let x = 48; x < 80; x++) {
+                        if (Math.random() > 0.8) this.drawPixel(x, y, palette.clothes);
+                    }
+                }
+
+                // Weapon
+                for (let y = 45; y < 75; y++) {
+                    for (let x = 35; x < 45; x++) {
+                        if (Math.random() > 0.9) this.drawPixel(x, y, palette.weapon);
+                    }
+                }
+            }
+
+            drawWalkSprite(palette, frame) {
+                const offset = Math.sin(frame * 0.5) * 2;
+                // Similar to idle but with movement offset
+                this.drawIdleSprite(palette);
+                // Add walking animation by shifting pixels
+            }
+
+            drawAttackSprite(palette, frame) {
+                // Attack pose - weapon extended
+                this.drawIdleSprite(palette);
+                // Extend weapon further
+                for (let y = 40; y < 70; y++) {
+                    for (let x = 25; x < 40; x++) {
+                        if (Math.random() > 0.85) this.drawPixel(x, y, palette.weapon);
+                    }
+                }
+            }
+
+            drawFrame() {
+                this.drawSprite();
+            }
+
+            startAnimation() {
+                if (this.isAnimating) return;
+                this.isAnimating = true;
+                this.animate();
+            }
+
+            stopAnimation() {
+                this.isAnimating = false;
+            }
+
+            animate() {
+                if (!this.isAnimating) return;
+
+                const now = performance.now();
+                this.frameCount++;
+
+                if (now - this.lastFrameTime >= 1000) {
+                    this.fps = this.frameCount;
+                    this.frameCount = 0;
+                    this.lastFrameTime = now;
+
+                    // Update FPS display
+                    document.getElementById('fps-counter').textContent = `FPS: ${this.fps}`;
+                }
+
+                // Update frame for animation
+                if (this.animationState !== 'idle') {
+                    this.frameIndex = (this.frameIndex + 1) % 60; // 60 frames per cycle
+                    document.getElementById('frame-counter').textContent = `Frame: ${this.frameIndex}`;
+                }
+
+                this.drawFrame();
+                requestAnimationFrame(() => this.animate());
+            }
+
+            resetSprite() {
+                this.animationState = 'idle';
+                this.colorPalette = 'default';
+                this.frameIndex = 0;
+                this.scale = 4;
+                document.getElementById('animation-state').value = 'idle';
+                document.getElementById('color-palette').value = 'default';
+                document.getElementById('display-scale').value = '4';
+                this.resizeCanvas();
+                this.drawFrame();
+            }
+
+            exportPNG() {
+                const link = document.createElement('a');
+                link.download = `hd-sprite-${this.animationState}-${this.colorPalette}.png`;
+                link.href = this.canvas.toDataURL();
+                link.click();
+            }
+
+            exportSpriteSheet() {
+                // Create a larger canvas for sprite sheet
+                const sheetCanvas = document.createElement('canvas');
+                const sheetCtx = sheetCanvas.getContext('2d');
+                sheetCanvas.width = this.width * 3; // 3 frames
+                sheetCanvas.height = this.height;
+
+                // Draw different animation frames
+                const states = ['idle', 'walk', 'attack'];
+                states.forEach((state, index) => {
+                    this.animationState = state;
+                    this.drawFrame();
+                    sheetCtx.drawImage(this.canvas, index * this.width, 0, this.width, this.height);
+                });
+
+                const link = document.createElement('a');
+                link.download = `sprite-sheet-${this.colorPalette}.png`;
+                link.href = sheetCanvas.toDataURL();
+                link.click();
+            }
+
+            exportJSON() {
+                const spriteData = {
+                    width: this.width,
+                    height: this.height,
+                    scale: this.scale,
+                    palettes: this.palettes,
+                    currentPalette: this.colorPalette,
+                    animationStates: ['idle', 'walk', 'attack'],
+                    exportDate: new Date().toISOString()
+                };
+
+                const dataStr = JSON.stringify(spriteData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.download = `sprite-data-${this.colorPalette}.json`;
+                link.href = URL.createObjectURL(dataBlob);
+                link.click();
+            }
+        }
+
+        // Global sprite instance
+        let hdSprite;
+
+        // Control functions
+        function changeAnimation(state) {
+            if (hdSprite) hdSprite.changeAnimation(state);
+        }
+
+        function changePalette(palette) {
+            if (hdSprite) hdSprite.changePalette(palette);
+        }
+
+        function changeScale(scale) {
+            if (hdSprite) hdSprite.changeScale(scale);
+        }
+
+        function startAnimation() {
+            if (hdSprite) hdSprite.startAnimation();
+        }
+
+        function stopAnimation() {
+            if (hdSprite) hdSprite.stopAnimation();
+        }
+
+        function resetSprite() {
+            if (hdSprite) hdSprite.resetSprite();
+        }
+
+        function exportPNG() {
+            if (hdSprite) hdSprite.exportPNG();
+        }
+
+        function exportSpriteSheet() {
+            if (hdSprite) hdSprite.exportSpriteSheet();
+        }
+
+        function exportJSON() {
+            if (hdSprite) hdSprite.exportJSON();
+        }
+
+        // Initialize HD Sprite when page loads
+        function initHDSprite() {
+            const canvas = document.getElementById('pixel-canvas');
+            if (canvas) {
+                hdSprite = new HDPixelArtSprite(canvas);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initGame();
+            initHDSprite();
+        });
+    </script>
+</body>
+
+</html>

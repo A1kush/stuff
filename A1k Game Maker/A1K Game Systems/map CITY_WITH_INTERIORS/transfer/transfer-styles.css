@@ -1,0 +1,104 @@
+.transfer-root { z-index: 3000; }
+.transfer-entity { transform-origin: top left; }
+.transfer-entity.is-hovered { outline: 1px dashed rgba(94,234,212,0.6); }
+.transfer-entity.is-focused { box-shadow: 0 0 0 2px rgba(59,130,246,0.6) inset; }
+:root[data-transfer-theme="dark"] {
+  --t-bg: rgba(10, 16, 24, 0.92);
+  --t-fg: #e5e7eb;
+  --t-accent: #5eead4;
+  --t-border: rgba(94, 234, 212, 0.35);
+  --t-muted: #cbd5e1;
+}
+:root[data-transfer-theme="light"] {
+  --t-bg: rgba(248, 250, 252, 0.96);
+  --t-fg: #0f172a;
+  --t-accent: #0ea5e9;
+  --t-border: rgba(2, 132, 199, 0.35);
+  --t-muted: #334155;
+}
+.transfer-label {
+  position: absolute;
+  top: -18px;
+  left: 0;
+  padding: 2px 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 10px;
+  color: var(--t-fg);
+  background: var(--t-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.transfer-sprite {
+  display: block;
+  pointer-events: auto;
+  user-select: none;
+}
+.animate-bob { animation: bob 1.2s ease-in-out infinite; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.transfer-meta {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #e5e7eb;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+}
+.transfer-name {
+  font-weight: 700;
+  color: var(--t-accent);
+}
+.transfer-dialogue {
+  opacity: 0.9;
+}
+.transfer-house {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.transfer-house-label {
+  font-size: 11px;
+  color: var(--t-muted);
+  background: var(--t-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-bottom: 4px;
+}
+/* Interior overlay */
+.transfer-interior-overlay { /* container styles created in JS; class hooks here for custom overrides */ }
+.transfer-interior-root { position: relative; }
+.transfer-interior-close:hover { filter: brightness(1.2); }
+@media (prefers-reduced-motion: reduce) {
+  .animate-bob { animation: none !important; }
+}
+
+/* Diagnostics */
+.transfer-diagnostics {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  z-index: 5000;
+  background: var(--t-bg);
+  color: var(--t-fg);
+  border: 1px solid var(--t-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 11px;
+  max-width: 40vw;
+  pointer-events: none;
+}
+.transfer-diagnostics h4 {
+  margin: 0 0 4px 0;
+  color: var(--t-accent);
+  font-size: 12px;
+}
+.transfer-diagnostics .transfer-diagnostics-body {
+  white-space: pre-wrap;
+  line-height: 1.3;
+}
+
+

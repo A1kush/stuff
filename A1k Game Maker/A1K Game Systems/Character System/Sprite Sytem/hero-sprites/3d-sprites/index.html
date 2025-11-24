@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Sprites - Hero Sprites Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .type-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .type-info h3 {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .type-info p {
+            color: #bbb;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .traits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .trait {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            color: #a0b0ff;
+        }
+
+        .trait::before {
+            content: '✓ ';
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .template-section {
+            margin-top: 60px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .template-section h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .template-section p {
+            color: #b5b5c9;
+            margin-bottom: 24px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .template-card {
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            background: rgba(19, 21, 32, 0.65);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .template-card header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .template-card h3 {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .template-card small {
+            color: #7ad5ff;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+        }
+
+        .template-card .cost {
+            font-size: 14px;
+            color: #f5d67a;
+        }
+
+        .template-card .status {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            align-self: flex-start;
+        }
+
+        .template-card .status.locked {
+            color: #ff7a7a;
+            border-color: rgba(255, 122, 122, 0.35);
+        }
+
+        .template-card .status.unlocked {
+            color: #7affaf;
+            border-color: rgba(122, 255, 175, 0.45);
+        }
+
+        .template-card button {
+            margin-top: auto;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.25), rgba(118, 75, 162, 0.25));
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .template-card button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .bundle-contents {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+        }
+
+        .bundle-section {
+            margin-bottom: 10px;
+        }
+
+        .bundle-section-title {
+            font-weight: bold;
+            color: #7ad5ff;
+            margin-bottom: 4px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bundle-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .bundle-item {
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: #a0b0ff;
+        }
+
+        .bundle-item.npc {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+        }
+
+        .bundle-item.equipment {
+            background: rgba(255, 69, 0, 0.15);
+            border-color: rgba(255, 69, 0, 0.3);
+            color: #ff8c69;
+        }
+
+        .template-footnote {
+            margin-top: 18px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .card-features {
+            list-style: none;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .card-features li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .card-features li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .type-10 { background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.4); }
+        .type-11 { background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid rgba(0, 255, 255, 0.4); }
+        .type-12 { background: rgba(184, 134, 11, 0.2); color: #b8860b; border: 1px solid rgba(184, 134, 11, 0.4); }
+        .type-13 { background: rgba(75, 0, 130, 0.2); color: #9370db; border: 1px solid rgba(75, 0, 130, 0.4); }
+        .type-14 { background: rgba(255, 69, 0, 0.2); color: #ff4500; border: 1px solid rgba(255, 69, 0, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>3D SPRITES COLLECTION</h1>
+            <p class="subtitle">Five Unique 3D Styles - Celestial, Cyberpunk, Steampunk, Shadow, Elemental</p>
+        </header>
+
+        <div class="gallery">
+            <a href="type-10/a1-celestial-ascension.html" class="card">
+                <div class="card-title">✨ Type 10: Celestial 3D <span class="type-badge type-10">CELESTIAL</span></div>
+                <div class="card-desc">
+                    High-fantasy style with glowing effects, ethereal auras, and divine light. Perfect for celestial warriors and angelic characters.
+                </div>
+                <ul class="card-features">
+                    <li>Glowing ethereal effects</li>
+                    <li>Divine light systems</li>
+                    <li>Celestial auras</li>
+                    <li>High-fantasy aesthetic</li>
+                    <li>3 Characters: A1, Missy, Unique</li>
+                </ul>
+                <span class="btn">View Type 10 →</span>
+            </a>
+
+            <a href="type-11/a1-neon-warrior.html" class="card">
+                <div class="card-title">🌃 Type 11: Cyberpunk 3D <span class="type-badge type-11">CYBERPUNK</span></div>
+                <div class="card-desc">
+                    Neon-soaked futuristic style with tech enhancements, holographic displays, and cybernetic aesthetics.
+                </div>
+                <ul class="card-features">
+                    <li>Neon energy effects</li>
+                    <li>Tech-enhanced visuals</li>
+                    <li>Holographic displays</li>
+                    <li>Futuristic aesthetic</li>
+                    <li>3 Characters: A1, Missy, Unique</li>
+                </ul>
+                <span class="btn">View Type 11 →</span>
+            </a>
+
+            <a href="type-12/a1-steam-knight.html" class="card">
+                <div class="card-title">⚙️ Type 12: Steampunk 3D <span class="type-badge type-12">STEAMPUNK</span></div>
+                <div class="card-desc">
+                    Victorian-era mechanical style with gears, steam vents, brass accents, and clockwork precision.
+                </div>
+                <ul class="card-features">
+                    <li>Mechanical gear systems</li>
+                    <li>Steam-powered effects</li>
+                    <li>Brass and copper aesthetics</li>
+                    <li>Victorian-era design</li>
+                    <li>3 Characters: A1, Missy, Unique</li>
+                </ul>
+                <span class="btn">View Type 12 →</span>
+            </a>
+
+            <a href="type-13/a1-shadow-blade.html" class="card">
+                <div class="card-title">🌑 Type 13: Shadow 3D <span class="type-badge type-13">SHADOW</span></div>
+                <div class="card-desc">
+                    Dark and mysterious style with void energy, shadow effects, and enigmatic aura. Perfect for dark warriors.
+                </div>
+                <ul class="card-features">
+                    <li>Void energy systems</li>
+                    <li>Shadow particle effects</li>
+                    <li>Dark mysterious aura</li>
+                    <li>Enigmatic aesthetic</li>
+                    <li>3 Characters: A1, Missy, Unique</li>
+                </ul>
+                <span class="btn">View Type 13 →</span>
+            </a>
+
+            <a href="type-14/a1-elemental-master.html" class="card">
+                <div class="card-title">⚡ Type 14: Elemental 3D <span class="type-badge type-14">ELEMENTAL</span></div>
+                <div class="card-desc">
+                    Dynamic elemental style with fire, ice, and lightning effects. Swirling particles and multi-element powers.
+                </div>
+                <ul class="card-features">
+                    <li>Fire/Ice/Lightning effects</li>
+                    <li>Dynamic particle systems</li>
+                    <li>Multi-element powers</li>
+                    <li>Prismatic aesthetics</li>
+                    <li>3 Characters: A1, Missy, Unique</li>
+                </ul>
+                <span class="btn">View Type 14 →</span>
+            </a>
+        </div>
+
+        <section class="template-section">
+            <h2>🎯 Summon-Ready Templates</h2>
+            <p>Auto-detects unlocked assets via Bag data and previews all 15 templates. Each summon spends 20k–200k gold and bundles pets, vehicles, spirits, NPCs, equipment, and AI bots.</p>
+            <div id="bag-template-grid" class="template-grid"></div>
+            <div class="template-footnote">Tap a template to open it in the 3D Mode workspace. Summons will deduct the listed gold within A1k World.</div>
+        </section>
+
+        <div class="type-info">
+            <h3>📖 About 3D Sprites Collection</h3>
+            <p>
+                This collection features 5 unique 3D sprite styles, each with 3 character variants (A1, Missy, Unique), 
+                totaling 15 templates. All templates integrate with the A1K Bag System, including pets, vehicles, spirits, 
+                NPCs (E-S rank), S-rank equipment, and AI bots.
+            </p>
+            <p>
+                Each template type offers a distinct visual style and gameplay experience, from the divine light of Celestial 
+                to the neon energy of Cyberpunk, the mechanical precision of Steampunk, the mysterious void of Shadow, 
+                and the dynamic elements of Elemental.
+            </p>
+
+            <div class="traits">
+                <div class="trait">15 Total Templates</div>
+                <div class="trait">5 Unique Styles</div>
+                <div class="trait">3 Characters Each</div>
+                <div class="trait">Bag System Integration</div>
+                <div class="trait">E-S Rank NPCs</div>
+                <div class="trait">S-Rank Equipment</div>
+                <div class="trait">3 Pets per Template</div>
+                <div class="trait">3 Vehicles per Template</div>
+                <div class="trait">3 Spirits per Template</div>
+                <div class="trait">3 AI Bots per Template</div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="../START_HERE.html">← Back to Main Gallery</a>
+        </div>
+    </div>
+</body>
+<script>
+    const TEMPLATE_TYPES = {
+        'type-10': { name: 'Celestial 3D', icon: '✨', color: '#ffd700' },
+        'type-11': { name: 'Cyberpunk 3D', icon: '🌃', color: '#00ffff' },
+        'type-12': { name: 'Steampunk 3D', icon: '⚙️', color: '#b8860b' },
+        'type-13': { name: 'Shadow 3D', icon: '🌑', color: '#9370db' },
+        'type-14': { name: 'Elemental 3D', icon: '⚡', color: '#ff4500' }
+    };
+
+    async function loadManifest() {
+        try {
+            const response = await fetch('manifest.json');
+            return await response.json();
+        } catch (error) {
+            console.warn('[3D Sprites] Unable to load manifest', error);
+            return [];
+        }
+    }
+
+    function getUnlockedSprites() {
+        if (window.SpriteAssetManager && typeof window.SpriteAssetManager.getSummonReadySprites === 'function') {
+            return window.SpriteAssetManager.getSummonReadySprites({ limit: 200 });
+        }
+        const inventorySkins = window.gameState?.inventory?.skins || [];
+        return inventorySkins.map((skin) => ({ id: skin.id, name: skin.name, unlocked: skin.unlocked !== false }));
+    }
+
+    function isTemplateUnlocked(template) {
+        const unlockedIds = new Set(getUnlockedSprites().filter(item => item.unlocked !== false).map(item => item.id));
+        
+        // Check if any bundle option is unlocked
+        const allIds = [
+            ...(template.bundleOptions?.pets || []),
+            ...(template.bundleOptions?.vehicles || []),
+            ...(template.bundleOptions?.spirits || []),
+            ...(template.summons ? [template.summons.pet, template.summons.vehicle, template.summons.spirit] : [])
+        ].filter(Boolean);
+        
+        return allIds.some(id => unlockedIds.has(id)) || unlockedIds.size === 0;
+    }
+
+    async function renderTemplateCards() {
+        const container = document.getElementById('bag-template-grid');
+        if (!container) return;
+        
+        const templates = await loadManifest();
+        if (!templates.length) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #999; padding: 40px;">Loading templates...</div>';
+            return;
+        }
+
+        function formatBundleItems(items, maxShow = 3) {
+            if (!items || items.length === 0) return '';
+            const shown = items.slice(0, maxShow);
+            const remaining = items.length - maxShow;
+            return shown.map(item => {
+                const displayName = item.replace(/^(pet_|veh_|spirit_|npc_|gear_|robot_)/, '').replace(/_/g, ' ');
+                return `<span class="bundle-item">${displayName}</span>`;
+            }).join('') + (remaining > 0 ? `<span class="bundle-item">+${remaining} more</span>` : '');
+        }
+
+        function formatNPCs(npcs) {
+            if (!npcs) return '';
+            const ranks = Object.keys(npcs);
+            const total = ranks.reduce((sum, rank) => sum + (npcs[rank]?.length || 0), 0);
+            if (total === 0) return '';
+            return `<span class="bundle-item npc">NPCs: ${ranks.join(', ').toUpperCase()} (${total} total)</span>`;
+        }
+
+        function formatEquipment(equipment) {
+            if (!equipment?.weapons || equipment.weapons.length === 0) return '';
+            return equipment.weapons.map(w => {
+                const displayName = w.id.replace(/^gear_/, '').replace(/_/g, ' ');
+                return `<span class="bundle-item equipment">${displayName} (${w.rank})</span>`;
+            }).join('');
+        }
+
+        templates.forEach((template) => {
+            const unlocked = isTemplateUnlocked(template);
+            const typeInfo = TEMPLATE_TYPES[template.type] || { name: template.type, icon: '🎨', color: '#667eea' };
+            const card = document.createElement('div');
+            card.className = 'template-card';
+            
+            const bundleHTML = `
+                <div class="bundle-contents">
+                    ${template.bundleOptions?.pets?.length > 0 ? `
+                    <div class="bundle-section">
+                        <div class="bundle-section-title">🐾 Pets (${template.bundleOptions.pets.length})</div>
+                        <div class="bundle-items">${formatBundleItems(template.bundleOptions.pets)}</div>
+                    </div>` : ''}
+                    ${template.bundleOptions?.vehicles?.length > 0 ? `
+                    <div class="bundle-section">
+                        <div class="bundle-section-title">🚗 Vehicles (${template.bundleOptions.vehicles.length})</div>
+                        <div class="bundle-items">${formatBundleItems(template.bundleOptions.vehicles)}</div>
+                    </div>` : ''}
+                    ${template.bundleOptions?.spirits?.length > 0 ? `
+                    <div class="bundle-section">
+                        <div class="bundle-section-title">✨ Spirits (${template.bundleOptions.spirits.length})</div>
+                        <div class="bundle-items">${formatBundleItems(template.bundleOptions.spirits)}</div>
+                    </div>` : ''}
+                    ${template.npcs ? `
+                    <div class="bundle-section">
+                        <div class="bundle-section-title">👥 NPCs</div>
+                        <div class="bundle-items">${formatNPCs(template.npcs)}</div>
+                    </div>` : ''}
+                    ${template.equipment?.weapons?.length > 0 ? `
+                    <div class="bundle-section">
+                        <div class="bundle-section-title">⚔️ Equipment (${template.equipment.weapons.length})</div>
+                        <div class="bundle-items">${formatEquipment(template.equipment)}</div>
+                    </div>` : ''}
+                    ${template.aiBots?.length > 0 ? `
+                    <div class="bundle-section">
+                        <div class="bundle-section-title">🤖 AI Bots (${template.aiBots.length})</div>
+                        <div class="bundle-items">${formatBundleItems(template.aiBots)}</div>
+                    </div>` : ''}
+                </div>
+            `;
+            
+            card.innerHTML = `
+                <header>
+                    <div>
+                        <h3>${typeInfo.icon} ${template.title}</h3>
+                        <small>${template.slug} · ${template.heroId}</small>
+                    </div>
+                    <div class="cost">💰 ${template.goldCost.toLocaleString()} g</div>
+                </header>
+                <p>${template.description}</p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                    <span class="type-badge type-${template.type.replace('type-', '')}" style="font-size: 10px;">${typeInfo.name}</span>
+                    <span style="font-size: 10px; padding: 4px 12px; border-radius: 12px; background: rgba(255,255,255,0.1); color: #fff;">${template.rewardTier.toUpperCase()}</span>
+                </div>
+                ${bundleHTML}
+                <span class="status ${unlocked ? 'unlocked' : 'locked'}">
+                    ${unlocked ? 'Unlocked in Bag' : 'Requires asset unlock'}
+                </span>
+            `;
+            const button = document.createElement('button');
+            button.textContent = 'Open Template';
+            button.onclick = () => window.open(`${template.type}/${template.slug}.html`, '_blank');
+            if (!unlocked) {
+                button.disabled = true;
+                button.style.opacity = '0.5';
+                button.style.cursor = 'not-allowed';
+            }
+            card.appendChild(button);
+            container.appendChild(card);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderTemplateCards);
+</script>
+</html>
+

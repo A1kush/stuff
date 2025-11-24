@@ -1,0 +1,174 @@
+/**
+ * Chibi Pet System - Styles
+ * Cute, candy-themed styling
+ */
+
+:root {
+  /* Candy color palette */
+  --bg-primary: #1a0a2e;
+  --bg-secondary: #16213e;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --accent-pink: #ff6b9d;
+  --accent-purple: #9b59b6;
+  --accent-gold: #f1c40f;
+  
+  font-family: 'Comic Sans MS', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 20px;
+}
+
+#app {
+  text-align: center;
+  max-width: 100%;
+}
+
+h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple), var(--accent-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(255, 107, 157, 0.5);
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: var(--accent-pink);
+  margin-bottom: 0.75rem;
+}
+
+#game-container {
+  position: relative;
+  display: inline-block;
+  background: var(--bg-secondary);
+  border: 3px solid rgba(255, 107, 157, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(255, 107, 157, 0.3);
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.controls {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border: 2px solid rgba(155, 89, 182, 0.3);
+  border-radius: 12px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.controls h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--accent-purple);
+}
+
+.controls p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.info {
+  margin-top: 1rem;
+  padding: 1.2rem;
+  background: rgba(155, 89, 182, 0.08);
+  border-left: 4px solid var(--accent-purple);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.info h3 {
+  color: var(--accent-gold);
+  margin-bottom: 0.5rem;
+}
+
+.info p {
+  margin: 0.4rem 0;
+  color: var(--text-secondary);
+}
+
+button {
+  padding: 8px 14px;
+  margin: 5px;
+  background: var(--accent-purple);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+button:hover {
+  background: var(--accent-pink);
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+}
+
+button.selected {
+  background: var(--accent-pink);
+  box-shadow: 0 0 20px rgba(255, 107, 157, 0.6);
+  transform: scale(1.08);
+}
+
+.element-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.rarity-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.rarity-common { background: #ffffff; color: #000; }
+.rarity-uncommon { background: #4CAF50; color: #fff; }
+.rarity-rare { background: #2196F3; color: #fff; }
+.rarity-epic { background: #9C27B0; color: #fff; }
+.rarity-legendary { background: #FF9800; color: #fff; }
+

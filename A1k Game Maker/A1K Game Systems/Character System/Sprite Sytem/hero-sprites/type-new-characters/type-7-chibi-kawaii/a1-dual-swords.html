@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Dual Swords - Chibi Kawaii</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {min-height: 100vh; background: linear-gradient(135deg, #FFE5F0 0%, #E5F0FF 100%); font-family: 'Arial', sans-serif; display: flex; align-items: center; justify-content: center; padding: 20px;}
+        #container {display: flex; gap: 30px; max-width: 1400px;}
+        canvas {border: 3px solid #FFB6D9; background: #FFFFFF; border-radius: 20px; box-shadow: 0 10px 40px rgba(255,182,217,0.3);}
+        #controls {background: rgba(255,255,255,0.9); border: 3px solid #FFB6D9; border-radius: 20px; padding: 25px; width: 400px;}
+        h1 {font-size: 20px; margin-bottom: 20px; color: #FF69B4; border-bottom: 3px solid #FFB6D9; padding-bottom: 15px; font-weight: bold;}
+        .control-group {margin-bottom: 18px;}
+        label {display: block; font-size: 13px; color: #FF1493; margin-bottom: 8px; font-weight: bold; text-transform: uppercase;}
+        select, button {width: 100%; padding: 10px 15px; background: #FFF0F5; border: 2px solid #FFB6D9; color: #FF1493; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600;}
+        button {background: linear-gradient(135deg, #FFB6D9 0%, #FF69B4 100%); color: #FFF; border: none;}
+        .btn-group {display: grid; grid-template-columns: 1fr 1fr; gap: 10px;}
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="c" width="256" height="256"></canvas>
+        <div id="controls">
+            <h1>⚔️ A1 CHIBI DUAL SWORDS</h1>
+            <div class="control-group"><label>Animation</label><select id="a"><option value="i">Idle</option><option value="w">Walk</option><option value="a">Attack</option></select></div>
+            <div class="control-group"><label>Palette</label><select id="p"><option value="f">Fire</option><option value="i">Ice</option><option value="s">Shadow</option></select></div>
+            <div class="control-group"><label>Export</label><div class="btn-group"><button id="e">PNG</button><button id="j">JSON</button></div></div>
+        </div>
+    </div>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        let an = 'i', fr = 0, tm = 0, pl = 'f', bg = '#FFFFFF';
+        const ps = {f: {s: '#FFD4A3', cl: '#FF4444', clL: '#FF8888', w: '#FF0000', wG: '#FFAA00', e: '#FFD700'}, i: {s: '#FFD4A3', cl: '#4444FF', clL: '#8888FF', w: '#00FFFF', wG: '#66FFFF', e: '#00CCFF'}, s: {s: '#FFD4A3', cl: '#8844FF', clL: '#AA88FF', w: '#AA00FF', wG: '#DD66FF', e: '#CC00FF'}};
+        const as = {i: {f: 8, t: 250}, w: {f: 8, t: 125}, a: {f: 6, t: 83}};
+        function dr() {const p = ps[pl], cx = 128, cy = 148; let b = Math.abs(Math.sin(fr / 4 * Math.PI)) * 8, sq = 1 + Math.sin(fr / 4 * Math.PI) * 0.05, aS = an === 'a' ? (fr / 6) * Math.PI : 0; x.clearRect(0, 0, 256, 256); x.fillStyle = bg; x.fillRect(0, 0, 256, 256); x.save(); x.translate(cx, cy - b); x.scale(1, sq); x.fillStyle = 'rgba(0,0,0,0.15)'; x.beginPath(); x.ellipse(0, 80 / sq, 40, 15, 0, 0, Math.PI * 2); x.fill(); x.fillStyle = p.cl; x.beginPath(); x.arc(-15, 40, 18, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(15, 40, 18, 0, Math.PI * 2); x.fill(); const g = x.createLinearGradient(0, 0, 0, 60); g.addColorStop(0, p.clL); g.addColorStop(1, p.cl); x.fillStyle = g; x.beginPath(); x.ellipse(0, 20, 35, 40, 0, 0, Math.PI * 2); x.fill(); x.save(); x.translate(-30, 15); x.rotate(-0.3 + Math.sin(aS) * 0.5); x.fillStyle = p.s; x.beginPath(); x.ellipse(0, 0, 12, 20, 0, 0, Math.PI * 2); x.fill(); x.restore(); x.save(); x.translate(30, 15); x.rotate(0.3 - Math.sin(aS) * 0.5); x.fillStyle = p.s; x.beginPath(); x.ellipse(0, 0, 12, 20, 0, 0, Math.PI * 2); x.fill(); x.restore(); const hg = x.createRadialGradient(0, -25, 5, 0, -25, 55); hg.addColorStop(0, p.s); hg.addColorStop(1, '#FFB380'); x.fillStyle = hg; x.beginPath(); x.arc(0, -25, 50, 0, Math.PI * 2); x.fill(); x.fillStyle = '#000000'; x.beginPath(); x.ellipse(0, -55, 52, 20, 0, 0, Math.PI); x.fill(); x.fillRect(-50, -55, 100, 15); x.beginPath(); x.ellipse(-30, -45, 12, 8, -0.3, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(-35, -30, 8, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(35, -30, 8, 0, Math.PI * 2); x.fill(); x.fillStyle = '#FFFFFF'; x.beginPath(); x.ellipse(-15, -25, 18, 20, 0, 0, Math.PI * 2); x.fill(); x.beginPath(); x.ellipse(15, -25, 18, 20, 0, 0, Math.PI * 2); x.fill(); x.fillStyle = '#FF0000'; x.beginPath(); x.arc(-15, -22, 12, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(15, -22, 12, 0, Math.PI * 2); x.fill(); x.fillStyle = '#FFFFFF'; x.beginPath(); x.arc(-18, -28, 6, 0, Math.PI * 2); x.fill(); x.beginPath(); x.arc(12, -28, 6, 0, Math.PI * 2); x.fill(); x.save(); x.translate(-40, 10); x.rotate(-Math.PI/4 + aS); x.fillStyle = p.w; x.fillRect(-3, -25, 6, 30); x.fillStyle = p.wG; x.fillRect(-1, -25, 2, 30); x.restore(); x.save(); x.translate(40, 10); x.rotate(Math.PI/4 - aS); x.fillStyle = p.w; x.fillRect(-3, -25, 6, 30); x.fillStyle = p.wG; x.fillRect(-1, -25, 2, 30); x.restore(); x.restore();}
+        function lp(t) {if (tm += 16; tm >= as[an].t) {tm = 0; fr++; if (fr >= as[an].f) fr = 0;} dr(); requestAnimationFrame(lp);}
+        document.getElementById('a').addEventListener('change', (e) => an = e.target.value);
+        document.getElementById('p').addEventListener('change', (e) => pl = e.target.value);
+        document.getElementById('e').addEventListener('click', () => {const l = document.createElement('a'); l.download = `a1-chibi-${an}.png`; l.href = c.toDataURL('image/png'); l.click();});
+        c.style.width = '512px'; c.style.height = '512px'; lp(0);
+    </script>
+</body>
+</html>

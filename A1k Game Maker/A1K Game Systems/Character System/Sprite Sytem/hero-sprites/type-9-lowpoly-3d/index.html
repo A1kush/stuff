@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 9: Low-Poly 3D Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); font-family: 'Arial', sans-serif; padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 36px; margin-bottom: 10px; color: #ecf0f1; text-align: center; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .subtitle { text-align: center; color: #bdc3c7; margin-bottom: 40px; font-size: 16px; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .sprite-card { background: rgba(255,255,255,0.1); border: 3px solid #3498db; border-radius: 15px; padding: 25px; text-align: center; transition: all 0.3s; backdrop-filter: blur(10px); }
+        .sprite-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 40px rgba(52,152,219,0.4); }
+        .sprite-card h2 { font-size: 20px; margin-bottom: 15px; color: #3498db; }
+        .sprite-card p { color: #ecf0f1; font-size: 13px; margin-bottom: 15px; line-height: 1.6; }
+        .sprite-card a { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); border: none; color: #FFF; text-decoration: none; border-radius: 8px; transition: all 0.2s; font-weight: bold; }
+        .sprite-card a:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(52,152,219,0.5); }
+        .info-box { background: rgba(255,255,255,0.1); border: 3px solid #3498db; border-radius: 15px; padding: 30px; margin-top: 40px; backdrop-filter: blur(10px); }
+        .info-box h3 { font-size: 24px; margin-bottom: 15px; color: #3498db; }
+        .info-box ul { list-style: none; line-height: 2; color: #ecf0f1; }
+        .info-box ul li:before { content: "▸ "; color: #3498db; margin-right: 8px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #3498db; text-decoration: none; font-size: 16px; font-weight: 600; }
+        .back-link:hover { color: #2980b9; }
+
+        .template-section {
+            margin-top: 60px;
+            padding: 28px;
+            border-radius: 18px;
+            border: 2px dashed rgba(52, 152, 219, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .template-section h2 {
+            margin-bottom: 8px;
+        }
+
+        .template-section p {
+            color: #d9e8ff;
+            margin-bottom: 20px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .template-card {
+            border-radius: 14px;
+            background: rgba(15, 22, 32, 0.75);
+            border: 1px solid rgba(52, 152, 219, 0.35);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .template-card header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .template-card h3 {
+            margin: 0;
+            color: #ecf0f1;
+        }
+
+        .template-card small {
+            color: #7ad5ff;
+            letter-spacing: 0.08em;
+        }
+
+        .template-card .cost {
+            color: #f7d774;
+        }
+
+        .template-card button {
+            margin-top: auto;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(52, 152, 219, 0.4);
+            background: rgba(52, 152, 219, 0.2);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .template-card button:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .template-card .status {
+            font-size: 12px;
+            border-radius: 999px;
+            padding: 4px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: fit-content;
+        }
+
+        .template-card .status.unlocked { color: #2ecc71; border-color: rgba(46, 204, 113, 0.5); }
+        .template-card .status.locked { color: #e74c3c; border-color: rgba(231, 76, 60, 0.5); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../START_HERE.html" class="back-link">← Back to Gallery</a>
+        <h1>TYPE 9: LOW-POLY 3D STYLE</h1>
+        <p class="subtitle">Three.js Real-Time 3D Rendering</p>
+
+        <div class="gallery">
+            <div class="sprite-card">
+                <h2>⚔️ A1 Warrior</h2>
+                <p>Faceted low-poly warrior with dual energy swords and flat shading</p>
+                <a href="warrior-dual-swords.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>😇 Missy Cat Angel</h2>
+                <p>Black cat with polygonal halo ring and geometric wings</p>
+                <a href="cat-angel-gunner.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>🤖 Unique Cyborg</h2>
+                <p>Segmented armor with energy conduits and black pigtails</p>
+                <a href="cyborg-rifle-operative.html">View & Export</a>
+            </div>
+        </div>
+
+        <section class="template-section">
+            <h2>🚀 Summon-Ready Low-Poly Templates</h2>
+            <p>Pulls unlocked skins from the Bag system and links directly to the new 3D Mode templates. Each entry
+                spends between 20k and 200k gold when summoned.</p>
+            <div id="template-grid" class="template-grid"></div>
+        </section>
+
+        <div class="info-box">
+            <h3>About Type 9: Low-Poly 3D Style</h3>
+            <ul>
+                <li><strong>Technique:</strong> Three.js WebGL real-time 3D rendering</li>
+                <li><strong>Resolution:</strong> 512×512 rendered viewport</li>
+                <li><strong>Style:</strong> Faceted polygons with flat shading</li>
+                <li><strong>Rotation:</strong> Full 360° camera control</li>
+                <li><strong>Views:</strong> Front, Side, Back, Top, Free Rotate</li>
+                <li><strong>Animations:</strong> Idle, Walk, Attack, Jump, Hurt, Victory</li>
+                <li><strong>Materials:</strong> Phong shading with emissive accents</li>
+                <li><strong>Lighting:</strong> Ambient + directional dynamic lighting</li>
+                <li><strong>Hair Color:</strong> Always black (locked)</li>
+                <li><strong>Performance:</strong> 60fps real-time 3D</li>
+            </ul>
+        </div>
+    </div>
+</body>
+<script>
+    const TYPE9_TEMPLATES = [
+        {
+            slug: 'missy-neon-wing',
+            hero: 'Missy Cat Angel',
+            description: 'Fast hover kit with neon wing shaders and pet halo buffs.',
+            cost: 70000,
+            spriteIds: ['MISSY_S3', 'skin_default_a1'],
+            path: '../../../../../x%20one/3d%20mode/templates/type-9/missy-neon-wing.html'
+        },
+        {
+            slug: 'unique-voltage-rain',
+            hero: 'Unique Cyborg',
+            description: 'Ion helix drill variant riding the cybercar bundle.',
+            cost: 180000,
+            spriteIds: ['UNIQUE_S5', 'skin_default_a1'],
+            path: '../../../../../x%20one/3d%20mode/templates/type-9/unique-voltage-rain.html'
+        }
+    ];
+
+    function collectSprites() {
+        if (window.SpriteAssetManager?.getSummonReadySprites) {
+            return window.SpriteAssetManager.getSummonReadySprites({ limit: 20 });
+        }
+        const skins = window.gameState?.inventory?.skins || [];
+        return skins.map((skin) => ({ id: skin.id, unlocked: skin.unlocked !== false }));
+    }
+
+    function renderCards() {
+        const container = document.getElementById('template-grid');
+        if (!container) return;
+        const unlockedSet = new Set(collectSprites().filter((s) => s.unlocked !== false).map((s) => s.id));
+
+        TYPE9_TEMPLATES.forEach((template) => {
+            const unlocked = template.spriteIds.some((id) => unlockedSet.has(id)) || unlockedSet.size === 0;
+            const card = document.createElement('div');
+            card.className = 'template-card';
+            card.innerHTML = `
+                <header>
+                    <div>
+                        <h3>${template.hero}</h3>
+                        <small>${template.slug}</small>
+                    </div>
+                    <div class="cost">💰 ${template.cost.toLocaleString()} g</div>
+                </header>
+                <p>${template.description}</p>
+                <span class="status ${unlocked ? 'unlocked' : 'locked'}">${unlocked ? 'Unlocked' : 'Locked'}</span>
+            `;
+            const button = document.createElement('button');
+            button.textContent = 'Open Template';
+            if (!unlocked) {
+                button.disabled = true;
+                button.style.opacity = '0.5';
+                button.style.cursor = 'not-allowed';
+            } else {
+                button.onclick = () => window.open(template.path, '_blank');
+            }
+            card.appendChild(button);
+            container.appendChild(card);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCards);
+</script>
+
+</html>

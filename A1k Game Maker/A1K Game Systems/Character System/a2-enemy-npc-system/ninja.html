@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Ninja Assassin - HD Pixel Art Enemy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1200px; }
+        canvas {
+            border: 2px solid #8b00ff;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #1a1a1a;
+            box-shadow: 0 0 30px rgba(139,0,255,0.5);
+        }
+        #controls {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #8b00ff;
+            border-radius: 8px;
+            padding: 20px;
+            width: 350px;
+        }
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #8b00ff;
+            border-bottom: 2px solid #8b00ff;
+            padding-bottom: 10px;
+        }
+        .control-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        select, button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #8b00ff;
+            color: #8b00ff;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        button { margin-top: 8px; background: #2a2a2a; }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .stat {
+            background: rgba(139,0,255,0.1);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #8b00ff;
+        }
+        .stat-label { font-size: 10px; color: #999; }
+        .stat-value { font-size: 14px; color: #8b00ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div>
+            <canvas id="sprite" width="128" height="128"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>🥷 SHADOW NINJA ASSASSIN</h1>
+
+            <div class="control-group">
+                <label>Animation</label>
+                <select id="anim">
+                    <option value="idle">⚡ Idle Stance</option>
+                    <option value="run">🏃 Shadow Run</option>
+                    <option value="attack">⚔️ Dual Kunai Attack</option>
+                    <option value="jutsu">🌀 Shadow Jutsu</option>
+                    <option value="teleport">💨 Teleport</option>
+                    <option value="death">💀 Vanish</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Shadow Variant</label>
+                <select id="variant">
+                    <option value="purple">💜 Purple Shadow</option>
+                    <option value="red">❤️ Blood Shadow</option>
+                    <option value="blue">💙 Frost Shadow</option>
+                </select>
+            </div>
+
+            <button onclick="download()">💾 Download Sprite</button>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">TYPE</div>
+                    <div class="stat-value">NINJA</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">TIER</div>
+                    <div class="stat-value">A-RANK</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">HP</div>
+                    <div class="stat-value">400</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">ATK</div>
+                    <div class="stat-value">65</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sprite');
+        const ctx = canvas.getContext('2d');
+        
+        let anim = 'idle';
+        let variant = 'purple';
+        let frame = 0;
+
+        const PALETTE = {
+            purple: { main: '#8b00ff', dark: '#4b0082', light: '#da70d6', accent: '#ff00ff', shadow: '#2d0052' },
+            red: { main: '#ff0040', dark: '#8b0000', light: '#ff69b4', accent: '#ff1493', shadow: '#4a0000' },
+            blue: { main: '#00bfff', dark: '#000080', light: '#87ceeb', accent: '#00ffff', shadow: '#001a33' }
+        };
+
+        document.getElementById('anim').onchange = (e) => anim = e.target.value;
+        document.getElementById('variant').onchange = (e) => variant = e.target.value;
+
+        function drawNinja() {
+            ctx.clearRect(0, 0, 128, 128);
+            const p = PALETTE[variant];
+            const cx = 64, cy = 80;
+
+            let bobY = 0, legSpread = 0, armAngle = 0, alpha = 1;
+
+            if (anim === 'idle') {
+                bobY = Math.sin(frame * 0.1) * 2;
+            } else if (anim === 'run') {
+                bobY = Math.abs(Math.sin(frame * 0.2)) * 3;
+                legSpread = Math.sin(frame * 0.2) * 8;
+            } else if (anim === 'attack') {
+                armAngle = Math.sin(frame * 0.3) * 0.8;
+                bobY = Math.sin(frame * 0.3) * 4;
+            } else if (anim === 'teleport') {
+                alpha = 0.3 + Math.sin(frame * 0.2) * 0.3;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.translate(cx, cy + bobY);
+
+            // Shadow particles
+            if (anim === 'jutsu' || anim === 'teleport') {
+                for (let i = 0; i < 8; i++) {
+                    const angle = (frame * 0.1 + i) * Math.PI / 4;
+                    const dist = 25;
+                    const px = Math.cos(angle) * dist;
+                    const py = Math.sin(angle) * dist;
+                    ctx.fillStyle = p.accent + '80';
+                    ctx.fillRect(px - 2, py - 2, 4, 4);
+                }
+            }
+
+            // LEGS
+            ctx.fillStyle = p.dark;
+            // Left leg
+            ctx.fillRect(-6 - legSpread, 5, 5, 15);
+            ctx.fillRect(-6 - legSpread, 20, 6, 5);
+            // Right leg  
+            ctx.fillRect(2 + legSpread, 5, 5, 15);
+            ctx.fillRect(1 + legSpread, 20, 6, 5);
+
+            // BODY
+            ctx.fillStyle = p.main;
+            ctx.fillRect(-8, -15, 16, 20);
+            
+            // Body armor detail
+            ctx.fillStyle = p.dark;
+            ctx.fillRect(-7, -14, 3, 18);
+            ctx.fillRect(4, -14, 3, 18);
+
+            // Belt
+            ctx.fillStyle = p.accent;
+            ctx.fillRect(-8, 3, 16, 3);
+
+            // ARMS with dual kunai
+            ctx.save();
+            ctx.translate(-10, -8);
+            ctx.rotate(armAngle);
+            // Left arm
+            ctx.fillStyle = p.dark;
+            ctx.fillRect(-2, 0, 4, 12);
+            // Kunai
+            ctx.fillStyle = '#silver';
+            ctx.fillRect(-1, 12, 2, 8);
+            ctx.fillStyle = p.accent;
+            ctx.beginPath();
+            ctx.moveTo(-3, 20);
+            ctx.lineTo(0, 24);
+            ctx.lineTo(3, 20);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(10, -8);
+            ctx.rotate(-armAngle);
+            // Right arm
+            ctx.fillStyle = p.dark;
+            ctx.fillRect(-2, 0, 4, 12);
+            // Kunai
+            ctx.fillStyle = '#silver';
+            ctx.fillRect(-1, 12, 2, 8);
+            ctx.fillStyle = p.accent;
+            ctx.beginPath();
+            ctx.moveTo(-3, 20);
+            ctx.lineTo(0, 24);
+            ctx.lineTo(3, 20);
+            ctx.fill();
+            ctx.restore();
+
+            // HEAD
+            ctx.fillStyle = p.dark;
+            ctx.fillRect(-7, -28, 14, 13);
+            
+            // Mask/headband
+            ctx.fillStyle = p.main;
+            ctx.fillRect(-8, -29, 16, 4);
+            
+            // Ninja symbol
+            ctx.fillStyle = p.accent;
+            ctx.fillRect(-2, -28, 4, 3);
+
+            // Eyes (glowing)
+            ctx.fillStyle = p.accent;
+            ctx.fillRect(-5, -23, 3, 2);
+            ctx.fillRect(2, -23, 3, 2);
+
+            // Shadow aura
+            ctx.strokeStyle = p.accent + '40';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-10, -30, 20, 55);
+
+            ctx.restore();
+        }
+
+        function animate() {
+            frame++;
+            drawNinja();
+            requestAnimationFrame(animate);
+        }
+
+        function download() {
+            const link = document.createElement('a');
+            link.download = `shadow-ninja-${variant}-${anim}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        animate();
+    </script>
+</body>
+</html>

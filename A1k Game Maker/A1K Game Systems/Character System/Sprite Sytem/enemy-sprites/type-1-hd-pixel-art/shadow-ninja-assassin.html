@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shadow Ninja Assassin - HD Pixel Art (S-Rank)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas {
+            border: 2px solid #8b00ff;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #1a1a1a;
+            box-shadow: 0 0 30px rgba(139,0,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="sprite" width="128" height="128"></canvas>
+    <script>
+        const ctx = document.getElementById('sprite').getContext('2d');
+        let frame = 0;
+        const p = { main: '#8b00ff', dark: '#4b0082', light: '#da70d6', accent: '#ff00ff', shadow: '#2d0052' };
+        function draw() {
+            ctx.clearRect(0, 0, 128, 128);
+            const cx = 64, cy = 80;
+            const bobY = Math.abs(Math.sin(frame * 0.2)) * 3;
+            const legSpread = Math.sin(frame * 0.2) * 8;
+            const armAngle = Math.sin(frame * 0.3) * 0.8;
+            const alpha = 0.3 + Math.sin(frame * 0.2) * 0.3;
+            ctx.save(); ctx.globalAlpha = alpha; ctx.translate(cx, cy + bobY);
+            for (let i = 0; i < 8; i++) {
+                const angle = (frame * 0.1 + i) * Math.PI / 4;
+                const dist = 25, px = Math.cos(angle) * dist, py = Math.sin(angle) * dist;
+                ctx.fillStyle = p.accent + '80';
+                ctx.fillRect(px - 2, py - 2, 4, 4);
+            }
+            ctx.fillStyle = p.dark;
+            ctx.fillRect(-6 - legSpread, 5, 5, 15); ctx.fillRect(-6 - legSpread, 20, 6, 5);
+            ctx.fillRect(2 + legSpread, 5, 5, 15); ctx.fillRect(1 + legSpread, 20, 6, 5);
+            ctx.fillStyle = p.main; ctx.fillRect(-8, -15, 16, 20);
+            ctx.fillStyle = p.dark; ctx.fillRect(-7, -14, 3, 18); ctx.fillRect(4, -14, 3, 18);
+            ctx.fillStyle = p.accent; ctx.fillRect(-8, 3, 16, 3);
+            ctx.save(); ctx.translate(-10, -8); ctx.rotate(armAngle);
+            ctx.fillStyle = p.dark; ctx.fillRect(-2, 0, 4, 12);
+            ctx.fillStyle = '#c0c0c0'; ctx.fillRect(-1, 12, 2, 8);
+            ctx.fillStyle = p.accent; ctx.beginPath(); ctx.moveTo(-3, 20); ctx.lineTo(0, 24); ctx.lineTo(3, 20); ctx.fill();
+            ctx.restore();
+            ctx.save(); ctx.translate(10, -8); ctx.rotate(-armAngle);
+            ctx.fillStyle = p.dark; ctx.fillRect(-2, 0, 4, 12);
+            ctx.fillStyle = '#c0c0c0'; ctx.fillRect(-1, 12, 2, 8);
+            ctx.fillStyle = p.accent; ctx.beginPath(); ctx.moveTo(-3, 20); ctx.lineTo(0, 24); ctx.lineTo(3, 20); ctx.fill();
+            ctx.restore();
+            ctx.fillStyle = p.dark; ctx.fillRect(-7, -28, 14, 13);
+            ctx.fillStyle = p.main; ctx.fillRect(-8, -29, 16, 4);
+            ctx.fillStyle = p.accent; ctx.fillRect(-2, -28, 4, 3);
+            ctx.fillStyle = p.accent; ctx.fillRect(-5, -23, 3, 2); ctx.fillRect(2, -23, 3, 2);
+            ctx.strokeStyle = p.accent + '40'; ctx.lineWidth = 2; ctx.strokeRect(-10, -30, 20, 55);
+            ctx.restore();
+        }
+        function animate() { frame++; draw(); requestAnimationFrame(animate); }
+        animate();
+    </script>
+</body>
+</html>
+

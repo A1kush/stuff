@@ -1,0 +1,58 @@
+╔══════════════════════════════════════════════════════════╗
+║                                                          ║
+║      🎮 TALENT-STORE SYSTEM - OFFLINE READY! 🎮         ║
+║                                                          ║
+╚══════════════════════════════════════════════════════════╝
+
+✅ NO SERVER REQUIRED!
+✅ NO NPM INSTALL NEEDED!
+✅ JUST DOUBLE-CLICK AND GO!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📂 TO START:
+
+   1. Find this file: standalone.html
+   
+   2. Double-click it
+   
+   3. That's it! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 FEATURES:
+
+   ✅ 31 Talents across 6 lanes
+   ✅ 50+ Shop items
+   ✅ Currency system (Gold, Essence, Tokens)
+   ✅ Auto-save to localStorage
+   ✅ Works completely offline!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💾 YOUR PROGRESS AUTO-SAVES!
+
+   - Saved to browser localStorage
+   - Close and reopen anytime
+   - Your progress is preserved
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 ADVANCED (Optional):
+
+   If you want the modular ES6 version with separate files:
+   
+   1. Install Node.js (if you don't have it)
+   2. Open terminal here
+   3. Run: npm install
+   4. Run: npm run dev:showcase
+   5. Open: http://localhost:5173/showcase.html
+
+   But standalone.html works perfectly without ANY of this!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 For full documentation, see README.md
+
+🎮 ENJOY! 🎮
+

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1 Combat System V2 - Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #gameCanvas {
+      display: block;
+      image-rendering: -webkit-optimize-contrast; /* Edge 79+ */
+      image-rendering: pixelated;
+      image-rendering: crisp-edges; /* Standard */
+      border: 2px solid #333;
+      background: #0a0a0a;
+    }
+
+    #controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90%;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background: rgba(50, 50, 50, 0.9);
+      border: 2px solid #666;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 80px;
+    }
+
+    button:hover {
+      background: rgba(70, 70, 70, 0.9);
+      border-color: #888;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #info {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      font-size: 12px;
+      max-width: 250px;
+      z-index: 1000;
+    }
+
+    #info h3 {
+      margin-bottom: 10px;
+      color: #0f0;
+    }
+
+    #info p {
+      margin: 5px 0;
+      color: #aaa;
+    }
+
+    #info kbd {
+      background: #333;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div id="info">
+      <h3>🎮 Controls</h3>
+      <p><kbd>WASD</kbd> / <kbd>Arrow Keys</kbd> - Move</p>
+      <p><kbd>1-5</kbd> - Skills S1-S5</p>
+      <p><kbd>X</kbd> - Ultimate (X1)</p>
+      <p><kbd>Space</kbd> - Basic Attack</p>
+      <p><kbd>C</kbd> - Switch Character</p>
+      <p><kbd>R</kbd> - Rage Mode</p>
+      <p><kbd>B</kbd> - Open Bag</p>
+      <p><kbd>Click</kbd> - Attack at cursor</p>
+    </div>
+
+    <div id="controls">
+      <button id="btnS1">S1</button>
+      <button id="btnS2">S2</button>
+      <button id="btnS3">S3</button>
+      <button id="btnS4">S4</button>
+      <button id="btnS5">S5</button>
+      <button id="btnATK">ATK</button>
+      <button id="btnX1">X1</button>
+      <button id="btnSWITCH">SWITCH</button>
+      <button id="btnRAGE">RAGE</button>
+      <button id="btnBAG">BAG</button>
+    </div>
+  </div>
+
+  <!-- Sprite System -->
+  <script src="sprites/sprite-palettes.js"></script>
+  <script src="sprites/base-sprite.js"></script>
+  <script src="sprites/warrior-sprite.js"></script>
+  <script src="sprites/cyborg-sprite.js"></script>
+  <script src="sprites/cat-angel-sprite.js"></script>
+  <script src="core/sprite-renderer.js"></script>
+  <script src="ui/sprite-icons.js"></script>
+
+  <!-- Combat System -->
+  <script src="skills/skill-definitions.js"></script>
+  <script src="skills/projectile-manager.js"></script>
+  <script src="skills/skill-executor.js"></script>
+  <script src="core/combat-engine.js"></script>
+  <script src="core/enemy-system.js"></script>
+
+  <!-- UI Systems -->
+  <script src="ui/combat-hud.js"></script>
+  <script src="ui/skill-buttons.js"></script>
+  <script src="ui/damage-numbers.js"></script>
+
+  <!-- Bag System (optional) -->
+  <script src="bag/bag-integration.js"></script>
+  <!-- <script src="bag/A1KBagSystem.js"></script> -->
+
+  <!-- Integration -->
+  <script src="integration/demo-bridge.js"></script>
+
+  <script>
+    // Initialize game
+    let demo = null;
+
+    window.addEventListener('load', async () => {
+      const canvas = document.getElementById('gameCanvas');
+      
+      // Create demo bridge
+      demo = new CombatDemoBridge();
+      await demo.initialize(canvas);
+
+      // Setup button handlers
+      setupButtons();
+
+      // Start game loop
+      demo.start();
+
+      console.log('🎉 Combat System Demo Ready!');
+      console.log('Press 1-5 for skills, Space for attack, C to switch character');
+    });
+
+    function setupButtons() {
+      // Skill buttons
+      document.getElementById('btnS1').addEventListener('click', () => {
+        const skill = demo.bagIntegration?.getEquippedSkill(1);
+        if (skill) {
+          demo.combatEngine.activateSkill(skill.id, demo.mouseX, demo.mouseY);
+        }
+      });
+
+      document.getElementById('btnS2').addEventListener('click', () => {
+        const skill = demo.bagIntegration?.getEquippedSkill(2);
+        if (skill) {
+          demo.combatEngine.activateSkill(skill.id, demo.mouseX, demo.mouseY);
+        }
+      });
+
+      document.getElementById('btnS3').addEventListener('click', () => {
+        const skill = demo.bagIntegration?.getEquippedSkill(3);
+        if (skill) {
+          demo.combatEngine.activateSkill(skill.id, demo.mouseX, demo.mouseY);
+        }
+      });
+
+      document.getElementById('btnS4').addEventListener('click', () => {
+        const skill = demo.bagIntegration?.getEquippedSkill(4);
+        if (skill) {
+          demo.combatEngine.activateSkill(skill.id, demo.mouseX, demo.mouseY);
+        }
+      });
+
+      document.getElementById('btnS5').addEventListener('click', () => {
+        const skill = demo.bagIntegration?.getEquippedSkill(5);
+        if (skill) {
+          demo.combatEngine.activateSkill(skill.id, demo.mouseX, demo.mouseY);
+        }
+      });
+
+      document.getElementById('btnATK').addEventListener('click', () => {
+        demo.combatEngine.basicAttack(demo.mouseX, demo.mouseY);
+      });
+
+      document.getElementById('btnX1').addEventListener('click', () => {
+        const skill = demo.bagIntegration?.getEquippedSkill('X');
+        if (skill) {
+          demo.combatEngine.activateSkill(skill.id, demo.mouseX, demo.mouseY);
+        }
+      });
+
+      document.getElementById('btnSWITCH').addEventListener('click', () => {
+        demo.switchCharacter();
+      });
+
+      document.getElementById('btnRAGE').addEventListener('click', () => {
+        demo.combatEngine.activateRage();
+      });
+
+      document.getElementById('btnBAG').addEventListener('click', () => {
+        if (demo.bagIntegration) {
+          demo.bagIntegration.openBag();
+        } else {
+          alert('Bag system not loaded');
+        }
+      });
+
+      // Update button labels based on equipped skills
+      if (demo.bagIntegration) {
+        updateButtonLabels();
+        
+        // Update on character switch
+        window.combatEvents.addEventListener('characterSwitched', () => {
+          updateButtonLabels();
+        });
+      }
+    }
+
+    function updateButtonLabels() {
+      if (!demo || !demo.bagIntegration) return;
+
+      const updateButton = (btnId, slot) => {
+        const skill = demo.bagIntegration.getEquippedSkill(slot);
+        const btn = document.getElementById(btnId);
+        if (skill && btn) {
+          btn.textContent = `${slot === 'X' ? 'X1' : 'S' + slot}: ${skill.name}`;
+        }
+      };
+
+      updateButton('btnS1', 1);
+      updateButton('btnS2', 2);
+      updateButton('btnS3', 3);
+      updateButton('btnS4', 4);
+      updateButton('btnS5', 5);
+      updateButton('btnX1', 'X');
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 7: Chibi/Kawaii Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #FFE5F0 0%, #E5F0FF 100%); font-family: 'Arial', sans-serif; padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 36px; margin-bottom: 10px; color: #FF69B4; text-align: center; font-weight: bold; }
+        .subtitle { text-align: center; color: #FF1493; margin-bottom: 40px; font-size: 16px; font-weight: 600; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 40px; }
+        .sprite-card { background: rgba(255,255,255,0.9); border: 3px solid #FFB6D9; border-radius: 20px; padding: 25px; text-align: center; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 5px 20px rgba(255,182,217,0.3); }
+        .sprite-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(255,182,217,0.5); }
+        .sprite-card h2 { font-size: 20px; margin-bottom: 15px; color: #FF69B4; }
+        .sprite-card p { color: #FF1493; font-size: 13px; margin-bottom: 15px; line-height: 1.6; }
+        .sprite-card a { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #FFB6D9 0%, #FF69B4 100%); border: none; color: #FFF; text-decoration: none; border-radius: 12px; transition: all 0.2s; font-weight: bold; }
+        .sprite-card a:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(255,105,180,0.4); }
+        .info-box { background: rgba(255,255,255,0.9); border: 3px solid #FFB6D9; border-radius: 20px; padding: 30px; margin-top: 40px; }
+        .info-box h3 { font-size: 24px; margin-bottom: 15px; color: #FF69B4; }
+        .info-box ul { list-style: none; line-height: 2; color: #FF1493; }
+        .info-box ul li:before { content: "✨ "; margin-right: 8px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #FF69B4; text-decoration: none; font-size: 16px; font-weight: 600; }
+        .back-link:hover { color: #FF1493; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../START_HERE.html" class="back-link">← Back to Gallery</a>
+        <h1>TYPE 7: CHIBI/KAWAII STYLE ✨</h1>
+        <p class="subtitle">Super Deformed Cute Proportions</p>
+
+        <div class="gallery">
+            <div class="sprite-card">
+                <h2>⚔️ A1 Warrior</h2>
+                <p>Adorable chibi warrior with huge head, tiny body, and sparkly dual swords</p>
+                <a href="warrior-dual-swords.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>😇 Missy Cat Angel</h2>
+                <p>Black cat angel with oversized head, floating halo, and kawaii eyes</p>
+                <a href="cat-angel-gunner.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>🤖 Unique Cyborg</h2>
+                <p>Cute cyborg operative with black pigtails and tiny energy rifle</p>
+                <a href="cyborg-rifle-operative.html">View & Export</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>About Type 7: Chibi/Kawaii Style</h3>
+            <ul>
+                <li><strong>Style:</strong> Super Deformed / Chibi (Japanese cute aesthetic)</li>
+                <li><strong>Head-to-Body Ratio:</strong> 1:1 (oversized heads)</li>
+                <li><strong>Eyes:</strong> Huge expressive kawaii eyes with sparkles</li>
+                <li><strong>Proportions:</strong> Tiny bodies, round shapes, nub limbs</li>
+                <li><strong>Animation:</strong> Bouncy with squash & stretch</li>
+                <li><strong>Effects:</strong> Floating sparkles and shimmer</li>
+                <li><strong>Hair Color:</strong> Always black (locked)</li>
+                <li><strong>Resolution:</strong> 256×256 smooth vector</li>
+                <li><strong>Technique:</strong> Canvas2D with bezier curves & gradients</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

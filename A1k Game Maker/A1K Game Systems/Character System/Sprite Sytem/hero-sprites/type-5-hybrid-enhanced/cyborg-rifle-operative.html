@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyborg Rifle Operative - Hybrid Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+        }
+
+        #canvas-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        #pixelCanvas {
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #1a1a1a;
+            display: block;
+        }
+
+        #glcanvas {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            pointer-events: none;
+            border: none;
+            background: transparent;
+            display: block;
+        }
+
+        #controls {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            width: 350px;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button,
+        input[type="range"] {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 30px;
+        }
+
+        select:hover,
+        button:hover {
+            border-color: #666;
+            background: #222;
+        }
+
+        button {
+            margin-top: 8px;
+            background: #2a2a2a;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .info {
+            font-size: 11px;
+            color: #666;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            color: #0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="pixelCanvas" width="128" height="128"></canvas>
+            <canvas id="glcanvas" width="128" height="128"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>🤖 CYBORG RIFLE OPERATIVE</h1>
+
+            <div class="control-group">
+                <label>Animation State</label>
+                <select id="animState">
+                    <option value="idle">Idle (Standing)</option>
+                    <option value="walk">Walk Cycle</option>
+                    <option value="attack">Attack (Shoot)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Color Palette</label>
+                <select id="palette">
+                    <option value="fire">🔥 Fire (Red/Orange)</option>
+                    <option value="ice">❄️ Ice (Cyan/Blue)</option>
+                    <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+                    <option value="light">✨ Light (Gold/White)</option>
+                    <option value="nature">🌿 Nature (Green/Earth)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Shader Intensity: <span id="shaderIntensityValue">1.0x</span></label>
+                <input type="range" id="shaderIntensity" min="0" max="200" value="100" step="10">
+            </div>
+
+            <div class="control-group">
+                <label>Animation Speed</label>
+                <select id="speed">
+                    <option value="0.5">0.5x Slow</option>
+                    <option value="1" selected>1x Normal</option>
+                    <option value="1.5">1.5x Fast</option>
+                    <option value="2">2x Very Fast</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Display Scale</label>
+                <select id="scale">
+                    <option value="2">2x (256px)</option>
+                    <option value="3" selected>3x (384px)</option>
+                    <option value="4">4x (512px)</option>
+                    <option value="5">5x (640px)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Export</label>
+                <div class="btn-group">
+                    <button id="exportFrame">PNG Frame</button>
+                    <button id="exportSheet">Sprite Sheet</button>
+                </div>
+                <button id="exportJSON">Export JSON Data</button>
+            </div>
+
+            <div id="webglWarning" class="info" style="display:none;color:#ff0;">
+                ⚠️ WebGL2 not available. Pixel art only.
+            </div>
+
+            <div class="info">
+                <strong>TYPE 5: HYBRID ENHANCED</strong><br>
+                HD Pixel Art + WebGL2 Shader Effects<br><br>
+                • Base: 128×128 HD Pixel Art<br>
+                • Overlay: Energy conduit flow, rifle beam<br>
+                • Effects: Animated energy through armor<br>
+                • Hair: Black (locked)<br>
+                • Performance: 60fps dual-layer<br><br>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Frame</div>
+                        <div class="stat-value" id="frameCount">0/8</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">FPS</div>
+                        <div class="stat-value" id="fpsCount">60</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pixelCanvas = document.getElementById('pixelCanvas');
+        const pixelCtx = pixelCanvas.getContext('2d');
+        pixelCtx.imageSmoothingEnabled = false;
+
+        const glCanvas = document.getElementById('glcanvas');
+        let gl = null;
+        let useWebGL2 = false;
+        let shaderIntensity = 1.0;
+
+        try {
+            gl = glCanvas.getContext('webgl2', { alpha: true, preserveDrawingBuffer: true });
+            useWebGL2 = !!gl;
+            if (useWebGL2) {
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            }
+        } catch (e) { }
+
+        if (!useWebGL2) {
+            document.getElementById('webglWarning').style.display = 'block';
+        }
+
+        // Animation state
+        let currentAnim = 'idle';
+        let currentFrame = 0;
+        let frameTimer = 0;
+        let animSpeed = 1;
+        let palette = 'fire';
+        let lastTime = 0;
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        // Color palettes (black hair stays black)
+        const palettes = {
+            fire: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                armor: ['#2a1a2a', '#3a2a3a', '#4a3a4a'],
+                armorAccent: ['#ff3333', '#ff6666', '#ff9999'],
+                rifle: ['#1a1a1a', '#2a2a2a'],
+                rifleGlow: ['#ff0000', '#ff3333', '#ff6666'],
+                eyes: '#ffffff',
+                aura: 'rgba(255,80,0,',
+                glow: '#ff3333',
+                shaderHue: [1.0, 0.2, 0.0]
+            },
+            ice: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                armor: ['#0a1a2a', '#1a2a3a', '#2a3a4a'],
+                armorAccent: ['#00ccff', '#33ddff', '#66eeff'],
+                rifle: ['#1a1a1a', '#2a2a2a'],
+                rifleGlow: ['#00ffff', '#33ffff', '#66ffff'],
+                eyes: '#ffffff',
+                aura: 'rgba(0,200,255,',
+                glow: '#00ccff',
+                shaderHue: [0.0, 0.8, 1.0]
+            },
+            shadow: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                armor: ['#1a0a2a', '#2a1a3a', '#3a2a4a'],
+                armorAccent: ['#aa00ff', '#cc33ff', '#dd66ff'],
+                rifle: ['#1a1a1a', '#2a2a2a'],
+                rifleGlow: ['#aa00ff', '#cc33ff', '#dd66ff'],
+                eyes: '#ffffff',
+                aura: 'rgba(170,0,255,',
+                glow: '#aa00ff',
+                shaderHue: [0.67, 0.0, 1.0]
+            },
+            light: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                armor: ['#2a2a1a', '#3a3a2a', '#4a4a3a'],
+                armorAccent: ['#ffcc00', '#ffdd33', '#ffee66'],
+                rifle: ['#1a1a1a', '#2a2a2a'],
+                rifleGlow: ['#ffff00', '#ffff33', '#ffff66'],
+                eyes: '#ffffff',
+                aura: 'rgba(255,200,0,',
+                glow: '#ffcc00',
+                shaderHue: [1.0, 0.85, 0.0]
+            },
+            nature: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                armor: ['#0a2a1a', '#1a3a2a', '#2a4a3a'],
+                armorAccent: ['#00ff66', '#33ff88', '#66ffaa'],
+                rifle: ['#1a1a1a', '#2a2a2a'],
+                rifleGlow: ['#00ff00', '#33ff33', '#66ff66'],
+                eyes: '#ffffff',
+                aura: 'rgba(0,255,100,',
+                glow: '#00ff66',
+                shaderHue: [0.0, 1.0, 0.4]
+            }
+        };
+
+        // Animation data
+        const animations = {
+            idle: {
+                frames: 8,
+                frameTime: 250,
+                loop: true
+            },
+            walk: {
+                frames: 8,
+                frameTime: 125,
+                loop: true
+            },
+            attack: {
+                frames: 6,
+                frameTime: 83,
+                loop: false
+            }
+        };
+
+        // Draw rectangle helper
+        function drawRect(x, y, w, h, color) {
+            pixelCtx.fillStyle = color;
+            pixelCtx.fillRect(x, y, w, h);
+        }
+
+        // Draw pixel helper
+        function drawPixel(x, y, color) {
+            pixelCtx.fillStyle = color;
+            pixelCtx.fillRect(x, y, 1, 1);
+        }
+
+        // Draw cyborg sprite (BASE LAYER ONLY)
+        function drawCyborgPixel(frame, anim) {
+            const pal = palettes[palette];
+            const centerX = 64;
+            const centerY = 64;
+
+            let bobY = 0;
+            let legOffset = 0;
+            let rifleRecoil = 0;
+            let muzzleFlash = false;
+
+            if (anim === 'idle') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 1;
+            } else if (anim === 'walk') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 1.5;
+                legOffset = Math.sin(frame / 4 * Math.PI) * 2.5;
+            } else if (anim === 'attack') {
+                rifleRecoil = frame < 2 ? frame * 2 : 0;
+                muzzleFlash = frame < 2;
+            }
+
+            pixelCtx.clearRect(0, 0, 128, 128);
+
+            // Legs
+            drawRect(centerX - 10, centerY + 18 - bobY + legOffset, 6, 14, pal.armor[1]);
+            drawRect(centerX - 9, centerY + 32 - bobY + legOffset, 4, 8, pal.skin[1]);
+            drawRect(centerX - 9, centerY + 26 - bobY + legOffset, 4, 3, pal.armorAccent[0]);
+            drawRect(centerX + 4, centerY + 18 - bobY - legOffset, 6, 14, pal.armor[1]);
+            drawRect(centerX + 5, centerY + 32 - bobY - legOffset, 4, 8, pal.skin[1]);
+            drawRect(centerX + 5, centerY + 26 - bobY - legOffset, 4, 3, pal.armorAccent[0]);
+
+            // Torso
+            drawRect(centerX - 12, centerY + 4 - bobY, 24, 18, pal.armor[1]);
+            drawRect(centerX - 10, centerY + 6 - bobY, 20, 14, pal.armor[2]);
+            drawRect(centerX - 8, centerY + 8 - bobY, 3, 8, pal.armorAccent[0]);
+            drawRect(centerX + 5, centerY + 8 - bobY, 3, 8, pal.armorAccent[0]);
+            drawPixel(centerX - 7, centerY + 9 - bobY, pal.armorAccent[2]);
+            drawPixel(centerX + 6, centerY + 9 - bobY, pal.armorAccent[2]);
+
+            // Head
+            drawRect(centerX - 10, centerY - 16 - bobY, 20, 18, pal.skin[2]);
+            drawRect(centerX - 6, centerY + 2 - bobY, 12, 4, pal.skin[1]);
+
+            // Black pigtails (LOCKED)
+            drawRect(centerX - 18, centerY - 14 - bobY, 6, 12, '#000000');
+            drawRect(centerX - 17, centerY - 2 - bobY, 4, 4, '#000000');
+            drawRect(centerX + 12, centerY - 14 - bobY, 6, 12, '#000000');
+            drawRect(centerX + 13, centerY - 2 - bobY, 4, 4, '#000000');
+            drawRect(centerX - 10, centerY - 18 - bobY, 20, 4, '#000000');
+
+            // White pixel eyes
+            drawPixel(centerX - 5, centerY - 8 - bobY, pal.eyes);
+            drawPixel(centerX - 4, centerY - 8 - bobY, pal.eyes);
+            drawPixel(centerX + 4, centerY - 8 - bobY, pal.eyes);
+            drawPixel(centerX + 5, centerY - 8 - bobY, pal.eyes);
+
+            // Left arm
+            drawRect(centerX - 18, centerY + 8 - bobY, 6, 12, pal.armor[1]);
+            drawRect(centerX - 17, centerY + 20 - bobY, 4, 8, pal.skin[1]);
+            drawRect(centerX - 17, centerY + 8 - bobY, 4, 3, pal.armorAccent[1]);
+
+            // Right arm
+            drawRect(centerX + 12, centerY + 6 - bobY, 6, 10, pal.armor[1]);
+            drawRect(centerX + 13, centerY + 16 - bobY, 4, 6, pal.skin[1]);
+            drawRect(centerX + 13, centerY + 6 - bobY, 4, 3, pal.armorAccent[1]);
+
+            // Energy rifle
+            const rifleX = centerX - 8 + rifleRecoil;
+            const rifleY = centerY + 10 - bobY;
+
+            drawRect(rifleX, rifleY, 24, 6, pal.rifle[0]);
+            drawRect(rifleX + 2, rifleY + 1, 20, 4, pal.rifle[1]);
+            drawRect(rifleX + 4, rifleY, 4, 6, pal.rifleGlow[0]);
+            drawRect(rifleX + 5, rifleY + 1, 2, 4, pal.rifleGlow[2]);
+            drawRect(rifleX + 14, rifleY, 4, 6, pal.rifleGlow[0]);
+            drawRect(rifleX + 15, rifleY + 1, 2, 4, pal.rifleGlow[2]);
+            drawRect(rifleX + 10, rifleY + 6, 4, 4, pal.rifle[0]);
+            drawPixel(rifleX + 23, rifleY + 2, pal.rifleGlow[2]);
+            drawPixel(rifleX + 23, rifleY + 3, pal.rifleGlow[2]);
+
+            // Muzzle flash (pixel art base)
+            if (muzzleFlash) {
+                pixelCtx.fillStyle = pal.glow;
+                pixelCtx.globalAlpha = 0.9;
+                drawRect(rifleX + 24, rifleY - 2, 8, 10);
+                pixelCtx.globalAlpha = 0.6;
+                drawRect(rifleX + 32, rifleY, 6, 6);
+                pixelCtx.globalAlpha = 1;
+            }
+        }
+
+        // WebGL Shader - EFFECTS LAYER ONLY
+        const VSH = `#version 300 es
+in vec2 aPos;
+out vec2 vUV;
+void main(){ vUV = aPos * 0.5 + 0.5; gl_Position = vec4(aPos,0.0,1.0);}`;
+
+        const FSH = `#version 300 es
+precision highp float;
+in vec2 vUV;
+out vec4 fragColor;
+
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform float u_frame;
+uniform int u_animState;
+uniform vec3 u_hue;
+uniform float u_intensity;
+
+void main(){
+  vec2 p = (vUV * u_resolution - 0.5*u_resolution) / min(u_resolution.x,u_resolution.y);
+  p.y += 0.15;
+  
+  float bobY = 0.0;
+  float rifleRecoil = 0.0;
+  if(u_animState == 0){
+    bobY = sin(u_frame / 4.0 * 3.14159) * 0.01;
+  }else if(u_animState == 1){
+    bobY = sin(u_frame / 4.0 * 3.14159) * 0.012;
+  }else if(u_animState == 2){
+    rifleRecoil = u_frame < 2.0 ? u_frame * 0.015 : 0.0;
+  }
+  
+  vec3 col = vec3(0.0);
+  
+  // Rifle position
+  vec2 riflePos = vec2(-0.06 + rifleRecoil, 0.08 - bobY);
+  
+  // Energy conduit flow along rifle (animated)
+  vec2 rifleDir = normalize(vec2(1.0, 0.0));
+  vec2 localPos = p - riflePos;
+  float alongRifle = dot(localPos, rifleDir);
+  float acrossRifle = abs(dot(localPos, vec2(-rifleDir.y, rifleDir.x)));
+  
+  if(alongRifle > -0.02 && alongRifle < 0.18 && acrossRifle < 0.03){
+    float flow = sin(alongRifle * 30.0 - u_time * 5.0) * 0.5 + 0.5;
+    col += u_hue * flow * exp(-pow(acrossRifle * 25.0, 2.0)) * 0.8;
+  }
+  
+  // Rifle beam trail (from barrel)
+  vec2 barrelPos = riflePos + vec2(0.18, 0.0);
+  float dBarrel = length(p - barrelPos);
+  float beam = exp(-pow(dBarrel * 12.0, 2.0));
+  col += u_hue * beam * 0.6;
+  
+  // Muzzle flash enhancement (during attack)
+  if(u_animState == 2 && u_frame < 2.0){
+    vec2 muzzlePos = barrelPos;
+    float dMuzzle = length(p - muzzlePos);
+    float flash = exp(-pow(dMuzzle * 10.0, 2.0));
+    col += u_hue * flash * 2.0;
+  }
+  
+  // Energy flow through armor (chest conduits)
+  vec2 chest1 = vec2(-0.06, 0.06 - bobY);
+  vec2 chest2 = vec2(0.04, 0.06 - bobY);
+  
+  float flow1 = sin(u_time * 3.0 - length(p - chest1) * 15.0) * 0.5 + 0.5;
+  float flow2 = sin(u_time * 3.0 - length(p - chest2) * 15.0) * 0.5 + 0.5;
+  
+  float dChest1 = length(p - chest1);
+  float dChest2 = length(p - chest2);
+  
+  if(dChest1 < 0.05){
+    col += u_hue * flow1 * exp(-pow(dChest1 * 20.0, 2.0)) * 0.5;
+  }
+  if(dChest2 < 0.05){
+    col += u_hue * flow2 * exp(-pow(dChest2 * 20.0, 2.0)) * 0.5;
+  }
+  
+  // Aura around center
+  vec2 centerPos = vec2(0.0, 0.0 - bobY);
+  float dAura = length(p - centerPos);
+  float aura = exp(-pow(dAura * 5.0, 2.0)) * (0.3 + 0.2 * sin(u_time * 2.0));
+  col += u_hue * aura * 0.3;
+  
+  // Rim light on armor edges
+  float rim = smoothstep(0.18, 0.14, dAura);
+  col += u_hue * rim * 0.2;
+  
+  col *= u_intensity;
+  
+  fragColor = vec4(col, length(col) * 0.8);
+}`;
+
+        let program, aPosLoc, u_resolution, u_time, u_frame, u_animState, u_hue, u_intensity, quadBuffer;
+
+        if (useWebGL2) {
+            function createShader(glCtx, type, src) {
+                const s = glCtx.createShader(type);
+                glCtx.shaderSource(s, src);
+                glCtx.compileShader(s);
+                if (!glCtx.getShaderParameter(s, glCtx.COMPILE_STATUS)) {
+                    console.error('Shader error:', glCtx.getShaderInfoLog(s));
+                    return null;
+                }
+                return s;
+            }
+
+            function createProgram(glCtx, vsrc, fsrc) {
+                const p = glCtx.createProgram();
+                const vs = createShader(glCtx, glCtx.VERTEX_SHADER, vsrc);
+                const fs = createShader(glCtx, glCtx.FRAGMENT_SHADER, fsrc);
+                if (!vs || !fs) return null;
+                glCtx.attachShader(p, vs);
+                glCtx.attachShader(p, fs);
+                glCtx.linkProgram(p);
+                if (!glCtx.getProgramParameter(p, glCtx.LINK_STATUS)) {
+                    console.error('Program error:', glCtx.getProgramInfoLog(p));
+                    return null;
+                }
+                return p;
+            }
+
+            program = createProgram(gl, VSH, FSH);
+            if (program) {
+                aPosLoc = gl.getAttribLocation(program, 'aPos');
+                u_resolution = gl.getUniformLocation(program, 'u_resolution');
+                u_time = gl.getUniformLocation(program, 'u_time');
+                u_frame = gl.getUniformLocation(program, 'u_frame');
+                u_animState = gl.getUniformLocation(program, 'u_animState');
+                u_hue = gl.getUniformLocation(program, 'u_hue');
+                u_intensity = gl.getUniformLocation(program, 'u_intensity');
+
+                const quad = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+                quadBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+            }
+        }
+
+        function drawShaderEffects(frame, anim, time) {
+            if (!useWebGL2 || !program) return;
+
+            gl.viewport(0, 0, 128, 128);
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            gl.useProgram(program);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+            gl.enableVertexAttribArray(aPosLoc);
+            gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 0, 0);
+
+            const animStateMap = { idle: 0, walk: 1, attack: 2 };
+            gl.uniform2f(u_resolution, 128, 128);
+            gl.uniform1f(u_time, time / 1000.0);
+            gl.uniform1f(u_frame, frame);
+            gl.uniform1i(u_animState, animStateMap[anim] || 0);
+            const hue = palettes[palette].shaderHue;
+            gl.uniform3f(u_hue, hue[0], hue[1], hue[2]);
+            gl.uniform1f(u_intensity, shaderIntensity);
+
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+
+        // Animation loop
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0;
+                currentFrame++;
+
+                if (currentFrame >= anim.frames) {
+                    if (anim.loop) {
+                        currentFrame = 0;
+                    } else {
+                        currentFrame = anim.frames - 1;
+                    }
+                }
+
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            drawCyborgPixel(currentFrame, currentAnim);
+            if (useWebGL2) {
+                drawShaderEffects(currentFrame, currentAnim, timestamp);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.getElementById('animState').addEventListener('change', (e) => {
+            currentAnim = e.target.value;
+            currentFrame = 0;
+            frameTimer = 0;
+        });
+
+        document.getElementById('palette').addEventListener('change', (e) => {
+            palette = e.target.value;
+        });
+
+        document.getElementById('shaderIntensity').addEventListener('input', (e) => {
+            shaderIntensity = parseFloat(e.target.value) / 100.0;
+            document.getElementById('shaderIntensityValue').textContent = shaderIntensity.toFixed(1) + 'x';
+        });
+
+        document.getElementById('speed').addEventListener('change', (e) => {
+            animSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('scale').addEventListener('change', (e) => {
+            const scale = parseInt(e.target.value);
+            pixelCanvas.style.width = (128 * scale) + 'px';
+            pixelCanvas.style.height = (128 * scale) + 'px';
+            glCanvas.style.width = (128 * scale) + 'px';
+            glCanvas.style.height = (128 * scale) + 'px';
+        });
+
+        function compositeCanvases() {
+            const composite = document.createElement('canvas');
+            composite.width = 128;
+            composite.height = 128;
+            const compCtx = composite.getContext('2d');
+            compCtx.drawImage(pixelCanvas, 0, 0);
+            if (useWebGL2) {
+                compCtx.drawImage(glCanvas, 0, 0);
+            }
+            return composite;
+        }
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const composite = compositeCanvases();
+            const link = document.createElement('a');
+            link.download = `cyborg-hybrid-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = composite.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            const anim = animations[currentAnim];
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 128 * anim.frames;
+            tempCanvas.height = 128;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            for (let i = 0; i < anim.frames; i++) {
+                drawCyborgPixel(i, currentAnim);
+                if (useWebGL2) {
+                    drawShaderEffects(i, currentAnim, Date.now());
+                }
+                const composite = compositeCanvases();
+                tempCtx.drawImage(composite, i * 128, 0);
+            }
+
+            const link = document.createElement('a');
+            link.download = `cyborg-hybrid-${currentAnim}-sheet-${palette}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+
+            drawCyborgPixel(currentFrame, currentAnim);
+            if (useWebGL2) {
+                drawShaderEffects(currentFrame, currentAnim, Date.now());
+            }
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = {
+                character: 'Cyborg Rifle Operative',
+                type: 'Hybrid Enhanced',
+                resolution: '128x128',
+                layers: ['pixel-art-base', 'webgl-shader-effects'],
+                animations: animations,
+                palettes: Object.keys(palettes),
+                currentState: {
+                    animation: currentAnim,
+                    frame: currentFrame,
+                    palette: palette,
+                    shaderIntensity: shaderIntensity
+                },
+                metadata: {
+                    hairColor: '#000000 (locked)',
+                    weaponType: 'Energy Rifle',
+                    style: 'HD Pixel + WebGL2 Shaders'
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `cyborg-hybrid-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+
+        // Initialize
+        pixelCanvas.style.width = '384px';
+        pixelCanvas.style.height = '384px';
+        glCanvas.style.width = '384px';
+        glCanvas.style.height = '384px';
+        animate(0);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Sprite Generator - NPC & Enemy Rank System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2d1b69 0%, #1a1a2e 50%, #0f0f23 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #10b981;
+            text-shadow: 0 0 20px #10b981;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #34d399;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .controls-panel {
+            background: rgba(45, 27, 105, 0.9);
+            border: 2px solid #10b981;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .canvas-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #10b981;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.1);
+        }
+
+        .support-card {
+            background: rgba(45, 27, 105, 0.8);
+            border: 1px solid #10b981;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .support-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .support-card canvas {
+            border: 1px solid #10b981;
+            background: #000000;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-optimize-contrast: true;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .support-card h3 {
+            color: #10b981;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #10b981;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #10b981;
+            border: 1px solid #10b981;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            background: #10b981;
+            color: #000000;
+        }
+
+        button {
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .generate-btn {
+            background: #10b981 !important;
+            color: #000000 !important;
+            font-weight: bold;
+            border: 2px solid #10b981 !important;
+        }
+
+        .generate-btn:hover {
+            background: #000000 !important;
+            color: #10b981 !important;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #10b981;
+        }
+
+        .export-section h3 {
+            color: #10b981;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(45, 27, 105, 0.6);
+            border: 1px solid #10b981;
+        }
+
+        .stats-title {
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: #34d399;
+        }
+
+        .stat-value {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .controls-title {
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+
+        .animation-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>💚 Support Sprite Generator</h1>
+        <p class="subtitle">Generate compassionate support sprites with healing and buff abilities • Priests, Shamans,
+            Druids, Monks, Bards</p>
+
+        <div class="support-grid">
+            <div class="controls-panel">
+                <h2 class="controls-title">⚙️ Support Controls</h2>
+
+                <div class="control-group">
+                    <label for="support-type">Support Type</label>
+                    <select id="support-type">
+                        <option value="priest">⛪ Priest</option>
+                        <option value="shaman">🪄 Shaman</option>
+                        <option value="druid">🌿 Druid</option>
+                        <option value="monk">🥋 Monk</option>
+                        <option value="bard">🎵 Bard</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="divine-rank">Divine Rank</label>
+                    <select id="divine-rank">
+                        <option value="novice">Novice (Level 1-10)</option>
+                        <option value="adept">Adept (Level 11-25)</option>
+                        <option value="master">Master (Level 26-50)</option>
+                        <option value="saint">Saint (Level 51+)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="specialization">Specialization</label>
+                    <select id="specialization">
+                        <option value="healer">💚 Pure Healer</option>
+                        <option value="buffer">✨ Buffer</option>
+                        <option value="summoner">👻 Summoner</option>
+                        <option value="protector">🛡️ Protector</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="attire">Attire Style</label>
+                    <select id="attire">
+                        <option value="robes">Flowing Robes</option>
+                        <option value="vestments">Sacred Vestments</option>
+                        <option value="simple">Simple Garments</option>
+                        <option value="ornate">Ornate Regalia</option>
+                    </select>
+                </div>
+
+                <button class="generate-btn" onclick="generateSupport()">💚 Generate Support</button>
+
+                <div class="export-section">
+                    <h3>💾 Export Options</h3>
+                    <div class="btn-grid">
+                        <button onclick="exportPNG()">📷 PNG</button>
+                        <button onclick="exportSheet()">📄 Sprite Sheet</button>
+                    </div>
+                    <button onclick="exportJSON()">💾 JSON Data</button>
+                </div>
+
+                <div class="stats-panel">
+                    <h3 class="stats-title">📊 Support Stats</h3>
+                    <div class="stats-grid" id="stats-display">
+                        <div class="stat-item">
+                            <span class="stat-label">HP:</span>
+                            <span class="stat-value" id="stat-hp">125</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">MP:</span>
+                            <span class="stat-value" id="stat-mp">180</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Attack:</span>
+                            <span class="stat-value" id="stat-attack">35</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Defense:</span>
+                            <span class="stat-value" id="stat-defense">30</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Healing:</span>
+                            <span class="stat-value" id="stat-healing">85</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Speed:</span>
+                            <span class="stat-value" id="stat-speed">40</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-panel">
+                <div class="support-card">
+                    <h3>Support Sprite Preview</h3>
+                    <canvas id="support-canvas" width="512" height="512"></canvas>
+                    <div class="animation-buttons">
+                        <button onclick="setAnimation('idle')">😌 Idle</button>
+                        <button onclick="setAnimation('cast')">✨ Cast</button>
+                        <button onclick="setAnimation('heal')">💚 Heal</button>
+                        <button onclick="setAnimation('special')">💫 Special</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./hd-sprite-engine.js"></script>
+    <script>
+        let supportSystem;
+        let currentAnimation = 'idle';
+
+        const supportStats = {
+            'priest': {
+                novice: { hp: 110, mp: 160, attack: 25, defense: 25, healing: 75, speed: 35 },
+                adept: { hp: 150, mp: 200, attack: 35, defense: 30, healing: 85, speed: 40 },
+                master: { hp: 190, mp: 240, attack: 45, defense: 35, healing: 95, speed: 45 },
+                saint: { hp: 230, mp: 280, attack: 55, defense: 40, healing: 105, speed: 50 }
+            },
+            'shaman': {
+                novice: { hp: 120, mp: 170, attack: 30, defense: 28, healing: 70, speed: 38 },
+                adept: { hp: 160, mp: 210, attack: 40, defense: 33, healing: 80, speed: 43 },
+                master: { hp: 200, mp: 250, attack: 50, defense: 38, healing: 90, speed: 48 },
+                saint: { hp: 240, mp: 290, attack: 60, defense: 43, healing: 100, speed: 53 }
+            },
+            'druid': {
+                novice: { hp: 130, mp: 165, attack: 35, defense: 35, healing: 80, speed: 32 },
+                adept: { hp: 170, mp: 205, attack: 45, defense: 40, healing: 90, speed: 37 },
+                master: { hp: 210, mp: 245, attack: 55, defense: 45, healing: 100, speed: 42 },
+                saint: { hp: 250, mp: 285, attack: 65, defense: 50, healing: 110, speed: 47 }
+            },
+            'monk': {
+                novice: { hp: 140, mp: 140, attack: 45, defense: 40, healing: 65, speed: 45 },
+                adept: { hp: 180, mp: 180, attack: 55, defense: 45, healing: 75, speed: 50 },
+                master: { hp: 220, mp: 220, attack: 65, defense: 50, healing: 85, speed: 55 },
+                saint: { hp: 260, mp: 260, attack: 75, defense: 55, healing: 95, speed: 60 }
+            },
+            'bard': {
+                novice: { hp: 115, mp: 155, attack: 28, defense: 22, healing: 72, speed: 42 },
+                adept: { hp: 155, mp: 195, attack: 38, defense: 27, healing: 82, speed: 47 },
+                master: { hp: 195, mp: 235, attack: 48, defense: 32, healing: 92, speed: 52 },
+                saint: { hp: 235, mp: 275, attack: 58, defense: 37, healing: 102, speed: 57 }
+            }
+        };
+
+        function init() {
+            const canvas = document.getElementById('support-canvas');
+            supportSystem = new HDSpriteSystem();
+            supportSystem.setCanvas(canvas);
+            supportSystem.setCharacter('support', 'priest');
+            supportSystem.setPalette('light');
+            supportSystem.setScale(4);
+            supportSystem.draw();
+
+            updateStats();
+        }
+
+        function generateSupport() {
+            const supportType = document.getElementById('support-type').value;
+            const divineRank = document.getElementById('divine-rank').value;
+            const specialization = document.getElementById('specialization').value;
+            const attire = document.getElementById('attire').value;
+
+            supportSystem.setCharacter('support', supportType);
+            supportSystem.setPalette('light');
+            supportSystem.setScale(4);
+
+            // Apply customizations based on selections
+            if (attire === 'vestments') {
+                supportSystem.addAccessory('holy-symbol');
+            } else if (attire === 'ornate') {
+                supportSystem.addAccessory('jewelry');
+            } else if (attire === 'simple') {
+                supportSystem.addAccessory('minimalist');
+            }
+
+            supportSystem.draw();
+            updateStats();
+        }
+
+        function setAnimation(animation) {
+            currentAnimation = animation;
+            supportSystem.setAnimation(animation);
+            supportSystem.draw();
+        }
+
+        function updateStats() {
+            const supportType = document.getElementById('support-type').value;
+            const divineRank = document.getElementById('divine-rank').value;
+
+            const stats = supportStats[supportType][divineRank];
+
+            document.getElementById('stat-hp').textContent = stats.hp;
+            document.getElementById('stat-mp').textContent = stats.mp;
+            document.getElementById('stat-attack').textContent = stats.attack;
+            document.getElementById('stat-defense').textContent = stats.defense;
+            document.getElementById('stat-healing').textContent = stats.healing;
+            document.getElementById('stat-speed').textContent = stats.speed;
+        }
+
+        function exportPNG() {
+            const dataURL = supportSystem.exportPNG();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `support-${document.getElementById('support-type').value}-${currentAnimation}.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportSheet() {
+            const dataURL = supportSystem.exportSpriteSheet();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `support-${document.getElementById('support-type').value}-sheet.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportJSON() {
+            const data = supportSystem.exportJSON();
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `support-${document.getElementById('support-type').value}-data.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

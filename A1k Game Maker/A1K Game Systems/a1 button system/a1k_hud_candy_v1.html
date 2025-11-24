@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A1K HUD — Candy Style (v1)</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      font: 14px/1.4 ui-sans-serif, system-ui, Segoe UI, Roboto, sans-serif;
+      color: #F5F9FF;
+    }
+
+    /* ===== LAYOUT ===== */
+    #hud-wrap {
+      position: fixed;
+      inset: auto 0 0 0;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      pointer-events: none;
+      z-index: 55;
+    }
+
+    #hud-left {
+      pointer-events: auto;
+      justify-self: start;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-left: 40px;
+    }
+
+    #hud-right {
+      pointer-events: auto;
+      justify-self: end;
+      display: grid;
+      grid-template-rows: auto auto;
+      gap: 10px;
+      align-content: end;
+      margin-right: 147px;
+      margin-bottom: 40px;
+    }
+
+    /* ===== JOYSTICK - CANDY STYLE ===== */
+    #vj-root {
+      width: 140px;
+      height: 140px;
+      position: relative;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: none;
+      filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.4));
+    }
+
+    #vj-base {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.15), rgba(122, 213, 255, 0.08), rgba(0, 0, 0, 0.4));
+      border: 3px solid rgba(122, 213, 255, 0.35);
+      box-shadow: 
+        inset 0 3px 12px rgba(0, 0, 0, 0.3),
+        inset 0 -2px 10px rgba(122, 213, 255, 0.25),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        0 0 24px rgba(122, 213, 255, 0.2);
+    }
+
+    #vj-knob {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 56px;
+      height: 56px;
+      margin-left: -28px;
+      margin-top: -28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.35), rgba(122, 213, 255, 0.25), rgba(167, 139, 250, 0.15));
+      border: 3px solid rgba(122, 213, 255, 0.85);
+      box-shadow: 
+        0 6px 18px rgba(0, 0, 0, 0.4),
+        0 0 28px rgba(122, 213, 255, 0.45),
+        inset 0 2px 6px rgba(255, 255, 255, 0.45),
+        inset 0 -3px 8px rgba(122, 213, 255, 0.3);
+      transform: translate(0, 0);
+      transition: transform 0.08s ease-out;
+    }
+
+    /* Joystick READY - Candy Pulse */
+    @keyframes candyJoystickPulse {
+      0%, 100% {
+        box-shadow: 
+          0 6px 18px rgba(0, 0, 0, 0.4),
+          0 0 30px rgba(122, 213, 255, 0.5),
+          0 0 50px rgba(167, 139, 250, 0.4),
+          inset 0 2px 6px rgba(255, 255, 255, 0.5),
+          inset 0 -3px 8px rgba(122, 213, 255, 0.35);
+      }
+      50% {
+        box-shadow: 
+          0 6px 22px rgba(0, 0, 0, 0.45),
+          0 0 45px rgba(122, 213, 255, 0.75),
+          0 0 70px rgba(167, 139, 250, 0.6),
+          inset 0 2px 8px rgba(255, 255, 255, 0.6),
+          inset 0 -3px 10px rgba(122, 213, 255, 0.45);
+        transform: translate(0, 0) scale(1.08);
+      }
+    }
+
+    #vj-root.ready #vj-base {
+      border-color: rgba(122, 213, 255, 0.7);
+      box-shadow: 
+        inset 0 3px 14px rgba(0, 0, 0, 0.35),
+        inset 0 -2px 12px rgba(122, 213, 255, 0.4),
+        inset 0 1px 3px rgba(255, 255, 255, 0.5),
+        0 0 32px rgba(122, 213, 255, 0.35);
+    }
+
+    #vj-root.ready #vj-knob {
+      animation: candyJoystickPulse 1.6s ease-in-out infinite;
+    }
+
+    #vj-root.ready::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid rgba(122, 213, 255, 0.5);
+      box-shadow: 
+        0 0 28px rgba(122, 213, 255, 0.4),
+        0 0 50px rgba(167, 139, 250, 0.35);
+      pointer-events: none;
+      animation: ringPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* ===== UTILITY BUTTONS - CANDY STYLE ===== */
+    .utility-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 15px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .utility-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .utility-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.28), rgba(255, 182, 255, 0.12), rgba(167, 139, 250, 0.15));
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: .03em;
+      font-size: 13px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -2px 8px rgba(167, 139, 250, 0.3),
+        0 0 20px rgba(255, 182, 255, 0.2);
+      touch-action: manipulation;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .utility-btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -2px 10px rgba(167, 139, 250, 0.4),
+        0 0 28px rgba(255, 182, 255, 0.35);
+    }
+
+    .utility-btn:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 
+        0 2px 10px rgba(0, 0, 0, 0.3),
+        inset 0 3px 10px rgba(0, 0, 0, 0.3),
+        inset 0 -1px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Top row - Sky Candy */
+    .utility-row.top .utility-btn {
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3), rgba(122, 213, 255, 0.2), rgba(168, 230, 255, 0.18));
+      border-color: rgba(122, 213, 255, 0.5);
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -2px 8px rgba(122, 213, 255, 0.35),
+        0 0 20px rgba(122, 213, 255, 0.25);
+    }
+
+    /* Bottom row - Yellow Candy */
+    .utility-row.bot .utility-btn[data-btn="bag"],
+    .utility-row.bot .utility-btn[data-btn="switch"] {
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.28), rgba(255, 214, 102, 0.2), rgba(255, 235, 153, 0.15));
+      border-color: rgba(255, 214, 102, 0.6);
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -2px 8px rgba(255, 214, 102, 0.35),
+        0 0 20px rgba(255, 214, 102, 0.3);
+    }
+
+    /* AI Button - Purple Magic */
+    .utility-btn[data-btn="ai"] {
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.15), rgba(186, 85, 211, 0.18), rgba(233, 215, 255, 0.1));
+      border: 2px dashed rgba(186, 85, 211, 0.75);
+      color: #F3E8FF;
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 8px rgba(186, 85, 211, 0.25),
+        0 0 24px rgba(186, 85, 211, 0.3);
+    }
+
+    /* ===== SKILL PILLS - CANDY STYLE ===== */
+    .skill-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      justify-content: flex-end;
+    }
+
+    .skill-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.15));
+      font-weight: 900;
+      letter-spacing: .05em;
+      font-size: 13px;
+      position: relative;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      color: #fff;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .skill-pill::after {
+      content: attr(data-skill);
+    }
+
+    .skill-pill:active {
+      transform: scale(0.95) translateY(2px);
+    }
+
+    /* S1 - Pink Candy */
+    .skill-pill.s1 {
+      border-color: rgba(255, 122, 217, 0.75);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3), rgba(255, 122, 217, 0.25), rgba(255, 181, 232, 0.15));
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 2px 6px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 10px rgba(255, 122, 217, 0.3),
+        0 0 24px rgba(255, 122, 217, 0.25);
+    }
+
+    /* S2 - Mint Candy */
+    .skill-pill.s2 {
+      border-color: rgba(122, 248, 200, 0.8);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3), rgba(122, 248, 200, 0.25), rgba(168, 255, 224, 0.15));
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 2px 6px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 10px rgba(122, 248, 200, 0.3),
+        0 0 24px rgba(122, 248, 200, 0.25);
+    }
+
+    /* S3 - Sky Candy */
+    .skill-pill.s3 {
+      border-color: rgba(122, 213, 255, 0.8);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3), rgba(122, 213, 255, 0.25), rgba(168, 230, 255, 0.15));
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 2px 6px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 10px rgba(122, 213, 255, 0.3),
+        0 0 24px rgba(122, 213, 255, 0.25);
+    }
+
+    /* READY GLOW ANIMATIONS */
+    @keyframes candyGlowPink {
+      0%, 100% {
+        box-shadow: 
+          0 4px 16px rgba(0, 0, 0, 0.4),
+          0 0 28px rgba(255, 122, 217, 0.55),
+          0 0 40px rgba(255, 122, 217, 0.35),
+          inset 0 2px 8px rgba(255, 255, 255, 0.5),
+          inset 0 -2px 12px rgba(255, 122, 217, 0.4);
+      }
+      50% {
+        box-shadow: 
+          0 4px 20px rgba(0, 0, 0, 0.45),
+          0 0 40px rgba(255, 122, 217, 0.85),
+          0 0 60px rgba(255, 122, 217, 0.55),
+          inset 0 2px 10px rgba(255, 255, 255, 0.6),
+          inset 0 -2px 14px rgba(255, 122, 217, 0.5);
+      }
+    }
+
+    @keyframes candyGlowMint {
+      0%, 100% {
+        box-shadow: 
+          0 4px 16px rgba(0, 0, 0, 0.4),
+          0 0 28px rgba(122, 248, 200, 0.55),
+          0 0 40px rgba(122, 248, 200, 0.35),
+          inset 0 2px 8px rgba(255, 255, 255, 0.5),
+          inset 0 -2px 12px rgba(122, 248, 200, 0.4);
+      }
+      50% {
+        box-shadow: 
+          0 4px 20px rgba(0, 0, 0, 0.45),
+          0 0 40px rgba(122, 248, 200, 0.85),
+          0 0 60px rgba(122, 248, 200, 0.55),
+          inset 0 2px 10px rgba(255, 255, 255, 0.6),
+          inset 0 -2px 14px rgba(122, 248, 200, 0.5);
+      }
+    }
+
+    @keyframes candyGlowSky {
+      0%, 100% {
+        box-shadow: 
+          0 4px 16px rgba(0, 0, 0, 0.4),
+          0 0 28px rgba(122, 213, 255, 0.55),
+          0 0 40px rgba(122, 213, 255, 0.35),
+          inset 0 2px 8px rgba(255, 255, 255, 0.5),
+          inset 0 -2px 12px rgba(122, 213, 255, 0.4);
+      }
+      50% {
+        box-shadow: 
+          0 4px 20px rgba(0, 0, 0, 0.45),
+          0 0 40px rgba(122, 213, 255, 0.85),
+          0 0 60px rgba(122, 213, 255, 0.55),
+          inset 0 2px 10px rgba(255, 255, 255, 0.6),
+          inset 0 -2px 14px rgba(122, 213, 255, 0.5);
+      }
+    }
+
+    .skill-pill.ready {
+      filter: saturate(130%) brightness(1.1);
+    }
+
+    .skill-pill.s1.ready {
+      animation: candyGlowPink 1.25s ease-in-out infinite;
+    }
+
+    .skill-pill.s2.ready {
+      animation: candyGlowMint 1.25s ease-in-out infinite;
+    }
+
+    .skill-pill.s3.ready {
+      animation: candyGlowSky 1.25s ease-in-out infinite;
+    }
+
+    .skill-pill.ready::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+      animation: ringPulse 1.25s ease-in-out infinite;
+    }
+
+    /* ===== ATTACK BUTTONS - CANDY STYLE ===== */
+    .big-btn {
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      padding: 18px 24px;
+      border-radius: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.35);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2));
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: .06em;
+      font-size: 18px;
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .big-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+    }
+
+    .big-btn:active {
+      transform: translateY(2px) scale(0.97);
+    }
+
+    .big-btn.attack {
+      border-color: rgba(255, 122, 217, 0.85);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3), rgba(255, 122, 217, 0.25), rgba(255, 100, 150, 0.2));
+      box-shadow: 
+        0 6px 24px rgba(0, 0, 0, 0.4),
+        inset 0 2px 8px rgba(255, 255, 255, 0.4),
+        inset 0 -3px 12px rgba(255, 122, 217, 0.35),
+        0 0 32px rgba(255, 122, 217, 0.35);
+    }
+
+    .big-btn.jump {
+      border-color: rgba(122, 213, 255, 0.85);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3), rgba(122, 213, 255, 0.25), rgba(100, 180, 255, 0.2));
+      box-shadow: 
+        0 6px 24px rgba(0, 0, 0, 0.4),
+        inset 0 2px 8px rgba(255, 255, 255, 0.4),
+        inset 0 -3px 12px rgba(122, 213, 255, 0.35),
+        0 0 32px rgba(122, 213, 255, 0.35);
+    }
+
+    .rage-shield-container {
+      position: absolute;
+      right: -80px;
+      top: 0%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .btn-container {
+      position: relative;
+    }
+
+    .rage-shield-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.35);
+      background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2));
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: .05em;
+      font-size: 11px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rage-shield-btn:hover {
+      transform: scale(1.08);
+    }
+
+    .rage-shield-btn:active {
+      transform: scale(0.95);
+    }
+
+    .rage-shield-btn.rage {
+      border-color: rgba(255, 100, 100, 0.85);
+      background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.3), rgba(255, 100, 100, 0.25), rgba(255, 50, 50, 0.2));
+      box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 2px 6px rgba(255, 255, 255, 0.4),
+        inset 0 -3px 10px rgba(255, 100, 100, 0.35),
+        0 0 28px rgba(255, 100, 100, 0.35);
+    }
+
+    .rage-shield-btn.shield {
+      border-color: rgba(100, 200, 255, 0.85);
+      background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.3), rgba(100, 200, 255, 0.25), rgba(80, 180, 255, 0.2));
+      box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.4),
+        inset 0 2px 6px rgba(255, 255, 255, 0.4),
+        inset 0 -3px 10px rgba(100, 200, 255, 0.35),
+        0 0 28px rgba(100, 200, 255, 0.35);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="hud-wrap">
+    <!-- LEFT CLUSTER -->
+    <div id="hud-left">
+      <!-- Utility Buttons -->
+      <div class="utility-stack">
+        <div class="utility-row top">
+          <button class="utility-btn" data-btn="pet">Pet</button>
+          <button class="utility-btn" data-btn="veh">Veh</button>
+          <button class="utility-btn" data-btn="act">Act</button>
+          <button class="utility-btn" data-btn="act2">Act2</button>
+        </div>
+        <div class="utility-row bot">
+          <button class="utility-btn" data-btn="bag">Bag</button>
+          <button class="utility-btn" data-btn="ai">AI</button>
+          <button class="utility-btn" data-btn="switch">Switch</button>
+        </div>
+      </div>
+
+      <!-- Joystick -->
+      <div id="vj-root">
+        <div id="vj-base"></div>
+        <div id="vj-knob"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT CLUSTER -->
+    <div id="hud-right">
+      <!-- Skill Pills -->
+      <div class="skill-row">
+        <button class="skill-pill s1" data-skill="S1" data-btn="s1" aria-label="Skill 1"></button>
+        <button class="skill-pill s2" data-skill="S2" data-btn="s2" aria-label="Skill 2"></button>
+        <button class="skill-pill s3" data-skill="S3" data-btn="s3" aria-label="Skill 3"></button>
+      </div>
+
+      <!-- Attack Buttons -->
+      <div class="btn-container">
+        <button class="big-btn attack" data-btn="attack">ATTACK</button>
+        <button class="big-btn jump" data-btn="jump">JUMP</button>
+        <div class="rage-shield-container">
+          <button class="rage-shield-btn rage" data-btn="rage">RAGE</button>
+          <button class="rage-shield-btn shield" data-btn="shield">SHIELD</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== PUBLIC HUD API =====
+    (function () {
+      const HUD = window.HUD = window.HUD || {};
+
+      function skillEl(id) {
+        return document.querySelector('.skill-row [data-skill="' + id + '"]');
+      }
+
+      HUD.setSkillReady = function (id, ready = true) {
+        const el = skillEl(id);
+        if (el) el.classList.toggle('ready', !!ready);
+      };
+
+      HUD.setJoystickReady = function (ready = true) {
+        document.getElementById('vj-root').classList.toggle('ready', !!ready);
+      };
+
+      HUD.setAllReady = function (ready = true) {
+        HUD.setSkillReady('S1', ready);
+        HUD.setSkillReady('S2', ready);
+        HUD.setSkillReady('S3', ready);
+        HUD.setJoystickReady(ready);
+      };
+    })();
+
+    // ===== JOYSTICK CONTROLLER =====
+    (function () {
+      const root = document.getElementById('vj-root');
+      const knob = document.getElementById('vj-knob');
+      const radius = 59; // Half of base size
+      let isActive = false;
+
+      function getTouch(e) {
+        return e.touches ? e.touches[0] : e;
+      }
+
+      function handleStart(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        isActive = true;
+        if (e.type === 'touchstart') e.preventDefault();
+        handleMove(e);
+      }
+
+      function handleMove(e) {
+        if (!isActive) return;
+
+        const touch = getTouch(e);
+        const rect = root.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        let dx = touch.clientX - centerX;
+        let dy = touch.clientY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > radius) {
+          const ratio = radius / distance;
+          dx *= ratio;
+          dy *= ratio;
+        }
+
+        knob.style.transform = `translate(${dx}px, ${dy}px)`;
+
+        // Emit joystick move event (normalized -1 to 1)
+        const joyX = dx / radius;
+        const joyY = dy / radius;
+        window.dispatchEvent(new CustomEvent('joystick:move', {
+          detail: { x: joyX, y: joyY, distance: distance / radius }
+        }));
+
+        if (e.type === 'touchmove') e.preventDefault();
+      }
+
+      function handleEnd(e) {
+        if (!isActive) return;
+        isActive = false;
+        knob.style.transform = 'translate(0, 0)';
+        window.dispatchEvent(new CustomEvent('joystick:end', { detail: { x: 0, y: 0 } }));
+      }
+
+      // Attach events
+      root.addEventListener('touchstart', handleStart, { passive: false });
+      root.addEventListener('touchmove', handleMove, { passive: false });
+      root.addEventListener('touchend', handleEnd);
+      root.addEventListener('touchcancel', handleEnd);
+      root.addEventListener('mousedown', handleStart);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+    })();
+
+    // ===== BUTTON CLICK HANDLERS =====
+    (function () {
+      const buttons = document.querySelectorAll('[data-btn]');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function () {
+          const btnType = this.dataset.btn;
+          console.log('Button clicked:', btnType);
+          
+          // Emit custom event
+          window.dispatchEvent(new CustomEvent('button:click', {
+            detail: { button: btnType }
+          }));
+        });
+      });
+    })();
+
+    // ===== DEMO: STAGGERED READY GLOWS =====
+    setTimeout(() => HUD.setSkillReady('S1', true), 800);
+    setTimeout(() => HUD.setSkillReady('S2', true), 1600);
+    setTimeout(() => HUD.setSkillReady('S3', true), 2400);
+    setTimeout(() => HUD.setJoystickReady(true), 3200);
+
+    // ===== EVENT LISTENERS (EXAMPLE) =====
+    window.addEventListener('joystick:move', (e) => {
+      // Use e.detail.x and e.detail.y for game movement
+      // console.log('Joystick:', e.detail.x.toFixed(2), e.detail.y.toFixed(2));
+    });
+
+    window.addEventListener('button:click', (e) => {
+      console.log('Button pressed:', e.detail.button);
+      // Handle button actions here
+    });
+
+    console.log('🍬 A1K HUD Candy Style Loaded!');
+    console.log('API: HUD.setSkillReady("S1", true), HUD.setJoystickReady(true), HUD.setAllReady(true)');
+  </script>
+</body>
+
+</html>
+

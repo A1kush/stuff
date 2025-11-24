@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Cyborg - Chibi Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FFE5F0 0%, #E5F0FF 100%);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        canvas {
+            border: 3px solid #FFB6D9;
+            background: #FFFFFF;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255,182,217,0.3);
+        }
+        #controls {
+            background: rgba(255,255,255,0.9);
+            border: 3px solid #FFB6D9;
+            border-radius: 20px;
+            padding: 25px;
+            width: 400px;
+        }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #FF69B4; border-bottom: 3px solid #FFB6D9; padding-bottom: 15px; font-weight: bold; }
+        .control-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: #FF1493; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        select, button, input { width: 100%; padding: 10px 15px; background: #FFF0F5; border: 2px solid #FFB6D9; color: #FF1493; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600; }
+        input[type="range"] { padding: 0; height: 35px; }
+        input[type="color"] { height: 45px; }
+        button { margin-top: 8px; background: linear-gradient(135deg, #FFB6D9 0%, #FF69B4 100%); color: #FFF; border: none; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info { font-size: 12px; color: #FF69B4; margin-top: 25px; padding-top: 25px; border-top: 2px solid #FFB6D9; line-height: 1.8; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat { background: #FFF0F5; padding: 12px; border-radius: 10px; border: 2px solid #FFB6D9; }
+        .stat-label { font-size: 11px; color: #FF69B4; font-weight: bold; }
+        .stat-value { font-size: 18px; color: #FF1493; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div><canvas id="chibiCanvas" width="256" height="256"></canvas></div>
+        <div id="controls">
+            <h1>🤖 UNIQUE CYBORG - CHIBI</h1>
+            <div class="control-group">
+                <label>Animation State</label>
+                <select id="animState">
+                    <option value="idle">💖 Idle</option>
+                    <option value="walk">🚶 Walk</option>
+                    <option value="attack">🔫 Attack</option>
+                    <option value="jump">🦘 Jump</option>
+                    <option value="hurt">💢 Hurt</option>
+                    <option value="victory">🎉 Victory</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Color Palette</label>
+                <select id="palette">
+                    <option value="fire">🔥 Fire</option>
+                    <option value="ice">❄️ Ice</option>
+                    <option value="shadow">🌑 Shadow</option>
+                    <option value="light">✨ Light</option>
+                    <option value="nature">🌿 Nature</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Background</label><input type="color" id="bgColor" value="#FFFFFF"></div>
+            <div class="control-group"><label>Speed</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
+            <div class="control-group"><label>Scale</label><select id="scale"><option value="1">1x</option><option value="1.5">1.5x</option><option value="2" selected>2x</option><option value="2.5">2.5x</option></select></div>
+            <div class="control-group">
+                <label>Export</label>
+                <div class="btn-group"><button id="exportFrame">PNG</button><button id="exportSheet">Sheet</button></div>
+                <button id="exportJSON">JSON Data</button>
+            </div>
+            <div class="info">
+                <strong>TYPE 7: CHIBI/KAWAII</strong><br>
+                Cyborg Cuteness Overload<br><br>
+                • Oversized head, tiny body<br>
+                • Huge white eyes<br>
+                • Black pigtails (locked) ✨<br><br>
+                <div class="stats">
+                    <div class="stat"><div class="stat-label">Frame</div><div class="stat-value" id="frameCount">0/8</div></div>
+                    <div class="stat"><div class="stat-label">FPS</div><div class="stat-value" id="fpsCount">60</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('chibiCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentAnim = 'idle', currentFrame = 0, frameTimer = 0, animSpeed = 1, palette = 'fire', bgColor = '#FFFFFF';
+        let lastTime = 0, fps = 60, frameCount = 0, lastFpsTime = 0;
+
+        const palettes = {
+            fire: { skin: '#FFD4A3', armor: '#FF4444', armorLight: '#FF8888', accent: '#FF0000', rifle: '#1a1a1a', glow: '#FFAA00', eyes: '#FFFFFF' },
+            ice: { skin: '#FFD4A3', armor: '#4444FF', armorLight: '#8888FF', accent: '#00FFFF', rifle: '#1a1a1a', glow: '#66FFFF', eyes: '#FFFFFF' },
+            shadow: { skin: '#FFD4A3', armor: '#8844FF', armorLight: '#AA88FF', accent: '#AA00FF', rifle: '#1a1a1a', glow: '#DD66FF', eyes: '#FFFFFF' },
+            light: { skin: '#FFD4A3', armor: '#FFDD44', armorLight: '#FFEE88', accent: '#FFFF00', rifle: '#1a1a1a', glow: '#FFFF88', eyes: '#FFFFFF' },
+            nature: { skin: '#FFD4A3', armor: '#44FF44', armorLight: '#88FF88', accent: '#00FF00', rifle: '#1a1a1a', glow: '#66FF66', eyes: '#FFFFFF' }
+        };
+
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true }, walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false }, jump: { frames: 6, frameTime: 100, loop: false },
+            hurt: { frames: 4, frameTime: 150, loop: false }, victory: { frames: 8, frameTime: 200, loop: true }
+        };
+
+        function drawSparkle(x, y, size, alpha) {
+            ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = '#FFFFFF'; ctx.shadowColor = '#00FFFF'; ctx.shadowBlur = 10;
+            ctx.beginPath();
+            for (let i = 0; i < 4; i++) {
+                const angle = (Math.PI / 2 * i) + Math.PI / 4;
+                ctx.lineTo(x + Math.cos(angle) * size, y + Math.sin(angle) * size);
+                ctx.lineTo(x + Math.cos(angle + Math.PI/4) * (size*0.3), y + Math.sin(angle + Math.PI/4) * (size*0.3));
+            }
+            ctx.closePath(); ctx.fill(); ctx.restore();
+        }
+
+        function drawCyborg(frame, anim) {
+            const pal = palettes[palette];
+            const cx = canvas.width / 2, cy = canvas.height / 2 + 20;
+
+            let bounce = 0, squash = 1, legSpread = 0, rifleRecoil = 0, jumpY = 0, shake = 0;
+            if (anim === 'idle') { bounce = Math.sin(frame / 4 * Math.PI) * 6; squash = 1 + Math.sin(frame / 4 * Math.PI) * 0.04; }
+            else if (anim === 'walk') { bounce = Math.abs(Math.sin(frame / 4 * Math.PI)) * 8; legSpread = Math.sin(frame / 4 * Math.PI) * 12; squash = 1 - Math.abs(Math.sin(frame / 4 * Math.PI)) * 0.08; }
+            else if (anim === 'attack') { rifleRecoil = frame < 2 ? 10 : 0; }
+            else if (anim === 'jump') { jumpY = frame < 3 ? -frame * 30 : -(6 - frame) * 30; squash = frame === 0 || frame === 5 ? 0.8 : 1.2; }
+            else if (anim === 'hurt') { shake = frame < 2 ? (frame % 2 === 0 ? 5 : -5) : 0; }
+            else if (anim === 'victory') { bounce = Math.abs(Math.sin(frame / 2 * Math.PI)) * 12; squash = 1 + Math.sin(frame / 2 * Math.PI) * 0.1; }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = bgColor; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save(); ctx.translate(cx + shake, cy - bounce + jumpY); ctx.scale(1, squash);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.beginPath(); ctx.ellipse(0, 75 / squash, 35, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Legs
+            ctx.fillStyle = pal.armor;
+            ctx.beginPath(); ctx.arc(-12 + legSpread, 38, 15, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(12 - legSpread, 38, 15, 0, Math.PI * 2); ctx.fill();
+
+            // Body
+            const bodyGrad = ctx.createLinearGradient(0, 0, 0, 50);
+            bodyGrad.addColorStop(0, pal.armorLight); bodyGrad.addColorStop(1, pal.armor);
+            ctx.fillStyle = bodyGrad; ctx.beginPath(); ctx.ellipse(0, 15, 32, 38, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Accents
+            ctx.fillStyle = pal.accent;
+            ctx.fillRect(-8, 10, 4, 15); ctx.fillRect(4, 10, 4, 15);
+
+            // Arms
+            ctx.save(); ctx.translate(-28, 12); ctx.rotate(-0.2);
+            ctx.fillStyle = pal.skin; ctx.beginPath(); ctx.ellipse(0, 0, 11, 18, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+
+            ctx.save(); ctx.translate(28, 12); ctx.rotate(0.2);
+            ctx.fillStyle = pal.skin; ctx.beginPath(); ctx.ellipse(0, 0, 11, 18, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+
+            // Huge head
+            const headGrad = ctx.createRadialGradient(0, -28, 5, 0, -28, 50);
+            headGrad.addColorStop(0, pal.skin); headGrad.addColorStop(1, '#FFB380');
+            ctx.fillStyle = headGrad; ctx.beginPath(); ctx.arc(0, -28, 45, 0, Math.PI * 2); ctx.fill();
+
+            // Black pigtails
+            ctx.fillStyle = '#000000';
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath(); ctx.arc(-38, -20 + i * 8, 10 - i * 2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(38, -20 + i * 8, 10 - i * 2, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // Top hair
+            ctx.fillRect(-42, -52, 84, 12);
+
+            // Giant white eyes
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath(); ctx.ellipse(-13, -28, 16, 18, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(13, -28, 16, 18, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Pupils
+            ctx.fillStyle = '#000000';
+            ctx.beginPath(); ctx.arc(-13, -25, 8, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(13, -25, 8, 0, Math.PI * 2); ctx.fill();
+
+            // Eye shine
+            ctx.fillStyle = pal.eyes;
+            ctx.beginPath(); ctx.arc(-16, -32, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(10, -32, 5, 0, Math.PI * 2); ctx.fill();
+
+            // Tiny mouth
+            ctx.strokeStyle = '#000000'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0, -12, 6, 0, Math.PI); ctx.stroke();
+
+            // Energy rifle (tiny)
+            ctx.save(); ctx.translate(-38 - rifleRecoil, 12);
+            ctx.fillStyle = pal.rifle; ctx.fillRect(-12, -2, 15, 4);
+            ctx.fillStyle = pal.accent; ctx.fillRect(-8, -2, 2, 4); ctx.fillRect(-4, -2, 2, 4);
+            if (anim === 'attack' && frame < 2) {
+                ctx.fillStyle = pal.glow; ctx.fillRect(-18, -4, 8, 8);
+            }
+            ctx.restore();
+
+            ctx.restore();
+
+            // Sparkles
+            if (anim === 'idle' || anim === 'victory') {
+                const t = frame / 4 * Math.PI;
+                drawSparkle(cx - 65, cy - bounce - 55 + jumpY, 7, 0.6 + Math.sin(t) * 0.4);
+                drawSparkle(cx + 60, cy - bounce - 70 + jumpY, 6, 0.5 + Math.cos(t * 1.5) * 0.3);
+                drawSparkle(cx, cy - bounce - 95 + jumpY, 8, 0.7);
+            }
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime; lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount; frameCount = 0; lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0; currentFrame++;
+                if (currentFrame >= anim.frames) currentFrame = anim.loop ? 0 : anim.frames - 1;
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            drawCyborg(currentFrame, currentAnim);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', e => { currentAnim = e.target.value; currentFrame = 0; frameTimer = 0; });
+        document.getElementById('palette').addEventListener('change', e => palette = e.target.value);
+        document.getElementById('bgColor').addEventListener('input', e => bgColor = e.target.value);
+        document.getElementById('speed').addEventListener('change', e => animSpeed = parseFloat(e.target.value));
+        document.getElementById('scale').addEventListener('change', e => {
+            const scale = parseFloat(e.target.value);
+            canvas.style.width = (256 * scale) + 'px'; canvas.style.height = (256 * scale) + 'px';
+        });
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `cyborg-chibi-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = canvas.toDataURL('image/png'); link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            const anim = animations[currentAnim];
+            const temp = document.createElement('canvas'); temp.width = 256 * anim.frames; temp.height = 256;
+            const tempCtx = temp.getContext('2d'); const oldBg = bgColor; bgColor = 'transparent';
+            for (let i = 0; i < anim.frames; i++) { drawCyborg(i, currentAnim); tempCtx.drawImage(canvas, i * 256, 0); }
+            bgColor = oldBg;
+            const link = document.createElement('a');
+            link.download = `cyborg-chibi-${currentAnim}-sheet-${palette}.png`;
+            link.href = temp.toDataURL('image/png'); link.click();
+            drawCyborg(currentFrame, currentAnim);
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = { character: 'Unique Cyborg Rifle Operative', type: 'Chibi/Kawaii Style', resolution: '256x256',
+                animations, palettes: Object.keys(palettes), currentState: { animation: currentAnim, frame: currentFrame, palette },
+                metadata: { hairColor: '#000000 (locked)', weaponType: 'Energy Rifle', style: 'Super Deformed Chibi' }
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `cyborg-chibi-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob); link.click();
+        });
+
+        canvas.style.width = '512px'; canvas.style.height = '512px'; animate(0);
+    </script>
+</body>
+</html>

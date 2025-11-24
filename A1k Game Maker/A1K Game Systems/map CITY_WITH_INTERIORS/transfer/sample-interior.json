@@ -1,0 +1,12 @@
+{
+  "player": null,
+  "npcs": [
+    { "id": "innkeeper", "x": 120, "y": 90, "name": "Innkeeper", "dialogue": "Rooms are upstairs.", "sprite": "assets/npcs/innkeeper.png" }
+  ],
+  "houses": [
+    { "id": "table", "x": 80, "y": 100, "width": 40, "height": 20, "label": "Table" },
+    { "id": "bed", "x": 160, "y": 110, "width": 50, "height": 30, "label": "Bed" }
+  ]
+}
+
+

@@ -1,0 +1,90 @@
+/**
+ * Fantasy Light Theme
+ * Warm, medieval-inspired light theme
+ */
+
+:root {
+  /* Primary Colors */
+  --theme-bg-primary: #f5f1e8;
+  --theme-bg-secondary: #faf8f3;
+  --theme-bg-tertiary: #eee8dc;
+
+  /* Text Colors */
+  --theme-text-primary: #2c1810;
+  --theme-text-secondary: #5c4a38;
+  --theme-text-muted: #8c7a68;
+
+  /* Accent Colors */
+  --theme-accent-primary: #d4af37;
+  --theme-accent-secondary: #c17817;
+  --theme-accent-success: #6b8e23;
+  --theme-accent-warning: #cd853f;
+  --theme-accent-danger: #8b4513;
+
+  /* UI Elements */
+  --theme-border: #d4c4a8;
+  --theme-border-light: #e4d4b8;
+  --theme-shadow: rgba(44, 24, 16, 0.2);
+  --theme-shadow-light: rgba(44, 24, 16, 0.1);
+
+  /* Progress Bars */
+  --theme-xp-bar: linear-gradient(90deg, #d4af37, #f4cf67);
+  --theme-hp-bar: linear-gradient(90deg, #dc143c, #ff6b6b);
+  --theme-mana-bar: linear-gradient(90deg, #4169e1, #6495ed);
+
+  /* Spacing & Radius same as modern-dark */
+  --theme-gap-sm: 8px;
+  --theme-gap-md: 16px;
+  --theme-gap-lg: 24px;
+  --theme-radius-sm: 4px;
+  --theme-radius-md: 8px;
+  --theme-radius-lg: 16px;
+  --theme-transition: 0.3s ease;
+}
+
+body.theme-fantasy-light {
+  background: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.panel {
+  background: var(--theme-bg-secondary);
+  border: 3px solid var(--theme-border);
+  border-radius: var(--theme-radius-sm);
+  padding: var(--theme-gap-md);
+  margin-bottom: var(--theme-gap-md);
+  box-shadow: 0 6px 12px var(--theme-shadow);
+}
+
+.panel h2 {
+  color: var(--theme-accent-primary);
+  font-variant: small-caps;
+  text-shadow: 1px 1px 2px var(--theme-shadow);
+  margin-top: 0;
+  border-bottom: 2px solid var(--theme-border);
+  padding-bottom: var(--theme-gap-sm);
+}
+
+button {
+  background: linear-gradient(
+    135deg,
+    var(--theme-accent-primary),
+    var(--theme-accent-secondary)
+  );
+  color: var(--theme-text-primary);
+  border: 2px solid var(--theme-accent-secondary);
+  padding: 10px 20px;
+  border-radius: var(--theme-radius-sm);
+  cursor: pointer;
+  font-weight: bold;
+  font-variant: small-caps;
+  transition: var(--theme-transition);
+  box-shadow: 0 4px 8px var(--theme-shadow);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--theme-shadow);
+  border-color: var(--theme-accent-primary);
+}

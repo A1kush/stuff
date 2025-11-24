@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1K Dungeon System - Standalone Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2a 100%);
+      color: #cfe3ff;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #gameCanvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border: 3px solid #4fc3f7;
+      background: #0a0a0a;
+      box-shadow: 0 0 30px rgba(79, 195, 247, 0.5);
+    }
+
+    /* UI Overlays */
+    .ui-overlay {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .ui-overlay > * {
+      pointer-events: auto;
+    }
+
+    /* HUD */
+    #hud {
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .hud-panel {
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      min-width: 200px;
+    }
+
+    .hud-title {
+      color: #4fc3f7;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .hud-info {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .hud-info span {
+      color: #fbbf24;
+    }
+
+    /* Dungeon Selection Menu */
+    #dungeon-menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10, 10, 26, 0.95);
+      border: 3px solid #4fc3f7;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 50px rgba(79, 195, 247, 0.8);
+      display: none;
+    }
+
+    #dungeon-menu.visible {
+      display: block;
+    }
+
+    .menu-title {
+      text-align: center;
+      color: #4fc3f7;
+      font-size: 32px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(79, 195, 247, 0.6);
+    }
+
+    .rank-section {
+      margin-bottom: 30px;
+    }
+
+    .rank-header {
+      color: #fbbf24;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(79, 195, 247, 0.1);
+      border-left: 4px solid;
+      border-radius: 5px;
+    }
+
+    .rank-header.C { border-color: #9ca3af; }
+    .rank-header.B { border-color: #60a5fa; }
+    .rank-header.A { border-color: #34d399; }
+    .rank-header.S { border-color: #fbbf24; }
+    .rank-header.SS { border-color: #f97316; }
+    .rank-header.SSS { border-color: #ef4444; }
+
+    .dungeon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .room-type-card {
+      background: rgba(26, 26, 42, 0.8);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .room-type-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(79, 195, 247, 0.5);
+      border-color: #fbbf24;
+    }
+
+    .room-type-card.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .room-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .room-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #cfe3ff;
+      margin-bottom: 5px;
+    }
+
+    .room-description {
+      font-size: 11px;
+      color: rgba(207, 227, 255, 0.7);
+    }
+
+    /* Controls Info */
+    #controls {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    kbd {
+      background: #1a1a2a;
+      border: 1px solid #4fc3f7;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #4fc3f7;
+    }
+
+    /* Action Buttons */
+    #action-buttons {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: rgba(79, 195, 247, 0.2);
+      border: 2px solid #4fc3f7;
+      border-radius: 8px;
+      padding: 12px 24px;
+      color: #cfe3ff;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .action-btn:hover {
+      background: rgba(79, 195, 247, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(79, 195, 247, 0.5);
+    }
+
+    /* Status Messages */
+    #status-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      border: 3px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 30px 50px;
+      font-size: 24px;
+      color: #4fc3f7;
+      display: none;
+      z-index: 1000;
+    }
+
+    #status-message.visible {
+      display: block;
+      animation: fadeInOut 2s;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0; }
+      20%, 80% { opacity: 1; }
+    }
+
+    /* Scrollbar Styling */
+    #dungeon-menu::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    #dungeon-menu::-webkit-scrollbar-track {
+      background: rgba(26, 26, 42, 0.5);
+      border-radius: 5px;
+    }
+
+    #dungeon-menu::-webkit-scrollbar-thumb {
+      background: #4fc3f7;
+      border-radius: 5px;
+    }
+
+    #dungeon-menu::-webkit-scrollbar-thumb:hover {
+      background: #fbbf24;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="gameCanvas" width="1200" height="800"></canvas>
+    
+    <!-- HUD -->
+    <div class="ui-overlay" id="hud">
+      <div class="hud-panel">
+        <div class="hud-title">Dungeon Info</div>
+        <div class="hud-info">
+          <div>Rank: <span id="hud-rank">-</span></div>
+          <div>Floor: <span id="hud-floor">-</span></div>
+          <div>Room: <span id="hud-room">-</span></div>
+          <div>Type: <span id="hud-type">-</span></div>
+        </div>
+      </div>
+      
+      <div class="hud-panel">
+        <div class="hud-title">Player</div>
+        <div class="hud-info">
+          <div>Level: <span id="hud-level">1</span></div>
+          <div>Position: <span id="hud-position">0, 0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dungeon Selection Menu -->
+    <div id="dungeon-menu">
+      <div class="menu-title">🕳️ Dungeon Selection</div>
+      <div id="rank-sections"></div>
+      <button class="action-btn" onclick="closeDungeonMenu()" style="width: 100%; margin-top: 20px;">Close</button>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <div class="hud-title">Controls</div>
+      <div class="control-item"><kbd>WASD</kbd> Move Player</div>
+      <div class="control-item"><kbd>M</kbd> Open Dungeon Menu</div>
+      <div class="control-item"><kbd>E</kbd> Interact (Chests/NPCs)</div>
+      <div class="control-item"><kbd>ESC</kbd> Exit Dungeon</div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="action-buttons">
+      <button class="action-btn" onclick="openDungeonMenu()">Select Dungeon</button>
+      <button class="action-btn" onclick="exitDungeon()" id="exit-btn" style="display: none;">Exit Dungeon</button>
+    </div>
+
+    <!-- Status Message -->
+    <div id="status-message"></div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // EMBEDDED DUNGEON DATA
+    // ═══════════════════════════════════════════════════════════════
+    
+    // Embedding dungeon-data.js content
+    (function() {
+      'use strict';
+      window.DungeonRoomData = {
+        roomTypes: {
+          dungeon_depths: { id: 'dungeon_depths', name: 'Dungeon Depths', icon: '🕳️', description: 'Dark underground caverns with torches lighting the way.', theme: 'dark', backgroundColor: '#0a0a0a', foregroundColor: '#2a2a2a', accentColor: '#FFA500', platforms: { ground: { color: '#4a4a4a', height: 20 }, mid: { color: '#3a3a3a', height: 15 }, high: { color: '#2a2a2a', height: 12 } }, features: ['torches', 'hidden_passages', 'cave_walls'], enemySpawnRate: 0.8, chestSpawnRate: 0.6, hiddenRoomChance: 0.3 },
+          elf_forest: { id: 'elf_forest', name: 'Elf Forest', icon: '🌲', description: 'Magical forest with floating platforms and hidden groves.', theme: 'nature', backgroundColor: '#1a3a2a', foregroundColor: '#2a5a3a', accentColor: '#4ade80', platforms: { ground: { color: '#3a5a2a', height: 20 }, mid: { color: '#4a6a3a', height: 15, floating: true }, high: { color: '#5a7a4a', height: 12, floating: true } }, features: ['floating_platforms', 'tree_houses', 'magical_portals'], enemySpawnRate: 0.7, chestSpawnRate: 0.7, hiddenRoomChance: 0.4 },
+          goblin_mines: { id: 'goblin_mines', name: 'Goblin Mines', icon: '⛏️', description: 'Mining tunnels with ore carts and secret treasure rooms.', theme: 'industrial', backgroundColor: '#2a1a0a', foregroundColor: '#4a3a2a', accentColor: '#fbbf24', platforms: { ground: { color: '#5a4a3a', height: 20 }, mid: { color: '#4a3a2a', height: 15 }, high: { color: '#3a2a1a', height: 12 } }, features: ['ore_carts', 'ore_veins', 'mine_tracks'], enemySpawnRate: 0.9, chestSpawnRate: 0.8, hiddenRoomChance: 0.5 },
+          magic_academy: { id: 'magic_academy', name: 'Magic Academy', icon: '🏰', description: 'Floating platforms connected by spell circles.', theme: 'magical', backgroundColor: '#1a1a3a', foregroundColor: '#2a2a4a', accentColor: '#a78bfa', platforms: { ground: { color: '#3a3a5a', height: 20 }, mid: { color: '#4a4a6a', height: 15, floating: true }, high: { color: '#5a5a7a', height: 12, floating: true } }, features: ['spell_circles', 'floating_books', 'magical_portals'], enemySpawnRate: 0.6, chestSpawnRate: 0.5, hiddenRoomChance: 0.4 },
+          space_station: { id: 'space_station', name: 'Space Station', icon: '🚀', description: 'Zero-gravity platforms and hidden compartments.', theme: 'sci-fi', backgroundColor: '#0a0a1a', foregroundColor: '#1a1a2a', accentColor: '#60a5fa', platforms: { ground: { color: '#2a2a3a', height: 20 }, mid: { color: '#3a3a4a', height: 15, floating: true }, high: { color: '#4a4a5a', height: 12, floating: true } }, features: ['airlocks', 'zero_gravity_zones', 'tech_panels'], enemySpawnRate: 0.7, chestSpawnRate: 0.6, hiddenRoomChance: 0.3 },
+          samurai_dojo: { id: 'samurai_dojo', name: 'Samurai Dojo', icon: '⚔️', description: 'Traditional Japanese architecture with training platforms.', theme: 'traditional', backgroundColor: '#2a1a0a', foregroundColor: '#4a3a2a', accentColor: '#dc2626', platforms: { ground: { color: '#5a4a3a', height: 20 }, mid: { color: '#4a3a2a', height: 15 }, high: { color: '#3a2a1a', height: 12 } }, features: ['sliding_doors', 'weapon_racks', 'training_dummies'], enemySpawnRate: 0.8, chestSpawnRate: 0.6, hiddenRoomChance: 0.4 },
+          pirate_cove: { id: 'pirate_cove', name: 'Pirate Cove', icon: '🏴‍☠️', description: 'Ship decks with rope swings and hidden treasure caves.', theme: 'pirate', backgroundColor: '#1a2a1a', foregroundColor: '#2a3a2a', accentColor: '#f59e0b', platforms: { ground: { color: '#3a4a3a', height: 20 }, mid: { color: '#4a5a4a', height: 15 }, high: { color: '#5a6a5a', height: 12 } }, features: ['rope_swings', 'ship_decks', 'barrels'], enemySpawnRate: 0.8, chestSpawnRate: 0.9, hiddenRoomChance: 0.5 },
+          zombie_apocalypse: { id: 'zombie_apocalypse', name: 'Zombie Apocalypse', icon: '🧟', description: 'Urban ruins with broken buildings and safe houses.', theme: 'post-apocalyptic', backgroundColor: '#1a1a1a', foregroundColor: '#2a2a2a', accentColor: '#84cc16', platforms: { ground: { color: '#3a3a3a', height: 20 }, mid: { color: '#4a4a4a', height: 15 }, high: { color: '#5a5a5a', height: 12 } }, features: ['broken_buildings', 'rubble', 'safe_houses'], enemySpawnRate: 1.0, chestSpawnRate: 0.7, hiddenRoomChance: 0.4 },
+          carnival_circus: { id: 'carnival_circus', name: 'Carnival Circus', icon: '🎪', description: 'Colorful tents, tightrope platforms, and secret performer rooms.', theme: 'festive', backgroundColor: '#2a1a3a', foregroundColor: '#4a3a5a', accentColor: '#f472b6', platforms: { ground: { color: '#5a4a6a', height: 20 }, mid: { color: '#6a5a7a', height: 15 }, high: { color: '#7a6a8a', height: 12 } }, features: ['colorful_tents', 'tightropes', 'backstage_areas'], enemySpawnRate: 0.7, chestSpawnRate: 0.6, hiddenRoomChance: 0.4 },
+          moon_walk: { id: 'moon_walk', name: 'Moon Walk', icon: '🌙', description: 'Low-gravity platforms and hidden lunar bases.', theme: 'lunar', backgroundColor: '#1a1a2a', foregroundColor: '#2a2a3a', accentColor: '#e0e7ff', platforms: { ground: { color: '#3a3a4a', height: 20 }, mid: { color: '#4a4a5a', height: 15, lowGravity: true }, high: { color: '#5a5a6a', height: 12, lowGravity: true } }, features: ['craters', 'low_gravity_zones', 'lunar_bases'], enemySpawnRate: 0.6, chestSpawnRate: 0.5, hiddenRoomChance: 0.3 },
+          crystal_caverns: { id: 'crystal_caverns', name: 'Crystal Caverns', icon: '💎', description: 'Glowing crystal platforms and hidden crystal chambers.', theme: 'crystal', backgroundColor: '#0a0a2a', foregroundColor: '#1a1a3a', accentColor: '#a855f7', platforms: { ground: { color: '#2a2a4a', height: 20 }, mid: { color: '#3a3a5a', height: 15, glowing: true }, high: { color: '#4a4a6a', height: 12, glowing: true } }, features: ['glowing_crystals', 'prismatic_light', 'crystal_chambers'], enemySpawnRate: 0.7, chestSpawnRate: 0.8, hiddenRoomChance: 0.4 },
+          volcanic_forge: { id: 'volcanic_forge', name: 'Volcanic Forge', icon: '🌋', description: 'Lava platforms, floating rocks, and hidden forge rooms.', theme: 'volcanic', backgroundColor: '#2a0a0a', foregroundColor: '#4a1a1a', accentColor: '#f97316', platforms: { ground: { color: '#5a2a1a', height: 20 }, mid: { color: '#6a3a2a', height: 15, floating: true }, high: { color: '#7a4a3a', height: 12, floating: true } }, features: ['lava_pools', 'floating_rocks', 'forge_fires'], enemySpawnRate: 0.9, chestSpawnRate: 0.7, hiddenRoomChance: 0.3 },
+          sky_temple: { id: 'sky_temple', name: 'Sky Temple', icon: '☁️', description: 'Floating temple platforms and hidden sanctums.', theme: 'divine', backgroundColor: '#1a2a3a', foregroundColor: '#2a3a4a', accentColor: '#fbbf24', platforms: { ground: { color: '#3a4a5a', height: 20 }, mid: { color: '#4a5a6a', height: 15, floating: true }, high: { color: '#5a6a7a', height: 12, floating: true } }, features: ['cloud_platforms', 'divine_light', 'temple_pillars'], enemySpawnRate: 0.6, chestSpawnRate: 0.6, hiddenRoomChance: 0.5 },
+          underwater_ruins: { id: 'underwater_ruins', name: 'Underwater Ruins', icon: '🌊', description: 'Bubble platforms, sunken structures, and ancient treasures.', theme: 'aquatic', backgroundColor: '#0a1a2a', foregroundColor: '#1a2a3a', accentColor: '#06b6d4', platforms: { ground: { color: '#2a3a4a', height: 20 }, mid: { color: '#3a4a5a', height: 15, floating: true }, high: { color: '#4a5a6a', height: 12, floating: true } }, features: ['bubble_platforms', 'sunken_ruins', 'coral_reefs'], enemySpawnRate: 0.7, chestSpawnRate: 0.7, hiddenRoomChance: 0.4 },
+          desert_oasis: { id: 'desert_oasis', name: 'Desert Oasis', icon: '🏜️', description: 'Sand platforms, mirage portals, and hidden oasis rooms.', theme: 'desert', backgroundColor: '#3a2a1a', foregroundColor: '#5a4a3a', accentColor: '#fbbf24', platforms: { ground: { color: '#6a5a4a', height: 20 }, mid: { color: '#7a6a5a', height: 15 }, high: { color: '#8a7a6a', height: 12 } }, features: ['sand_dunes', 'mirage_portals', 'oasis_pools'], enemySpawnRate: 0.8, chestSpawnRate: 0.6, hiddenRoomChance: 0.4 }
+        },
+        ranks: {
+          C: { name: 'C-Rank', color: '#9ca3af', unlockLevel: 1, floors: 5, roomsPerFloor: 3, enemyMultiplier: 0.5, rewardMultiplier: 0.5, dailyEntries: -1, description: 'Entry level dungeons. Perfect for beginners.' },
+          B: { name: 'B-Rank', color: '#60a5fa', unlockLevel: 10, floors: 8, roomsPerFloor: 4, enemyMultiplier: 1.0, rewardMultiplier: 1.0, dailyEntries: 10, description: 'Moderate difficulty. Elite enemies await.' },
+          A: { name: 'A-Rank', color: '#34d399', unlockLevel: 25, floors: 12, roomsPerFloor: 5, enemyMultiplier: 1.5, rewardMultiplier: 1.5, dailyEntries: 5, description: 'High difficulty. Mini-bosses appear.' },
+          S: { name: 'S-Rank', color: '#fbbf24', unlockLevel: 50, floors: 15, roomsPerFloor: 6, enemyMultiplier: 2.0, rewardMultiplier: 2.0, dailyEntries: 3, description: 'Extreme difficulty. Multiple bosses.' },
+          SS: { name: 'SS-Rank', color: '#f97316', unlockLevel: 75, floors: 18, roomsPerFloor: 7, enemyMultiplier: 3.0, rewardMultiplier: 3.0, dailyEntries: 1, description: 'Legendary difficulty. Unique bosses.' },
+          SSS: { name: 'SSS-Rank', color: '#ef4444', unlockLevel: 100, floors: 20, roomsPerFloor: 8, enemyMultiplier: 5.0, rewardMultiplier: 5.0, dailyEntries: 1, description: 'Ultimate challenge. Final bosses.' }
+        },
+        npcTypes: {
+          shop: { icon: '🏪', name: 'Merchant', description: 'Sells items and equipment', spawnChance: 0.2 },
+          quest: { icon: '📜', name: 'Quest Giver', description: 'Offers dungeon-specific quests', spawnChance: 0.15 },
+          hidden: { icon: '👤', name: 'Hidden NPC', description: 'Rare NPCs in secret rooms', spawnChance: 0.05 }
+        }
+      };
+    })();
+
+    // ═══════════════════════════════════════════════════════════════
+    // EMBEDDED ROOM GENERATOR
+    // ═══════════════════════════════════════════════════════════════
+    
+    window.DungeonRoomGenerator = {
+      generateRoom(roomTypeId, rank, floor, roomIndex, isBossRoom = false) {
+        const roomType = window.DungeonRoomData.roomTypes[roomTypeId];
+        const rankData = window.DungeonRoomData.ranks[rank];
+        if (!roomType || !rankData) return null;
+
+        const roomWidth = 2400;
+        const roomHeight = 800;
+        const groundY = roomHeight - 100;
+
+        const platforms = this.generatePlatforms(roomType, rankData, roomWidth, groundY, isBossRoom);
+        const enemySpawns = this.generateEnemySpawns(roomType, rankData, platforms, roomWidth, isBossRoom);
+        const chestSpawns = this.generateChestSpawns(roomType, rankData, platforms, roomWidth, isBossRoom);
+        const hiddenRoom = Math.random() < roomType.hiddenRoomChance ? this.generateHiddenRoom(roomType, rankData, roomWidth) : null;
+        const npcSpawns = this.generateNPCSpawns(roomType, rankData, platforms, roomWidth, isBossRoom);
+        const transitions = this.generateTransitions(roomIndex, isBossRoom, roomWidth);
+
+        return {
+          id: `${roomTypeId}_${rank}_f${floor}_r${roomIndex}`,
+          type: roomTypeId,
+          rank: rank,
+          floor: floor,
+          roomIndex: roomIndex,
+          isBossRoom: isBossRoom,
+          width: roomWidth,
+          height: roomHeight,
+          backgroundColor: roomType.backgroundColor,
+          foregroundColor: roomType.foregroundColor,
+          accentColor: roomType.accentColor,
+          theme: roomType.theme,
+          platforms: platforms,
+          enemySpawns: enemySpawns,
+          chestSpawns: chestSpawns,
+          hiddenRoom: hiddenRoom,
+          npcSpawns: npcSpawns,
+          transitions: transitions,
+          features: roomType.features
+        };
+      },
+      generatePlatforms(roomType, rankData, roomWidth, groundY, isBossRoom) {
+        const platforms = [];
+        platforms.push({ x: 0, y: groundY, width: roomWidth, height: roomType.platforms.ground.height, type: 'ground', color: roomType.platforms.ground.color });
+        if (isBossRoom) {
+          platforms.push({ x: (roomWidth - 600) / 2, y: groundY - 200, width: 600, height: roomType.platforms.mid.height, type: 'boss_arena', color: roomType.platforms.mid.color });
+          return platforms;
+        }
+        const midCount = 3 + Math.floor(rankData.roomsPerFloor * 0.5);
+        for (let i = 0; i < midCount; i++) {
+          platforms.push({ x: 200 + (i * (roomWidth - 400) / midCount), y: groundY - 150 - Math.random() * 50, width: 150 + Math.random() * 100, height: roomType.platforms.mid.height, type: 'mid', color: roomType.platforms.mid.color, floating: roomType.platforms.mid.floating || false, glowing: roomType.platforms.mid.glowing || false });
+        }
+        if (rankData.unlockLevel >= 25) {
+          for (let i = 0; i < 2 + Math.floor(Math.random() * 2); i++) {
+            platforms.push({ x: 300 + Math.random() * (roomWidth - 600), y: groundY - 300 - Math.random() * 50, width: 100 + Math.random() * 80, height: roomType.platforms.high.height, type: 'high', color: roomType.platforms.high.color, floating: roomType.platforms.high.floating || false, glowing: roomType.platforms.high.glowing || false });
+          }
+        }
+        return platforms;
+      },
+      generateEnemySpawns(roomType, rankData, platforms, roomWidth, isBossRoom) {
+        return isBossRoom ? [] : platforms.filter(p => p.type === 'ground' || p.type === 'mid').map(p => ({ x: p.x + 20 + Math.random() * (p.width - 40), y: p.y - 30, platformId: p.id || 'platform', enemyType: 'enemy_slime', spawnDelay: Math.random() * 2 }));
+      },
+      generateChestSpawns(roomType, rankData, platforms, roomWidth, isBossRoom) {
+        const chests = [];
+        const count = isBossRoom ? 3 : Math.floor(1 + rankData.rewardMultiplier);
+        const availablePlatforms = platforms.filter(p => p.type === 'mid' || p.type === 'high' || (p.type === 'ground' && isBossRoom));
+        for (let i = 0; i < Math.min(count, availablePlatforms.length); i++) {
+          const p = availablePlatforms[i];
+          chests.push({ x: p.x + 30 + Math.random() * (p.width - 60), y: p.y - 40, rarity: rankData.unlockLevel >= 50 ? (Math.random() < 0.3 ? 'epic' : Math.random() < 0.6 ? 'rare' : 'uncommon') : (Math.random() < 0.3 ? 'rare' : 'uncommon') });
+        }
+        return chests;
+      },
+      generateHiddenRoom(roomType, rankData, roomWidth) {
+        return { entranceX: 300 + Math.random() * (roomWidth - 600), entranceY: 300 + Math.random() * 200, width: 400, height: 300 };
+      },
+      generateNPCSpawns(roomType, rankData, platforms, roomWidth, isBossRoom) {
+        if (isBossRoom) return [];
+        const npcs = [];
+        if (Math.random() < 0.2) {
+          const platform = platforms.find(p => p.type === 'ground') || platforms[0];
+          npcs.push({ x: platform.x + platform.width / 2, y: platform.y - 40, type: 'shop', icon: '🏪' });
+        }
+        return npcs;
+      },
+      generateTransitions(roomIndex, isBossRoom, roomWidth) {
+        return {
+          entrance: { x: 50, y: 600, width: 100, height: 100 },
+          exit: isBossRoom ? null : { x: roomWidth - 150, y: 600, width: 100, height: 100 }
+        };
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // EMBEDDED PROGRESSION SYSTEM
+    // ═══════════════════════════════════════════════════════════════
+    
+    window.DungeonProgression = {
+      getAvailableRanks(playerLevel) {
+        return Object.keys(window.DungeonRoomData.ranks).filter(rank => playerLevel >= window.DungeonRoomData.ranks[rank].unlockLevel);
+      },
+      canEnterDungeon(rankId, playerLevel) {
+        const rank = window.DungeonRoomData.ranks[rankId];
+        if (!rank || playerLevel < rank.unlockLevel) return { allowed: false, reason: `Requires level ${rank.unlockLevel}` };
+        if (!window.gameState) window.gameState = { playerLevel: 1, dungeons: { unlockedRanks: ['C'], clearedFloors: {}, dailyEntries: {} } };
+        return { allowed: true };
+      },
+      enterDungeon(rankId) {
+        const canEnter = this.canEnterDungeon(rankId, window.gameState.playerLevel || 1);
+        if (!canEnter.allowed) return { success: false, error: canEnter.reason };
+        if (!window.gameState.dungeons.unlockedRanks.includes(rankId)) window.gameState.dungeons.unlockedRanks.push(rankId);
+        return { success: true };
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // GAME STATE
+    // ═══════════════════════════════════════════════════════════════
+    
+    window.gameState = {
+      playerLevel: 1,
+      dungeons: {
+        unlockedRanks: ['C'],
+        clearedFloors: {},
+        dailyEntries: {}
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // MAIN GAME CLASS
+    // ═══════════════════════════════════════════════════════════════
+    
+    class DungeonGame {
+      constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.canvas.width = 1200;
+        this.canvas.height = 800;
+
+        // Player
+        this.player = { x: 100, y: 600, width: 32, height: 32, speed: 3, vx: 0, vy: 0, onGround: false };
+
+        // Current dungeon state
+        this.currentRoom = null;
+        this.currentRank = null;
+        this.currentFloor = 1;
+        this.currentRoomIndex = 0;
+        this.currentRoomType = null;
+        this.inDungeon = false;
+        this.cameraX = 0;
+        this.cameraY = 0;
+
+        // Input
+        this.keys = {};
+        this.setupInput();
+
+        // Game loop
+        this.lastTime = performance.now();
+        this.gameLoop();
+      }
+
+      setupInput() {
+        document.addEventListener('keydown', (e) => {
+          this.keys[e.key.toLowerCase()] = true;
+          if (e.key === 'm' || e.key === 'M') openDungeonMenu();
+          if (e.key === 'Escape') exitDungeon();
+          if (e.key === 'e' || e.key === 'E') this.interact();
+        });
+        document.addEventListener('keyup', (e) => {
+          this.keys[e.key.toLowerCase()] = false;
+        });
+      }
+
+      enterDungeon(rankId, roomTypeId) {
+        const result = window.DungeonProgression.enterDungeon(rankId);
+        if (!result.success) {
+          showStatusMessage(result.error);
+          return;
+        }
+
+        this.currentRank = rankId;
+        this.currentFloor = 1;
+        this.currentRoomIndex = 0;
+        this.currentRoomType = roomTypeId;
+        this.inDungeon = true;
+        this.generateRoom();
+        document.getElementById('exit-btn').style.display = 'block';
+        closeDungeonMenu();
+        showStatusMessage(`Entering ${window.DungeonRoomData.ranks[rankId].name} - ${window.DungeonRoomData.roomTypes[roomTypeId].name}`);
+      }
+
+      generateRoom() {
+        const isBossRoom = this.currentRoomIndex === window.DungeonRoomData.ranks[this.currentRank].roomsPerFloor - 1;
+        this.currentRoom = window.DungeonRoomGenerator.generateRoom(
+          this.currentRoomType,
+          this.currentRank,
+          this.currentFloor,
+          this.currentRoomIndex,
+          isBossRoom
+        );
+        this.player.x = this.currentRoom.transitions.entrance.x + 50;
+        this.player.y = this.currentRoom.transitions.entrance.y - 32;
+        this.cameraX = 0;
+        this.updateHUD();
+      }
+
+      exitDungeon() {
+        if (!this.inDungeon) return;
+        this.inDungeon = false;
+        this.currentRoom = null;
+        this.player.x = 100;
+        this.player.y = 600;
+        this.cameraX = 0;
+        document.getElementById('exit-btn').style.display = 'none';
+        showStatusMessage('Exited dungeon');
+        this.updateHUD();
+      }
+
+      update(deltaTime) {
+        if (!this.inDungeon || !this.currentRoom) {
+          this.drawMenuScreen();
+          return;
+        }
+
+        // Player movement
+        this.player.vx = 0;
+        if (this.keys['a']) this.player.vx = -this.player.speed;
+        if (this.keys['d']) this.player.vx = this.player.speed;
+
+        // Gravity and jumping
+        if (this.keys['w'] && this.player.onGround) {
+          this.player.vy = -12;
+          this.player.onGround = false;
+        }
+        this.player.vy += 0.5; // gravity
+        if (this.player.vy > 10) this.player.vy = 10;
+
+        this.player.x += this.player.vx;
+        this.player.y += this.player.vy;
+
+        // Collision with platforms
+        this.player.onGround = false;
+        for (const platform of this.currentRoom.platforms) {
+          if (this.player.x < platform.x + platform.width &&
+              this.player.x + this.player.width > platform.x &&
+              this.player.y < platform.y &&
+              this.player.y + this.player.height > platform.y - 10 &&
+              this.player.vy >= 0) {
+            this.player.y = platform.y - this.player.height;
+            this.player.vy = 0;
+            this.player.onGround = true;
+          }
+        }
+
+        // Check room transitions
+        if (this.currentRoom.transitions.exit && 
+            this.player.x > this.currentRoom.transitions.exit.x &&
+            this.player.x < this.currentRoom.transitions.exit.x + this.currentRoom.transitions.exit.width) {
+          this.nextRoom();
+        }
+
+        // Update camera
+        this.cameraX = this.player.x - this.canvas.width / 2;
+        this.cameraX = Math.max(0, Math.min(this.cameraX, this.currentRoom.width - this.canvas.width));
+
+        // Boundary check
+        if (this.player.x < 0) this.player.x = 0;
+        if (this.player.x > this.currentRoom.width) this.player.x = this.currentRoom.width;
+        if (this.player.y > this.currentRoom.height) this.player.y = this.currentRoom.height - this.player.height;
+      }
+
+      nextRoom() {
+        this.currentRoomIndex++;
+        const rankData = window.DungeonRoomData.ranks[this.currentRank];
+        if (this.currentRoomIndex >= rankData.roomsPerFloor) {
+          this.currentFloor++;
+          this.currentRoomIndex = 0;
+          if (this.currentFloor > rankData.floors) {
+            // Floor cleared
+            showStatusMessage(`Floor ${this.currentFloor - 1} cleared!`);
+            this.exitDungeon();
+            return;
+          }
+        }
+        this.generateRoom();
+        showStatusMessage(`Room ${this.currentRoomIndex + 1} of ${rankData.roomsPerFloor}`);
+      }
+
+      interact() {
+        if (!this.inDungeon || !this.currentRoom) return;
+        // Check for chests
+        for (const chest of this.currentRoom.chestSpawns) {
+          const dx = this.player.x - chest.x;
+          const dy = this.player.y - chest.y;
+          if (Math.abs(dx) < 50 && Math.abs(dy) < 50) {
+            showStatusMessage(`Opened ${chest.rarity} chest!`);
+            return;
+          }
+        }
+        // Check for NPCs
+        for (const npc of this.currentRoom.npcSpawns) {
+          const dx = this.player.x - npc.x;
+          const dy = this.player.y - npc.y;
+          if (Math.abs(dx) < 50 && Math.abs(dy) < 50) {
+            showStatusMessage(`Interacted with ${npc.type} NPC!`);
+            return;
+          }
+        }
+      }
+
+      render() {
+        if (!this.inDungeon || !this.currentRoom) return;
+
+        const ctx = this.ctx;
+        const room = this.currentRoom;
+
+        // Clear canvas
+        ctx.fillStyle = room.backgroundColor;
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        ctx.save();
+        ctx.translate(-this.cameraX, -this.cameraY);
+
+        // Draw background
+        ctx.fillStyle = room.foregroundColor;
+        ctx.fillRect(0, room.height - 100, room.width, 100);
+
+        // Draw platforms
+        for (const platform of room.platforms) {
+          ctx.fillStyle = platform.color;
+          ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+          ctx.strokeStyle = room.accentColor;
+          ctx.lineWidth = 2;
+          ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+          if (platform.floating) {
+            ctx.fillStyle = room.accentColor + '40';
+            ctx.fillRect(platform.x - 5, platform.y + platform.height, platform.width + 10, 5);
+          }
+          if (platform.glowing) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = room.accentColor;
+            ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            ctx.shadowBlur = 0;
+          }
+        }
+
+        // Draw chests
+        for (const chest of room.chestSpawns) {
+          const colors = { uncommon: '#60a5fa', rare: '#34d399', epic: '#fbbf24', legendary: '#ef4444' };
+          ctx.fillStyle = colors[chest.rarity] || colors.uncommon;
+          ctx.fillRect(chest.x - 15, chest.y - 10, 30, 20);
+          ctx.fillRect(chest.x - 15, chest.y - 10, 30, 5);
+          if (chest.rarity !== 'uncommon') {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = colors[chest.rarity];
+            ctx.fillRect(chest.x - 15, chest.y - 10, 30, 20);
+            ctx.shadowBlur = 0;
+          }
+        }
+
+        // Draw NPCs
+        for (const npc of room.npcSpawns) {
+          ctx.font = '32px Arial';
+          ctx.fillText(npc.icon, npc.x - 16, npc.y);
+        }
+
+        // Draw transitions
+        if (room.transitions.entrance) {
+          ctx.fillStyle = '#00ff00' + '80';
+          ctx.fillRect(room.transitions.entrance.x, room.transitions.entrance.y, room.transitions.entrance.width, room.transitions.entrance.height);
+        }
+        if (room.transitions.exit) {
+          ctx.fillStyle = '#ff0000' + '80';
+          ctx.fillRect(room.transitions.exit.x, room.transitions.exit.y, room.transitions.exit.width, room.transitions.exit.height);
+        }
+
+        // Draw player
+        ctx.fillStyle = '#4fc3f7';
+        ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
+
+        ctx.restore();
+      }
+
+      drawMenuScreen() {
+        this.ctx.fillStyle = '#0a0a1a';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#4fc3f7';
+        this.ctx.font = '48px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('A1K Dungeon System', this.canvas.width / 2, this.canvas.height / 2 - 50);
+        this.ctx.font = '24px Arial';
+        this.ctx.fillText('Press M to select a dungeon', this.canvas.width / 2, this.canvas.height / 2 + 50);
+      }
+
+      updateHUD() {
+        if (this.inDungeon && this.currentRoom) {
+          document.getElementById('hud-rank').textContent = this.currentRank;
+          document.getElementById('hud-floor').textContent = this.currentFloor;
+          document.getElementById('hud-room').textContent = this.currentRoomIndex + 1;
+          document.getElementById('hud-type').textContent = window.DungeonRoomData.roomTypes[this.currentRoomType].name;
+        } else {
+          document.getElementById('hud-rank').textContent = '-';
+          document.getElementById('hud-floor').textContent = '-';
+          document.getElementById('hud-room').textContent = '-';
+          document.getElementById('hud-type').textContent = '-';
+        }
+        document.getElementById('hud-level').textContent = window.gameState.playerLevel;
+        document.getElementById('hud-position').textContent = Math.floor(this.player.x) + ', ' + Math.floor(this.player.y);
+      }
+
+      gameLoop() {
+        const now = performance.now();
+        const deltaTime = (now - this.lastTime) / 1000;
+        this.lastTime = now;
+
+        this.update(deltaTime);
+        this.render();
+        this.updateHUD();
+
+        requestAnimationFrame(() => this.gameLoop());
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // UI FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+    
+    function openDungeonMenu() {
+      const menu = document.getElementById('dungeon-menu');
+      const sections = document.getElementById('rank-sections');
+      sections.innerHTML = '';
+
+      const rankOrder = ['C', 'B', 'A', 'S', 'SS', 'SSS'];
+      const availableRanks = window.DungeonProgression.getAvailableRanks(window.gameState.playerLevel);
+
+      rankOrder.forEach(rankId => {
+        const rank = window.DungeonRoomData.ranks[rankId];
+        const isAvailable = availableRanks.includes(rankId);
+        
+        const section = document.createElement('div');
+        section.className = 'rank-section';
+        
+        const header = document.createElement('div');
+        header.className = `rank-header ${rankId}`;
+        header.textContent = `${rank.name} - Level ${rank.unlockLevel}+`;
+        section.appendChild(header);
+
+        const grid = document.createElement('div');
+        grid.className = 'dungeon-grid';
+        
+        Object.values(window.DungeonRoomData.roomTypes).forEach(roomType => {
+          const card = document.createElement('div');
+          card.className = `room-type-card ${!isAvailable ? 'locked' : ''}`;
+          if (isAvailable) {
+            card.onclick = () => game.enterDungeon(rankId, roomType.id);
+          }
+          card.innerHTML = `
+            <div class="room-icon">${roomType.icon}</div>
+            <div class="room-name">${roomType.name}</div>
+            <div class="room-description">${roomType.description}</div>
+          `;
+          grid.appendChild(card);
+        });
+        
+        section.appendChild(grid);
+        sections.appendChild(section);
+      });
+
+      menu.classList.add('visible');
+    }
+
+    function closeDungeonMenu() {
+      document.getElementById('dungeon-menu').classList.remove('visible');
+    }
+
+    function exitDungeon() {
+      game.exitDungeon();
+    }
+
+    function showStatusMessage(text) {
+      const msg = document.getElementById('status-message');
+      msg.textContent = text;
+      msg.classList.add('visible');
+      setTimeout(() => msg.classList.remove('visible'), 2000);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // INITIALIZE GAME
+    // ═══════════════════════════════════════════════════════════════
+    
+    let game;
+    window.addEventListener('DOMContentLoaded', () => {
+      game = new DungeonGame();
+      console.log('✅ A1K Dungeon System - Standalone Demo Loaded');
+    });
+  </script>
+</body>
+</html>
+

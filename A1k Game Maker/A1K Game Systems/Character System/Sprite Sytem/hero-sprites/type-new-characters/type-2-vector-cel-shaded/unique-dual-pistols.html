@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unique Dual Pistols - Vector Cel-Shaded</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #container { display: flex; gap: 30px; max-width: 1200px; }
+  #canvas-wrapper { flex-shrink: 0; }
+  canvas {
+    border: 2px solid #333;
+    background: #1a1a1a;
+  }
+  #controls {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+  }
+  h1 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #fff;
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
+  }
+  .control-group { margin-bottom: 16px; }
+  label {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  select, button {
+    width: 100%;
+    padding: 8px 12px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  select:hover, button:hover {
+    border-color: #666;
+    background: #222;
+  }
+  button { margin-top: 8px; background: #2a2a2a; }
+  button:active { transform: translateY(1px); }
+  .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .info {
+    font-size: 11px;
+    color: #666;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    line-height: 1.6;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.02);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #333;
+  }
+  .stat-label { font-size: 10px; color: #666; text-transform: uppercase; }
+  .stat-value { font-size: 14px; color: #0f0; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="canvas-wrapper">
+    <canvas id="sprite" width="256" height="256"></canvas>
+  </div>
+  
+  <div id="controls">
+    <h1>🔫 UNIQUE (DUAL PISTOLS)</h1>
+    
+    <div class="control-group">
+      <label>Animation State</label>
+      <select id="animState">
+        <option value="idle">Idle (Breathing)</option>
+        <option value="walk">Walk Cycle</option>
+        <option value="attack">Attack Shoot</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Color Palette</label>
+      <select id="palette">
+        <option value="fire">🔥 Fire (Red/Orange)</option>
+        <option value="ice">❄️ Ice (Cyan/Blue)</option>
+        <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+        <option value="light">✨ Light (Gold/White)</option>
+        <option value="nature">🌿 Nature (Green/Earth)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Animation Speed</label>
+      <select id="speed">
+        <option value="0.5">0.5x Slow</option>
+        <option value="1" selected>1x Normal</option>
+        <option value="1.5">1.5x Fast</option>
+        <option value="2">2x Very Fast</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Display Scale</label>
+      <select id="scale">
+        <option value="1">1x (256px)</option>
+        <option value="1.5">1.5x (384px)</option>
+        <option value="2" selected>2x (512px)</option>
+        <option value="2.5">2.5x (640px)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Export</label>
+      <div class="btn-group">
+        <button id="exportFrame">PNG Frame</button>
+        <button id="exportSheet">Sprite Sheet</button>
+      </div>
+      <button id="exportJSON">Export JSON Data</button>
+    </div>
+    
+    <div class="info">
+      <strong>TYPE 2: VECTOR CEL-SHADED</strong><br>
+      Castle Crashers / Hollow Knight Style<br><br>
+      • Resolution: Infinite (vector-based)<br>
+      • Technique: Canvas path rendering<br>
+      • Bold outlines + soft gradients<br>
+      • Hair: Black (locked)<br>
+      • Frame Rate: 60fps<br><br>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Frame</div>
+          <div class="stat-value" id="frameCount">0/8</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">FPS</div>
+          <div class="stat-value" id="fpsCount">60</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('sprite');
+const ctx = canvas.getContext('2d');
+
+let currentAnim = 'idle';
+let currentFrame = 0;
+let frameTimer = 0;
+let animSpeed = 1;
+let palette = 'fire';
+let lastTime = 0;
+let fps = 60;
+let frameCount = 0;
+let lastFpsTime = 0;
+
+const palettes = {
+  fire: {
+    skin: ['#6d4c3d', '#8b6347', '#a07855'],
+    clothes: ['#2a1a1a', '#3a2a2a', '#4a3a3a'],
+    weapon: ['#ff3333', '#ff6666', '#ff9999'],
+    weaponGlow: 'rgba(255,80,0,0.6)',
+    eyes: '#ff0000',
+    outline: '#0a0a0a'
+  },
+  ice: {
+    skin: ['#6d4c3d', '#8b6347', '#a07855'],
+    clothes: ['#0a1a2a', '#1a2a3a', '#2a3a4a'],
+    weapon: ['#00ccff', '#33ddff', '#66eeff'],
+    weaponGlow: 'rgba(0,200,255,0.6)',
+    eyes: '#00ffff',
+    outline: '#0a0a0a'
+  },
+  shadow: {
+    skin: ['#6d4c3d', '#8b6347', '#a07855'],
+    clothes: ['#1a0a2a', '#2a1a3a', '#3a2a4a'],
+    weapon: ['#aa00ff', '#cc33ff', '#dd66ff'],
+    weaponGlow: 'rgba(170,0,255,0.6)',
+    eyes: '#aa00ff',
+    outline: '#0a0a0a'
+  },
+  light: {
+    skin: ['#6d4c3d', '#8b6347', '#a07855'],
+    clothes: ['#2a2a1a', '#3a3a2a', '#4a4a3a'],
+    weapon: ['#ffcc00', '#ffdd33', '#ffee66'],
+    weaponGlow: 'rgba(255,200,0,0.6)',
+    eyes: '#ffff00',
+    outline: '#0a0a0a'
+  },
+  nature: {
+    skin: ['#6d4c3d', '#8b6347', '#a07855'],
+    clothes: ['#0a2a1a', '#1a3a2a', '#2a4a3a'],
+    weapon: ['#00ff66', '#33ff88', '#66ffaa'],
+    weaponGlow: 'rgba(0,255,100,0.6)',
+    eyes: '#00ff00',
+    outline: '#0a0a0a'
+  }
+};
+
+const animations = {
+  idle: { frames: 8, frameTime: 250, loop: true },
+  walk: { frames: 8, frameTime: 125, loop: true },
+  attack: { frames: 6, frameTime: 83, loop: false }
+};
+
+function drawUniqueDualPistols(frame, anim) {
+  const pal = palettes[palette];
+  const centerX = 128;
+  const centerY = 128;
+  
+  let bobY = 0;
+  let gunRecoil = 0;
+  let legOffset = 0;
+  
+  if (anim === 'idle') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 3;
+  } else if (anim === 'walk') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 5;
+    legOffset = Math.sin(frame / 4 * Math.PI) * 8;
+  } else if (anim === 'attack') {
+    gunRecoil = frame < 2 ? 8 : 0;
+  }
+  
+  ctx.clearRect(0, 0, 256, 256);
+  
+  const glowGrad = ctx.createRadialGradient(centerX, centerY - bobY, 0, centerX, centerY - bobY, 100);
+  glowGrad.addColorStop(0, pal.weaponGlow);
+  glowGrad.addColorStop(0.5, 'rgba(0,0,0,0.1)');
+  glowGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = glowGrad;
+  ctx.fillRect(0, 0, 256, 256);
+  
+  // Legs (armored)
+  drawLeg(centerX - 25, centerY + 50 - bobY + legOffset, pal);
+  drawLeg(centerX + 15, centerY + 50 - bobY - legOffset, pal);
+  
+  // Torso (with armor panel)
+  drawCyborgTorso(centerX, centerY + 10 - bobY, pal);
+  
+  // Arms with cyan accents
+  // Left arm
+  ctx.fillStyle = pal.clothes[2];
+  ctx.beginPath();
+  ctx.roundRect(centerX - 48, centerY + 20 - bobY, 12, 30, 6);
+  ctx.fill();
+  ctx.fillStyle = pal.weapon[2]; // CYAN elbow accent
+  ctx.fillRect(centerX - 46, centerY + 35 - bobY, 8, 4);
+  ctx.fillStyle = pal.weapon[3]; // CYAN forearm accent
+  ctx.fillRect(centerX - 46, centerY + 42 - bobY, 8, 3);
+  
+  // Right arm
+  ctx.fillStyle = pal.clothes[2];
+  ctx.beginPath();
+  ctx.roundRect(centerX + 36, centerY + 20 - bobY, 12, 30, 6);
+  ctx.fill();
+  ctx.fillStyle = pal.weapon[2]; // CYAN elbow accent
+  ctx.fillRect(centerX + 38, centerY + 35 - bobY, 8, 4);
+  ctx.fillStyle = pal.weapon[3]; // CYAN forearm accent
+  ctx.fillRect(centerX + 38, centerY + 42 - bobY, 8, 3);
+  
+  // Head with pigtails
+  drawCyborgHead(centerX - 5, centerY - 40 - bobY, pal);
+  
+  // LEFT PISTOL (in left hand)
+  drawPistol(centerX - 60 - gunRecoil, centerY + 25 - bobY, 'left', pal, anim === 'attack' && frame < 2);
+  
+  // RIGHT PISTOL (in right hand)
+  drawPistol(centerX + 55, centerY + 25 - bobY, 'right', pal, anim === 'attack' && frame < 2);
+}
+
+function drawLeg(x, y, pal) {
+  const grad = ctx.createLinearGradient(x, y, x, y + 70);
+  grad.addColorStop(0, pal.clothes[1]);
+  grad.addColorStop(0.6, pal.clothes[2]);
+  grad.addColorStop(1, pal.clothes[0]);
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(x, y, 15, 40, 8);
+  ctx.fill();
+  
+  // CYAN knee accent
+  ctx.fillStyle = pal.weapon[2];
+  ctx.fillRect(x + 4, y + 18, 7, 3);
+  
+  // CYAN shin/boot accent
+  ctx.fillStyle = pal.weapon[2];
+  ctx.fillRect(x + 3, y + 48, 9, 3);
+  
+  const skinGrad = ctx.createLinearGradient(x, y + 40, x, y + 70);
+  skinGrad.addColorStop(0, pal.skin[1]);
+  skinGrad.addColorStop(1, pal.skin[0]);
+  ctx.fillStyle = skinGrad;
+  ctx.beginPath();
+  ctx.roundRect(x + 2, y + 40, 11, 30, 6);
+  ctx.fill();
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.roundRect(x, y, 15, 70, 8);
+  ctx.stroke();
+}
+
+function drawCyborgTorso(x, y, pal) {
+  const grad = ctx.createLinearGradient(x - 30, y, x + 30, y);
+  grad.addColorStop(0, pal.clothes[0]);
+  grad.addColorStop(0.5, pal.clothes[1]);
+  grad.addColorStop(1, pal.clothes[0]);
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(x - 30, y, 60, 50, 10);
+  ctx.fill();
+  
+  // CYAN armor panel (chest)
+  ctx.fillStyle = pal.weapon[2];
+  ctx.beginPath();
+  ctx.roundRect(x - 12, y + 10, 24, 30, 6);
+  ctx.fill();
+  
+  // CYAN shoulder accents
+  ctx.fillStyle = pal.weapon[2];
+  ctx.fillRect(x - 28, y + 5, 10, 8);
+  ctx.fillRect(x + 18, y + 5, 10, 8);
+  
+  // Energy indicators
+  ctx.fillStyle = pal.weapon[3];
+  ctx.beginPath();
+  ctx.arc(x - 5, y + 20, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 5, y + 20, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(x - 30, y, 60, 50, 10);
+  ctx.stroke();
+}
+
+function drawCyborgHead(x, y, pal) {
+  const grad = ctx.createRadialGradient(x + 15, y + 15, 5, x + 15, y + 15, 25);
+  grad.addColorStop(0, pal.skin[2]);
+  grad.addColorStop(0.7, pal.skin[1]);
+  grad.addColorStop(1, pal.skin[0]);
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(x + 15, y + 15, 25, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Black pigtails
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.ellipse(x - 15, y + 10, 8, 25, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + 45, y + 10, 8, 25, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Top hair
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.ellipse(x + 15, y - 8, 32, 15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // White cyborg eyes
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = pal.weapon[2];
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.arc(x + 8, y + 12, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 22, y + 12, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(x + 15, y + 15, 25, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawPistol(x, y, hand, pal, firing) {
+  ctx.shadowColor = pal.weapon[0];
+  ctx.shadowBlur = 10;
+  
+  const gunGrad = ctx.createLinearGradient(x, y - 5, x, y + 10);
+  gunGrad.addColorStop(0, pal.weapon[0]);
+  gunGrad.addColorStop(0.5, pal.weapon[1]);
+  gunGrad.addColorStop(1, pal.weapon[0]);
+  
+  ctx.fillStyle = gunGrad;
+  ctx.beginPath();
+  if (hand === 'left') {
+    ctx.roundRect(x, y, 25, 12, 4);
+  } else {
+    ctx.roundRect(x - 25, y, 25, 12, 4);
+  }
+  ctx.fill();
+  
+  // Energy indicators
+  ctx.fillStyle = pal.weapon[2];
+  if (hand === 'left') {
+    ctx.fillRect(x + 8, y + 4, 3, 4);
+    ctx.fillRect(x + 14, y + 4, 3, 4);
+  } else {
+    ctx.fillRect(x - 17, y + 4, 3, 4);
+    ctx.fillRect(x - 11, y + 4, 3, 4);
+  }
+  
+  ctx.shadowBlur = 0;
+  
+  // Muzzle flash
+  if (firing) {
+    ctx.fillStyle = pal.weapon[2];
+    ctx.globalAlpha = 0.8;
+    if (hand === 'left') {
+      ctx.fillRect(x + 25, y - 5, 12, 22);
+    } else {
+      ctx.fillRect(x - 37, y - 5, 12, 22);
+    }
+    ctx.globalAlpha = 1;
+  }
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  if (hand === 'left') {
+    ctx.roundRect(x, y, 25, 12, 4);
+  } else {
+    ctx.roundRect(x - 25, y, 25, 12, 4);
+  }
+  ctx.stroke();
+}
+
+function animate(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+  
+  frameCount++;
+  if (timestamp - lastFpsTime >= 1000) {
+    fps = frameCount;
+    frameCount = 0;
+    lastFpsTime = timestamp;
+    document.getElementById('fpsCount').textContent = fps;
+  }
+  
+  const anim = animations[currentAnim];
+  frameTimer += deltaTime * animSpeed;
+  
+  if (frameTimer >= anim.frameTime) {
+    frameTimer = 0;
+    currentFrame++;
+    
+    if (currentFrame >= anim.frames) {
+      if (anim.loop) {
+        currentFrame = 0;
+      } else {
+        currentFrame = anim.frames - 1;
+      }
+    }
+    
+    document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+  }
+  
+  drawUniqueDualPistols(currentFrame, currentAnim);
+  
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('animState').addEventListener('change', (e) => {
+  currentAnim = e.target.value;
+  currentFrame = 0;
+  frameTimer = 0;
+});
+
+document.getElementById('palette').addEventListener('change', (e) => {
+  palette = e.target.value;
+});
+
+document.getElementById('speed').addEventListener('change', (e) => {
+  animSpeed = parseFloat(e.target.value);
+});
+
+document.getElementById('scale').addEventListener('change', (e) => {
+  const scale = parseFloat(e.target.value);
+  canvas.style.width = (256 * scale) + 'px';
+  canvas.style.height = (256 * scale) + 'px';
+});
+
+document.getElementById('exportFrame').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `unique-dual-pistols-vector-${currentAnim}-f${currentFrame}-${palette}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+document.getElementById('exportSheet').addEventListener('click', () => {
+  const tempCanvas = document.createElement('canvas');
+  const anim = animations[currentAnim];
+  tempCanvas.width = 256 * anim.frames;
+  tempCanvas.height = 256;
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  for (let i = 0; i < anim.frames; i++) {
+    drawUniqueDualPistols(i, currentAnim);
+    tempCtx.drawImage(canvas, i * 256, 0);
+  }
+  
+  const link = document.createElement('a');
+  link.download = `unique-dual-pistols-vector-${currentAnim}-sheet-${palette}.png`;
+  link.href = tempCanvas.toDataURL('image/png');
+  link.click();
+  
+  drawUniqueDualPistols(currentFrame, currentAnim);
+});
+
+document.getElementById('exportJSON').addEventListener('click', () => {
+  const data = {
+    character: 'Unique (Dual Pistols)',
+    type: 'Vector Cel-Shaded',
+    resolution: 'Infinite (vector-based)',
+    animations: animations,
+    palettes: Object.keys(palettes),
+    currentState: {
+      animation: currentAnim,
+      frame: currentFrame,
+      palette: palette
+    },
+    metadata: {
+      hairColor: '#000000 (locked)',
+      weaponType: 'Dual Energy Pistols',
+      style: 'Castle Crashers Tier',
+      technique: 'Canvas path rendering with gradients'
+    }
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.download = `unique-dual-pistols-vector-data-${palette}.json`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+});
+
+canvas.style.width = '512px';
+canvas.style.height = '512px';
+animate(0);
+</script>
+</body>
+</html>

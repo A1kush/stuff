@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cat Angel Gunner - 3D Pre-rendered</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #container {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+  }
+  #canvas-wrapper {
+    flex-shrink: 0;
+  }
+  canvas {
+    border: 2px solid #333;
+    background: #0a0a0a;
+  }
+  #controls {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+  }
+  h1 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #fff;
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
+  }
+  .control-group {
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  select, button {
+    width: 100%;
+    padding: 8px 12px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  select:hover, button:hover {
+    border-color: #666;
+    background: #222;
+  }
+  button {
+    margin-top: 8px;
+    background: #2a2a2a;
+  }
+  button:active {
+    transform: translateY(1px);
+  }
+  .btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .info {
+    font-size: 11px;
+    color: #666;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    line-height: 1.6;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.02);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #333;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+  }
+  .stat-value {
+    font-size: 14px;
+    color: #0f0;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="canvas-wrapper">
+    <canvas id="sprite" width="256" height="256"></canvas>
+  </div>
+  
+  <div id="controls">
+    <h1>😇 CAT ANGEL GUNNER</h1>
+    
+    <div class="control-group">
+      <label>Animation State</label>
+      <select id="animState">
+        <option value="idle">Idle (Floating)</option>
+        <option value="walk">Walk Cycle</option>
+        <option value="attack">Attack Shoot</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Color Palette</label>
+      <select id="palette">
+        <option value="fire">🔥 Fire (Red/Orange)</option>
+        <option value="ice">❄️ Ice (Cyan/Blue)</option>
+        <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+        <option value="light">✨ Light (Gold/White)</option>
+        <option value="nature">🌿 Nature (Green/Earth)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Animation Speed</label>
+      <select id="speed">
+        <option value="0.5">0.5x Slow</option>
+        <option value="1" selected>1x Normal</option>
+        <option value="1.5">1.5x Fast</option>
+        <option value="2">2x Very Fast</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Display Scale</label>
+      <select id="scale">
+        <option value="1">1x (256px)</option>
+        <option value="1.5">1.5x (384px)</option>
+        <option value="2" selected>2x (512px)</option>
+        <option value="2.5">2.5x (640px)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Export</label>
+      <div class="btn-group">
+        <button id="exportFrame">PNG Frame</button>
+        <button id="exportSheet">Sprite Sheet</button>
+      </div>
+      <button id="exportJSON">Export JSON Data</button>
+    </div>
+    
+    <div class="info">
+      <strong>TYPE 3: 3D PRE-RENDERED</strong><br>
+      Octopath Traveler / FF Tactics Style<br><br>
+      • Resolution: 256×256 native<br>
+      • Technique: Simulated 3D lighting<br>
+      • Baked shadows + specular<br>
+      • Fur: Unique black (locked)<br>
+      • Frame Rate: 60fps<br><br>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Frame</div>
+          <div class="stat-value" id="frameCount">0/8</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">FPS</div>
+          <div class="stat-value" id="fpsCount">60</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('sprite');
+const ctx = canvas.getContext('2d');
+
+let currentAnim = 'idle';
+let currentFrame = 0;
+let frameTimer = 0;
+let animSpeed = 1;
+let palette = 'fire';
+let lastTime = 0;
+let fps = 60;
+let frameCount = 0;
+let lastFpsTime = 0;
+
+const palettes = {
+  fire: {
+    suit: {
+      base: '#3a2a3a',
+      highlight: '#5a4a5a',
+      shadow: '#1a0a1a',
+      rim: 'rgba(255,100,0,0.5)'
+    },
+    halo: {
+      base: '#ff8833',
+      glow: '#ffaa66',
+      bloom: 'rgba(255,100,0,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    wing: {
+      base: '#ffb3cc',
+      highlight: '#fff0f5',
+      shadow: '#cc8099'
+    },
+    badge: '#ff6600',
+    eye: '#00ff00',
+    gun: { base: '#1a1a1a', highlight: '#3a3a3a', shadow: '#0a0a0a' },
+    ambient: 'rgba(255,100,0,0.12)'
+  },
+  ice: {
+    suit: {
+      base: '#1a2a3a',
+      highlight: '#2a3a4a',
+      shadow: '#0a1a2a',
+      rim: 'rgba(0,200,255,0.5)'
+    },
+    halo: {
+      base: '#33ddff',
+      glow: '#66eeff',
+      bloom: 'rgba(0,200,255,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    wing: {
+      base: '#b3e6ff',
+      highlight: '#f0f9ff',
+      shadow: '#80b3cc'
+    },
+    badge: '#00ccff',
+    eye: '#00ffcc',
+    gun: { base: '#1a1a1a', highlight: '#3a3a3a', shadow: '#0a0a0a' },
+    ambient: 'rgba(0,200,255,0.12)'
+  },
+  shadow: {
+    suit: {
+      base: '#2a1a3a',
+      highlight: '#3a2a4a',
+      shadow: '#1a0a2a',
+      rim: 'rgba(170,0,255,0.5)'
+    },
+    halo: {
+      base: '#cc33ff',
+      glow: '#dd66ff',
+      bloom: 'rgba(170,0,255,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    wing: {
+      base: '#d9b3ff',
+      highlight: '#f5f0ff',
+      shadow: '#a680cc'
+    },
+    badge: '#aa00ff',
+    eye: '#aa00ff',
+    gun: { base: '#1a1a1a', highlight: '#3a3a3a', shadow: '#0a0a0a' },
+    ambient: 'rgba(170,0,255,0.12)'
+  },
+  light: {
+    suit: {
+      base: '#3a3a2a',
+      highlight: '#5a5a4a',
+      shadow: '#2a2a1a',
+      rim: 'rgba(255,200,0,0.6)'
+    },
+    halo: {
+      base: '#ffdd33',
+      glow: '#ffee66',
+      bloom: 'rgba(255,200,0,0.8)',
+      specular: 'rgba(255,255,255,1.0)'
+    },
+    wing: {
+      base: '#ffffcc',
+      highlight: '#fffff0',
+      shadow: '#cccc99'
+    },
+    badge: '#ffcc00',
+    eye: '#ffff00',
+    gun: { base: '#1a1a1a', highlight: '#3a3a3a', shadow: '#0a0a0a' },
+    ambient: 'rgba(255,200,0,0.15)'
+  },
+  nature: {
+    suit: {
+      base: '#1a3a2a',
+      highlight: '#2a4a3a',
+      shadow: '#0a2a1a',
+      rim: 'rgba(0,255,100,0.5)'
+    },
+    halo: {
+      base: '#33ff88',
+      glow: '#66ffaa',
+      bloom: 'rgba(0,255,100,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    wing: {
+      base: '#ccffdd',
+      highlight: '#f0fff5',
+      shadow: '#99ccaa'
+    },
+    badge: '#00ff66',
+    eye: '#00ff66',
+    gun: { base: '#1a1a1a', highlight: '#3a3a3a', shadow: '#0a0a0a' },
+    ambient: 'rgba(0,255,100,0.12)'
+  }
+};
+
+const animations = {
+  idle: { frames: 8, frameTime: 250, loop: true },
+  walk: { frames: 8, frameTime: 125, loop: true },
+  attack: { frames: 6, frameTime: 83, loop: false }
+};
+
+function drawCatAngel3D(frame, anim) {
+  const pal = palettes[palette];
+  const centerX = 128;
+  const centerY = 128;
+  
+  let bobY = 0;
+  let wingFlap = 0;
+  let gunRecoil = 0;
+  let legOffset = 0;
+  
+  if (anim === 'idle') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 6;
+    wingFlap = Math.sin(frame / 4 * Math.PI) * 10;
+  } else if (anim === 'walk') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 4;
+    legOffset = Math.sin(frame / 4 * Math.PI) * 8;
+  } else if (anim === 'attack') {
+    gunRecoil = frame < 2 ? frame * 10 : 0;
+  }
+  
+  ctx.clearRect(0, 0, 256, 256);
+  
+  // Ground shadow
+  const shadowGrad = ctx.createRadialGradient(centerX, 245, 0, centerX, 245, 65);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.35)');
+  shadowGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = shadowGrad;
+  ctx.beginPath();
+  ctx.ellipse(centerX, 245, 45, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Ambient light removed per user request
+  
+  // Halo (floating, 3D volumetric)
+  drawHalo3D(centerX, centerY - 75 - bobY - Math.abs(Math.sin(frame / 4 * Math.PI)) * 6, pal);
+  
+  // Wing (3D shaded)
+  drawWing3D(centerX - 55, centerY - 25 - bobY + wingFlap, pal);
+  
+  // Legs (black fur with 3D shading)
+  drawCatLeg3D(centerX - 22, centerY + 45 - bobY + legOffset, pal);
+  drawCatLeg3D(centerX + 10, centerY + 45 - bobY - legOffset, pal);
+  
+  // Body (suit with 3D lighting)
+  drawCatBody3D(centerX, centerY + 5 - bobY, pal);
+  
+  // Head (black fur sphere with lighting)
+  drawCatHead3D(centerX, centerY - 35 - bobY, pal);
+  
+  // Tail (curved with shading)
+  drawCatTail3D(centerX + 30, centerY + 50 - bobY, pal);
+  
+  // Left arm (black paw holding gun)
+  drawCatPaw3D(centerX - 40, centerY + 20 - bobY, pal);
+  
+  // Right arm (black paw holding sword)
+  drawCatPaw3D(centerX + 32, centerY + 18 - bobY, pal);
+  
+  // Gun (left hand, 3D shaded)
+  drawGun3D(centerX - 45 - gunRecoil, centerY + 18 - bobY, frame < 2 && anim === 'attack', pal);
+  
+  // Sword (right hand, 3D shaded)
+  drawCatSword3D(centerX + 38, centerY + 18 - bobY, pal);
+  
+  // Rim bloom removed per user request
+  // drawRimBloom(centerX, centerY - bobY, pal);
+}
+
+function drawHalo3D(x, y, pal) {
+  // Volumetric bloom
+  const bloomGrad = ctx.createRadialGradient(x, y, 0, x, y, 60);
+  bloomGrad.addColorStop(0, pal.halo.bloom);
+  bloomGrad.addColorStop(0.5, 'rgba(0,0,0,0.1)');
+  bloomGrad.addColorStop(1, 'transparent');
+  
+  ctx.fillStyle = bloomGrad;
+  ctx.fillRect(x - 60, y - 30, 120, 60);
+  
+  // Main halo ring with 3D shading
+  const haloGrad = ctx.createLinearGradient(x, y - 10, x, y + 10);
+  haloGrad.addColorStop(0, pal.halo.base);
+  haloGrad.addColorStop(0.5, pal.halo.glow);
+  haloGrad.addColorStop(1, pal.halo.base);
+  
+  ctx.strokeStyle = haloGrad;
+  ctx.lineWidth = 8;
+  ctx.shadowColor = pal.halo.glow;
+  ctx.shadowBlur = 20;
+  ctx.beginPath();
+  ctx.ellipse(x, y, 32, 10, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  
+  // Specular highlight on halo
+  ctx.strokeStyle = pal.halo.specular;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(x, y - 2, 32, 8, 0, 0, Math.PI);
+  ctx.stroke();
+}
+
+function drawWing3D(x, y, pal) {
+  // Wing shadow (baked)
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.moveTo(x + 5, y + 5);
+  ctx.bezierCurveTo(x - 5, y + 20, x, y + 35, x + 10, y + 45);
+  ctx.bezierCurveTo(x + 25, y + 40, x + 30, y + 28, x + 28, y + 12);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Wing with 3D gradient
+  const wingGrad = ctx.createLinearGradient(x, y, x + 30, y + 40);
+  wingGrad.addColorStop(0, pal.wing.highlight);
+  wingGrad.addColorStop(0.5, pal.wing.base);
+  wingGrad.addColorStop(1, pal.wing.shadow);
+  
+  ctx.fillStyle = wingGrad;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x - 12, y + 18, x - 8, y + 30, x + 8, y + 42);
+  ctx.bezierCurveTo(x + 22, y + 38, x + 28, y + 25, x + 25, y + 8);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Feather structure with lighting
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 5; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x + 8, y + 5 + i * 7);
+    ctx.lineTo(x + 18, y + 10 + i * 7);
+    ctx.stroke();
+  }
+  
+  // Specular highlight on wing
+  const specGrad = ctx.createRadialGradient(x + 12, y + 15, 2, x + 12, y + 15, 18);
+  specGrad.addColorStop(0, 'rgba(255,255,255,0.5)');
+  specGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = specGrad;
+  ctx.fillRect(x + 5, y + 8, 20, 25);
+}
+
+function drawCatLeg3D(x, y, pal) {
+  // Black fur with 3D lighting
+  const legGrad = ctx.createLinearGradient(x, y, x + 14, y);
+  legGrad.addColorStop(0, '#000000');
+  legGrad.addColorStop(0.4, '#1a1a1a');
+  legGrad.addColorStop(0.6, '#2a2a2a');
+  legGrad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = legGrad;
+  ctx.fillRect(x, y, 14, 35);
+  
+  // Subtle specular on fur
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(x + 6, y + 5, 3, 20);
+}
+
+function drawCatBody3D(x, y, pal) {
+  // Suit with directional lighting
+  const bodyGrad = ctx.createRadialGradient(x - 20, y + 10, 15, x, y + 25, 55);
+  bodyGrad.addColorStop(0, pal.suit.highlight);
+  bodyGrad.addColorStop(0.6, pal.suit.base);
+  bodyGrad.addColorStop(1, pal.suit.shadow);
+  
+  ctx.fillStyle = bodyGrad;
+  ctx.fillRect(x - 32, y, 64, 50);
+  
+  // Ambient occlusion
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(x - 32, y + 45, 64, 5);
+  
+  // Badge with glow and specular
+  ctx.shadowColor = pal.badge;
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = pal.badge;
+  ctx.fillRect(x - 10, y + 18, 20, 24);
+  ctx.shadowBlur = 0;
+  
+  // Badge specular highlight
+  const badgeSpec = ctx.createLinearGradient(x - 10, y + 18, x + 10, y + 42);
+  badgeSpec.addColorStop(0, 'rgba(255,255,255,0.6)');
+  badgeSpec.addColorStop(0.5, 'transparent');
+  badgeSpec.addColorStop(1, 'rgba(255,255,255,0.2)');
+  ctx.fillStyle = badgeSpec;
+  ctx.fillRect(x - 10, y + 18, 20, 24);
+}
+
+function drawCatHead3D(x, y, pal) {
+  // Black fur sphere with 3D lighting
+  const headGrad = ctx.createRadialGradient(x - 15, y + 5, 8, x, y + 10, 35);
+  headGrad.addColorStop(0, '#2a2a2a');
+  headGrad.addColorStop(0.4, '#1a1a1a');
+  headGrad.addColorStop(0.8, '#0a0a0a');
+  headGrad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(x, y + 10, 30, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Ears with shading
+  const earGrad = ctx.createLinearGradient(x - 25, y - 15, x - 15, y - 5);
+  earGrad.addColorStop(0, '#1a1a1a');
+  earGrad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = earGrad;
+  ctx.beginPath();
+  ctx.moveTo(x - 25, y - 8);
+  ctx.lineTo(x - 18, y - 30);
+  ctx.lineTo(x - 12, y - 8);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(x + 25, y - 8);
+  ctx.lineTo(x + 18, y - 30);
+  ctx.lineTo(x + 12, y - 8);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Fur specular highlight
+  const furSpec = ctx.createRadialGradient(x - 12, y, 3, x - 12, y, 15);
+  furSpec.addColorStop(0, 'rgba(255,255,255,0.15)');
+  furSpec.addColorStop(1, 'transparent');
+  ctx.fillStyle = furSpec;
+  ctx.beginPath();
+  ctx.arc(x, y + 10, 30, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Green eyes (both visible) with volumetric glow
+  ctx.shadowColor = pal.eye;
+  ctx.shadowBlur = 20;
+  ctx.fillStyle = pal.eye;
+  ctx.beginPath();
+  ctx.arc(x - 12, y + 8, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 12, y + 8, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  
+  // Eye speculars
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.beginPath();
+  ctx.arc(x - 14, y + 6, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 10, y + 6, 2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawCatTail3D(x, y, pal) {
+  // Tail with 3D shading
+  const tailGrad = ctx.createLinearGradient(x, y, x + 15, y + 35);
+  tailGrad.addColorStop(0, '#1a1a1a');
+  tailGrad.addColorStop(0.5, '#0a0a0a');
+  tailGrad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = tailGrad;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x + 18, y + 12, x + 15, y + 28, x - 8, y + 35);
+  ctx.lineTo(x - 6, y + 32);
+  ctx.bezierCurveTo(x + 12, y + 25, x + 15, y + 10, x, y);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Tail specular
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(x + 5, y + 8, 6, 15);
+}
+
+function drawGun3D(x, y, flash, pal) {
+  // Gun body with 3D shading
+  const gunGrad = ctx.createLinearGradient(x, y, x, y + 14);
+  gunGrad.addColorStop(0, pal.gun.shadow);
+  gunGrad.addColorStop(0.4, pal.gun.base);
+  gunGrad.addColorStop(0.7, pal.gun.highlight);
+  gunGrad.addColorStop(1, pal.gun.shadow);
+  
+  ctx.fillStyle = gunGrad;
+  ctx.fillRect(x, y, 30, 14);
+  ctx.fillRect(x - 12, y, 12, 14);
+  
+  // Specular highlight on gun
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fillRect(x + 2, y + 2, 25, 3);
+  
+  // Muzzle flash with volumetric bloom
+  if (flash) {
+    const flashGrad = ctx.createRadialGradient(x - 12, y + 7, 5, x - 12, y + 7, 35);
+    flashGrad.addColorStop(0, pal.halo.glow);
+    flashGrad.addColorStop(0.4, pal.halo.base);
+    flashGrad.addColorStop(1, 'transparent');
+    
+    ctx.fillStyle = flashGrad;
+    ctx.fillRect(x - 40, y - 20, 50, 54);
+    
+    ctx.shadowColor = pal.halo.glow;
+    ctx.shadowBlur = 25;
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.beginPath();
+    ctx.moveTo(x - 12, y + 7);
+    ctx.lineTo(x - 28, y);
+    ctx.lineTo(x - 32, y + 7);
+    ctx.lineTo(x - 28, y + 14);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+function drawCatPaw3D(x, y, pal) {
+  // Black paw with 3D shading
+  const pawGrad = ctx.createRadialGradient(x - 3, y, 5, x, y + 5, 12);
+  pawGrad.addColorStop(0, '#2a2a2a');
+  pawGrad.addColorStop(0.6, '#0a0a0a');
+  pawGrad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = pawGrad;
+  ctx.beginPath();
+  ctx.ellipse(x, y, 10, 15, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawCatSword3D(x, y, pal) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(45 * Math.PI / 180);
+  
+  // Sword blade with energy glow
+  const swordGrad = ctx.createLinearGradient(0, -30, 0, 0);
+  swordGrad.addColorStop(0, pal.halo.glow);
+  swordGrad.addColorStop(0.5, pal.halo.core);
+  swordGrad.addColorStop(1, pal.halo.base);
+  
+  ctx.shadowColor = pal.halo.glow;
+  ctx.shadowBlur = 15;
+  ctx.fillStyle = swordGrad;
+  ctx.fillRect(-4, -30, 8, 35);
+  ctx.shadowBlur = 0;
+  
+  // Specular highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillRect(-1, -28, 2, 32);
+  
+  // Handle
+  const handleGrad = ctx.createLinearGradient(-5, 5, 5, 5);
+  handleGrad.addColorStop(0, '#0a0a0a');
+  handleGrad.addColorStop(0.5, '#1a1a1a');
+  handleGrad.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = handleGrad;
+  ctx.fillRect(-5, 5, 10, 8);
+  
+  ctx.restore();
+}
+
+// Rim bloom effect removed per user request
+// function drawRimBloom(x, y, pal) {
+//   ctx.globalCompositeOperation = 'lighter';
+//   
+//   const rimGrad = ctx.createRadialGradient(x + 30, y - 10, 20, x + 30, y - 10, 90);
+//   rimGrad.addColorStop(0, 'transparent');
+//   rimGrad.addColorStop(0.7, pal.suit.rim);
+//   rimGrad.addColorStop(1, 'transparent');
+//   
+//   ctx.fillStyle = rimGrad;
+//   ctx.fillRect(x - 60, y - 100, 180, 180);
+//   
+//   ctx.globalCompositeOperation = 'source-over';
+// }
+
+function animate(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+  
+  frameCount++;
+  if (timestamp - lastFpsTime >= 1000) {
+    fps = frameCount;
+    frameCount = 0;
+    lastFpsTime = timestamp;
+    document.getElementById('fpsCount').textContent = fps;
+  }
+  
+  const anim = animations[currentAnim];
+  frameTimer += deltaTime * animSpeed;
+  
+  if (frameTimer >= anim.frameTime) {
+    frameTimer = 0;
+    currentFrame++;
+    
+    if (currentFrame >= anim.frames) {
+      if (anim.loop) {
+        currentFrame = 0;
+      } else {
+        currentFrame = anim.frames - 1;
+      }
+    }
+    
+    document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+  }
+  
+  drawCatAngel3D(currentFrame, currentAnim);
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('animState').addEventListener('change', (e) => {
+  currentAnim = e.target.value;
+  currentFrame = 0;
+  frameTimer = 0;
+});
+
+document.getElementById('palette').addEventListener('change', (e) => {
+  palette = e.target.value;
+});
+
+document.getElementById('speed').addEventListener('change', (e) => {
+  animSpeed = parseFloat(e.target.value);
+});
+
+document.getElementById('scale').addEventListener('change', (e) => {
+  const scale = parseFloat(e.target.value);
+  canvas.style.width = (256 * scale) + 'px';
+  canvas.style.height = (256 * scale) + 'px';
+});
+
+document.getElementById('exportFrame').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `cat-angel-3d-${currentAnim}-f${currentFrame}-${palette}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+document.getElementById('exportSheet').addEventListener('click', () => {
+  const tempCanvas = document.createElement('canvas');
+  const anim = animations[currentAnim];
+  tempCanvas.width = 256 * anim.frames;
+  tempCanvas.height = 256;
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  for (let i = 0; i < anim.frames; i++) {
+    drawCatAngel3D(i, currentAnim);
+    tempCtx.drawImage(canvas, i * 256, 0);
+  }
+  
+  const link = document.createElement('a');
+  link.download = `cat-angel-3d-${currentAnim}-sheet-${palette}.png`;
+  link.href = tempCanvas.toDataURL('image/png');
+  link.click();
+  
+  drawCatAngel3D(currentFrame, currentAnim);
+});
+
+document.getElementById('exportJSON').addEventListener('click', () => {
+  const data = {
+    character: 'Cat Angel Gunner',
+    type: '3D Pre-rendered Simulation',
+    resolution: '256x256',
+    animations: animations,
+    palettes: Object.keys(palettes),
+    currentState: {
+      animation: currentAnim,
+      frame: currentFrame,
+      palette: palette
+    },
+    metadata: {
+      furColor: '#000000 (locked)',
+      weaponType: 'Handgun',
+      style: 'Octopath Traveler Tier',
+      technique: 'Volumetric lighting with baked shadows',
+      specialFeatures: ['Floating Halo', '3D Wing', 'Volumetric Glow']
+    }
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.download = `cat-angel-3d-data-${palette}.json`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+});
+
+canvas.style.width = '512px';
+canvas.style.height = '512px';
+animate(0);
+</script>
+</body>
+</html>
+

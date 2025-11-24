@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unique - Paper</title>
+    <style>
+        body {margin: 0; background: linear-gradient(135deg, #87CEEB, #98D8E8); display: flex; align-items: center; justify-content: center; height: 100vh;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        x.clearRect(0, 0, 512, 512);
+        x.fillStyle = '#FF6B6B'; x.fillRect(200, 250, 112, 150);
+        x.fillStyle = '#FFB380'; x.fillRect(200, 150, 112, 100);
+        x.fillStyle = '#000'; x.fillRect(200, 150, 112, 30); x.fillRect(180, 175, 12, 25); x.fillRect(320, 175, 12, 25); x.fillStyle = '#FFF'; x.fillRect(222, 197, 18, 18); x.fillRect(272, 197, 18, 18); x.fillStyle = '#00FFFF'; x.fillRect(245, 265, 22, 16);
+        x.fillStyle = '#8B4513'; x.fillRect(150, 285, 45, 25);
+        x.fillRect(317, 285, 45, 25);
+        x.fillStyle = '#FFD700'; x.fillRect(152, 287, 20, 21);
+        x.fillRect(319, 287, 20, 21);
+    </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 13: Stained Glass Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #fff;
+            text-align: center;
+        }
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .sprite-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #3a3a5e;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(100, 100, 255, 0.2);
+        }
+        .sprite-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 40px rgba(100, 100, 255, 0.4);
+            border-color: #6666cc;
+        }
+        .sprite-card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        .sprite-card p {
+            color: #999;
+            font-size: 12px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .sprite-card a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2a2a3e;
+            border: 1px solid #3a3a5e;
+            color: #e0e0e0;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .sprite-card a:hover {
+            background: #3a3a4e;
+            border-color: #6666cc;
+        }
+        .info-box {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #3a3a5e;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        .info-box h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        .info-box ul {
+            list-style: none;
+            line-height: 2;
+            color: #999;
+        }
+        .info-box ul li:before {
+            content: "🪟 ";
+            margin-right: 8px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #999;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../START_HERE.html" class="back-link">← Back to Hero Sprites Gallery</a>
+
+        <h1>TYPE 13: STAINED GLASS STYLE</h1>
+        <p class="subtitle">Cathedral Mosaic with Light Transmission</p>
+
+        <div class="gallery">
+            <div class="sprite-card">
+                <h2>⚔️ A1 Warrior (Dual Swords)</h2>
+                <p>Warrior rendered as translucent glass panels with black leading and cathedral lighting</p>
+                <a href="warrior-dual-swords.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>😇 Missy Cat Angel Gunner</h2>
+                <p>Black cat with halo, wings, 2 eyes, gun + sword in luminous stained glass</p>
+                <a href="cat-angel-gunner.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>🤖 Unique Cyborg Rifle Operative</h2>
+                <p>Segmented armor cyborg with glowing energy rifle in glass mosaic</p>
+                <a href="cyborg-rifle-operative.html">View & Export</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>About Type 13: Stained Glass</h3>
+            <ul>
+                <li><strong>Technique:</strong> Canvas2D with glass panel rendering</li>
+                <li><strong>Resolution:</strong> 320×320</li>
+                <li><strong>Style:</strong> Cathedral stained glass with black leading</li>
+                <li><strong>Lighting:</strong> Radial gradients simulate light transmission</li>
+                <li><strong>Animations:</strong> Idle, Walk, Attack, Jump, Hurt, Victory (6 total)</li>
+                <li><strong>Palettes:</strong> Fire, Ice, Forest, Royal, Sunset Cathedrals (5 total)</li>
+                <li><strong>Hair Color:</strong> Always black (locked)</li>
+                <li><strong>Leading:</strong> Black grout lines between glass panels</li>
+                <li><strong>Export:</strong> PNG frames and sprite sheets</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

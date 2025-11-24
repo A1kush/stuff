@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1 Button System - Offline Demo</title>
+  <link rel="stylesheet" href="a1-buttons.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      min-height: 100vh;
+      color: #FFF;
+      overflow-x: hidden;
+    }
+
+    /* Demo Header */
+    .demo-header {
+      padding: 30px 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .demo-header h1 {
+      font-size: 42px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(135deg, #fff, #ffd1ff, #d1e8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .demo-header p {
+      font-size: 18px;
+      opacity: 0.9;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .demo-header .offline-badge {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 12px;
+      background: rgba(122, 248, 200, 0.3);
+      border: 2px solid rgba(122, 248, 200, 0.6);
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* Event Logger */
+    .demo-content {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .event-logger,
+    .joystick-viz {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .logger-title,
+    .viz-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .event-list {
+      max-height: 300px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .event-item {
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-left: 3px solid #7AD5FF;
+      border-radius: 6px;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .event-time {
+      color: #FFB5E8;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .event-type {
+      color: #7AD5FF;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .event-data {
+      color: #A8FFE0;
+    }
+
+    /* Joystick Visualization */
+    .viz-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .viz-canvas {
+      width: 200px;
+      height: 200px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      border: 2px solid rgba(122, 213, 255, 0.5);
+      position: relative;
+      box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .viz-dot {
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #fff, #7AD5FF);
+      border-radius: 50%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 20px rgba(122, 213, 255, 0.8);
+      transition: all 0.05s linear;
+    }
+
+    .viz-coords {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .viz-coords span {
+      color: #7AD5FF;
+    }
+
+    /* Controls */
+    .demo-controls {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .control-panel {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .control-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .control-btn {
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.2), rgba(122, 213, 255, 0.15));
+      color: #FFF;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .control-btn:hover {
+      transform: translateY(-2px);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.25), rgba(122, 213, 255, 0.25));
+      box-shadow: 0 6px 20px rgba(122, 213, 255, 0.3);
+    }
+
+    .control-btn:active {
+      transform: translateY(0);
+    }
+
+    .clear-btn {
+      margin-top: 12px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 100, 100, 0.5);
+      background: rgba(255, 100, 100, 0.2);
+      color: #FFF;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      background: rgba(255, 100, 100, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Info Section */
+    .info-section {
+      max-width: 1200px;
+      margin: 40px auto 60px;
+      padding: 0 20px;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-box h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #FFD1FF;
+    }
+
+    .info-box p {
+      line-height: 1.6;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .info-box code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #7AD5FF;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .demo-content {
+        grid-template-columns: 1fr;
+      }
+
+      .demo-header h1 {
+        font-size: 32px;
+      }
+
+      .demo-header p {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="demo-header">
+    <h1>🍬 A1 Button System</h1>
+    <p>Offline Demo - Works without a server!</p>
+    <div class="offline-badge">✅ 100% Offline Compatible</div>
+  </div>
+
+  <!-- Demo Content -->
+  <div class="demo-content">
+    <!-- Event Logger -->
+    <div class="event-logger">
+      <div class="logger-title">📋 Event Log</div>
+      <div class="event-list" id="event-list"></div>
+      <button class="clear-btn" id="clear-log">Clear Log</button>
+    </div>
+
+    <!-- Joystick Visualization -->
+    <div class="joystick-viz">
+      <div class="viz-title">🕹️ Joystick Position</div>
+      <div class="viz-container">
+        <div class="viz-canvas">
+          <div class="viz-dot" id="viz-dot"></div>
+        </div>
+        <div class="viz-coords">
+          X: <span id="coord-x">0.00</span> | Y: <span id="coord-y">0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Control Panel -->
+  <div class="demo-controls">
+    <div class="control-panel">
+      <div class="control-title">🎮 Demo Controls</div>
+      <div class="control-grid">
+        <button class="control-btn" id="toggle-ai">Toggle AI Overlay</button>
+        <button class="control-btn" id="ready-s1">Toggle S1 Ready</button>
+        <button class="control-btn" id="ready-s2">Toggle S2 Ready</button>
+        <button class="control-btn" id="ready-s3">Toggle S3 Ready</button>
+        <button class="control-btn" id="ready-joy">Toggle Joystick Ready</button>
+        <button class="control-btn" id="reset-all">Reset All Ready States</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <div class="info-section">
+    <div class="info-box">
+      <h2>🎯 How to Use This Demo</h2>
+      <p>
+        <strong>✅ Offline Mode:</strong> This demo works completely offline! Just open this HTML file in any browser.
+      </p>
+      <p>
+        <strong>Joystick:</strong> Touch or click and drag to control movement. The visualization shows the current position.
+      </p>
+      <p>
+        <strong>Skills (S1-S3):</strong> Click to activate. Use demo controls to toggle ready states with candy glow effects.
+      </p>
+      <p>
+        <strong>AI Button:</strong> Opens the AI robot control overlay with behavior modes and targeting options.
+      </p>
+      <p>
+        <strong>Event Log:</strong> Watch all button interactions in real-time.
+      </p>
+    </div>
+  </div>
+
+  <!-- Button System Container -->
+  <div id="button-container"></div>
+
+  <!-- Inline JavaScript (No modules for offline compatibility) -->
+  <script>
+    // ===== JOYSTICK CONTROLLER =====
+    class JoystickController {
+      constructor(options = {}) {
+        this.radius = options.radius || 59;
+        this.knobRadius = options.knobRadius || 26;
+        this.isActive = false;
+        this.ready = false;
+        this.x = 0;
+        this.y = 0;
+        this.listeners = { 'move': [], 'start': [], 'end': [] };
+        this.root = null;
+        this.knob = null;
+        
+        this.handleStart = this.handleStart.bind(this);
+        this.handleMove = this.handleMove.bind(this);
+        this.handleEnd = this.handleEnd.bind(this);
+      }
+      
+      mount(rootElement) {
+        this.root = rootElement;
+        this.knob = rootElement.querySelector('.vj-knob');
+        if (!this.knob) return;
+        
+        this.root.addEventListener('touchstart', this.handleStart, { passive: false });
+        this.root.addEventListener('touchmove', this.handleMove, { passive: false });
+        this.root.addEventListener('touchend', this.handleEnd);
+        this.root.addEventListener('touchcancel', this.handleEnd);
+        this.root.addEventListener('mousedown', this.handleStart);
+        document.addEventListener('mousemove', this.handleMove);
+        document.addEventListener('mouseup', this.handleEnd);
+      }
+      
+      handleStart(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        this.isActive = true;
+        this.emit('start', { x: this.x, y: this.y });
+        if (e.type === 'touchstart') e.preventDefault();
+        this.handleMove(e);
+      }
+      
+      handleMove(e) {
+        if (!this.isActive) return;
+        const touch = e.touches ? e.touches[0] : e;
+        const rect = this.root.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        let dx = touch.clientX - centerX;
+        let dy = touch.clientY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const maxDistance = this.radius;
+        
+        if (distance > maxDistance) {
+          const ratio = maxDistance / distance;
+          dx *= ratio;
+          dy *= ratio;
+        }
+        
+        this.x = dx / maxDistance;
+        this.y = dy / maxDistance;
+        
+        if (this.knob) {
+          this.knob.style.transform = `translate(${dx}px, ${dy}px)`;
+        }
+        
+        this.emit('move', { x: this.x, y: this.y, distance: distance / maxDistance });
+        if (e.type === 'touchmove') e.preventDefault();
+      }
+      
+      handleEnd(e) {
+        if (!this.isActive) return;
+        this.isActive = false;
+        this.x = 0;
+        this.y = 0;
+        if (this.knob) {
+          this.knob.style.transform = 'translate(0, 0)';
+        }
+        this.emit('end', { x: 0, y: 0 });
+      }
+      
+      setReady(ready = true) {
+        this.ready = ready;
+        if (this.root) {
+          this.root.classList.toggle('ready', ready);
+        }
+      }
+      
+      on(event, callback) {
+        if (this.listeners[event]) {
+          this.listeners[event].push(callback);
+        }
+        return this;
+      }
+      
+      emit(event, data) {
+        if (this.listeners[event]) {
+          this.listeners[event].forEach(callback => callback(data));
+        }
+      }
+      
+      destroy() {
+        if (!this.root) return;
+        this.root.removeEventListener('touchstart', this.handleStart);
+        this.root.removeEventListener('touchmove', this.handleMove);
+        this.root.removeEventListener('touchend', this.handleEnd);
+        this.root.removeEventListener('touchcancel', this.handleEnd);
+        this.root.removeEventListener('mousedown', this.handleStart);
+        document.removeEventListener('mousemove', this.handleMove);
+        document.removeEventListener('mouseup', this.handleEnd);
+        this.root = null;
+        this.knob = null;
+      }
+    }
+
+    // ===== AI OVERLAY =====
+    class AIOverlay {
+      constructor(options = {}) {
+        this.visible = false;
+        this.robotSystem = options.robotSystem || null;
+        this.currentRobot = null;
+        this.listeners = { 'command': [], 'summon': [], 'mode-change': [], 'target-change': [], 'close': [] };
+        this.overlay = null;
+        this.commandInput = null;
+        this.modeSelector = null;
+        this.targetSelector = null;
+        
+        this.handleCommand = this.handleCommand.bind(this);
+        this.handleSummon = this.handleSummon.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+      }
+      
+      mount(containerElement) {
+        this.overlay = document.createElement('div');
+        this.overlay.className = 'ai-overlay';
+        this.overlay.innerHTML = `
+          <div class="ai-overlay-backdrop"></div>
+          <div class="ai-overlay-panel">
+            <div class="ai-overlay-header">
+              <h2>🤖 AI Robot Control</h2>
+              <button class="ai-close-btn" aria-label="Close">✕</button>
+            </div>
+            <div class="ai-overlay-content">
+              <div class="ai-section">
+                <h3>Summon Robot</h3>
+                <div class="ai-summon-grid">
+                  <button class="ai-summon-btn" data-robot="combat">⚔️ Combat</button>
+                  <button class="ai-summon-btn" data-robot="support">💚 Support</button>
+                  <button class="ai-summon-btn" data-robot="stealth">🥷 Stealth</button>
+                  <button class="ai-summon-btn" data-robot="tank">🛡️ Tank</button>
+                </div>
+              </div>
+              <div class="ai-section">
+                <h3>Behavior Mode</h3>
+                <select class="ai-selector" id="ai-mode-select">
+                  <option value="follow">Follow - Stay close to leader</option>
+                  <option value="aggro">Aggro - Attack enemies</option>
+                  <option value="guard">Guard - Protect leader</option>
+                  <option value="assist">Assist - Support attacks</option>
+                  <option value="patrol">Patrol - Circular patrol</option>
+                  <option value="defend">Defend - Defensive stance</option>
+                  <option value="hunt">Hunt - Aggressive pursuit</option>
+                  <option value="flank">Flank - Side attacks</option>
+                  <option value="snipe">Snipe - Long range</option>
+                  <option value="overwatch">Overwatch - High ground</option>
+                </select>
+              </div>
+              <div class="ai-section">
+                <h3>Target Priority</h3>
+                <select class="ai-selector" id="ai-target-select">
+                  <option value="nearest">Nearest - Closest enemy</option>
+                  <option value="lowest">Lowest HP - Finish weak enemies</option>
+                  <option value="boss">Boss - Focus bosses</option>
+                  <option value="highest_hp">Highest HP - Tank targets</option>
+                  <option value="strongest">Strongest - High threat</option>
+                  <option value="grouped">Grouped - Dense clusters</option>
+                  <option value="lowest_ally">Lowest Ally - Heal priority</option>
+                </select>
+              </div>
+              <div class="ai-section">
+                <h3>Command Input</h3>
+                <div class="ai-command-box">
+                  <input type="text" class="ai-command-input" placeholder="Type command... (e.g., 'attack boss')"/>
+                  <button class="ai-send-btn">Send</button>
+                </div>
+              </div>
+              <div class="ai-section ai-status-section">
+                <h3>Robot Status</h3>
+                <div class="ai-status">
+                  <div class="ai-status-item">
+                    <span class="ai-status-label">Active:</span>
+                    <span class="ai-status-value" id="ai-robot-active">None</span>
+                  </div>
+                  <div class="ai-status-item">
+                    <span class="ai-status-label">Mode:</span>
+                    <span class="ai-status-value" id="ai-robot-mode">-</span>
+                  </div>
+                  <div class="ai-status-item">
+                    <span class="ai-status-label">Target:</span>
+                    <span class="ai-status-value" id="ai-robot-target">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        containerElement.appendChild(this.overlay);
+        
+        this.commandInput = this.overlay.querySelector('.ai-command-input');
+        this.modeSelector = this.overlay.querySelector('#ai-mode-select');
+        this.targetSelector = this.overlay.querySelector('#ai-target-select');
+        
+        this.overlay.querySelector('.ai-close-btn').addEventListener('click', this.handleClose);
+        this.overlay.querySelector('.ai-overlay-backdrop').addEventListener('click', this.handleClose);
+        this.overlay.querySelector('.ai-send-btn').addEventListener('click', this.handleCommand);
+        this.commandInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.handleCommand();
+        });
+        
+        this.overlay.querySelectorAll('.ai-summon-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            this.handleSummon(e.currentTarget.dataset.robot);
+          });
+        });
+        
+        this.modeSelector.addEventListener('change', (e) => {
+          this.emit('mode-change', { mode: e.target.value });
+          this.updateStatus();
+        });
+        
+        this.targetSelector.addEventListener('change', (e) => {
+          this.emit('target-change', { targetMode: e.target.value });
+          this.updateStatus();
+        });
+        
+        this.overlay.style.display = 'none';
+      }
+      
+      show() {
+        if (!this.overlay) return;
+        this.visible = true;
+        this.overlay.style.display = 'flex';
+        this.overlay.classList.add('ai-overlay-visible');
+        this.commandInput?.focus();
+      }
+      
+      hide() {
+        if (!this.overlay) return;
+        this.visible = false;
+        this.overlay.classList.remove('ai-overlay-visible');
+        setTimeout(() => {
+          if (!this.visible) {
+            this.overlay.style.display = 'none';
+          }
+        }, 300);
+      }
+      
+      toggle() {
+        if (this.visible) {
+          this.hide();
+        } else {
+          this.show();
+        }
+      }
+      
+      handleClose() {
+        this.hide();
+      }
+      
+      handleCommand() {
+        const command = this.commandInput.value.trim();
+        if (!command) return;
+        this.emit('command', { command });
+        this.commandInput.value = '';
+      }
+      
+      handleSummon(robotType) {
+        this.emit('summon', { robotType });
+        this.currentRobot = robotType;
+        this.updateStatus();
+      }
+      
+      updateStatus() {
+        if (!this.overlay) return;
+        const activeEl = this.overlay.querySelector('#ai-robot-active');
+        const modeEl = this.overlay.querySelector('#ai-robot-mode');
+        const targetEl = this.overlay.querySelector('#ai-robot-target');
+        
+        if (activeEl) {
+          activeEl.textContent = this.currentRobot || 'None';
+          activeEl.className = 'ai-status-value ' + (this.currentRobot ? 'active' : '');
+        }
+        if (modeEl) modeEl.textContent = this.modeSelector?.value || '-';
+        if (targetEl) targetEl.textContent = this.targetSelector?.value || '-';
+      }
+      
+      on(event, callback) {
+        if (this.listeners[event]) {
+          this.listeners[event].push(callback);
+        }
+        return this;
+      }
+      
+      emit(event, data) {
+        if (this.listeners[event]) {
+          this.listeners[event].forEach(callback => callback(data));
+        }
+      }
+      
+      destroy() {
+        if (this.overlay && this.overlay.parentElement) {
+          this.overlay.parentElement.removeChild(this.overlay);
+        }
+        this.overlay = null;
+      }
+    }
+
+    // ===== A1 BUTTON SYSTEM =====
+    class A1ButtonSystem {
+      constructor(options = {}) {
+        this.config = {
+          theme: options.theme || 'candy',
+          enableAI: options.enableAI !== false,
+          enableJoystick: options.enableJoystick !== false,
+          enableSkills: options.enableSkills !== false,
+          enableUtilities: options.enableUtilities !== false,
+          enableAttack: options.enableAttack !== false,
+          ...options
+        };
+        
+        this.listeners = {
+          'button:press': [], 'button:release': [], 'skill:activate': [],
+          'joystick:move': [], 'joystick:start': [], 'joystick:end': [],
+          'ai:command': [], 'ai:summon': [], 'utility:press': [], 'attack:press': []
+        };
+        
+        this.skillStates = {
+          S1: { ready: false, cooldown: 0 },
+          S2: { ready: false, cooldown: 0 },
+          S3: { ready: false, cooldown: 0 }
+        };
+        
+        this.joystickReady = false;
+        this.joystick = null;
+        this.aiOverlay = null;
+        this.container = null;
+        this.root = null;
+      }
+      
+      mount(containerSelector) {
+        const container = typeof containerSelector === 'string' 
+          ? document.querySelector(containerSelector)
+          : containerSelector;
+        if (!container) return;
+        
+        this.container = container;
+        this.root = document.createElement('div');
+        this.root.className = `a1-button-system theme-${this.config.theme}`;
+        this.root.innerHTML = this.generateHTML();
+        container.appendChild(this.root);
+        
+        if (this.config.enableJoystick) this.mountJoystick();
+        if (this.config.enableAI) this.mountAI();
+        this.attachButtonListeners();
+        return this;
+      }
+      
+      generateHTML() {
+        return `
+          <div class="a1-button-wrap">
+            ${this.config.enableJoystick || this.config.enableUtilities ? `
+            <div class="a1-left-cluster">
+              ${this.config.enableUtilities ? this.generateUtilitiesHTML() : ''}
+              ${this.config.enableJoystick ? this.generateJoystickHTML() : ''}
+            </div>` : ''}
+            ${this.config.enableSkills || this.config.enableAttack ? `
+            <div class="a1-right-cluster">
+              ${this.config.enableSkills ? this.generateSkillsHTML() : ''}
+              ${this.config.enableAttack ? this.generateAttackHTML() : ''}
+            </div>` : ''}
+          </div>
+        `;
+      }
+      
+      generateUtilitiesHTML() {
+        return `
+          <div class="utility-stack">
+            <div class="utility-row top">
+              <button class="utility-btn" data-btn="pet">Pet</button>
+              <button class="utility-btn" data-btn="veh">Veh</button>
+              <button class="utility-btn" data-btn="act">Act</button>
+              <button class="utility-btn" data-btn="act2">Act2</button>
+            </div>
+            <div class="utility-row bot">
+              <button class="utility-btn" data-btn="bag">Bag</button>
+              <button class="utility-btn ai-btn" data-btn="ai">AI</button>
+              <button class="utility-btn" data-btn="switch">Switch</button>
+            </div>
+          </div>
+        `;
+      }
+      
+      generateJoystickHTML() {
+        return `
+          <div class="vj-root" id="vj-joystick">
+            <div class="vj-base"></div>
+            <div class="vj-knob"></div>
+          </div>
+        `;
+      }
+      
+      generateSkillsHTML() {
+        return `
+          <div class="skill-row">
+            <button class="skill-pill s1" data-skill="S1" data-btn="s1"><span class="skill-label">S1</span></button>
+            <button class="skill-pill s2" data-skill="S2" data-btn="s2"><span class="skill-label">S2</span></button>
+            <button class="skill-pill s3" data-skill="S3" data-btn="s3"><span class="skill-label">S3</span></button>
+          </div>
+        `;
+      }
+      
+      generateAttackHTML() {
+        return `
+          <div class="attack-container">
+            <div class="main-attacks">
+              <button class="big-btn attack" data-btn="attack">ATTACK</button>
+              <button class="big-btn jump" data-btn="jump">JUMP</button>
+            </div>
+            <div class="rage-shield-cluster">
+              <button class="rage-shield-btn rage" data-btn="rage">RAGE</button>
+              <button class="rage-shield-btn shield" data-btn="shield">SHIELD</button>
+            </div>
+          </div>
+        `;
+      }
+      
+      mountJoystick() {
+        const joystickRoot = this.root.querySelector('#vj-joystick');
+        if (!joystickRoot) return;
+        
+        this.joystick = new JoystickController({ radius: 59, knobRadius: 26 });
+        this.joystick.mount(joystickRoot);
+        this.joystick.on('move', (data) => this.emit('joystick:move', data));
+        this.joystick.on('start', (data) => this.emit('joystick:start', data));
+        this.joystick.on('end', (data) => this.emit('joystick:end', data));
+      }
+      
+      mountAI() {
+        this.aiOverlay = new AIOverlay({ robotSystem: this.config.robotSystem });
+        this.aiOverlay.mount(document.body);
+        this.aiOverlay.on('command', (data) => this.emit('ai:command', data));
+        this.aiOverlay.on('summon', (data) => this.emit('ai:summon', data));
+        this.aiOverlay.on('mode-change', (data) => this.emit('ai:mode-change', data));
+        this.aiOverlay.on('target-change', (data) => this.emit('ai:target-change', data));
+      }
+      
+      attachButtonListeners() {
+        const buttons = this.root.querySelectorAll('[data-btn]');
+        buttons.forEach(btn => {
+          const btnType = btn.dataset.btn;
+          btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleButtonPress(btnType, btn);
+          });
+          btn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.handleButtonRelease(btnType, btn);
+          });
+          btn.addEventListener('mousedown', (e) => this.handleButtonPress(btnType, btn));
+          btn.addEventListener('mouseup', (e) => this.handleButtonRelease(btnType, btn));
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.handleButtonClick(btnType, btn);
+          });
+        });
+      }
+      
+      handleButtonPress(btnType, element) {
+        element.classList.add('pressed');
+        this.emit('button:press', { button: btnType, element });
+        if (btnType.startsWith('s')) {
+          this.emit('skill:activate', { skill: btnType.toUpperCase(), element });
+        } else if (['pet', 'veh', 'act', 'act2', 'bag', 'switch'].includes(btnType)) {
+          this.emit('utility:press', { utility: btnType, element });
+        } else if (['attack', 'jump', 'rage', 'shield'].includes(btnType)) {
+          this.emit('attack:press', { attack: btnType, element });
+        }
+      }
+      
+      handleButtonRelease(btnType, element) {
+        element.classList.remove('pressed');
+        this.emit('button:release', { button: btnType, element });
+      }
+      
+      handleButtonClick(btnType, element) {
+        if (btnType === 'ai' && this.aiOverlay) {
+          this.aiOverlay.toggle();
+        }
+        element.classList.add('bounce');
+        setTimeout(() => element.classList.remove('bounce'), 300);
+      }
+      
+      setSkillReady(skillId, ready = true) {
+        const skillUpper = skillId.toUpperCase();
+        if (this.skillStates[skillUpper]) {
+          this.skillStates[skillUpper].ready = ready;
+        }
+        const skillEl = this.root?.querySelector(`[data-skill="${skillUpper}"]`);
+        if (skillEl) {
+          skillEl.classList.toggle('ready', ready);
+        }
+        return this;
+      }
+      
+      setJoystickReady(ready = true) {
+        this.joystickReady = ready;
+        if (this.joystick) {
+          this.joystick.setReady(ready);
+        }
+        return this;
+      }
+      
+      toggleAIOverlay() {
+        if (this.aiOverlay) this.aiOverlay.toggle();
+        return this;
+      }
+      
+      on(event, callback) {
+        if (this.listeners[event]) {
+          this.listeners[event].push(callback);
+        }
+        return this;
+      }
+      
+      emit(event, data) {
+        if (this.listeners[event]) {
+          this.listeners[event].forEach(callback => callback(data));
+        }
+      }
+    }
+
+    // ===== DEMO INITIALIZATION =====
+    const buttonSystem = new A1ButtonSystem({
+      theme: 'candy',
+      enableAI: true,
+      enableJoystick: true,
+      enableSkills: true,
+      enableUtilities: true,
+      enableAttack: true
+    });
+
+    buttonSystem.mount('#button-container');
+
+    // Event logger
+    const eventList = document.getElementById('event-list');
+    const maxEvents = 50;
+
+    function logEvent(type, data) {
+      const time = new Date().toLocaleTimeString();
+      const item = document.createElement('div');
+      item.className = 'event-item';
+      item.innerHTML = `
+        <span class="event-time">${time}</span>
+        <span class="event-type">${type}</span>
+        <span class="event-data">${JSON.stringify(data)}</span>
+      `;
+      eventList.insertBefore(item, eventList.firstChild);
+      while (eventList.children.length > maxEvents) {
+        eventList.removeChild(eventList.lastChild);
+      }
+    }
+
+    // Listen to all events
+    buttonSystem.on('button:press', (data) => logEvent('BTN_PRESS', { button: data.button }));
+    buttonSystem.on('button:release', (data) => logEvent('BTN_RELEASE', { button: data.button }));
+    buttonSystem.on('skill:activate', (data) => logEvent('SKILL_ACTIVATE', { skill: data.skill }));
+    buttonSystem.on('joystick:start', (data) => logEvent('JOYSTICK_START', { x: data.x.toFixed(2), y: data.y.toFixed(2) }));
+    buttonSystem.on('joystick:end', (data) => logEvent('JOYSTICK_END', { x: 0, y: 0 }));
+    buttonSystem.on('utility:press', (data) => logEvent('UTILITY_PRESS', { utility: data.utility }));
+    buttonSystem.on('attack:press', (data) => logEvent('ATTACK_PRESS', { attack: data.attack }));
+    buttonSystem.on('ai:command', (data) => logEvent('AI_COMMAND', { command: data.command }));
+    buttonSystem.on('ai:summon', (data) => logEvent('AI_SUMMON', { robot: data.robotType }));
+    buttonSystem.on('ai:mode-change', (data) => logEvent('AI_MODE_CHANGE', { mode: data.mode }));
+    buttonSystem.on('ai:target-change', (data) => logEvent('AI_TARGET_CHANGE', { target: data.targetMode }));
+
+    // Joystick visualization
+    const vizDot = document.getElementById('viz-dot');
+    const coordX = document.getElementById('coord-x');
+    const coordY = document.getElementById('coord-y');
+
+    buttonSystem.on('joystick:move', (data) => {
+      const offsetX = data.x * 90;
+      const offsetY = data.y * 90;
+      vizDot.style.left = `calc(50% + ${offsetX}px)`;
+      vizDot.style.top = `calc(50% + ${offsetY}px)`;
+      coordX.textContent = data.x.toFixed(2);
+      coordY.textContent = data.y.toFixed(2);
+    });
+
+    // Demo controls
+    document.getElementById('toggle-ai').addEventListener('click', () => buttonSystem.toggleAIOverlay());
+    
+    document.getElementById('ready-s1').addEventListener('click', () => {
+      const current = buttonSystem.skillStates.S1.ready;
+      buttonSystem.setSkillReady('S1', !current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_s1_ready', ready: !current });
+    });
+    
+    document.getElementById('ready-s2').addEventListener('click', () => {
+      const current = buttonSystem.skillStates.S2.ready;
+      buttonSystem.setSkillReady('S2', !current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_s2_ready', ready: !current });
+    });
+    
+    document.getElementById('ready-s3').addEventListener('click', () => {
+      const current = buttonSystem.skillStates.S3.ready;
+      buttonSystem.setSkillReady('S3', !current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_s3_ready', ready: !current });
+    });
+    
+    document.getElementById('ready-joy').addEventListener('click', () => {
+      const current = buttonSystem.joystickReady;
+      buttonSystem.setJoystickReady(!current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_joystick_ready', ready: !current });
+    });
+    
+    document.getElementById('reset-all').addEventListener('click', () => {
+      buttonSystem.setSkillReady('S1', false);
+      buttonSystem.setSkillReady('S2', false);
+      buttonSystem.setSkillReady('S3', false);
+      buttonSystem.setJoystickReady(false);
+      logEvent('DEMO_CONTROL', { action: 'reset_all' });
+    });
+    
+    document.getElementById('clear-log').addEventListener('click', () => {
+      eventList.innerHTML = '';
+    });
+
+    // Auto-demo sequence
+    setTimeout(() => {
+      buttonSystem.setSkillReady('S1', true);
+      logEvent('AUTO_DEMO', { action: 'S1 ready' });
+    }, 2000);
+
+    setTimeout(() => {
+      buttonSystem.setSkillReady('S2', true);
+      logEvent('AUTO_DEMO', { action: 'S2 ready' });
+    }, 3000);
+
+    setTimeout(() => {
+      buttonSystem.setSkillReady('S3', true);
+      logEvent('AUTO_DEMO', { action: 'S3 ready' });
+    }, 4000);
+
+    setTimeout(() => {
+      buttonSystem.setJoystickReady(true);
+      logEvent('AUTO_DEMO', { action: 'Joystick ready' });
+    }, 5000);
+
+    logEvent('SYSTEM', { status: 'initialized', mode: 'offline' });
+    console.log('🍬 A1 Button System - Offline Demo Loaded!');
+  </script>
+</body>
+
+</html>
+

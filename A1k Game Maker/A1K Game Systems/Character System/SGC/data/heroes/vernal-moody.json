@@ -1,0 +1,44 @@
+{
+  "id": "vernal-moody",
+  "name": "Vernal Moody",
+  "rank": "S",
+  "role": "support",
+  "summary": {
+    "hook": "Spring-walking grandmother who answers morale dips with blossoms.",
+    "gameplay": "Random healer that pauses boss rage timers and feeds the party mid-chaos.",
+    "why_it_matters": "Her surprise entrances keep tension spikes fair and teach players to watch morale meters."
+  },
+  "stats": {"attack": 20, "defense": 50, "luck": 80, "support": 90, "speed": 60},
+  "skills": [
+    {
+      "name": "Bloom Drop",
+      "type": "feed",
+      "cooldown": 20,
+      "aura_cost": 18,
+      "effects": ["full_party_feed", "stamina_restore"],
+      "rationale": "Full-coverage feed prevents wipe spirals during marathon fights."
+    },
+    {
+      "name": "Sundial Blessing",
+      "type": "utility",
+      "cooldown": 45,
+      "aura_cost": 25,
+      "effects": ["rage_pause", "debuff_cleanse"],
+      "rationale": "Briefly freezing enemy enrages gives designers room for difficulty spikes without frustration."
+    }
+  ],
+  "acquisition": {
+    "method": "Random field encounter",
+    "costs": {"bond_sparks": 10},
+    "spawn_logic": "Trigger if morale < 40% and player finished two rooms without rest."
+  },
+  "synergy": {
+    "combos": ["Carestorm", "Morale-first runs"],
+    "counters": ["Anti-randomizers"]
+  },
+  "visuals": {
+    "palette": ["#e8f8ff", "#c8e6c9", "#ffe0f7"],
+    "aura": "Pastel petals spiraling from sky fractures.",
+    "animation_notes": "Paint falling petals as additive sprites so even low-end canvas builds feel lush."
+  }
+}

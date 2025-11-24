@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Sprite Generator - NPC & Enemy Rank System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2d5016 0%, #1a2e0f 50%, #0f1a0a 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #4ade80;
+            text-shadow: 0 0 20px #4ade80;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #86efac;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .hunter-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .controls-panel {
+            background: rgba(45, 80, 22, 0.9);
+            border: 2px solid #4ade80;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
+        }
+
+        .canvas-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #4ade80;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: inset 0 0 30px rgba(74, 222, 128, 0.1);
+        }
+
+        .hunter-card {
+            background: rgba(45, 80, 22, 0.8);
+            border: 1px solid #4ade80;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .hunter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(74, 222, 128, 0.4);
+        }
+
+        .hunter-card canvas {
+            border: 1px solid #4ade80;
+            background: #000000;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-optimize-contrast: true;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .hunter-card h3 {
+            color: #4ade80;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #4ade80;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #4ade80;
+            border: 1px solid #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            background: #4ade80;
+            color: #000000;
+        }
+
+        button {
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.8);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .generate-btn {
+            background: #4ade80 !important;
+            color: #000000 !important;
+            font-weight: bold;
+            border: 2px solid #4ade80 !important;
+        }
+
+        .generate-btn:hover {
+            background: #000000 !important;
+            color: #4ade80 !important;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #4ade80;
+        }
+
+        .export-section h3 {
+            color: #4ade80;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(45, 80, 22, 0.6);
+            border: 1px solid #4ade80;
+        }
+
+        .stats-title {
+            color: #4ade80;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: #86efac;
+        }
+
+        .stat-value {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .controls-title {
+            color: #4ade80;
+            margin-bottom: 20px;
+        }
+
+        .animation-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🏹 Hunter Sprite Generator</h1>
+        <p class="subtitle">Generate skilled hunter sprites with bows and tracking abilities • Archers, Crossbowmen,
+            Snipers, Trackers</p>
+
+        <div class="hunter-grid">
+            <div class="controls-panel">
+                <h2 class="controls-title">⚙️ Hunter Controls</h2>
+
+                <div class="control-group">
+                    <label for="hunter-type">Hunter Type</label>
+                    <select id="hunter-type">
+                        <option value="archer">🏹 Archer</option>
+                        <option value="crossbowman">⚔️ Crossbowman</option>
+                        <option value="sniper">🎯 Sniper</option>
+                        <option value="tracker">🔍 Tracker</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="skill-level">Skill Level</label>
+                    <select id="skill-level">
+                        <option value="novice">Novice (Level 1-10)</option>
+                        <option value="skilled">Skilled (Level 11-25)</option>
+                        <option value="expert">Expert (Level 26-50)</option>
+                        <option value="master">Master (Level 51+)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="specialization">Specialization</label>
+                    <select id="specialization">
+                        <option value="beast-hunter">🐺 Beast Hunter</option>
+                        <option value="monster-hunter">👹 Monster Hunter</option>
+                        <option value="treasure-hunter">💰 Treasure Hunter</option>
+                        <option value="bounty-hunter">💀 Bounty Hunter</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="armor-type">Armor Type</label>
+                    <select id="armor-type">
+                        <option value="leather">Leather Armor</option>
+                        <option value="studded">Studded Leather</option>
+                        <option value="chain">Chain Mail</option>
+                        <option value="plate">Plate Armor</option>
+                    </select>
+                </div>
+
+                <button class="generate-btn" onclick="generateHunter()">🏹 Generate Hunter</button>
+
+                <div class="export-section">
+                    <h3>💾 Export Options</h3>
+                    <div class="btn-grid">
+                        <button onclick="exportPNG()">📷 PNG</button>
+                        <button onclick="exportSheet()">📄 Sprite Sheet</button>
+                    </div>
+                    <button onclick="exportJSON()">💾 JSON Data</button>
+                </div>
+
+                <div class="stats-panel">
+                    <h3 class="stats-title">📊 Hunter Stats</h3>
+                    <div class="stats-grid" id="stats-display">
+                        <div class="stat-item">
+                            <span class="stat-label">HP:</span>
+                            <span class="stat-value" id="stat-hp">140</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">MP:</span>
+                            <span class="stat-value" id="stat-mp">80</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Attack:</span>
+                            <span class="stat-value" id="stat-attack">65</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Defense:</span>
+                            <span class="stat-value" id="stat-defense">35</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Accuracy:</span>
+                            <span class="stat-value" id="stat-accuracy">85</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Speed:</span>
+                            <span class="stat-value" id="stat-speed">55</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-panel">
+                <div class="hunter-card">
+                    <h3>Hunter Sprite Preview</h3>
+                    <canvas id="hunter-canvas" width="512" height="512"></canvas>
+                    <div class="animation-buttons">
+                        <button onclick="setAnimation('idle')">😌 Idle</button>
+                        <button onclick="setAnimation('aim')">🎯 Aim</button>
+                        <button onclick="setAnimation('shoot')">🏹 Shoot</button>
+                        <button onclick="setAnimation('special')">💫 Special</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./hd-sprite-engine.js"></script>
+    <script>
+        let hunterSystem;
+        let currentAnimation = 'idle';
+
+        const hunterStats = {
+            'archer': {
+                novice: { hp: 120, mp: 60, attack: 50, defense: 25, accuracy: 70, speed: 45 },
+                skilled: { hp: 160, mp: 80, attack: 60, defense: 30, accuracy: 80, speed: 50 },
+                expert: { hp: 200, mp: 100, attack: 70, defense: 35, accuracy: 90, speed: 55 },
+                master: { hp: 240, mp: 120, attack: 80, defense: 40, accuracy: 100, speed: 60 }
+            },
+            'crossbowman': {
+                novice: { hp: 140, mp: 50, attack: 55, defense: 35, accuracy: 75, speed: 35 },
+                skilled: { hp: 180, mp: 70, attack: 65, defense: 40, accuracy: 85, speed: 40 },
+                expert: { hp: 220, mp: 90, attack: 75, defense: 45, accuracy: 95, speed: 45 },
+                master: { hp: 260, mp: 110, attack: 85, defense: 50, accuracy: 105, speed: 50 }
+            },
+            'sniper': {
+                novice: { hp: 100, mp: 70, attack: 45, defense: 20, accuracy: 85, speed: 40 },
+                skilled: { hp: 140, mp: 90, attack: 55, defense: 25, accuracy: 95, speed: 45 },
+                expert: { hp: 180, mp: 110, attack: 65, defense: 30, accuracy: 105, speed: 50 },
+                master: { hp: 220, mp: 130, attack: 75, defense: 35, accuracy: 115, speed: 55 }
+            },
+            'tracker': {
+                novice: { hp: 130, mp: 80, attack: 40, defense: 30, accuracy: 65, speed: 50 },
+                skilled: { hp: 170, mp: 100, attack: 50, defense: 35, accuracy: 75, speed: 55 },
+                expert: { hp: 210, mp: 120, attack: 60, defense: 40, accuracy: 85, speed: 60 },
+                master: { hp: 250, mp: 140, attack: 70, defense: 45, accuracy: 95, speed: 65 }
+            }
+        };
+
+        function init() {
+            const canvas = document.getElementById('hunter-canvas');
+            hunterSystem = new HDSpriteSystem();
+            hunterSystem.setCanvas(canvas);
+            hunterSystem.setCharacter('hunter', 'archer');
+            hunterSystem.setPalette('nature');
+            hunterSystem.setScale(4);
+            hunterSystem.draw();
+
+            updateStats();
+        }
+
+        function generateHunter() {
+            const hunterType = document.getElementById('hunter-type').value;
+            const skillLevel = document.getElementById('skill-level').value;
+            const specialization = document.getElementById('specialization').value;
+            const armorType = document.getElementById('armor-type').value;
+
+            hunterSystem.setCharacter('hunter', hunterType);
+            hunterSystem.setPalette('nature');
+            hunterSystem.setScale(4);
+
+            // Apply customizations based on selections
+            if (armorType === 'studded') {
+                hunterSystem.addAccessory('helmet');
+            } else if (armorType === 'chain') {
+                hunterSystem.addAccessory('gauntlets');
+            } else if (armorType === 'plate') {
+                hunterSystem.addAccessory('shoulder-pads');
+            }
+
+            hunterSystem.draw();
+            updateStats();
+        }
+
+        function setAnimation(animation) {
+            currentAnimation = animation;
+            hunterSystem.setAnimation(animation);
+            hunterSystem.draw();
+        }
+
+        function updateStats() {
+            const hunterType = document.getElementById('hunter-type').value;
+            const skillLevel = document.getElementById('skill-level').value;
+
+            const stats = hunterStats[hunterType][skillLevel];
+
+            document.getElementById('stat-hp').textContent = stats.hp;
+            document.getElementById('stat-mp').textContent = stats.mp;
+            document.getElementById('stat-attack').textContent = stats.attack;
+            document.getElementById('stat-defense').textContent = stats.defense;
+            document.getElementById('stat-accuracy').textContent = stats.accuracy;
+            document.getElementById('stat-speed').textContent = stats.speed;
+        }
+
+        function exportPNG() {
+            const dataURL = hunterSystem.exportPNG();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `hunter-${document.getElementById('hunter-type').value}-${currentAnimation}.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportSheet() {
+            const dataURL = hunterSystem.exportSpriteSheet();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `hunter-${document.getElementById('hunter-type').value}-sheet.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportJSON() {
+            const data = hunterSystem.exportJSON();
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `hunter-${document.getElementById('hunter-type').value}-data.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

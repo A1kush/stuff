@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A1 Dual Swords - Glitch Art</title>
+    <style>
+        body {margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        canvas {border: 2px solid #0F0; box-shadow: 0 0 20px #0F0;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        let f = 0;
+        function d() {
+            x.fillStyle = '#000'; x.fillRect(0, 0, 512, 512);
+            const g = Math.sin(f / 10) * 10;
+            // RGB split effect
+            x.fillStyle = '#F00'; x.globalAlpha = 0.5; x.fillRect(200 + g, 250, 112, 150);
+            x.fillStyle = '#0F0'; x.fillRect(200, 250, 112, 150);
+            x.fillStyle = '#00F'; x.fillRect(200 - g, 250, 112, 150);
+            x.globalAlpha = 1;
+            // Head glitch
+            x.fillStyle = '#0FF'; x.fillRect(200 + Math.random() * 5, 150, 112, 100);
+            x.fillStyle = '#F0F'; x.fillRect(200, 150 + Math.random() * 5, 112, 100);
+            // RED glowing eyes
+            x.fillStyle = '#F00'; x.fillRect(220, 195, 20, 20); x.fillRect(272, 195, 20, 20);
+            // Baseball cap + hair
+            x.fillStyle = '#000'; x.fillRect(200, 150, 112, 30); x.fillRect(185, 175, 30, 10);
+            // Glitch lines
+            for (let i = 0; i < 5; i++) {
+                x.fillStyle = '#0F0';
+                x.fillRect(0, Math.random() * 512, 512, 2);
+            }
+            // LEFT SWORD with glitch
+            x.save();
+            x.translate(175 + Math.random() * 3, 300);
+            x.rotate(-0.3);
+            x.fillStyle = '#F0F';
+            x.fillRect(-10, -60, 20, 120);
+            x.restore();
+            // RIGHT SWORD with glitch
+            x.save();
+            x.translate(337 + Math.random() * 3, 300);
+            x.rotate(0.3);
+            x.fillStyle = '#0FF';
+            x.fillRect(-10, -60, 20, 120);
+            x.restore();
+        }
+        function l() {f++; d(); requestAnimationFrame(l);}
+        l();
+    </script>
+</body>
+</html>

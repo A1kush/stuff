@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A1 Dual Swords - Paper Cutout</title>
+    <style>
+        body {margin: 0; background: linear-gradient(135deg, #87CEEB, #98D8E8); display: flex; align-items: center; justify-content: center; height: 100vh;}
+        canvas {filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.3));}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        x.clearRect(0, 0, 512, 512);
+        // Paper layers with shadows
+        x.fillStyle = '#FF6B6B';
+        x.fillRect(200, 250, 112, 150);
+        x.fillStyle = '#FFB380';
+        x.fillRect(200, 150, 112, 100);
+        x.fillStyle = '#000';
+        x.fillRect(200, 150, 112, 30);
+        x.fillStyle = '#FFF';
+        x.beginPath();
+        x.arc(235, 190, 15, 0, Math.PI * 2);
+        x.fill();
+        x.beginPath();
+        x.arc(277, 190, 15, 0, Math.PI * 2);
+        x.fill();
+        x.fillStyle = '#000';
+        x.beginPath();
+        x.arc(235, 190, 8, 0, Math.PI * 2);
+        x.fill();
+        x.beginPath();
+        x.arc(277, 190, 8, 0, Math.PI * 2);
+        x.fill();
+        // LEFT SWORD
+        x.save();
+        x.translate(175, 300);
+        x.rotate(-0.3);
+        x.fillStyle = '#FFD700';
+        x.fillRect(-10, -60, 20, 120);
+        x.fillStyle = '#8B4513';
+        x.fillRect(-8, 60, 16, 15);
+        x.restore();
+        // RIGHT SWORD
+        x.save();
+        x.translate(337, 300);
+        x.rotate(0.3);
+        x.fillStyle = '#FFD700';
+        x.fillRect(-10, -60, 20, 120);
+        x.fillStyle = '#8B4513';
+        x.fillRect(-8, 60, 16, 15);
+        x.restore();
+    </script>
+</body>
+</html>

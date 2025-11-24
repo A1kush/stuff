@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Sprites Showcase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #bbb;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        select, input[type="range"] {
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .character-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .character-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .character-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .character-class {
+            font-size: 0.9em;
+            color: #bbb;
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            background: #000;
+            image-rendering: pixelated;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+            font-size: 0.85em;
+        }
+
+        .stat {
+            color: #999;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .error {
+            text-align: center;
+            color: #f5576c;
+            padding: 20px;
+            background: rgba(245, 87, 108, 0.1);
+            border: 2px solid #f5576c;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 Character Sprites Showcase</h1>
+        <div class="subtitle">Procedural Character Generation System</div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="filterClass">Filter by Class:</label>
+            <select id="filterClass">
+                <option value="all">All Classes</option>
+                <option value="ranged">Ranged</option>
+                <option value="tech">Tech</option>
+                <option value="melee">Melee</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="size">Sprite Size:</label>
+            <input type="range" id="size" min="64" max="256" value="128" step="32">
+            <span id="sizeValue">128px</span>
+        </div>
+        <div class="control-group">
+            <label for="animation">Animation:</label>
+            <select id="animation">
+                <option value="idle">Idle</option>
+                <option value="walk">Walk</option>
+                <option value="run">Run</option>
+                <option value="attack">Attack</option>
+                <option value="jump">Jump</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="characterGrid" class="grid"></div>
+
+    <script>
+        // Embedded Character Data - No external dependencies!
+        const CHARACTERS = {
+            cat_angel_gunner: {
+                id: "cat_angel_gunner",
+                name: "Cat Angel Gunner",
+                class: "ranged",
+                weapon: "Dual Pistols",
+                stats: { hp: 100, atk: 45, def: 20, spd: 130 },
+                abilities: ["Holy Shot", "Angel Wings", "Rapid Fire"],
+                color: "#FFD700"
+            },
+            cyborg_rifle_operative: {
+                id: "cyborg_rifle_operative",
+                name: "Cyborg Rifle Operative",
+                class: "tech",
+                weapon: "Rifle",
+                stats: { hp: 120, atk: 50, def: 30, spd: 110 },
+                abilities: ["Precision Shot", "Tactical Scan", "EMP Blast"],
+                color: "#00CED1"
+            },
+            warrior_dual_swords: {
+                id: "warrior_dual_swords",
+                name: "Warrior (Dual Swords)",
+                class: "melee",
+                weapon: "Dual Swords",
+                stats: { hp: 150, atk: 60, def: 40, spd: 120 },
+                abilities: ["Dual Slash", "Whirlwind", "Blade Storm"],
+                color: "#FF6347"
+            },
+            mage_arcane: {
+                id: "mage_arcane",
+                name: "Arcane Mage",
+                class: "ranged",
+                weapon: "Staff",
+                stats: { hp: 80, atk: 70, def: 15, spd: 100 },
+                abilities: ["Fireball", "Ice Shard", "Lightning Bolt"],
+                color: "#9370DB"
+            },
+            ninja_assassin: {
+                id: "ninja_assassin",
+                name: "Ninja Assassin",
+                class: "melee",
+                weapon: "Kunai",
+                stats: { hp: 90, atk: 65, def: 25, spd: 150 },
+                abilities: ["Shadow Strike", "Smoke Bomb", "Poison Dart"],
+                color: "#2F4F4F"
+            },
+            paladin_shield: {
+                id: "paladin_shield",
+                name: "Paladin",
+                class: "melee",
+                weapon: "Sword & Shield",
+                stats: { hp: 180, atk: 40, def: 60, spd: 90 },
+                abilities: ["Shield Bash", "Divine Light", "Protection Aura"],
+                color: "#FFD700"
+            },
+            ranger_bow: {
+                id: "ranger_bow",
+                name: "Ranger",
+                class: "ranged",
+                weapon: "Bow",
+                stats: { hp: 110, atk: 55, def: 25, spd: 125 },
+                abilities: ["Multi Shot", "Trap", "Eagle Eye"],
+                color: "#228B22"
+            },
+            engineer_drone: {
+                id: "engineer_drone",
+                name: "Engineer",
+                class: "tech",
+                weapon: "Drone",
+                stats: { hp: 100, atk: 45, def: 35, spd: 105 },
+                abilities: ["Deploy Turret", "Repair", "EMP Grenade"],
+                color: "#FFA500"
+            }
+        };
+
+        let currentSize = 128;
+        let currentAnimation = 'idle';
+        let currentFilter = 'all';
+
+        // Simple procedural sprite renderer
+        function renderCharacter(canvas, character) {
+            const ctx = canvas.getContext('2d');
+            const size = currentSize;
+            canvas.width = size;
+            canvas.height = size;
+            
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, size, size);
+
+            // Draw character body (simple procedural generation)
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const bodySize = size * 0.4;
+            const headSize = size * 0.25;
+
+            // Head
+            ctx.fillStyle = character.color || '#667eea';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - bodySize * 0.3, headSize, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body
+            ctx.fillRect(centerX - bodySize * 0.3, centerY - bodySize * 0.2, bodySize * 0.6, bodySize * 0.8);
+
+            // Arms
+            ctx.fillRect(centerX - bodySize * 0.5, centerY, bodySize * 0.2, bodySize * 0.6);
+            ctx.fillRect(centerX + bodySize * 0.3, centerY, bodySize * 0.2, bodySize * 0.6);
+
+            // Legs
+            ctx.fillRect(centerX - bodySize * 0.25, centerY + bodySize * 0.6, bodySize * 0.15, bodySize * 0.5);
+            ctx.fillRect(centerX + bodySize * 0.1, centerY + bodySize * 0.6, bodySize * 0.15, bodySize * 0.5);
+
+            // Weapon indicator
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            if (character.class === 'ranged') {
+                ctx.beginPath();
+                ctx.moveTo(centerX + bodySize * 0.4, centerY);
+                ctx.lineTo(centerX + bodySize * 0.7, centerY - bodySize * 0.2);
+                ctx.stroke();
+            } else if (character.class === 'melee') {
+                ctx.beginPath();
+                ctx.moveTo(centerX - bodySize * 0.4, centerY);
+                ctx.lineTo(centerX - bodySize * 0.7, centerY - bodySize * 0.1);
+                ctx.stroke();
+            }
+
+            // Animation effect
+            if (currentAnimation === 'walk' || currentAnimation === 'run') {
+                const offset = Math.sin(Date.now() / 200) * 3;
+                ctx.translate(0, offset);
+            } else if (currentAnimation === 'attack') {
+                const scale = 1 + Math.sin(Date.now() / 100) * 0.1;
+                ctx.scale(scale, scale);
+            } else if (currentAnimation === 'jump') {
+                const offset = Math.abs(Math.sin(Date.now() / 300)) * 10;
+                ctx.translate(0, -offset);
+            }
+        }
+
+        function createCharacterCard(character) {
+            const card = document.createElement('div');
+            card.className = 'character-card';
+
+            const name = document.createElement('div');
+            name.className = 'character-name';
+            name.textContent = character.name;
+            card.appendChild(name);
+
+            const classLabel = document.createElement('div');
+            classLabel.className = 'character-class';
+            classLabel.textContent = `${character.class.toUpperCase()} • ${character.weapon}`;
+            card.appendChild(classLabel);
+
+            const canvas = document.createElement('canvas');
+            canvas.id = `canvas-${character.id}`;
+            card.appendChild(canvas);
+
+            const stats = document.createElement('div');
+            stats.className = 'stats';
+            Object.entries(character.stats).forEach(([key, value]) => {
+                const stat = document.createElement('div');
+                stat.className = 'stat';
+                stat.innerHTML = `<span>${key.toUpperCase()}:</span> <span class="stat-value">${value}</span>`;
+                stats.appendChild(stat);
+            });
+            card.appendChild(stats);
+
+            return card;
+        }
+
+        function renderAll() {
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = '';
+
+            const filtered = Object.values(CHARACTERS).filter(char => {
+                return currentFilter === 'all' || char.class === currentFilter;
+            });
+
+            filtered.forEach(character => {
+                const card = createCharacterCard(character);
+                grid.appendChild(card);
+                const canvas = card.querySelector('canvas');
+                renderCharacter(canvas, character);
+            });
+
+            // Animate
+            setInterval(() => {
+                filtered.forEach(character => {
+                    const canvas = document.getElementById(`canvas-${character.id}`);
+                    if (canvas) {
+                        renderCharacter(canvas, character);
+                    }
+                });
+            }, 50);
+        }
+
+        // Event listeners
+        document.getElementById('size').addEventListener('input', (e) => {
+            currentSize = parseInt(e.target.value);
+            document.getElementById('sizeValue').textContent = currentSize + 'px';
+            renderAll();
+        });
+
+        document.getElementById('animation').addEventListener('change', (e) => {
+            currentAnimation = e.target.value;
+            renderAll();
+        });
+
+        document.getElementById('filterClass').addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            renderAll();
+        });
+
+        // Initial render
+        renderAll();
+    </script>
+</body>
+</html>
+

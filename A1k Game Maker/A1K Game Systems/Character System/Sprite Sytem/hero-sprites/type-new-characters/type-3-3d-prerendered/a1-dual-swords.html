@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Dual Swords - 3D Prerendered</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #canvas-wrapper { flex-shrink: 0; }
+        canvas {
+            border: 2px solid #444;
+            background: radial-gradient(circle at 30% 30%, #2a2a2a, #0a0a0a);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        #controls {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 2px solid #555;
+            padding-bottom: 10px;
+        }
+        .control-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px 14px;
+            background: #1a1a1a;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        select:hover, button:hover {
+            border-color: #777;
+            background: #252525;
+        }
+        button { margin-top: 8px; background: #2a2a2a; }
+        button:active { transform: translateY(1px); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .info {
+            font-size: 11px;
+            color: #888;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            line-height: 1.6;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #444;
+        }
+        .stat-label { font-size: 10px; color: #888; text-transform: uppercase; }
+        .stat-value { font-size: 16px; color: #0f0; font-weight: bold; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="sprite" width="256" height="256"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>⚔️ A1 (DUAL SWORDS) - 3D</h1>
+
+            <div class="control-group">
+                <label>Animation State</label>
+                <select id="animState">
+                    <option value="idle">Idle (Breathing)</option>
+                    <option value="walk">Walk Cycle</option>
+                    <option value="attack">Attack Swing</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Color Palette</label>
+                <select id="palette">
+                    <option value="fire">🔥 Fire (Red/Orange)</option>
+                    <option value="ice">❄️ Ice (Cyan/Blue)</option>
+                    <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+                    <option value="light">✨ Light (Gold/White)</option>
+                    <option value="nature">🌿 Nature (Green/Earth)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Animation Speed</label>
+                <select id="speed">
+                    <option value="0.5">0.5x Slow</option>
+                    <option value="1" selected>1x Normal</option>
+                    <option value="1.5">1.5x Fast</option>
+                    <option value="2">2x Very Fast</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Display Scale</label>
+                <select id="scale">
+                    <option value="1.5">1.5x (384px)</option>
+                    <option value="2" selected>2x (512px)</option>
+                    <option value="2.5">2.5x (640px)</option>
+                    <option value="3">3x (768px)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Export</label>
+                <div class="btn-group">
+                    <button id="exportFrame">PNG Frame</button>
+                    <button id="exportSheet">Sprite Sheet</button>
+                </div>
+                <button id="exportJSON">Export JSON Data</button>
+            </div>
+
+            <div class="info">
+                <strong>TYPE 3: 3D PRERENDERED</strong><br>
+                Donkey Kong Country / Killer Instinct Style<br><br>
+                • Resolution: 256×256 high-detail<br>
+                • Technique: Simulated 3D lighting<br>
+                • Depth shading, rim lighting, specular<br>
+                • Hair: Black (locked)<br>
+                • Frame Rate: 60fps<br><br>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Frame</div>
+                        <div class="stat-value" id="frameCount">0/8</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">FPS</div>
+                        <div class="stat-value" id="fpsCount">60</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sprite');
+        const ctx = canvas.getContext('2d');
+
+        let currentAnim = 'idle';
+        let currentFrame = 0;
+        let frameTimer = 0;
+        let animSpeed = 1;
+        let palette = 'fire';
+        let lastTime = 0;
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        const palettes = {
+            fire: {
+                skin: { base: '#5c4033', highlight: '#8b6347', shadow: '#3a2820', specular: 'rgba(255,255,255,0.3)' },
+                clothes: { base: '#2a1a1a', highlight: '#3a2a2a', shadow: '#1a1a1a', rim: 'rgba(255,80,0,0.4)' },
+                weapon: { base: '#cc0000', glow: '#ff3333', core: '#ff6666', bloom: 'rgba(255,80,0,0.6)', specular: 'rgba(255,255,255,0.8)' },
+                eyes: '#ff0000',
+                ambient: 'rgba(255,80,0,0.15)'
+            },
+            ice: {
+                skin: { base: '#5c4033', highlight: '#8b6347', shadow: '#3a2820', specular: 'rgba(255,255,255,0.3)' },
+                clothes: { base: '#0a1a2a', highlight: '#1a2a3a', shadow: '#0a1a2a', rim: 'rgba(0,200,255,0.4)' },
+                weapon: { base: '#0099cc', glow: '#00ccff', core: '#66eeff', bloom: 'rgba(0,200,255,0.6)', specular: 'rgba(255,255,255,0.8)' },
+                eyes: '#00ffff',
+                ambient: 'rgba(0,200,255,0.15)'
+            },
+            shadow: {
+                skin: { base: '#5c4033', highlight: '#8b6347', shadow: '#3a2820', specular: 'rgba(255,255,255,0.2)' },
+                clothes: { base: '#2a1a3a', highlight: '#3a2a4a', shadow: '#1a0a2a', rim: 'rgba(170,0,255,0.4)' },
+                weapon: { base: '#7700cc', glow: '#aa00ff', core: '#dd66ff', bloom: 'rgba(170,0,255,0.6)', specular: 'rgba(255,255,255,0.8)' },
+                eyes: '#aa00ff',
+                ambient: 'rgba(170,0,255,0.15)'
+            },
+            light: {
+                skin: { base: '#5c4033', highlight: '#8b6347', shadow: '#3a2820', specular: 'rgba(255,255,255,0.3)' },
+                clothes: { base: '#3a3a2a', highlight: '#4a4a3a', shadow: '#2a2a1a', rim: 'rgba(255,200,0,0.5)' },
+                weapon: { base: '#ccaa00', glow: '#ffcc00', core: '#ffee66', bloom: 'rgba(255,200,0,0.7)', specular: 'rgba(255,255,255,0.9)' },
+                eyes: '#ffff00',
+                ambient: 'rgba(255,200,0,0.2)'
+            },
+            nature: {
+                skin: { base: '#5c4033', highlight: '#8b6347', shadow: '#3a2820', specular: 'rgba(255,255,255,0.2)' },
+                clothes: { base: '#1a3a2a', highlight: '#2a4a3a', shadow: '#0a2a1a', rim: 'rgba(0,255,100,0.4)' },
+                weapon: { base: '#00cc33', glow: '#00ff66', core: '#66ffaa', bloom: 'rgba(0,255,100,0.6)', specular: 'rgba(255,255,255,0.8)' },
+                eyes: '#00ff00',
+                ambient: 'rgba(0,255,100,0.15)'
+            }
+        };
+
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true },
+            walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false }
+        };
+
+        function draw3DSphere(x, y, radius, baseColor, lightDir) {
+            const grad = ctx.createRadialGradient(
+                x - radius * lightDir.x, y - radius * lightDir.y, 0,
+                x, y, radius
+            );
+            grad.addColorStop(0, 'rgba(255,255,255,0.4)');
+            grad.addColorStop(0.3, baseColor);
+            grad.addColorStop(1, '#000000');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawA1DualSwords3D(frame, anim) {
+            const pal = palettes[palette];
+            const centerX = 128;
+            const centerY = 128;
+            const lightDir = { x: 0.3, y: 0.3 };
+
+            let bobY = 0, armAngle = 0, legOffset = 0;
+
+            if (anim === 'idle') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 2;
+            } else if (anim === 'walk') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 4;
+                legOffset = Math.sin(frame / 4 * Math.PI) * 6;
+            } else if (anim === 'attack') {
+                armAngle = (frame / 6) * 90;
+            }
+
+            ctx.clearRect(0, 0, 256, 256);
+
+            // Ambient glow
+            const ambGrad = ctx.createRadialGradient(centerX, centerY - bobY, 0, centerX, centerY - bobY, 100);
+            ambGrad.addColorStop(0, pal.ambient);
+            ambGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = ambGrad;
+            ctx.fillRect(0, 0, 256, 256);
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 80, 40, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Legs with 3D shading
+            const legGrad1 = ctx.createLinearGradient(centerX - 25, centerY + 50 - bobY, centerX - 10, centerY + 50 - bobY);
+            legGrad1.addColorStop(0, pal.clothes.shadow);
+            legGrad1.addColorStop(0.5, pal.clothes.base);
+            legGrad1.addColorStop(1, pal.clothes.highlight);
+            ctx.fillStyle = legGrad1;
+            ctx.fillRect(centerX - 25, centerY + 50 - bobY + legOffset, 15, 35);
+
+            const legGrad2 = ctx.createLinearGradient(centerX + 10, centerY + 50 - bobY, centerX + 25, centerY + 50 - bobY);
+            legGrad2.addColorStop(0, pal.clothes.highlight);
+            legGrad2.addColorStop(0.5, pal.clothes.base);
+            legGrad2.addColorStop(1, pal.clothes.shadow);
+            ctx.fillStyle = legGrad2;
+            ctx.fillRect(centerX + 10, centerY + 50 - bobY - legOffset, 15, 35);
+
+            // Torso with depth
+            const torsoGrad = ctx.createRadialGradient(centerX - 20, centerY + 10 - bobY, 10, centerX, centerY + 20 - bobY, 50);
+            torsoGrad.addColorStop(0, pal.clothes.highlight);
+            torsoGrad.addColorStop(0.6, pal.clothes.base);
+            torsoGrad.addColorStop(1, pal.clothes.shadow);
+            ctx.fillStyle = torsoGrad;
+            ctx.fillRect(centerX - 30, centerY + 10 - bobY, 60, 45);
+
+            // Head with 3D lighting
+            draw3DSphere(centerX, centerY - 30 - bobY, 28, pal.skin.base, lightDir);
+            
+            // Black baseball cap
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(centerX - 30, centerY - 50 - bobY, 60, 12);
+            ctx.fillRect(centerX - 35, centerY - 42 - bobY, 15, 5);
+
+            // Black curly hair (LOCKED - under cap)
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 45 - bobY, 30, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Left side curls
+            ctx.beginPath();
+            ctx.arc(centerX - 28, centerY - 38 - bobY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX - 25, centerY - 32 - bobY, 6, 0, Math.PI * 2);
+            ctx.fill();
+            // Right side curls
+            ctx.beginPath();
+            ctx.arc(centerX + 28, centerY - 38 - bobY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 25, centerY - 32 - bobY, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Glowing eyes with depth
+            ctx.fillStyle = pal.eyes;
+            ctx.shadowColor = pal.eyes;
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(centerX - 12, centerY - 30 - bobY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 12, centerY - 30 - bobY, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // LEFT SWORD (in left hand) with glow
+            ctx.save();
+            ctx.translate(centerX - 45, centerY + 15 - bobY);
+            ctx.rotate((-45 + armAngle) * Math.PI / 180);
+            
+            ctx.shadowColor = pal.weapon.glow;
+            ctx.shadowBlur = 20;
+            const swordGrad1 = ctx.createLinearGradient(-5, -50, 5, -50);
+            swordGrad1.addColorStop(0, pal.weapon.shadow || pal.weapon.base);
+            swordGrad1.addColorStop(0.5, pal.weapon.core);
+            swordGrad1.addColorStop(1, pal.weapon.base);
+            ctx.fillStyle = swordGrad1;
+            ctx.fillRect(-4, -50, 8, 55);
+            ctx.shadowBlur = 0;
+            
+            ctx.fillStyle = pal.clothes.base;
+            ctx.fillRect(-5, 5, 10, 12);
+            ctx.restore();
+
+            // RIGHT SWORD (in right hand) with glow
+            ctx.save();
+            ctx.translate(centerX + 45, centerY + 15 - bobY);
+            ctx.rotate((45 - armAngle) * Math.PI / 180);
+            
+            ctx.shadowColor = pal.weapon.glow;
+            ctx.shadowBlur = 20;
+            const swordGrad2 = ctx.createLinearGradient(-5, -50, 5, -50);
+            swordGrad2.addColorStop(0, pal.weapon.base);
+            swordGrad2.addColorStop(0.5, pal.weapon.core);
+            swordGrad2.addColorStop(1, pal.weapon.shadow || pal.weapon.base);
+            ctx.fillStyle = swordGrad2;
+            ctx.fillRect(-4, -50, 8, 55);
+            ctx.shadowBlur = 0;
+            
+            ctx.fillStyle = pal.clothes.base;
+            ctx.fillRect(-5, 5, 10, 12);
+            ctx.restore();
+
+            // Weapon bloom effect
+            ctx.globalAlpha = 0.4;
+            const bloom1 = ctx.createRadialGradient(centerX - 45, centerY - 20 - bobY, 0, centerX - 45, centerY - 20 - bobY, 25);
+            bloom1.addColorStop(0, pal.weapon.bloom);
+            bloom1.addColorStop(1, 'transparent');
+            ctx.fillStyle = bloom1;
+            ctx.fillRect(centerX - 70, centerY - 45 - bobY, 50, 50);
+
+            const bloom2 = ctx.createRadialGradient(centerX + 45, centerY - 20 - bobY, 0, centerX + 45, centerY - 20 - bobY, 25);
+            bloom2.addColorStop(0, pal.weapon.bloom);
+            bloom2.addColorStop(1, 'transparent');
+            ctx.fillStyle = bloom2;
+            ctx.fillRect(centerX + 20, centerY - 45 - bobY, 50, 50);
+            ctx.globalAlpha = 1;
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0;
+                currentFrame++;
+                if (currentFrame >= anim.frames) {
+                    currentFrame = anim.loop ? 0 : anim.frames - 1;
+                }
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            drawA1DualSwords3D(currentFrame, currentAnim);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', (e) => {
+            currentAnim = e.target.value;
+            currentFrame = 0;
+            frameTimer = 0;
+        });
+
+        document.getElementById('palette').addEventListener('change', (e) => {
+            palette = e.target.value;
+        });
+
+        document.getElementById('speed').addEventListener('change', (e) => {
+            animSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('scale').addEventListener('change', (e) => {
+            const scale = parseFloat(e.target.value);
+            canvas.style.width = (256 * scale) + 'px';
+            canvas.style.height = (256 * scale) + 'px';
+        });
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `a1-dual-swords-3d-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            const tempCanvas = document.createElement('canvas');
+            const anim = animations[currentAnim];
+            tempCanvas.width = 256 * anim.frames;
+            tempCanvas.height = 256;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            for (let i = 0; i < anim.frames; i++) {
+                drawA1DualSwords3D(i, currentAnim);
+                tempCtx.drawImage(canvas, i * 256, 0);
+            }
+
+            const link = document.createElement('a');
+            link.download = `a1-dual-swords-3d-${currentAnim}-sheet-${palette}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+
+            drawA1DualSwords3D(currentFrame, currentAnim);
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = {
+                character: 'A1 (Dual Swords)',
+                type: '3D Prerendered',
+                resolution: '256x256',
+                animations: animations,
+                palettes: Object.keys(palettes),
+                currentState: {
+                    animation: currentAnim,
+                    frame: currentFrame,
+                    palette: palette
+                },
+                metadata: {
+                    hairColor: '#000000 (locked)',
+                    weaponType: 'Dual Energy Swords',
+                    style: 'DKC Prerendered Tier',
+                    technique: 'Simulated 3D lighting with depth shading'
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `a1-dual-swords-3d-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+
+        canvas.style.width = '512px';
+        canvas.style.height = '512px';
+        animate(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unique - Comic</title>
+    <style>
+        body {margin: 0; background: #FFEB3B; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        canvas {border: 5px solid #000;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        x.fillStyle = '#FFF'; x.fillRect(0, 0, 512, 512);
+        for (let i = 0; i < 512; i += 10) for (let j = 0; j < 512; j += 10) {x.fillStyle = '#FFB3BA'; x.beginPath(); x.arc(i, j, 2, 0, 7); x.fill();}
+        x.fillStyle = '#FF0000'; x.fillRect(200, 250, 112, 150);
+        x.strokeStyle = '#000'; x.lineWidth = 6; x.strokeRect(200, 250, 112, 150);
+        x.fillStyle = '#FFB380'; x.fillRect(200, 150, 112, 100); x.strokeRect(200, 150, 112, 100);
+        x.fillStyle = '#000'; x.fillRect(200, 150, 112, 30); x.fillRect(180, 175, 12, 28); x.fillRect(320, 175, 12, 28);
+        x.fillStyle = '#1a1a1a'; x.fillRect(150, 285, 45, 25); x.strokeRect(150, 285, 45, 25);
+        x.fillRect(317, 285, 45, 25); x.strokeRect(317, 285, 45, 25);
+        x.fillStyle = '#00FFFF'; x.fillRect(160, 292, 12, 11); x.fillRect(327, 292, 12, 11); x.fillRect(245, 265, 22, 18); x.fillStyle = '#FFF'; x.fillRect(225, 197, 20, 20); x.fillRect(267, 197, 20, 20);
+    </script>
+</body>
+</html>

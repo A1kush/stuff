@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "description": "Production-ready HD Pixel Art Sprite System for NPC & Enemy Rank System",
+  "style": "DBZ + Solo Leveling + Minecraft + Brawl Stars (Copyright-Free)",
+  "resolution": "128x128 HD with 2x-5x scaling",
+  "features": [
+    "Offline-first (no server required)",
+    "Modular body parts (head, arms, legs, body)",
+    "Multiple animation states (idle, walk, attack, special)",
+    "Color palette system (fire, ice, shadow, light, nature, energy)",
+    "Procedural sprite generation",
+    "Sprite sheet export",
+    "JSON manifest system"
+  ],
+  "categories": {
+    "hero": {
+      "description": "Player-aligned characters with heroic abilities",
+      "subtypes": ["warrior", "mage", "ranger", "paladin", "ninja"],
+      "stats": {"power": 1.2, "defense": 1.1, "speed": 1.0, "magic": 0.9}
+    },
+    "villain": {
+      "description": "Antagonistic characters with dark powers",
+      "subtypes": ["warlock", "bandit", "necromancer", "tyrant", "assassin"],
+      "stats": {"power": 1.3, "defense": 0.9, "speed": 1.1, "magic": 1.2}
+    },
+    "npc": {
+      "description": "Neutral characters providing quests and services",
+      "subtypes": ["merchant", "blacksmith", "alchemist", "scholar", "healer"],
+      "stats": {"power": 0.7, "defense": 0.8, "speed": 0.9, "magic": 1.1}
+    },
+    "slayer": {
+      "description": "Monster hunters specialized in combat",
+      "subtypes": ["demon-slayer", "dragon-slayer", "beast-slayer", "undead-slayer"],
+      "stats": {"power": 1.4, "defense": 1.0, "speed": 1.2, "magic": 0.8}
+    },
+    "hunter": {
+      "description": "Ranged combat specialists",
+      "subtypes": ["archer", "crossbowman", "sniper", "tracker"],
+      "stats": {"power": 1.1, "defense": 0.9, "speed": 1.3, "magic": 0.7}
+    },
+    "guardian": {
+      "description": "Defensive warriors with protective abilities",
+      "subtypes": ["shield-bearer", "warden", "protector", "sentinel"],
+      "stats": {"power": 0.9, "defense": 1.5, "speed": 0.8, "magic": 1.0}
+    },
+    "mage": {
+      "description": "Magic users with elemental powers",
+      "subtypes": ["fire-mage", "ice-mage", "lightning-mage", "earth-mage", "wind-mage"],
+      "stats": {"power": 1.0, "defense": 0.7, "speed": 0.9, "magic": 1.6}
+    },
+    "assassin": {
+      "description": "Stealth and precision strike specialists",
+      "subtypes": ["shadow-assassin", "poison-assassin", "blade-assassin", "night-assassin"],
+      "stats": {"power": 1.3, "defense": 0.8, "speed": 1.4, "magic": 0.9}
+    },
+    "support": {
+      "description": "Characters providing buffs and healing",
+      "subtypes": ["priest", "shaman", "druid", "monk", "bard"],
+      "stats": {"power": 0.8, "defense": 1.0, "speed": 1.0, "magic": 1.4}
+    },
+    "minion": {
+      "description": "Low-level summoned creatures",
+      "subtypes": ["imp", "goblin", "skeleton", "zombie", "spirit"],
+      "stats": {"power": 0.6, "defense": 0.7, "speed": 1.1, "magic": 0.8}
+    },
+    "elite": {
+      "description": "High-level enemies with special abilities",
+      "subtypes": ["elite-warrior", "elite-mage", "elite-assassin", "elite-guardian"],
+      "stats": {"power": 1.5, "defense": 1.2, "speed": 1.1, "magic": 1.0}
+    },
+    "boss": {
+      "description": "Major antagonists with unique powers",
+      "subtypes": ["dragon-lord", "demon-king", "titan", "lich", "behemoth"],
+      "stats": {"power": 2.0, "defense": 1.5, "speed": 0.9, "magic": 1.8}
+    },
+    "pet": {
+      "description": "Companion creatures that aid in battle",
+      "subtypes": ["wolf", "eagle", "bear", "fox", "dragonling"],
+      "stats": {"power": 0.8, "defense": 0.9, "speed": 1.2, "magic": 0.7}
+    },
+    "merchant": {
+      "description": "NPCs focused on trade and economy",
+      "subtypes": ["trader", "shopkeeper", "collector", "artisan"],
+      "stats": {"power": 0.5, "defense": 0.6, "speed": 0.8, "magic": 0.7}
+    },
+    "crafter": {
+      "description": "NPCs that create and upgrade equipment",
+      "subtypes": ["blacksmith", "enchanter", "alchemist", "tailor"],
+      "stats": {"power": 0.7, "defense": 0.8, "speed": 0.9, "magic": 1.1}
+    }
+  },
+  "palettes": {
+    "fire": {"primary": "#FF4444", "secondary": "#FF8844", "accent": "#FFFF44", "glow": "#FF6600"},
+    "ice": {"primary": "#44FFFF", "secondary": "#4488FF", "accent": "#4444FF", "glow": "#00CCFF"},
+    "shadow": {"primary": "#8844FF", "secondary": "#444488", "accent": "#FF44FF", "glow": "#6600FF"},
+    "light": {"primary": "#FFFF88", "secondary": "#FFFFFF", "accent": "#FF8844", "glow": "#FFFF00"},
+    "nature": {"primary": "#44FF44", "secondary": "#88FF88", "accent": "#FFFF44", "glow": "#00FF00"},
+    "energy": {"primary": "#44FF88", "secondary": "#88FFFF", "accent": "#FF44FF", "glow": "#00FF88"},
+    "void": {"primary": "#444444", "secondary": "#666666", "accent": "#888888", "glow": "#AAAAAA"},
+    "cosmic": {"primary": "#8844FF", "secondary": "#FF4488", "accent": "#44FF88", "glow": "#FF8844"}
+  },
+  "animations": {
+    "idle": {"frames": 8, "duration": 1000, "loop": true},
+    "walk": {"frames": 8, "duration": 800, "loop": true},
+    "attack": {"frames": 6, "duration": 600, "loop": false},
+    "special": {"frames": 12, "duration": 1200, "loop": false},
+    "hurt": {"frames": 4, "duration": 400, "loop": false},
+    "death": {"frames": 8, "duration": 800, "loop": false}
+  },
+  "bodyParts": {
+    "head": ["human", "elf", "orc", "beast", "undead", "mechanical", "angelic", "demonic"],
+    "body": ["light", "medium", "heavy", "robe", "armor", "fur", "scales", "energy"],
+    "arms": ["human", "mechanical", "tentacle", "wing", "claw", "blade", "staff", "shield"],
+    "legs": ["human", "hoof", "paw", "wheel", "root", "tail", "none"],
+    "weapon": ["sword", "staff", "bow", "gun", "axe", "hammer", "dagger", "shield", "none"],
+    "accessory": ["cape", "hat", "mask", "jewelry", "wings", "aura", "tail", "none"]
+  }
+}

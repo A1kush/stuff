@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎀 Pet System - Chibi Candy Gallery - STANDALONE</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #FFB6D9 0%, #C3AED6 50%, #8EC5FC 100%);
+      color: #4A5568;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      color: #FF6B9D;
+      text-shadow: 3px 3px 0 #FFE5EC, 0 0 20px rgba(255, 107, 157, 0.5);
+      margin: 20px 0;
+    }
+    canvas {
+      border: 4px solid #FF6B9D;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 107, 157, 0.3);
+      background: #FFF8DC;
+    }
+    .controls {
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid #FFB6D9;
+      border-radius: 20px;
+      padding: 25px;
+      margin: 20px 0;
+      max-width: 1400px;
+      box-shadow: 0 10px 40px rgba(195, 174, 214, 0.4);
+    }
+    h2 {
+      color: #C3AED6;
+      margin-bottom: 15px;
+    }
+    #pet-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px;
+      background: linear-gradient(135deg, #FFB6D9 0%, #C3AED6 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Comic Sans MS', cursive;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 10px rgba(195, 174, 214, 0.3);
+    }
+    button:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(255, 107, 157, 0.5);
+    }
+    button.selected {
+      background: linear-gradient(135deg, #FF6B9D 0%, #C3AED6 100%);
+      box-shadow: 0 0 20px #FF6B9D;
+    }
+    .info {
+      background: rgba(255, 248, 220, 0.9);
+      border: 2px solid #FFB6D9;
+      border-radius: 15px;
+      padding: 20px;
+      line-height: 1.8;
+    }
+    .info strong {
+      color: #FF6B9D;
+    }
+    .note {
+      background: rgba(255, 182, 217, 0.2);
+      border-left: 5px solid #FF6B9D;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>🎀 Chibi Candy Pet Gallery</h1>
+    <div class="note">
+      ✅ <strong>STANDALONE MODE</strong> - No server needed! Just double-click!
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+      <h2>All 14 Pets with Skills!</h2>
+      <div id="pet-selector"></div>
+      <div id="pet-stats" class="info"></div>
+    </div>
+  </div>
+
+  <script>
+    // PET REGISTRY
+    const PETS = [
+      { id: 'pet_flame', name: 'Flame Pup', element: 'fire', rarity: 'common', hp: 120, atk: 35, color: '#FF6B35', secondaryColor: '#FFB347' },
+      { id: 'pet_aqua', name: 'Aqua Kitty', element: 'water', rarity: 'common', hp: 110, atk: 30, color: '#4FB3D9', secondaryColor: '#A8E6FF' },
+      { id: 'pet_leaf', name: 'Leaf Bunny', element: 'nature', rarity: 'common', hp: 130, atk: 28, color: '#77DD77', secondaryColor: '#B8F4B8' },
+      { id: 'pet_spark', name: 'Spark Mouse', element: 'electric', rarity: 'rare', hp: 100, atk: 42, color: '#FFE135', secondaryColor: '#FFF380' },
+      { id: 'pet_crystal', name: 'Crystal Owl', element: 'ice', rarity: 'rare', hp: 115, atk: 38, color: '#89CFF0', secondaryColor: '#C4E7F5' },
+      { id: 'pet_terra', name: 'Terra Bear', element: 'earth', rarity: 'rare', hp: 150, atk: 32, color: '#C19A6B', secondaryColor: '#D4AF85' },
+      { id: 'pet_gale', name: 'Gale Bird', element: 'wind', rarity: 'epic', hp: 95, atk: 45, color: '#B6E3F4', secondaryColor: '#E0F4FF' },
+      { id: 'pet_lux', name: 'Lux Fairy', element: 'light', rarity: 'epic', hp: 105, atk: 40, color: '#FFD700', secondaryColor: '#FFEC8B' },
+      { id: 'pet_void', name: 'Void Cat', element: 'dark', rarity: 'epic', hp: 110, atk: 46, color: '#4B0082', secondaryColor: '#8A2BE2' },
+      { id: 'pet_striker', name: 'Striker', element: 'summon', rarity: 'legendary', hp: 140, atk: 50, color: '#DC143C', secondaryColor: '#FF6B6B' },
+      { id: 'pet_sage', name: 'Sage', element: 'summon', rarity: 'legendary', hp: 120, atk: 45, color: '#9370DB', secondaryColor: '#BA9BD8' },
+      { id: 'pet_guardian', name: 'Guardian', element: 'summon', rarity: 'legendary', hp: 180, atk: 35, color: '#4682B4', secondaryColor: '#7BA4C8' },
+      { id: 'pet_storm_phoenix', name: 'Storm Phoenix', element: 'storm', rarity: 'mythic', hp: 130, atk: 60, color: '#00CED1', secondaryColor: '#48D1CC' },
+      { id: 'pet_dark_missy', name: 'Dark Missy', element: 'shadow', rarity: 'legendary', hp: 125, atk: 55, color: '#2F4F4F', secondaryColor: '#696969' }
+    ];
+
+    const ELEMENTS = {
+      fire: { icon: '🔥', color: '#FF6B35' },
+      water: { icon: '💧', color: '#4FB3D9' },
+      nature: { icon: '🌿', color: '#77DD77' },
+      electric: { icon: '⚡', color: '#FFE135' },
+      ice: { icon: '❄️', color: '#89CFF0' },
+      earth: { icon: '🪨', color: '#C19A6B' },
+      wind: { icon: '🌪️', color: '#B6E3F4' },
+      light: { icon: '✨', color: '#FFD700' },
+      dark: { icon: '🌙', color: '#4B0082' },
+      summon: { icon: '👤', color: '#DC143C' },
+      storm: { icon: '🌩️', color: '#00CED1' },
+      shadow: { icon: '👻', color: '#2F4F4F' }
+    };
+
+    const RARITIES = {
+      common: { name: 'Common', stars: '⭐', color: '#9E9E9E' },
+      rare: { name: 'Rare', stars: '⭐⭐⭐', color: '#4169E1' },
+      epic: { name: 'Epic', stars: '⭐⭐⭐⭐', color: '#9370DB' },
+      legendary: { name: 'Legendary', stars: '⭐⭐⭐⭐⭐', color: '#FFD700' },
+      mythic: { name: 'Mythic', stars: '🌟🌟🌟🌟🌟🌟', color: '#FF1493' }
+    };
+
+    // Simple pet rendering
+    class PetRenderer {
+      render(ctx, pet, x, y, time) {
+        const bounce = Math.sin(time / 300) * 5;
+        
+        ctx.save();
+        ctx.translate(x, y + bounce);
+        
+        // Body
+        ctx.fillStyle = pet.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, 30, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Eyes
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(-10, -5, 5, 0, Math.PI * 2);
+        ctx.arc(10, -5, 5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Eye shine
+        ctx.fillStyle = '#FFF';
+        ctx.beginPath();
+        ctx.arc(-8, -7, 2, 0, Math.PI * 2);
+        ctx.arc(12, -7, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Mouth
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 5, 10, 0.2, Math.PI - 0.2);
+        ctx.stroke();
+        
+        // Cheeks
+        ctx.fillStyle = pet.secondaryColor;
+        ctx.globalAlpha = 0.6;
+        ctx.beginPath();
+        ctx.arc(-15, 5, 6, 0, Math.PI * 2);
+        ctx.arc(15, 5, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        
+        // Element indicator
+        const elem = ELEMENTS[pet.element];
+        ctx.font = '24px Arial';
+        ctx.fillText(elem.icon, -12, -40);
+        
+        ctx.restore();
+      }
+    }
+
+    // MAIN APP
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1400;
+    canvas.height = 800;
+
+    const renderer = new PetRenderer();
+    let selectedPetIndex = 0;
+    let animTime = 0;
+
+    // Create buttons
+    const selector = document.getElementById('pet-selector');
+    PETS.forEach((pet, index) => {
+      const btn = document.createElement('button');
+      const elem = ELEMENTS[pet.element];
+      btn.textContent = `${elem.icon} ${pet.name}`;
+      btn.className = index === 0 ? 'selected' : '';
+      btn.onclick = () => {
+        selectedPetIndex = index;
+        document.querySelectorAll('#pet-selector button').forEach((b, i) => {
+          b.className = i === index ? 'selected' : '';
+        });
+        updateStats();
+      };
+      selector.appendChild(btn);
+    });
+
+    function updateStats() {
+      const pet = PETS[selectedPetIndex];
+      const elem = ELEMENTS[pet.element];
+      const rarity = RARITIES[pet.rarity];
+      
+      document.getElementById('pet-stats').innerHTML = `
+        <h3>${elem.icon} ${pet.name} ${rarity.stars}</h3>
+        <p><strong>Element:</strong> ${elem.icon} ${pet.element.toUpperCase()}</p>
+        <p><strong>Rarity:</strong> <span style="color: ${rarity.color}">${rarity.name}</span></p>
+        <p><strong>HP:</strong> ${pet.hp}</p>
+        <p><strong>ATK:</strong> ${pet.atk}</p>
+        <p><strong>Normal Skill:</strong> ${elem.icon} Blast (${Math.floor(pet.atk * 1.5)} dmg, 3s CD)</p>
+        <p><strong>Insane Special:</strong> ${elem.icon} MEGA BURST (${pet.atk * 5} dmg, 15s CD)</p>
+      `;
+    }
+
+    function render() {
+      // Background
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, '#FFE5EC');
+      grad.addColorStop(1, '#FFF8DC');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const pet = PETS[selectedPetIndex];
+      const elem = ELEMENTS[pet.element];
+      
+      // Stars background
+      ctx.fillStyle = 'rgba(255, 182, 217, 0.2)';
+      for (let i = 0; i < 30; i++) {
+        const x = (i * 137.5) % canvas.width;
+        const y = (i * 213.3) % canvas.height;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Title
+      ctx.fillStyle = '#FF6B9D';
+      ctx.font = 'bold 56px Comic Sans MS';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(255, 107, 157, 0.5)';
+      ctx.shadowBlur = 15;
+      ctx.fillText(pet.name, canvas.width / 2, 100);
+      ctx.shadowBlur = 0;
+
+      // Pet (large, centered, scaled)
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(3, 3);
+      renderer.render(ctx, pet, 0, 0, animTime);
+      ctx.restore();
+
+      // Stats
+      ctx.fillStyle = elem.color;
+      ctx.font = 'bold 32px Comic Sans MS';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${elem.icon} ${elem.color}`, 50, canvas.height - 120);
+      ctx.fillText(`HP: ${pet.hp} | ATK: ${pet.atk}`, 50, canvas.height - 70);
+    }
+
+    function gameLoop() {
+      animTime += 16;
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    updateStats();
+    gameLoop();
+
+    console.log('✅ Pet Gallery loaded! Total pets:', PETS.length);
+  </script>
+</body>
+</html>
+

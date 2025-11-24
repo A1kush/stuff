@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 5: Hybrid Enhanced - Hero Sprites</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .sprite-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .sprite-card:hover {
+            transform: translateY(-5px);
+            border-color: #666;
+        }
+
+        .sprite-card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .sprite-card a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .sprite-card a:hover {
+            background: #3a3a3a;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .info-box h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .info-box ul {
+            list-style: none;
+            line-height: 2;
+            color: #999;
+        }
+
+        .info-box ul li:before {
+            content: "▸ ";
+            color: #0f0;
+            margin-right: 8px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #999;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="../START_HERE.html" class="back-link">← Back to Hero Sprites Gallery</a>
+
+        <h1>TYPE 5: HYBRID ENHANCED</h1>
+        <p class="subtitle">HD Pixel Art + WebGL2 Shader Effects</p>
+
+        <div class="gallery">
+            <div class="sprite-card">
+                <h2>⚔️ Warrior (Dual Swords)</h2>
+                <p style="color: #666; font-size: 12px; margin-bottom: 15px;">
+                    Pixel art base with weapon trails and dynamic aura
+                </p>
+                <a href="warrior-dual-swords.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>😇 Cat Angel Gunner</h2>
+                <p style="color: #666; font-size: 12px; margin-bottom: 15px;">
+                    Halo particle ring and wing shimmer effects
+                </p>
+                <a href="cat-angel-gunner.html">View & Export</a>
+            </div>
+
+            <div class="sprite-card">
+                <h2>🤖 Cyborg Rifle Operative</h2>
+                <p style="color: #666; font-size: 12px; margin-bottom: 15px;">
+                    Energy conduit flow and rifle beam trails
+                </p>
+                <a href="cyborg-rifle-operative.html">View & Export</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>About Type 5: Hybrid Enhanced</h3>
+            <ul>
+                <li><strong>Technique:</strong> Dual-layer rendering (Canvas2D + WebGL2)</li>
+                <li><strong>Base Layer:</strong> 128×128 HD Pixel Art (pixel-perfect)</li>
+                <li><strong>Effect Layer:</strong> Real-time shader effects (transparent overlay)</li>
+                <li><strong>Performance:</strong> 60fps dual-layer rendering</li>
+                <li><strong>Export:</strong> Composited PNG (both layers combined)</li>
+                <li><strong>Shader Intensity:</strong> Adjustable 0-2x multiplier</li>
+                <li><strong>Hair Color:</strong> Always black (locked in pixel layer)</li>
+                <li><strong>Effects:</strong> Weapon trails, auras, rim lighting, particle systems</li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

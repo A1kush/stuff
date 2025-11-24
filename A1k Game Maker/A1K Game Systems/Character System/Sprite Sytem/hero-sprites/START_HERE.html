@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Sprites System - Production Ready</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 52px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-size: 20px;
+            color: #999;
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section {
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            padding-left: 16px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section-desc {
+            font-size: 16px;
+            color: #bbb;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            padding-left: 20px;
+        }
+
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+        }
+
+        .type-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .type-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .type-card:hover::before {
+            opacity: 1;
+        }
+
+        .type-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            border-radius: 20px;
+            font-size: 11px;
+            color: #a0b0ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .type-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .type-desc {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .type-features {
+            list-style: none;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .type-features li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .type-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .type-examples {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .character-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .character-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .character-desc {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 40px;
+        }
+
+        .info-box h3 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .info-box p {
+            color: #bbb;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            color: #666;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+
+            .tagline {
+                font-size: 16px;
+            }
+
+            .type-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hero">
+        <h1>🎮 Hero Sprites System</h1>
+        <p class="tagline">Production-Ready Sprites for Offline HTML Games</p>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-number">19</span>
+                <span class="stat-label">Rendering Types</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">3</span>
+                <span class="stat-label">Hero Characters</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">57</span>
+                <span class="stat-label">Total Sprites</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Dependencies</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div class="section">
+            <h2 class="section-title">🎨 5 Rendering Styles</h2>
+            <p class="section-desc">
+                Each character is available in 5 different rendering styles, from pixel-perfect HD art to procedural
+                shader-based generation.
+                All sprites are production-ready, fully animated, and work both online and offline.
+            </p>
+
+            <div class="type-grid">
+
+                <a href="type-1-hd-pixel-art/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 1</div>
+                        <div class="type-title">HD Pixel Art</div>
+                        <div class="type-examples">Soul Knight • Hyper Light Drifter • Eastward</div>
+                        <div class="type-desc">
+                            64×64 to 128×128 sprites with high-density pixel placement, selective contrast for facial
+                            features,
+                            and subpixel weapon rim-lighting. Hand-keyed expressive animation.
+                        </div>
+                        <ul class="type-features">
+                            <li>Pixel-perfect Canvas2D rendering</li>
+                            <li>3-5 color tones per material</li>
+                            <li>Under 64 colors per sprite sheet</li>
+                            <li>1-3 pixels per eye detail</li>
+                        </ul>
+                        <span class="btn">Explore Type 1 →</span>
+                    </div>
+                </a>
+
+                <a href="type-2-vector-cel-shaded/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 2</div>
+                        <div class="type-title">Vector Cel-Shaded</div>
+                        <div class="type-examples">Castle Crashers • Hollow Knight • BattleBlock Theater</div>
+                        <div class="type-desc">
+                            Clean vector geometry with bezier curves, bold outlines separating layers,
+                            and soft lighting gradients. Infinitely scalable with no pixel loss.
+                        </div>
+                        <ul class="type-features">
+                            <li>SVG/Canvas path-based rendering</li>
+                            <li>Skeletal transform animation</li>
+                            <li>Perfect scaling to any resolution</li>
+                            <li>Soft gradient lighting</li>
+                        </ul>
+                        <span class="btn">Explore Type 2 →</span>
+                    </div>
+                </a>
+
+                <a href="type-3-3d-prerendered/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 3</div>
+                        <div class="type-title">3D Pre-rendered</div>
+                        <div class="type-examples">Octopath Traveler • FF Tactics • Brotato 3D</div>
+                        <div class="type-desc">
+                            Simulated 3D rendering with baked shadows, specular highlights, and rim bloom effects.
+                            Full facial features with dynamic lighting falloff.
+                        </div>
+                        <ul class="type-features">
+                            <li>256×256 high-resolution rendering</li>
+                            <li>Simulated 3D lighting</li>
+                            <li>Specular reflections on armor</li>
+                            <li>Natural depth perception</li>
+                        </ul>
+                        <span class="btn">Explore Type 3 →</span>
+                    </div>
+                </a>
+
+                <a href="type-4-procedural-shader/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 4</div>
+                        <div class="type-title">Procedural Shader-Based</div>
+                        <div class="type-examples">A1K Runner • ShaderToy • Processing</div>
+                        <div class="type-desc">
+                            Entirely code-driven with WebGL2 shaders. Facial forms and limb silhouettes derived from
+                            math,
+                            with dynamic per-pixel lighting. Infinitely scalable, zero texture assets.
+                        </div>
+                        <ul class="type-features">
+                            <li>WebGL2 GLSL fragment shaders</li>
+                            <li>SDF-based geometry</li>
+                            <li>Real-time parametric effects</li>
+                            <li>Infinite resolution scaling</li>
+                        </ul>
+                        <span class="btn">Explore Type 4 →</span>
+                    </div>
+                </a>
+
+                <a href="type-5-hybrid-enhanced/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 5</div>
+                        <div class="type-title">Hybrid Enhanced</div>
+                        <div class="type-examples">Best of All Techniques Combined</div>
+                        <div class="type-desc">
+                            HD Pixel Art base with procedural shader aura effects, vector weapon trails,
+                            and real-time lighting overlays. Maximum visual impact combining all techniques.
+                        </div>
+                        <ul class="type-features">
+                            <li>Pixel base + shader effects</li>
+                            <li>Vector trails and overlays</li>
+                            <li>Composited rendering layers</li>
+                            <li>Ultimate visual quality</li>
+                        </ul>
+                        <span class="btn">Explore Type 5 →</span>
+                    </div>
+                </a>
+
+                <a href="type-6-voxel-minecraft/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 6</div>
+                        <div class="type-title">Voxel/Minecraft Style</div>
+                        <div class="type-examples">Minecraft • MagicaVoxel • Crossy Road</div>
+                        <div class="type-desc">
+                            Isometric 3D voxel construction with blocky cubic aesthetic. Features 4-way rotation
+                            and depth illusion using Canvas2D projection math.
+                        </div>
+                        <ul class="type-features">
+                            <li>Isometric 3D projection</li>
+                            <li>Cubic voxel rendering</li>
+                            <li>4-way rotation support</li>
+                            <li>256×256 resolution</li>
+                        </ul>
+                        <span class="btn">Explore Type 6 →</span>
+                    </div>
+                </a>
+
+                <a href="type-7-chibi-kawaii/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 7</div>
+                        <div class="type-title">Chibi/Kawaii Style</div>
+                        <div class="type-examples">MapleStory • Cute Knight • Neko Atsume</div>
+                        <div class="type-desc">
+                            Super deformed proportions with oversized heads (1:1 ratio), huge kawaii eyes,
+                            and bouncy squash & stretch animations with sparkle effects.
+                        </div>
+                        <ul class="type-features">
+                            <li>Oversized head proportions</li>
+                            <li>Huge expressive eyes</li>
+                            <li>Bouncy squash & stretch</li>
+                            <li>Floating sparkles</li>
+                        </ul>
+                        <span class="btn">Explore Type 7 →</span>
+                    </div>
+                </a>
+
+                <a href="type-8-neon-cyberpunk/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 8</div>
+                        <div class="type-title">Neon Cyberpunk Style</div>
+                        <div class="type-examples">Tron • Geometry Wars • Neon Drive</div>
+                        <div class="type-desc">
+                            Dark backgrounds with bright neon outlines, bloom and glow effects, scanlines,
+                            and chromatic aberration. Full synthwave aesthetic with WebGL2 shaders.
+                        </div>
+                        <ul class="type-features">
+                            <li>Neon outlines & bloom</li>
+                            <li>Scanline overlay effects</li>
+                            <li>Chromatic aberration</li>
+                            <li>Tron grid floor</li>
+                        </ul>
+                        <span class="btn">Explore Type 8 →</span>
+                    </div>
+                </a>
+
+                <a href="type-9-lowpoly-3d/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 9</div>
+                        <div class="type-title">Low-Poly 3D Style</div>
+                        <div class="type-examples">Superhot • Firewatch • Monument Valley</div>
+                        <div class="type-desc">
+                            Real-time Three.js 3D rendering with faceted polygons and flat shading. Full 360°
+                            rotation with dynamic lighting and camera controls.
+                        </div>
+                        <ul class="type-features">
+                            <li>Three.js WebGL rendering</li>
+                            <li>Faceted flat shading</li>
+                            <li>Full 360° camera control</li>
+                            <li>Dynamic lighting</li>
+                        </ul>
+                        <span class="btn">Explore Type 9 →</span>
+                    </div>
+                </a>
+
+                <a href="type-10-metroidvania-hires/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 10</div>
+                        <div class="type-title">Metroidvania Hi-Res</div>
+                        <div class="type-examples">Hollow Knight • Ori • Blasphemous</div>
+                        <div class="type-desc">
+                            High-resolution 256×256 hand-painted style with multi-layer gradients, rim lighting,
+                            atmospheric particles, and depth effects. Detailed shading and ambient glow.
+                        </div>
+                        <ul class="type-features">
+                            <li>Hand-painted simulation</li>
+                            <li>Atmospheric particles</li>
+                            <li>Multi-layer gradients</li>
+                            <li>Depth & rim lighting</li>
+                        </ul>
+                        <span class="btn">Explore Type 10 →</span>
+                    </div>
+                </a>
+
+                <a href="type-11-retro-8bit/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 11</div>
+                        <div class="type-title">Retro 8-Bit</div>
+                        <div class="type-examples">Game Boy • NES • C64 • CGA</div>
+                        <div class="type-desc">
+                            Authentic 160×144 Game Boy resolution with 4-color palettes. Pure retro gaming nostalgia
+                            with limited color palettes, pixel-perfect rendering, and classic 1980s-1990s aesthetics.
+                        </div>
+                        <ul class="type-features">
+                            <li>4-color limited palettes</li>
+                            <li>Game Boy native resolution</li>
+                            <li>Authentic retro style</li>
+                            <li>NES/GB/C64/CGA/ZX modes</li>
+                        </ul>
+                        <span class="btn">Explore Type 11 →</span>
+                    </div>
+                </a>
+
+                <a href="type-12-sketch-art/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 12</div>
+                        <div class="type-title">Hand-Drawn Sketch</div>
+                        <div class="type-examples">Pencil • Ink • Charcoal • Marker</div>
+                        <div class="type-desc">
+                            320×320 sketch-style line art with jittered strokes, cross-hatching shading, and organic
+                            imperfections. Simulates pencil, ink, charcoal, and marker techniques with adjustable line weight.
+                        </div>
+                        <ul class="type-features">
+                            <li>Jittered line rendering</li>
+                            <li>Cross-hatching shading</li>
+                            <li>5 drawing styles</li>
+                            <li>Adjustable line weight</li>
+                        </ul>
+                        <span class="btn">Explore Type 12 →</span>
+                    </div>
+                </a>
+
+                <a href="type-13-stained-glass/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 13</div>
+                        <div class="type-title">Stained Glass</div>
+                        <div class="type-examples">Cathedral • Mosaic • Gothic</div>
+                        <div class="type-desc">
+                            320×320 cathedral mosaic with translucent colored glass panels, black leading (grout lines),
+                            and radial gradient light transmission. Adjustable light intensity for backlit effects.
+                        </div>
+                        <ul class="type-features">
+                            <li>Translucent glass panels</li>
+                            <li>Black leading outlines</li>
+                            <li>Light transmission simulation</li>
+                            <li>5 cathedral palettes</li>
+                        </ul>
+                        <span class="btn">Explore Type 13 →</span>
+                    </div>
+                </a>
+
+                <a href="type-14-comic-halftone/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 14</div>
+                        <div class="type-title">Comic Book Halftone</div>
+                        <div class="type-examples">Silver Age • Pop Art • Manga</div>
+                        <div class="type-desc">
+                            320×320 comic book style with Ben-Day dot halftone patterns, bold black outlines, action lines,
+                            and sound effects (POW! BANG! ZAP!). Authentic Silver Age comics and Pop Art aesthetics.
+                        </div>
+                        <ul class="type-features">
+                            <li>Ben-Day dot halftone</li>
+                            <li>Bold 4-5px outlines</li>
+                            <li>Action lines & sound FX</li>
+                            <li>5 comic styles</li>
+                        </ul>
+                        <span class="btn">Explore Type 14 →</span>
+                    </div>
+                </a>
+
+                <a href="type-15-glitch-art/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 15</div>
+                        <div class="type-title">Glitch Art</div>
+                        <div class="type-examples">Digital Corruption • RGB Split • Cyberpunk</div>
+                        <div class="type-desc">
+                            400×400 glitch art with RGB channel separation, scan lines, and random corruption events (15% per frame).
+                            Additive blending creates chromatic aberration and digital artifacts.
+                        </div>
+                        <ul class="type-features">
+                            <li>RGB channel separation</li>
+                            <li>Scan line overlay</li>
+                            <li>Random glitch triggers</li>
+                            <li>Digital artifacts</li>
+                        </ul>
+                        <span class="btn">Explore Type 15 →</span>
+                    </div>
+                </a>
+
+                <a href="type-16-watercolor-paint/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 16</div>
+                        <div class="type-title">Watercolor Paint</div>
+                        <div class="type-examples">Soft Blends • Artistic • Hand-Painted</div>
+                        <div class="type-desc">
+                            400×400 watercolor style with soft blended edges, layered transparency (3 layers per shape), and radial gradients
+                            simulating paint diffusion. Artistic brushstroke aesthetic.
+                        </div>
+                        <ul class="type-features">
+                            <li>Soft blended edges</li>
+                            <li>3-layer transparency</li>
+                            <li>Radial gradients</li>
+                            <li>Paint diffusion</li>
+                        </ul>
+                        <span class="btn">Explore Type 16 →</span>
+                    </div>
+                </a>
+
+                <a href="type-17-ascii-terminal/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 17</div>
+                        <div class="type-title">ASCII/Terminal Art</div>
+                        <div class="type-examples">Retro Text • Monospace • Terminal</div>
+                        <div class="type-desc">
+                            Text-based sprites using ASCII characters (#, @, |, /, \). Retro terminal aesthetic with monospace font,
+                            color themes (green/magenta/cyan), and authentic 80s/90s BBS vibes.
+                        </div>
+                        <ul class="type-features">
+                            <li>ASCII character art</li>
+                            <li>Monospace font</li>
+                            <li>Terminal themes</li>
+                            <li>Retro BBS style</li>
+                        </ul>
+                        <span class="btn">Explore Type 17 →</span>
+                    </div>
+                </a>
+
+                <a href="type-18-paper-cutout/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 18</div>
+                        <div class="type-title">Paper Cut-Out</div>
+                        <div class="type-examples">Layered Shadows • Storybook • Silhouette</div>
+                        <div class="type-desc">
+                            400×400 paper cut-out style with layered silhouettes, drop shadows (depth 2-5), and black stroke outlines.
+                            Storybook aesthetic with shadow depth creating 3D paper layer illusion.
+                        </div>
+                        <ul class="type-features">
+                            <li>Layered silhouettes</li>
+                            <li>Drop shadow depth</li>
+                            <li>Black stroke outlines</li>
+                            <li>Storybook aesthetic</li>
+                        </ul>
+                        <span class="btn">Explore Type 18 →</span>
+                    </div>
+                </a>
+
+                <a href="type-19-hologram-wireframe/index.html" class="type-card">
+                    <div class="type-content">
+                        <div class="type-badge">Type 19</div>
+                        <div class="type-title">Hologram/Wireframe</div>
+                        <div class="type-examples">Sci-Fi Projection • Translucent • Pulsing</div>
+                        <div class="type-desc">
+                            400×400 holographic wireframe with pulsing opacity (sin wave), additive blending (globalCompositeOperation lighter),
+                            and digital particle artifacts. Sci-fi projection aesthetic.
+                        </div>
+                        <ul class="type-features">
+                            <li>Wireframe lines</li>
+                            <li>Pulsing opacity</li>
+                            <li>Additive blending</li>
+                            <li>Particle artifacts</li>
+                        </ul>
+                        <span class="btn">Explore Type 19 →</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">⚔️ 3 Hero Characters</h2>
+            <p class="section-desc">
+                Each rendering style includes all three hero characters with unique black hair/fur (locked across all
+                palettes),
+                full animations (idle, walk, attack), and 5 color palette variations.
+            </p>
+
+            <div class="character-grid">
+                <div class="character-card">
+                    <div class="character-icon">⚔️</div>
+                    <div class="character-name">Warrior (Dual Swords)</div>
+                    <div class="character-desc">
+                        Dark-skinned warrior with black curly hair, baseball cap, and dual glowing energy swords.
+                        Features red glowing eyes and dynamic combat stance.
+                    </div>
+                </div>
+
+                <div class="character-card">
+                    <div class="character-icon">😇</div>
+                    <div class="character-name">Cat Angel Gunner</div>
+                    <div class="character-desc">
+                        Anthropomorphic black cat with floating halo, pink wing, and handgun.
+                        Unique angelic aesthetic with tactical combat elements.
+                    </div>
+                </div>
+
+                <div class="character-card">
+                    <div class="character-icon">🤖</div>
+                    <div class="character-name">Cyborg Rifle Operative</div>
+                    <div class="character-desc">
+                        Dark-skinned female with black pigtails and futuristic energy rifle.
+                        Segmented armor with glowing cyan accents and advanced weaponry.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">✨ Key Features</h2>
+
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Production Ready</div>
+                    <div class="feature-desc">
+                        All sprites are fully animated with idle, walk, and attack cycles. Export as PNG frames,
+                        sprite sheets, or JSON metadata for immediate use in any game engine.
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-title">5 Color Palettes</div>
+                    <div class="feature-desc">
+                        Each character supports fire, ice, shadow, light, and nature themes.
+                        Hair/fur stays unique black across all palettes for character identity.
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🔌</div>
+                    <div class="feature-title">Zero Dependencies</div>
+                    <div class="feature-desc">
+                        Self-contained HTML files with no external libraries. Works completely offline
+                        with full WebGL2 + Canvas2D fallback support.
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">60fps Performance</div>
+                    <div class="feature-desc">
+                        Optimized rendering at 60 frames per second. Real-time animation control
+                        with speed adjustments from 0.5x to 2x normal speed.
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🎮</div>
+                    <div class="feature-title">Game Engine Integration</div>
+                    <div class="feature-desc">
+                        Includes adapters for Phaser 3, PixiJS, A1K Engine, Vanilla Canvas, and Three.js.
+                        Copy-paste ready code snippets for instant integration.
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">📦</div>
+                    <div class="feature-title">Export Tools</div>
+                    <div class="feature-desc">
+                        Export single frames, complete sprite sheets, or batch export all animations.
+                        JSON metadata includes frame timing, hitboxes, and animation states.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>📖 Getting Started</h3>
+            <p>
+                <strong>1. Choose a Rendering Style:</strong> Click any type card above to explore all three characters
+                in that style.
+            </p>
+            <p>
+                <strong>2. Customize & Preview:</strong> Each character page includes live animation preview with speed
+                controls,
+                palette switching, and real-time rendering.
+            </p>
+            <p>
+                <strong>3. Export for Your Game:</strong> Use the export buttons to save PNG frames, sprite sheets, or
+                JSON metadata.
+                Integration code snippets provided for popular game engines.
+            </p>
+            <p>
+                <strong>4. Integrate & Deploy:</strong> Drop exported sprites into your game, use provided integration
+                code,
+                and start developing immediately. All sprites work offline and in production.
+            </p>
+        </div>
+
+        <div class="info-box" style="margin-top: 20px;">
+            <h3>🛠️ Technical Specifications</h3>
+            <p><strong>Resolutions:</strong> 64×64, 128×128, 256×256 (scalable display 2x-5x)</p>
+            <p><strong>Animations:</strong> Idle (8 frames), Walk (8 frames), Attack (6 frames)</p>
+            <p><strong>Frame Rate:</strong> 60fps real-time rendering</p>
+            <p><strong>Export Formats:</strong> PNG (transparent), Sprite Sheets (horizontal strip), JSON (metadata)</p>
+            <p><strong>Browser Support:</strong> Chrome 56+, Firefox 51+, Safari 15+, Edge 79+</p>
+            <p><strong>File Sizes:</strong> ~10-25KB per HTML file (self-contained)</p>
+            <p><strong>Color Palettes:</strong> Fire, Ice, Shadow, Light, Nature (5 per character)</p>
+        </div>
+
+    </div>
+
+    <footer>
+        <p><strong>Hero Sprites System v1.0</strong></p>
+        <p style="margin-top: 8px;">Production-Ready • Fully Offline • Zero Dependencies</p>
+        <p style="margin-top: 16px; color: #555;">Built for A1K Game Engine & Universal HTML5 Games</p>
+    </footer>
+
+</body>
+
+</html>

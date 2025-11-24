@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Dual Pistols - Hybrid Enhanced</title>
+    <style>
+        * {margin: 0; padding: 0; box-sizing: border-box;}
+        body {min-height: 100vh; background: #0a0a0a; color: #e0e0e0; font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; padding: 20px;}
+        #container {display: flex; gap: 30px; max-width: 1200px;}
+        #canvas-wrapper {position: relative; flex-shrink: 0;}
+        #pixelCanvas {border: 2px solid #333; image-rendering: pixelated; image-rendering: crisp-edges; background: #1a1a1a; display: block;}
+        #controls {background: rgba(255, 255, 255, 0.03); border: 1px solid #333; border-radius: 8px; padding: 20px; width: 350px;}
+        h1 {font-size: 16px; margin-bottom: 20px; color: #fff; border-bottom: 2px solid #444; padding-bottom: 10px;}
+        .control-group {margin-bottom: 16px;}
+        label {display: block; font-size: 12px; color: #999; margin-bottom: 6px; text-transform: uppercase;}
+        select, button {width: 100%; padding: 8px 12px; background: #1a1a1a; border: 1px solid #444; color: #fff; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; cursor: pointer;}
+        button {margin-top: 8px; background: #2a2a2a;}
+        .btn-group {display: grid; grid-template-columns: 1fr 1fr; gap: 8px;}
+        .info {font-size: 11px; color: #666; margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;}
+        .stat-value {font-size: 14px; color: #0f0; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-wrapper"><canvas id="pixelCanvas" width="128" height="128"></canvas></div>
+        <div id="controls">
+            <h1>🔫 UNIQUE (DUAL PISTOLS)</h1>
+            <div class="control-group"><label>Animation</label><select id="animState"><option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option></select></div>
+            <div class="control-group"><label>Palette</label><select id="palette"><option value="fire">Fire</option><option value="ice">Ice</option><option value="shadow">Shadow</option></select></div>
+            <div class="control-group"><label>Export</label><div class="btn-group"><button id="exportFrame">PNG</button><button id="exportSheet">Sheet</button></div></div>
+            <div class="info"><strong>TYPE 5: HYBRID</strong><br>Dual Pistols • Hair: Black</div>
+        </div>
+    </div>
+    <script>
+        const c = document.getElementById('pixelCanvas'), ctx = c.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        let anim = 'idle', frame = 0, timer = 0, pal = 'fire';
+        const pals = {fire: {s: ['#4a3428', '#5c4033'], c: ['#1a1a1a', '#2a2a2a'], w: ['#ff0000', '#ff3333', '#ff6666']}, ice: {s: ['#4a3428', '#5c4033'], c: ['#0a1a2a', '#1a2a3a'], w: ['#00ffff', '#33ffff', '#66ffff']}, shadow: {s: ['#4a3428', '#5c4033'], c: ['#1a0a2a', '#2a1a3a'], w: ['#aa00ff', '#cc33ff', '#dd66ff']}};
+        const anims = {idle: {f: 8, t: 250}, walk: {f: 8, t: 125}, attack: {f: 6, t: 83}};
+        function draw() {const p = pals[pal], x = 64, y = 64; let b = Math.sin(frame / 4 * Math.PI); ctx.clearRect(0, 0, 128, 128); ctx.fillStyle = p.c[1]; ctx.fillRect(x - 10, y + 20, 6, 16); ctx.fillRect(x + 4, y + 20, 6, 16); ctx.fillRect(x - 12, y + 4, 24, 20); ctx.fillStyle = p.s[1]; ctx.fillRect(x - 10, y - 16, 20, 18); ctx.fillStyle = '#000'; ctx.fillRect(x - 14, y - 12, 3, 10); ctx.fillRect(x + 11, y - 12, 3, 10); ctx.fillRect(x - 10, y - 20, 20, 5); ctx.fillStyle = p.w[0]; ctx.fillRect(x - 25, y + 14, 6, 4); ctx.fillRect(x + 19, y + 14, 6, 4);}
+        function loop(t) {if (timer += 16; timer >= anims[anim].t) {timer = 0; frame++; if (frame >= anims[anim].f) frame = 0;} draw(); requestAnimationFrame(loop);}
+        document.getElementById('animState').addEventListener('change', (e) => anim = e.target.value);
+        document.getElementById('palette').addEventListener('change', (e) => pal = e.target.value);
+        document.getElementById('exportFrame').addEventListener('click', () => {const l = document.createElement('a'); l.download = `unique-pistols-${anim}.png`; l.href = c.toDataURL('image/png'); l.click();});
+        c.style.width = '384px'; c.style.height = '384px'; loop(0);
+    </script>
+</body>
+</html>

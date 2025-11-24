@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HD Merchant Sprite Generator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #3e2723, #1a0f0f);
+            color: #f5f5dc;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffc107;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ffc107;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #f5f5dc;
+            font-size: 14px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ffc107, #ff8f00);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .sprite-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            min-height: 300px;
+        }
+
+        canvas {
+            border: 3px solid #ffc107;
+            border-radius: 10px;
+            background: #1a0f0f;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .export-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .export-section button {
+            margin: 0 10px;
+            padding: 12px 24px;
+        }
+
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .animation-controls button {
+            padding: 8px 16px;
+            min-width: auto;
+            width: auto;
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffc107;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #f5f5dc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>💰 HD Merchant Sprite Generator</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Merchant Type:</label>
+                <select id="merchantType">
+                    <option value="shopkeeper">Shopkeeper</option>
+                    <option value="trader">Trader</option>
+                    <option value="alchemist">Alchemist</option>
+                    <option value="blacksmith">Blacksmith</option>
+                    <option value="innkeeper">Innkeeper</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Palette:</label>
+                <select id="palette">
+                    <option value="light">Light (Shopkeeper)</option>
+                    <option value="nature">Nature (Trader)</option>
+                    <option value="energy">Energy (Alchemist)</option>
+                    <option value="fire">Fire (Blacksmith)</option>
+                    <option value="ice">Ice (Innkeeper)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Scale:</label>
+                <select id="scale">
+                    <option value="2">2x (256px)</option>
+                    <option value="3">3x (384px)</option>
+                    <option value="4">4x (512px)</option>
+                    <option value="5">5x (640px)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Animation:</label>
+                <select id="animation">
+                    <option value="idle">Idle</option>
+                    <option value="walk">Walk</option>
+                    <option value="sell">Sell</option>
+                    <option value="count">Count</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="animation-controls">
+            <button id="playBtn">▶️ Play</button>
+            <button id="pauseBtn">⏸️ Pause</button>
+            <button id="stopBtn">⏹️ Stop</button>
+        </div>
+
+        <div class="sprite-display">
+            <canvas id="spriteCanvas" width="256" height="256"></canvas>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="wealthStat">80</div>
+                    <div class="stat-label">WEALTH</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="hagglingStat">85</div>
+                    <div class="stat-label">HAGGLING</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="trustStat">75</div>
+                    <div class="stat-label">TRUST</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="inventoryStat">90</div>
+                    <div class="stat-label">INVENTORY</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <button id="exportPNG">📷 Export PNG</button>
+            <button id="exportSpritesheet">📄 Export Spritesheet</button>
+            <button id="exportJSON">📋 Export JSON</button>
+        </div>
+    </div>
+
+    <script src="hd-sprite-engine.js"></script>
+    <script>
+        class MerchantSpriteGenerator {
+            constructor() {
+                this.canvas = document.getElementById('spriteCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.spriteEngine = new HDSpriteEngine(this.ctx);
+
+                this.currentType = 'shopkeeper';
+                this.currentPalette = 'light';
+                this.currentScale = 2;
+                this.currentAnimation = 'idle';
+                this.isAnimating = false;
+                this.animationFrame = 0;
+
+                this.initControls();
+                this.updateStats();
+                this.render();
+                this.startAnimationLoop();
+            }
+
+            initControls() {
+                // Type selection
+                document.getElementById('merchantType').addEventListener('change', (e) => {
+                    this.currentType = e.target.value;
+                    this.updatePaletteForType();
+                    this.updateStats();
+                    this.render();
+                });
+
+                // Palette selection
+                document.getElementById('palette').addEventListener('change', (e) => {
+                    this.currentPalette = e.target.value;
+                    this.render();
+                });
+
+                // Scale selection
+                document.getElementById('scale').addEventListener('change', (e) => {
+                    this.currentScale = parseInt(e.target.value);
+                    this.updateCanvasSize();
+                    this.render();
+                });
+
+                // Animation selection
+                document.getElementById('animation').addEventListener('change', (e) => {
+                    this.currentAnimation = e.target.value;
+                    this.animationFrame = 0;
+                    this.render();
+                });
+
+                // Animation controls
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.isAnimating = true;
+                });
+
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.isAnimating = false;
+                });
+
+                document.getElementById('stopBtn').addEventListener('click', () => {
+                    this.isAnimating = false;
+                    this.animationFrame = 0;
+                    this.render();
+                });
+
+                // Export buttons
+                document.getElementById('exportPNG').addEventListener('click', () => {
+                    this.exportPNG();
+                });
+
+                document.getElementById('exportSpritesheet').addEventListener('click', () => {
+                    this.exportSpritesheet();
+                });
+
+                document.getElementById('exportJSON').addEventListener('click', () => {
+                    this.exportJSON();
+                });
+            }
+
+            updatePaletteForType() {
+                const paletteMap = {
+                    'shopkeeper': 'light',
+                    'trader': 'nature',
+                    'alchemist': 'energy',
+                    'blacksmith': 'fire',
+                    'innkeeper': 'ice'
+                };
+                this.currentPalette = paletteMap[this.currentType];
+                document.getElementById('palette').value = this.currentPalette;
+            }
+
+            updateCanvasSize() {
+                const size = 128 * this.currentScale;
+                this.canvas.width = size;
+                this.canvas.height = size;
+                this.spriteEngine.setScale(this.currentScale);
+            }
+
+            updateStats() {
+                const statsMap = {
+                    'shopkeeper': { wealth: 70, haggling: 85, trust: 80, inventory: 75 },
+                    'trader': { wealth: 90, haggling: 95, trust: 85, inventory: 95 },
+                    'alchemist': { wealth: 75, haggling: 80, trust: 70, inventory: 85 },
+                    'blacksmith': { wealth: 80, haggling: 75, trust: 90, inventory: 80 },
+                    'innkeeper': { wealth: 85, haggling: 70, trust: 95, inventory: 90 }
+                };
+
+                const stats = statsMap[this.currentType];
+                document.getElementById('wealthStat').textContent = stats.wealth;
+                document.getElementById('hagglingStat').textContent = stats.haggling;
+                document.getElementById('trustStat').textContent = stats.trust;
+                document.getElementById('inventoryStat').textContent = stats.inventory;
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.spriteEngine.renderMerchant(this.currentType, this.currentPalette, this.currentAnimation, this.animationFrame);
+            }
+
+            startAnimationLoop() {
+                setInterval(() => {
+                    if (this.isAnimating) {
+                        this.animationFrame = (this.animationFrame + 1) % 4;
+                        this.render();
+                    }
+                }, 200);
+            }
+
+            exportPNG() {
+                const link = document.createElement('a');
+                link.download = `merchant-${this.currentType}-${this.currentPalette}.png`;
+                link.href = this.canvas.toDataURL();
+                link.click();
+            }
+
+            exportSpritesheet() {
+                // Create spritesheet with all animations
+                const frameWidth = 128 * this.currentScale;
+                const frameHeight = 128 * this.currentScale;
+                const spritesheetCanvas = document.createElement('canvas');
+                spritesheetCanvas.width = frameWidth * 4; // 4 frames per animation
+                spritesheetCanvas.height = frameHeight * 4; // 4 animations
+                const ssCtx = spritesheetCanvas.getContext('2d');
+
+                const animations = ['idle', 'walk', 'sell', 'count'];
+                animations.forEach((anim, animIndex) => {
+                    for (let frame = 0; frame < 4; frame++) {
+                        this.spriteEngine.renderMerchant(this.currentType, this.currentPalette, anim, frame);
+                        const x = frame * frameWidth;
+                        const y = animIndex * frameHeight;
+                        ssCtx.drawImage(this.canvas, x, y);
+                    }
+                });
+
+                const link = document.createElement('a');
+                link.download = `merchant-${this.currentType}-spritesheet.png`;
+                link.href = spritesheetCanvas.toDataURL();
+                link.click();
+            }
+
+            exportJSON() {
+                const spriteData = {
+                    type: 'merchant',
+                    subtype: this.currentType,
+                    palette: this.currentPalette,
+                    scale: this.currentScale,
+                    animations: {
+                        idle: { frames: 4 },
+                        walk: { frames: 4 },
+                        sell: { frames: 4 },
+                        count: { frames: 4 }
+                    },
+                    stats: {
+                        wealth: parseInt(document.getElementById('wealthStat').textContent),
+                        haggling: parseInt(document.getElementById('hagglingStat').textContent),
+                        trust: parseInt(document.getElementById('trustStat').textContent),
+                        inventory: parseInt(document.getElementById('inventoryStat').textContent)
+                    }
+                };
+
+                const dataStr = JSON.stringify(spriteData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.download = `merchant-${this.currentType}-data.json`;
+                link.href = URL.createObjectURL(dataBlob);
+                link.click();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new MerchantSpriteGenerator();
+        });
+    </script>
+</body>
+
+</html>

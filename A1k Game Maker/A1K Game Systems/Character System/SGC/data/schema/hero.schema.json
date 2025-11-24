@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SGC Hero Definition",
+  "description": "Structure for offline-capable Special Game Characters with rationale-rich skills.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "rank",
+    "role",
+    "summary",
+    "stats",
+    "skills",
+    "acquisition",
+    "synergy",
+    "visuals"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Slug used across JSON, UI, and canvas systems."
+    },
+    "name": {
+      "type": "string"
+    },
+    "rank": {
+      "type": "string",
+      "enum": ["E", "C", "A", "S", "SS", "SSS", "SSSS"],
+      "description": "Tier indicator driving aura styling and drop odds."
+    },
+    "role": {
+      "type": "string",
+      "enum": ["support", "striker", "tank", "pet", "hybrid"],
+      "description": "High-contrast lane communicated in UI filters."
+    },
+    "summary": {
+      "type": "object",
+      "required": ["hook", "gameplay", "why_it_matters"],
+      "properties": {
+        "hook": {"type": "string"},
+        "gameplay": {"type": "string"},
+        "why_it_matters": {"type": "string"}
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": ["attack", "defense", "luck", "support", "speed"],
+      "properties": {
+        "attack": {"type": "number", "minimum": 0, "maximum": 100},
+        "defense": {"type": "number", "minimum": 0, "maximum": 100},
+        "luck": {"type": "number", "minimum": 0, "maximum": 100},
+        "support": {"type": "number", "minimum": 0, "maximum": 100},
+        "speed": {"type": "number", "minimum": 0, "maximum": 100}
+      },
+      "description": "Relative sliders powering UI meters and combat math."
+    },
+    "skills": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "cooldown", "aura_cost", "effects", "rationale"],
+        "properties": {
+          "name": {"type": "string"},
+          "type": {"type": "string", "enum": ["feed", "heal", "attack", "buff", "utility"]},
+          "cooldown": {"type": "number", "minimum": 0},
+          "aura_cost": {"type": "number", "minimum": 0},
+          "effects": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Explains why the ability exists so future devs grok balance intent."
+          }
+        }
+      }
+    },
+    "acquisition": {
+      "type": "object",
+      "required": ["method", "costs", "spawn_logic"],
+      "properties": {
+        "method": {"type": "string"},
+        "costs": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        },
+        "spawn_logic": {
+          "type": "string",
+          "description": "Concise pseudo-logic for RNG conditions."
+        }
+      }
+    },
+    "synergy": {
+      "type": "object",
+      "required": ["combos", "counters"],
+      "properties": {
+        "combos": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "counters": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "visuals": {
+      "type": "object",
+      "required": ["palette", "aura", "animation_notes"],
+      "properties": {
+        "palette": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "aura": {"type": "string"},
+        "animation_notes": {"type": "string"}
+      }
+    }
+  }
+}

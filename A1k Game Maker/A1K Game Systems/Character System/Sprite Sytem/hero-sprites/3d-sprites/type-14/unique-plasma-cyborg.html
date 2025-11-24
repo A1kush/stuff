@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Plasma Cyborg - Type 14</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #1a0a0a 0%, #2d1a1a 100%); font-family: 'Arial', sans-serif; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #viewport { border: 3px solid #ff4500; border-radius: 10px; box-shadow: 0 10px 40px rgba(255,69,0,0.5); }
+        #controls { background: rgba(255,255,255,0.95); border: 3px solid #ff4500; border-radius: 10px; padding: 25px; width: 400px; box-shadow: 0 10px 40px rgba(255,69,0,0.3); }
+        h1 { font-size: 20px; margin-bottom: 20px; color: #cc3700; border-bottom: 3px solid #ff4500; padding-bottom: 12px; font-weight: bold; }
+        .control-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: #cc3700; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        select, button { width: 100%; padding: 10px 15px; background: #ecf0f1; border: 2px solid #ff4500; color: #cc3700; border-radius: 8px; font-family: 'Arial', sans-serif; font-size: 14px; cursor: pointer; font-weight: 600; }
+        button { margin-top: 8px; background: linear-gradient(135deg, #ff4500 0%, #cc3700 100%); color: #fff; border: none; }
+        button:hover { transform: scale(1.02); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info { font-size: 12px; color: #cc3700; margin-top: 25px; padding-top: 25px; border-top: 2px solid #ff4500; line-height: 1.8; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat { background: #ecf0f1; padding: 12px; border-radius: 8px; border: 2px solid #ff4500; }
+        .stat-label { font-size: 11px; color: #cc3700; font-weight: bold; }
+        .stat-value { font-size: 18px; color: #cc3700; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="viewport"></div>
+        <div id="controls">
+            <h1>⚡ UNIQUE PLASMA CYBORG</h1>
+            <div class="control-group"><label>Animation</label>
+                <select id="animState">
+                    <option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option>
+                    <option value="jump">Jump</option><option value="hurt">Hurt</option><option value="victory">Victory</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Material Color</label>
+                <select id="palette">
+                    <option value="fire">🔥 Fire Red</option><option value="ice">❄️ Ice Cyan</option>
+                    <option value="lightning">⚡ Lightning Yellow</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Camera View</label>
+                <select id="cameraView">
+                    <option value="front">Front View</option><option value="side">Side View</option><option value="back">Back View</option>
+                    <option value="top">Top View</option><option value="free" selected>Free Rotate</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Speed</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
+            <div class="control-group"><label>Export</label><div class="btn-group"><button id="exportFrame">PNG</button><button id="exportSheet">Sheet</button></div><button id="exportJSON">JSON</button></div>
+            <div class="info">
+                <strong>TYPE 14: ELEMENTAL 3D</strong><br>Dynamic Multi-Element Style<br><br>
+                • Resolution: 512×512<br>• 360° rotation<br>• Plasma energy systems<br>• Multi-element conduits<br>• Dynamic particles<br><br>
+                <div class="stats">
+                    <div class="stat"><div class="stat-label">Frame</div><div class="stat-value" id="frameCount">0/8</div></div>
+                    <div class="stat"><div class="stat-label">FPS</div><div class="stat-value" id="fpsCount">60</div></div>
+                </div>
+            </div>
+            <div class="info" style="margin-top: 20px; border-top: 2px solid #ff4500; padding-top: 20px;">
+                <strong>📦 BUNDLE CONTENTS</strong><br><br>
+                <div style="font-size: 11px; line-height: 1.8;">
+                    <strong>🐾 Pets:</strong> <span id="bundle-pets">Loading...</span><br>
+                    <strong>🚗 Vehicles:</strong> <span id="bundle-vehicles">Loading...</span><br>
+                    <strong>✨ Spirits:</strong> <span id="bundle-spirits">Loading...</span><br>
+                    <strong>👥 NPCs:</strong> <span id="bundle-npcs">Loading...</span><br>
+                    <strong>⚔️ Equipment:</strong> <span id="bundle-equipment">Loading...</span><br>
+                    <strong>🤖 AI Bots:</strong> <span id="bundle-bots">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.TEMPLATE_CONFIG = {
+            slug: "unique-plasma-cyborg",
+            title: "Plasma Cyborg",
+            heroId: "UNIQUE",
+            type: "type-14",
+            goldCost: 110000,
+            rewardTier: "gold",
+            summons: { pet: "pet_firecub", vehicle: "veh_hoverbike", spirit: "spirit_fire_spark" },
+            bundleOptions: {
+                pets: ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+                vehicles: ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+                spirits: ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+            },
+            npcs: {
+                eRank: ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+                dRank: ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+                cRank: ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+                bRank: ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+                aRank: ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+                sRank: ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+            },
+            equipment: {
+                weapons: [
+                    { id: "gear_mythic_blade", rank: "S", rarity: "legendary" },
+                    { id: "gear_mythic_shield", rank: "S", rarity: "legendary" },
+                    { id: "gear_mythic_ring", rank: "S", rarity: "legendary" }
+                ]
+            },
+            spirits: ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+            aiBots: ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+            skillLoadout: ["UNIQUE_S1", "UNIQUE_S3", "UNIQUE_S4", "UNIQUE_S5", "UNIQUE_X1"],
+            palette: ["fire", "ice", "lightning"]
+        };
+
+        let scene, camera, renderer, character;
+        let currentAnim = 'idle', currentFrame = 0, frameTimer = 0, animSpeed = 1, palette = 'fire';
+        let lastTime = 0, fps = 60, frameCount = 0, lastFpsTime = 0;
+        let autoRotate = true;
+        let elementalParticles = [];
+
+        const palettes = {
+            fire: 0xff4444, ice: 0x44ffff, lightning: 0xffff44
+        };
+
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true }, walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false }, jump: { frames: 6, frameTime: 100, loop: false },
+            hurt: { frames: 4, frameTime: 150, loop: false }, victory: { frames: 8, frameTime: 200, loop: true }
+        };
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a0a0a);
+            scene.fog = new THREE.Fog(0x1a0a0a, 10, 50);
+
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera.position.set(0, 1.5, 4);
+            camera.lookAt(0, 1, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(512, 512);
+            document.getElementById('viewport').appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(palettes[palette], 1.2);
+            dirLight.position.set(5, 10, 5);
+            scene.add(dirLight);
+
+            const pointLight = new THREE.PointLight(palettes[palette], 1.5, 10);
+            pointLight.position.set(0, 2, 0);
+            scene.add(pointLight);
+
+            createCharacter();
+            createElementalEffects();
+        }
+
+        function createCharacter() {
+            if (character) scene.remove(character);
+            character = new THREE.Group();
+
+            const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const headMat = new THREE.MeshPhongMaterial({ color: 0xd4a574, flatShading: true });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.5;
+            character.add(head);
+
+            const pigtailGeo = new THREE.BoxGeometry(0.15, 0.4, 0.15);
+            const pigtailMat = new THREE.MeshPhongMaterial({ color: 0x000000, flatShading: true });
+            const leftPigtail = new THREE.Mesh(pigtailGeo, pigtailMat);
+            leftPigtail.position.set(-0.3, 1.3, 0.2);
+            character.add(leftPigtail);
+            const rightPigtail = new THREE.Mesh(pigtailGeo, pigtailMat);
+            rightPigtail.position.set(0.3, 1.3, 0.2);
+            character.add(rightPigtail);
+
+            const bodyGeo = new THREE.BoxGeometry(0.6, 0.8, 0.4);
+            const bodyMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette], 
+                flatShading: true,
+                emissive: palettes[palette],
+                emissiveIntensity: 0.7
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.8;
+            character.add(body);
+
+            const armGeo = new THREE.BoxGeometry(0.2, 0.6, 0.2);
+            const armMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette],
+                flatShading: true,
+                emissive: palettes[palette],
+                emissiveIntensity: 0.5
+            });
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.5, 0.8, 0);
+            character.add(leftArm);
+
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.5, 0.8, 0);
+            character.add(rightArm);
+
+            const legGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
+            const legMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette], 
+                flatShading: true,
+                emissive: palettes[palette],
+                emissiveIntensity: 0.4
+            });
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.15, 0.15, 0);
+            character.add(leftLeg);
+
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.15, 0.15, 0);
+            character.add(rightLeg);
+
+            const rifleGeo = new THREE.BoxGeometry(0.4, 0.2, 0.15);
+            const rifleMat = new THREE.MeshPhongMaterial({ 
+                color: 0x333333, 
+                flatShading: true,
+                emissive: palettes[palette],
+                emissiveIntensity: 0.5
+            });
+            const rifle = new THREE.Mesh(rifleGeo, rifleMat);
+            rifle.position.set(0.7, 0.9, 0);
+            character.add(rifle);
+
+            character.position.y = 0.5;
+            scene.add(character);
+        }
+
+        function createElementalEffects() {
+            elementalParticles.forEach(p => scene.remove(p));
+            elementalParticles = [];
+            
+            for (let i = 0; i < 30; i++) {
+                const particleGeo = new THREE.SphereGeometry(0.04, 8, 8);
+                const particleMat = new THREE.MeshPhongMaterial({ 
+                    color: palettes[palette],
+                    emissive: palettes[palette],
+                    emissiveIntensity: 1.8,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const particle = new THREE.Mesh(particleGeo, particleMat);
+                const angle = (i / 30) * Math.PI * 2;
+                const radius = 1.4 + Math.random() * 0.4;
+                particle.position.set(
+                    Math.cos(angle) * radius,
+                    Math.random() * 2,
+                    Math.sin(angle) * radius
+                );
+                particle.userData.angle = angle;
+                particle.userData.radius = radius;
+                particle.userData.speed = 0.02 + Math.random() * 0.03;
+                particle.userData.verticalSpeed = 0.01 + Math.random() * 0.02;
+                scene.add(particle);
+                elementalParticles.push(particle);
+            }
+        }
+
+        function updateCharacter() {
+            if (!character) return;
+
+            const frame = currentFrame;
+            const anim = currentAnim;
+
+            if (anim === 'idle') {
+                character.position.y = 0.5 + Math.sin(frame / 4 * Math.PI) * 0.05;
+            } else if (anim === 'walk') {
+                character.position.y = 0.5 + Math.abs(Math.sin(frame / 4 * Math.PI)) * 0.08;
+                character.rotation.x = Math.sin(frame / 4 * Math.PI) * 0.1;
+            } else if (anim === 'attack') {
+                character.children.forEach((child, i) => {
+                    if (i > 6) child.rotation.y = (frame / 6) * Math.PI * 0.5;
+                });
+            } else if (anim === 'jump') {
+                character.position.y = frame < 3 ? 0.5 + frame * 0.3 : 0.5 + (6 - frame) * 0.3;
+            } else if (anim === 'victory') {
+                character.position.y = 0.5 + Math.abs(Math.sin(frame / 2 * Math.PI)) * 0.15;
+                character.rotation.y = Math.sin(frame / 4 * Math.PI) * 0.3;
+            }
+
+            if (autoRotate) {
+                character.rotation.y += 0.01;
+            }
+
+            elementalParticles.forEach(particle => {
+                particle.userData.angle += particle.userData.speed;
+                particle.position.x = Math.cos(particle.userData.angle) * particle.userData.radius;
+                particle.position.z = Math.sin(particle.userData.angle) * particle.userData.radius;
+                particle.position.y += Math.sin(Date.now() * 0.002 + particle.userData.angle) * particle.userData.verticalSpeed;
+                if (particle.position.y > 2.5) particle.position.y = 0;
+                if (particle.position.y < 0) particle.position.y = 2.5;
+            });
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount; frameCount = 0; lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0; currentFrame++;
+                if (currentFrame >= anim.frames) currentFrame = anim.loop ? 0 : anim.frames - 1;
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            updateCharacter();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', e => { currentAnim = e.target.value; currentFrame = 0; frameTimer = 0; });
+        document.getElementById('palette').addEventListener('change', e => {
+            palette = e.target.value;
+            createCharacter();
+            createElementalEffects();
+        });
+        document.getElementById('cameraView').addEventListener('change', e => {
+            const view = e.target.value;
+            autoRotate = view === 'free';
+            if (view === 'front') { camera.position.set(0, 1.5, 4); camera.lookAt(0, 1, 0); }
+            else if (view === 'side') { camera.position.set(4, 1.5, 0); camera.lookAt(0, 1, 0); }
+            else if (view === 'back') { camera.position.set(0, 1.5, -4); camera.lookAt(0, 1, 0); }
+            else if (view === 'top') { camera.position.set(0, 5, 0.1); camera.lookAt(0, 1, 0); }
+        });
+        document.getElementById('speed').addEventListener('change', e => animSpeed = parseFloat(e.target.value));
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `unique-plasma-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = renderer.domElement.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            alert('Sprite sheet export: Capture each frame manually or implement automated sheet generation');
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = { 
+                character: 'Unique Plasma Cyborg', 
+                type: 'Type 14: Elemental 3D', 
+                resolution: '512x512', 
+                animations, 
+                palettes: Object.keys(palettes),
+                currentState: { animation: currentAnim, frame: currentFrame, palette },
+                templateConfig: window.TEMPLATE_CONFIG
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a'); 
+            link.download = `unique-plasma-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob); 
+            link.click();
+        });
+
+        function displayBundleContents() {
+            const config = window.TEMPLATE_CONFIG;
+            if (!config) return;
+
+            const formatList = (items) => items ? items.map(item => item.replace(/^(pet_|veh_|spirit_|npc_|gear_|robot_)/, '').replace(/_/g, ' ')).join(', ') : 'None';
+            const formatNPCs = (npcs) => {
+                if (!npcs) return 'None';
+                const ranks = Object.keys(npcs);
+                const counts = ranks.map(r => `${r.toUpperCase()}: ${npcs[r].length}`).join(', ');
+                return counts;
+            };
+            const formatEquipment = (equip) => {
+                if (!equip?.weapons) return 'None';
+                return equip.weapons.map(w => {
+                    const name = w.id.replace(/^gear_/, '').replace(/_/g, ' ');
+                    return `${name} (${w.rank})`;
+                }).join(', ');
+            };
+
+            document.getElementById('bundle-pets').textContent = formatList(config.bundleOptions?.pets || []);
+            document.getElementById('bundle-vehicles').textContent = formatList(config.bundleOptions?.vehicles || []);
+            document.getElementById('bundle-spirits').textContent = formatList(config.spirits || config.bundleOptions?.spirits || []);
+            document.getElementById('bundle-npcs').textContent = formatNPCs(config.npcs);
+            document.getElementById('bundle-equipment').textContent = formatEquipment(config.equipment);
+            document.getElementById('bundle-bots').textContent = formatList(config.aiBots || []);
+        }
+
+        init();
+        animate(0);
+        displayBundleContents();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Steam Knight - Type 12</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #2c1810 0%, #3d2817 100%); font-family: 'Arial', sans-serif; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #viewport { border: 3px solid #b8860b; border-radius: 10px; box-shadow: 0 10px 40px rgba(184,134,11,0.5); }
+        #controls { background: rgba(255,255,255,0.95); border: 3px solid #b8860b; border-radius: 10px; padding: 25px; width: 400px; box-shadow: 0 10px 40px rgba(184,134,11,0.3); }
+        h1 { font-size: 20px; margin-bottom: 20px; color: #8b6914; border-bottom: 3px solid #b8860b; padding-bottom: 12px; font-weight: bold; }
+        .control-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: #8b6914; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        select, button { width: 100%; padding: 10px 15px; background: #ecf0f1; border: 2px solid #b8860b; color: #8b6914; border-radius: 8px; font-family: 'Arial', sans-serif; font-size: 14px; cursor: pointer; font-weight: 600; }
+        button { margin-top: 8px; background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%); color: #fff; border: none; }
+        button:hover { transform: scale(1.02); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info { font-size: 12px; color: #8b6914; margin-top: 25px; padding-top: 25px; border-top: 2px solid #b8860b; line-height: 1.8; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat { background: #ecf0f1; padding: 12px; border-radius: 8px; border: 2px solid #b8860b; }
+        .stat-label { font-size: 11px; color: #8b6914; font-weight: bold; }
+        .stat-value { font-size: 18px; color: #8b6914; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="viewport"></div>
+        <div id="controls">
+            <h1>⚙️ A1 STEAM KNIGHT</h1>
+            <div class="control-group"><label>Animation</label>
+                <select id="animState">
+                    <option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option>
+                    <option value="jump">Jump</option><option value="hurt">Hurt</option><option value="victory">Victory</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Material Color</label>
+                <select id="palette">
+                    <option value="steam">⚙️ Steam Brass</option><option value="brass">🔩 Brass Copper</option>
+                    <option value="gear">⚙️ Gear Bronze</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Camera View</label>
+                <select id="cameraView">
+                    <option value="front">Front View</option><option value="side">Side View</option><option value="back">Back View</option>
+                    <option value="top">Top View</option><option value="free" selected>Free Rotate</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Speed</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
+            <div class="control-group"><label>Export</label><div class="btn-group"><button id="exportFrame">PNG</button><button id="exportSheet">Sheet</button></div><button id="exportJSON">JSON</button></div>
+            <div class="info">
+                <strong>TYPE 12: STEAMPUNK 3D</strong><br>Victorian Mechanical Style<br><br>
+                • Resolution: 512×512<br>• 360° rotation<br>• Mechanical gears<br>• Steam vents<br>• Brass aesthetics<br><br>
+                <div class="stats">
+                    <div class="stat"><div class="stat-label">Frame</div><div class="stat-value" id="frameCount">0/8</div></div>
+                    <div class="stat"><div class="stat-label">FPS</div><div class="stat-value" id="fpsCount">60</div></div>
+                </div>
+            </div>
+            <div class="info" style="margin-top: 20px; border-top: 2px solid #b8860b; padding-top: 20px;">
+                <strong>📦 BUNDLE CONTENTS</strong><br><br>
+                <div style="font-size: 11px; line-height: 1.8;">
+                    <strong>🐾 Pets:</strong> <span id="bundle-pets">Loading...</span><br>
+                    <strong>🚗 Vehicles:</strong> <span id="bundle-vehicles">Loading...</span><br>
+                    <strong>✨ Spirits:</strong> <span id="bundle-spirits">Loading...</span><br>
+                    <strong>👥 NPCs:</strong> <span id="bundle-npcs">Loading...</span><br>
+                    <strong>⚔️ Equipment:</strong> <span id="bundle-equipment">Loading...</span><br>
+                    <strong>🤖 AI Bots:</strong> <span id="bundle-bots">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.TEMPLATE_CONFIG = {
+            slug: "a1-steam-knight",
+            title: "Steam Knight",
+            heroId: "A1",
+            type: "type-12",
+            goldCost: 85000,
+            rewardTier: "silver",
+            summons: { pet: "pet_firecub", vehicle: "veh_hoverbike", spirit: "spirit_fire_spark" },
+            bundleOptions: {
+                pets: ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+                vehicles: ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+                spirits: ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+            },
+            npcs: {
+                eRank: ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+                dRank: ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+                cRank: ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+                bRank: ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+                aRank: ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+                sRank: ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+            },
+            equipment: {
+                weapons: [
+                    { id: "gear_mythic_blade", rank: "S", rarity: "legendary" },
+                    { id: "gear_mythic_shield", rank: "S", rarity: "legendary" },
+                    { id: "gear_mythic_ring", rank: "S", rarity: "legendary" }
+                ]
+            },
+            spirits: ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+            aiBots: ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+            skillLoadout: ["A1_S1", "A1_S3", "A1_S4", "A1_S5", "A1_X1"],
+            palette: ["steam", "brass"]
+        };
+
+        let scene, camera, renderer, character, gears = [];
+        let currentAnim = 'idle', currentFrame = 0, frameTimer = 0, animSpeed = 1, palette = 'steam';
+        let lastTime = 0, fps = 60, frameCount = 0, lastFpsTime = 0;
+        let autoRotate = true;
+        let steamParticles = [];
+
+        const palettes = {
+            steam: 0xb8860b, brass: 0xcd7f32, gear: 0x8b6914
+        };
+
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true }, walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false }, jump: { frames: 6, frameTime: 100, loop: false },
+            hurt: { frames: 4, frameTime: 150, loop: false }, victory: { frames: 8, frameTime: 200, loop: true }
+        };
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x2c1810);
+            scene.fog = new THREE.Fog(0x2c1810, 10, 50);
+
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera.position.set(0, 1.5, 4);
+            camera.lookAt(0, 1, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(512, 512);
+            document.getElementById('viewport').appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffd700, 0.8);
+            dirLight.position.set(5, 10, 5);
+            scene.add(dirLight);
+
+            createCharacter();
+            createSteamEffects();
+        }
+
+        function createCharacter() {
+            if (character) scene.remove(character);
+            gears.forEach(g => scene.remove(g));
+            gears = [];
+            
+            character = new THREE.Group();
+
+            const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const headMat = new THREE.MeshPhongMaterial({ color: 0xd4a574, flatShading: true });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.5;
+            character.add(head);
+
+            const capGeo = new THREE.BoxGeometry(0.6, 0.2, 0.6);
+            const capMat = new THREE.MeshPhongMaterial({ color: 0x000000, flatShading: true });
+            const cap = new THREE.Mesh(capGeo, capMat);
+            cap.position.y = 1.8;
+            character.add(cap);
+
+            const bodyGeo = new THREE.BoxGeometry(0.6, 0.8, 0.4);
+            const bodyMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette], 
+                flatShading: true,
+                metalness: 0.8,
+                roughness: 0.3
+            });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.8;
+            character.add(body);
+
+            const armGeo = new THREE.BoxGeometry(0.2, 0.6, 0.2);
+            const armMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette],
+                flatShading: true,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.5, 0.8, 0);
+            character.add(leftArm);
+
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.5, 0.8, 0);
+            character.add(rightArm);
+
+            const legGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
+            const legMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette], 
+                flatShading: true,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.15, 0.15, 0);
+            character.add(leftLeg);
+
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.15, 0.15, 0);
+            character.add(rightLeg);
+
+            const swordGeo = new THREE.BoxGeometry(0.1, 1, 0.05);
+            const swordMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette], 
+                flatShading: true,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+            const leftSword = new THREE.Mesh(swordGeo, swordMat);
+            leftSword.position.set(-0.7, 1, 0);
+            leftSword.rotation.z = 0.3;
+            character.add(leftSword);
+
+            const rightSword = new THREE.Mesh(swordGeo, swordMat);
+            rightSword.position.set(0.7, 1, 0);
+            rightSword.rotation.z = -0.3;
+            character.add(rightSword);
+
+            const gearGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.05, 16);
+            const gearMat = new THREE.MeshPhongMaterial({ 
+                color: palettes[palette],
+                flatShading: true,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            for (let i = 0; i < 4; i++) {
+                const gear = new THREE.Mesh(gearGeo, gearMat);
+                gear.position.set(
+                    (i % 2 === 0 ? -0.3 : 0.3),
+                    0.5 + Math.floor(i / 2) * 0.4,
+                    0.2
+                );
+                gear.rotation.x = Math.PI / 2;
+                scene.add(gear);
+                gears.push(gear);
+            }
+
+            character.position.y = 0.5;
+            scene.add(character);
+        }
+
+        function createSteamEffects() {
+            steamParticles.forEach(p => scene.remove(p));
+            steamParticles = [];
+            
+            for (let i = 0; i < 10; i++) {
+                const particleGeo = new THREE.SphereGeometry(0.04, 8, 8);
+                const particleMat = new THREE.MeshPhongMaterial({ 
+                    color: 0xcccccc,
+                    transparent: true,
+                    opacity: 0.4
+                });
+                const particle = new THREE.Mesh(particleGeo, particleMat);
+                particle.position.set(
+                    (Math.random() - 0.5) * 0.5,
+                    0.3 + Math.random() * 0.5,
+                    (Math.random() - 0.5) * 0.5
+                );
+                particle.userData.speed = 0.01 + Math.random() * 0.02;
+                scene.add(particle);
+                steamParticles.push(particle);
+            }
+        }
+
+        function updateCharacter() {
+            if (!character) return;
+
+            const frame = currentFrame;
+            const anim = currentAnim;
+
+            if (anim === 'idle') {
+                character.position.y = 0.5 + Math.sin(frame / 4 * Math.PI) * 0.05;
+            } else if (anim === 'walk') {
+                character.position.y = 0.5 + Math.abs(Math.sin(frame / 4 * Math.PI)) * 0.08;
+                character.rotation.x = Math.sin(frame / 4 * Math.PI) * 0.1;
+            } else if (anim === 'attack') {
+                character.children.forEach((child, i) => {
+                    if (i > 6) child.rotation.y = (frame / 6) * Math.PI * 0.5;
+                });
+            } else if (anim === 'jump') {
+                character.position.y = frame < 3 ? 0.5 + frame * 0.3 : 0.5 + (6 - frame) * 0.3;
+            } else if (anim === 'victory') {
+                character.position.y = 0.5 + Math.abs(Math.sin(frame / 2 * Math.PI)) * 0.15;
+                character.rotation.y = Math.sin(frame / 4 * Math.PI) * 0.3;
+            }
+
+            if (autoRotate) {
+                character.rotation.y += 0.01;
+            }
+
+            gears.forEach(gear => {
+                gear.rotation.z += 0.02;
+            });
+
+            steamParticles.forEach(particle => {
+                particle.position.y += particle.userData.speed;
+                if (particle.position.y > 1.5) {
+                    particle.position.y = 0.3;
+                    particle.position.x = (Math.random() - 0.5) * 0.5;
+                    particle.position.z = (Math.random() - 0.5) * 0.5;
+                }
+            });
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount; frameCount = 0; lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0; currentFrame++;
+                if (currentFrame >= anim.frames) currentFrame = anim.loop ? 0 : anim.frames - 1;
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            updateCharacter();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', e => { currentAnim = e.target.value; currentFrame = 0; frameTimer = 0; });
+        document.getElementById('palette').addEventListener('change', e => {
+            palette = e.target.value;
+            createCharacter();
+            createSteamEffects();
+        });
+        document.getElementById('cameraView').addEventListener('change', e => {
+            const view = e.target.value;
+            autoRotate = view === 'free';
+            if (view === 'front') { camera.position.set(0, 1.5, 4); camera.lookAt(0, 1, 0); }
+            else if (view === 'side') { camera.position.set(4, 1.5, 0); camera.lookAt(0, 1, 0); }
+            else if (view === 'back') { camera.position.set(0, 1.5, -4); camera.lookAt(0, 1, 0); }
+            else if (view === 'top') { camera.position.set(0, 5, 0.1); camera.lookAt(0, 1, 0); }
+        });
+        document.getElementById('speed').addEventListener('change', e => animSpeed = parseFloat(e.target.value));
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `a1-steam-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = renderer.domElement.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            alert('Sprite sheet export: Capture each frame manually or implement automated sheet generation');
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = { 
+                character: 'A1 Steam Knight', 
+                type: 'Type 12: Steampunk 3D', 
+                resolution: '512x512', 
+                animations, 
+                palettes: Object.keys(palettes),
+                currentState: { animation: currentAnim, frame: currentFrame, palette },
+                templateConfig: window.TEMPLATE_CONFIG
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a'); 
+            link.download = `a1-steam-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob); 
+            link.click();
+        });
+
+        function displayBundleContents() {
+            const config = window.TEMPLATE_CONFIG;
+            if (!config) return;
+
+            const formatList = (items) => items ? items.map(item => item.replace(/^(pet_|veh_|spirit_|npc_|gear_|robot_)/, '').replace(/_/g, ' ')).join(', ') : 'None';
+            const formatNPCs = (npcs) => {
+                if (!npcs) return 'None';
+                const ranks = Object.keys(npcs);
+                const counts = ranks.map(r => `${r.toUpperCase()}: ${npcs[r].length}`).join(', ');
+                return counts;
+            };
+            const formatEquipment = (equip) => {
+                if (!equip?.weapons) return 'None';
+                return equip.weapons.map(w => {
+                    const name = w.id.replace(/^gear_/, '').replace(/_/g, ' ');
+                    return `${name} (${w.rank})`;
+                }).join(', ');
+            };
+
+            document.getElementById('bundle-pets').textContent = formatList(config.bundleOptions?.pets || []);
+            document.getElementById('bundle-vehicles').textContent = formatList(config.bundleOptions?.vehicles || []);
+            document.getElementById('bundle-spirits').textContent = formatList(config.spirits || config.bundleOptions?.spirits || []);
+            document.getElementById('bundle-npcs').textContent = formatNPCs(config.npcs);
+            document.getElementById('bundle-equipment').textContent = formatEquipment(config.equipment);
+            document.getElementById('bundle-bots').textContent = formatList(config.aiBots || []);
+        }
+
+        init();
+        animate(0);
+        displayBundleContents();
+    </script>
+</body>
+</html>
+

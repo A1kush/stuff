@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Missy - Stained Glass</title>
+    <style>
+        body {margin: 0; background: #1a0033; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        canvas {border: 5px solid #FFD700;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        x.fillStyle = '#330066'; x.fillRect(0, 0, 512, 512);
+        x.fillStyle = '#CC0000'; x.fillRect(200, 250, 112, 150);
+        x.strokeStyle = '#000'; x.lineWidth = 8; x.strokeRect(200, 250, 112, 150);
+        x.fillStyle = '#FFB380'; x.fillRect(200, 150, 112, 100); x.strokeRect(200, 150, 112, 100);
+        x.fillStyle = '#FF8800'; x.beginPath(); x.ellipse(256, 130, 40, 10, 0, 0, 7); x.fill(); x.strokeStyle = '#000'; x.lineWidth = 6; x.stroke(); x.fillStyle = '#000'; x.fillRect(200, 150, 112, 30); x.beginPath(); x.moveTo(205, 155); x.lineTo(195, 140); x.lineTo(215, 150); x.fill(); x.beginPath(); x.moveTo(307, 155); x.lineTo(317, 140); x.lineTo(297, 150); x.fill(); x.fillStyle = '#00FF00'; x.fillRect(230, 185, 15, 15); x.strokeRect(230, 185, 15, 15); x.fillStyle = '#FFD4E0'; x.beginPath(); x.ellipse(185, 195, 18, 30, -0.3, 0, 7); x.fill(); x.strokeRect(200, 150, 112, 30);
+        x.fillStyle = '#FFD700'; x.fillRect(150, 290, 40, 20); x.strokeRect(150, 290, 40, 20);
+        x.save(); x.translate(337, 300); x.rotate(0.3); x.fillRect(-10, -60, 20, 120); x.strokeRect(-10, -60, 20, 120); x.restore();
+    </script>
+</body>
+</html>

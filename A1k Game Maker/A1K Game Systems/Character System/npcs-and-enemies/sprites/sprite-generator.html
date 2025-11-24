@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Sprite Generator - NPC & Enemy Rank System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #00aa00;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .generator-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .controls-panel {
+            background: #001100;
+            border: 2px solid #00aa00;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 20px rgba(0, 170, 0, 0.3);
+        }
+
+        .canvas-panel {
+            background: #000000;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .sprite-card {
+            background: #001100;
+            border: 1px solid #00aa00;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .sprite-card canvas {
+            border: 1px solid #00aa00;
+            background: #000000;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-optimize-contrast: true;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .sprite-card h3 {
+            color: #00ff00;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #00ff00;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #000000;
+            color: #00ff00;
+            border: 1px solid #00aa00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            background: #00aa00;
+            color: #000000;
+        }
+
+        button {
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 0 10px rgba(0, 170, 0, 0.8);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .generate-btn {
+            background: #00ff00 !important;
+            color: #000000 !important;
+            font-weight: bold;
+            border: 2px solid #00ff00 !important;
+        }
+
+        .generate-btn:hover {
+            background: #000000 !important;
+            color: #00ff00 !important;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #00aa00;
+        }
+
+        .export-section h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .progress {
+            margin-top: 20px;
+            padding: 10px;
+            background: #001100;
+            border: 1px solid #00aa00;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #000000;
+            border: 1px solid #00aa00;
+            margin-bottom: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #00ff00;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            color: #00aa00;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .controls-title {
+            color: #00ff00;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎮 Production Sprite Generator</h1>
+        <p class="subtitle">Generate HD pixel art sprites for all NPC & Enemy categories • Works completely offline</p>
+
+        <div class="generator-grid">
+            <div class="controls-panel">
+                <h2 class="controls-title">⚙️ Generator Controls</h2>
+
+                <div class="control-group">
+                    <label for="category-select">Character Category</label>
+                    <select id="category-select">
+                        <option value="all">🎯 All Categories (15)</option>
+                        <option value="hero">⚔️ Hero</option>
+                        <option value="villain">🧙 Villain</option>
+                        <option value="npc">👤 NPC</option>
+                        <option value="slayer">🗡️ Slayer</option>
+                        <option value="hunter">🏹 Hunter</option>
+                        <option value="guardian">🛡️ Guardian</option>
+                        <option value="mage">🔮 Mage</option>
+                        <option value="assassin">🗡️ Assassin</option>
+                        <option value="support">💚 Support</option>
+                        <option value="minion">👾 Minion</option>
+                        <option value="elite">💀 Elite</option>
+                        <option value="boss">👹 Boss</option>
+                        <option value="pet">🐾 Pet</option>
+                        <option value="merchant">💰 Merchant</option>
+                        <option value="crafter">⚒️ Crafter</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="palette-select">Color Palette</label>
+                    <select id="palette-select">
+                        <option value="default">🎨 Default Mix</option>
+                        <option value="fire">🔥 Fire Theme</option>
+                        <option value="ice">❄️ Ice Theme</option>
+                        <option value="shadow">🌑 Shadow Theme</option>
+                        <option value="light">✨ Light Theme</option>
+                        <option value="nature">🌿 Nature Theme</option>
+                        <option value="energy">⚡ Energy Theme</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="scale-select">Sprite Scale</label>
+                    <select id="scale-select">
+                        <option value="2">2x Scale (256px)</option>
+                        <option value="3">3x Scale (384px)</option>
+                        <option value="4" selected>4x Scale (512px)</option>
+                        <option value="5">5x Scale (640px)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="quality-select">Quality Level</label>
+                    <select id="quality-select">
+                        <option value="basic">Basic (Fast)</option>
+                        <option value="standard" selected>Standard (Balanced)</option>
+                        <option value="premium">Premium (Detailed)</option>
+                    </select>
+                </div>
+
+                <button class="generate-btn" onclick="generateSprites()">🚀 Generate All Sprites</button>
+
+                <div class="export-section">
+                    <h3>💾 Export Options</h3>
+                    <div class="btn-grid">
+                        <button onclick="exportAllPNG()">📷 All PNGs</button>
+                        <button onclick="exportAllSheets()">📄 All Sheets</button>
+                    </div>
+                    <button onclick="exportAllJSON()">💾 All JSON Data</button>
+                </div>
+
+                <div class="progress hidden" id="progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Initializing...</div>
+                </div>
+            </div>
+
+            <div class="canvas-panel" id="canvas-panel">
+                <!-- Sprites will be generated here -->
+                <div class="sprite-card">
+                    <h3>Loading Sprite Generator...</h3>
+                    <p class="loading-text">Select options and click Generate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./hd-sprite-engine.js"></script>
+    <script>
+        let spriteSystems = {};
+        let currentCategory = 'all';
+        let currentPalette = 'default';
+        let currentScale = 4;
+        let currentQuality = 'standard';
+
+        const categories = {
+            hero: ['warrior', 'mage', 'ranger', 'paladin', 'ninja'],
+            villain: ['warlock', 'bandit', 'necromancer', 'tyrant', 'assassin'],
+            npc: ['merchant', 'blacksmith', 'alchemist', 'scholar', 'healer'],
+            slayer: ['demon-slayer', 'dragon-slayer', 'beast-slayer', 'undead-slayer'],
+            hunter: ['archer', 'crossbowman', 'sniper', 'tracker'],
+            guardian: ['shield-bearer', 'warden', 'protector', 'sentinel'],
+            mage: ['fire-mage', 'ice-mage', 'lightning-mage', 'earth-mage', 'wind-mage'],
+            assassin: ['shadow-assassin', 'poison-assassin', 'blade-assassin', 'night-assassin'],
+            support: ['priest', 'shaman', 'druid', 'monk', 'bard'],
+            minion: ['imp', 'goblin', 'skeleton', 'zombie', 'spirit'],
+            elite: ['elite-warrior', 'elite-mage', 'elite-assassin', 'elite-guardian'],
+            boss: ['dragon-lord', 'demon-king', 'titan', 'lich', 'behemoth'],
+            pet: ['wolf', 'eagle', 'bear', 'fox', 'dragonling'],
+            merchant: ['trader', 'shopkeeper', 'collector', 'artisan'],
+            crafter: ['blacksmith', 'enchanter', 'alchemist', 'tailor']
+        };
+
+        function init() {
+            // Setup controls
+            document.getElementById('category-select').addEventListener('change', (e) => {
+                currentCategory = e.target.value;
+            });
+
+            document.getElementById('palette-select').addEventListener('change', (e) => {
+                currentPalette = e.target.value;
+            });
+
+            document.getElementById('scale-select').addEventListener('change', (e) => {
+                currentScale = parseInt(e.target.value);
+            });
+
+            document.getElementById('quality-select').addEventListener('change', (e) => {
+                currentQuality = e.target.value;
+            });
+        }
+
+        async function generateSprites() {
+            const progress = document.getElementById('progress');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const canvasPanel = document.getElementById('canvas-panel');
+
+            progress.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Initializing sprite generation...';
+
+            // Clear existing sprites
+            canvasPanel.innerHTML = '';
+            spriteSystems = {};
+
+            let categoriesToGenerate = currentCategory === 'all' ?
+                Object.keys(categories) : [currentCategory];
+
+            let totalSprites = 0;
+            categoriesToGenerate.forEach(cat => {
+                totalSprites += categories[cat].length;
+            });
+
+            let completedSprites = 0;
+
+            for (const category of categoriesToGenerate) {
+                for (const subType of categories[category]) {
+                    // Create sprite card
+                    const card = document.createElement('div');
+                    card.className = 'sprite-card';
+
+                    const title = document.createElement('h3');
+                    title.textContent = `${category} ${subType}`.replace(/-/g, ' ');
+                    card.appendChild(title);
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 128 * currentScale;
+                    canvas.height = 128 * currentScale;
+                    card.appendChild(canvas);
+
+                    canvasPanel.appendChild(card);
+
+                    // Generate sprite
+                    const spriteSystem = new HDSpriteSystem();
+                    spriteSystem.setCanvas(canvas);
+                    spriteSystem.setCharacter(category, subType);
+                    spriteSystem.setPalette(currentPalette === 'default' ? getRandomPalette() : currentPalette);
+                    spriteSystem.setScale(currentScale);
+                    spriteSystem.draw();
+
+                    spriteSystems[`${category}-${subType}`] = spriteSystem;
+
+                    // Update progress
+                    completedSprites++;
+                    const progressPercent = (completedSprites / totalSprites) * 100;
+                    progressFill.style.width = `${progressPercent}%`;
+                    progressText.textContent = `Generated ${completedSprites}/${totalSprites} sprites...`;
+
+                    // Small delay to prevent UI freezing
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+            }
+
+            progressText.textContent = `✅ Generation complete! ${totalSprites} sprites ready.`;
+            setTimeout(() => {
+                progress.style.display = 'none';
+            }, 2000);
+        }
+
+        function getRandomPalette() {
+            const palettes = ['fire', 'ice', 'shadow', 'light', 'nature', 'energy'];
+            return palettes[Math.floor(Math.random() * palettes.length)];
+        }
+
+        function exportAllPNG() {
+            const zip = new JSZip();
+
+            Object.entries(spriteSystems).forEach(([key, system]) => {
+                const dataURL = system.exportPNG();
+                if (dataURL) {
+                    const base64Data = dataURL.split(',')[1];
+                    zip.file(`${key}-${system.colorPalette}.png`, base64Data, { base64: true });
+                }
+            });
+
+            zip.generateAsync({ type: 'blob' }).then(content => {
+                const link = document.createElement('a');
+                link.download = `all-sprites-png-${Date.now()}.zip`;
+                link.href = URL.createObjectURL(content);
+                link.click();
+            });
+        }
+
+        function exportAllSheets() {
+            const zip = new JSZip();
+
+            Object.entries(spriteSystems).forEach(([key, system]) => {
+                const dataURL = system.exportSpriteSheet();
+                if (dataURL) {
+                    const base64Data = dataURL.split(',')[1];
+                    zip.file(`${key}-sheet-${system.colorPalette}.png`, base64Data, { base64: true });
+                }
+            });
+
+            zip.generateAsync({ type: 'blob' }).then(content => {
+                const link = document.createElement('a');
+                link.download = `all-sprite-sheets-${Date.now()}.zip`;
+                link.href = URL.createObjectURL(content);
+                link.click();
+            });
+        }
+
+        function exportAllJSON() {
+            const zip = new JSZip();
+
+            Object.entries(spriteSystems).forEach(([key, system]) => {
+                const data = system.exportJSON();
+                const dataStr = JSON.stringify(data, null, 2);
+                zip.file(`${key}-data-${system.colorPalette}.json`, dataStr);
+            });
+
+            // Also export manifest
+            fetch('./sprite-manifest.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    zip.file('sprite-manifest.json', JSON.stringify(manifest, null, 2));
+
+                    zip.generateAsync({ type: 'blob' }).then(content => {
+                        const link = document.createElement('a');
+                        link.download = `all-sprite-data-${Date.now()}.zip`;
+                        link.href = URL.createObjectURL(content);
+                        link.click();
+                    });
+                });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <!-- JSZip for ZIP export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+
+</html>

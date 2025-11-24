@@ -1,0 +1,21 @@
+{
+  "name": "pet-system",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Chibi candy-style pet system with 13 elemental companions",
+  "scripts": {
+    "dev": "vite",
+    "dev:showcase": "vite showcase.html",
+    "build": "vite build",
+    "build:showcase": "vite build showcase.html",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "npm:rolldown-vite@7.1.14"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.1.14"
+  }
+}
+

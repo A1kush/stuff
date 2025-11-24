@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Field Interface - Standalone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+/* Full CSS from tactical.css - inlined */
+:root {
+    --tac-bg: rgba(10, 10, 12, 0.85);
+    --tac-accent: #ff9f43;
+    --tac-accent-dim: rgba(255, 159, 67, 0.2);
+    --tac-text: #ffffff;
+    --tac-text-muted: #8890a0;
+    --tac-border: rgba(255, 255, 255, 0.1);
+    --tac-font: 'Rajdhani', sans-serif;
+    --rarity-common: #bdc3c7;
+    --rarity-uncommon: #2ecc71;
+    --rarity-rare: #3498db;
+    --rarity-epic: #9b59b6;
+    --rarity-legendary: #f1c40f;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #050505;
+    font-family: var(--tac-font);
+    color: var(--tac-text);
+}
+
+#radar-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+#ui-layer {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+#btn-deploy {
+    background: transparent;
+    border: 1px solid var(--tac-accent);
+    color: var(--tac-accent);
+    padding: 15px 40px;
+    font-family: var(--tac-font);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+}
+
+#btn-deploy:hover {
+    background: var(--tac-accent);
+    color: #000;
+    box-shadow: 0 0 20px var(--tac-accent);
+}
+
+#tactical-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+}
+
+#tactical-root.open {
+    display: flex;
+    opacity: 1;
+}
+
+.tac-container {
+    width: 95%;
+    height: 85%;
+    margin: auto;
+    display: flex;
+    gap: 20px;
+}
+
+.tac-nav {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    padding-right: 20px;
+    border-right: 1px solid var(--tac-border);
+}
+
+.tac-header {
+    margin-bottom: 40px;
+}
+
+.tac-title {
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    border-left: 4px solid var(--tac-accent);
+    padding-left: 15px;
+    line-height: 1;
+}
+
+.tac-subtitle {
+    font-size: 14px;
+    color: var(--tac-text-muted);
+    margin-top: 5px;
+    padding-left: 20px;
+    text-transform: uppercase;
+}
+
+.nav-group {
+    margin-bottom: 30px;
+}
+
+.nav-group-title {
+    font-size: 12px;
+    color: var(--tac-accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    opacity: 0.7;
+}
+
+.nav-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--tac-text-muted);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 2px solid transparent;
+}
+
+.nav-item:hover {
+    color: white;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
+}
+
+.nav-item.active {
+    color: var(--tac-accent);
+    border-left: 2px solid var(--tac-accent);
+    background: linear-gradient(90deg, var(--tac-accent-dim), transparent);
+    font-weight: 700;
+}
+
+.tac-content {
+    flex: 1;
+    background: rgba(20, 20, 25, 0.4);
+    border: 1px solid var(--tac-border);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--tac-border);
+    padding-bottom: 10px;
+}
+
+.content-title {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.tac-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+    padding: 5px;
+    overflow-y: auto;
+}
+
+.tac-slot {
+    aspect-ratio: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    position: relative;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.tac-slot:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.tac-slot.selected {
+    border-color: var(--tac-accent);
+    box-shadow: inset 0 0 15px var(--tac-accent-dim);
+}
+
+.tac-slot .qty {
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tac-inspector {
+    width: 300px;
+    background: rgba(0,0,0,0.3);
+    border-left: 1px solid var(--tac-border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inspect-preview {
+    height: 200px;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 80px;
+    margin-bottom: 20px;
+    border: 1px solid var(--tac-border);
+}
+
+.inspect-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.inspect-type {
+    font-size: 14px;
+    color: var(--tac-accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.inspect-stats {
+    margin-top: 20px;
+}
+
+.stat-bar {
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--tac-text-muted);
+    margin-bottom: 2px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stat-track {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    width: 100%;
+}
+
+.stat-fill {
+    height: 100%;
+    background: var(--tac-accent);
+    width: 0%;
+    transition: width 0.5s ease-out;
+}
+
+.inspect-desc {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #bbb;
+    line-height: 1.5;
+    border-top: 1px solid var(--tac-border);
+    padding-top: 15px;
+}
+
+.inspect-actions {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.action-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--tac-border);
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    font-family: var(--tac-font);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.action-btn:hover {
+    background: white;
+    color: black;
+}
+
+.q-common { color: var(--rarity-common); }
+.q-uncommon { color: var(--rarity-uncommon); }
+.q-rare { color: var(--rarity-rare); }
+.q-epic { color: var(--rarity-epic); }
+.q-legendary { color: var(--rarity-legendary); }
+
+.border-common { border-color: var(--rarity-common); }
+.border-uncommon { border-color: var(--rarity-uncommon); }
+.border-rare { border-color: var(--rarity-rare); }
+.border-epic { border-color: var(--rarity-epic); }
+.border-legendary { border-color: var(--rarity-legendary); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--tac-accent); }
+    </style>
+</head>
+<body>
+    <canvas id="radar-canvas"></canvas>
+    
+    <div id="ui-layer">
+        <button id="btn-deploy">INITIALIZE SYSTEM (B)</button>
+    </div>
+
+    <div id="tactical-root"></div>
+
+    <script>
+// All JavaScript bundled inline - no modules needed
+
+// Inventory Class
+class Inventory {
+    constructor() {
+        this.size = 60;
+        this.items = new Array(this.size).fill(null);
+        this.load();
+    }
+
+    addItem(item) {
+        if (item.stackable) {
+            const existingIndex = this.items.findIndex(i => i && i.id === item.id && i.qty < item.maxStack);
+            if (existingIndex !== -1) {
+                this.items[existingIndex].qty++;
+                this.save();
+                return true;
+            }
+        }
+
+        const emptyIndex = this.items.findIndex(i => i === null);
+        if (emptyIndex !== -1) {
+            this.items[emptyIndex] = {
+                instanceId: Date.now() + Math.random(),
+                ...item,
+                qty: item.qty || 1
+            };
+            this.save();
+            return true;
+        }
+        return false;
+    }
+
+    removeItem(instanceId) {
+        const index = this.items.findIndex(i => i && i.instanceId === instanceId);
+        if (index !== -1) {
+            this.items[index] = null;
+            this.save();
+        }
+    }
+
+    moveItem(fromIndex, toIndex) {
+        if (fromIndex < 0 || fromIndex >= this.size || toIndex < 0 || toIndex >= this.size) return false;
+        if (fromIndex === toIndex) return true;
+
+        const itemFrom = this.items[fromIndex];
+        const itemTo = this.items[toIndex];
+
+        this.items[toIndex] = itemFrom;
+        this.items[fromIndex] = itemTo;
+
+        this.save();
+        return true;
+    }
+
+    getAll() {
+        return this.items;
+    }
+
+    save() {
+        localStorage.setItem('bag_system_inventory', JSON.stringify(this.items));
+    }
+
+    load() {
+        const data = localStorage.getItem('bag_system_inventory');
+        if (data) {
+            try {
+                const parsed = JSON.parse(data);
+                if (Array.isArray(parsed)) {
+                     this.items = new Array(this.size).fill(null);
+                     for(let i=0; i < Math.min(parsed.length, this.size); i++) {
+                         this.items[i] = parsed[i];
+                     }
+                }
+            } catch (e) {
+                console.error("Failed to load inventory", e);
+                this.items = new Array(this.size).fill(null);
+            }
+        }
+    }
+
+    clear() {
+        this.items = new Array(this.size).fill(null);
+        this.save();
+    }
+}
+
+// Item Generator
+const ItemGenerator = {
+    generate() {
+        const types = ['sword', 'potion', 'shield', 'ring', 'scroll'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        const qualities = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+        const quality = qualities[Math.floor(Math.random() * qualities.length)];
+        
+        const icons = {
+            sword: '⚔️',
+            potion: '🧪',
+            shield: '🛡️',
+            ring: '💍',
+            scroll: '📜'
+        };
+
+        return {
+            id: `item_${type}`,
+            name: `${quality.charAt(0).toUpperCase() + quality.slice(1)} ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+            type: type,
+            icon: icons[type],
+            quality: quality,
+            desc: `A ${quality} quality ${type}. Very useful!`,
+            stackable: type === 'potion' || type === 'scroll',
+            maxStack: 10,
+            value: Math.floor(Math.random() * 100) + 10
+        };
+    }
+};
+
+// Tactical System Core
+class TacticalSystem {
+    constructor() {
+        this.isOpen = false;
+        this.activeTabId = 'items';
+        this.selectedItem = null;
+        this.tabs = [];
+        this.renderers = {};
+        this.toggle = this.toggle.bind(this);
+    }
+
+    init(config) {
+        this.container = document.getElementById('tactical-root');
+        if (!this.container.innerHTML.trim()) {
+            this.createDOMStructure();
+        }
+
+        this.tabs = config.tabs || [];
+        this.defaultTab = config.defaultTab || 'items';
+        this.activeTabId = this.defaultTab;
+
+        this.setupEvents();
+        this.renderNav();
+    }
+
+    createDOMStructure() {
+        this.container.innerHTML = `
+            <div class="tac-container">
+                <aside class="tac-nav">
+                    <div class="tac-header">
+                        <div class="tac-title">NEXUS</div>
+                        <div class="tac-subtitle">Tactical Field Interface</div>
+                    </div>
+                    <nav id="tac-nav-list"></nav>
+                </aside>
+                <section class="tac-content">
+                    <header class="content-header">
+                        <div class="content-title" id="content-title">INVENTORY</div>
+                        <div class="content-meta">SYS.VER.4.0</div>
+                    </header>
+                    <div id="tac-view-container"></div>
+                </section>
+                <aside class="tac-inspector" id="tac-inspector-panel">
+                    <div style="padding-top:100px; text-align:center; color:#555;">NO SIGNAL TARGET ACQUIRED</div>
+                </aside>
+            </div>
+        `;
+    }
+
+    renderNav() {
+        const list = document.getElementById('tac-nav-list');
+        list.innerHTML = '';
+
+        const groups = {
+            'PRIMARY': ['items', 'gear', 'shop'],
+            'PERSONNEL': ['team', 'pets', 'skins', 'talents', 'skills'],
+            'INTEL': ['quests', 'bestiary', 'missions', 'map', 'ai', 'alchemy', 'spirit', 'supernatural', 'drops', 'vehicles'],
+            'SYSTEM': ['settings', 'controls']
+        };
+
+        Object.keys(groups).forEach(groupName => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'nav-group';
+            groupDiv.innerHTML = `<div class="nav-group-title">${groupName}</div>`;
+            
+            groups[groupName].forEach(tabId => {
+                const tab = this.tabs.find(t => t.id === tabId);
+                if (tab) {
+                    const item = document.createElement('div');
+                    item.className = `nav-item ${tab.id === this.activeTabId ? 'active' : ''}`;
+                    item.dataset.id = tab.id;
+                    item.innerHTML = `<span>${tab.icon}</span> ${tab.label}`;
+                    item.onclick = () => this.switchTab(tab.id);
+                    groupDiv.appendChild(item);
+                }
+            });
+
+            list.appendChild(groupDiv);
+        });
+    }
+
+    setupEvents() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'b') this.toggle();
+        });
+    }
+
+    registerRenderer(type, renderer) {
+        this.renderers[type] = renderer;
+    }
+
+    switchTab(id) {
+        if (this.activeTabId === id) return;
+        this.activeTabId = id;
+        this.selectedItem = null;
+        this.renderNav();
+        this.renderContent();
+        this.renderInspector();
+    }
+
+    renderContent() {
+        const container = document.getElementById('tac-view-container');
+        container.innerHTML = '';
+        
+        const tab = this.tabs.find(t => t.id === this.activeTabId);
+        document.getElementById('content-title').innerText = tab.label.toUpperCase();
+
+        let renderer = this.renderers[tab.id] || this.renderers[tab.type];
+        if (renderer) {
+            renderer.render(container, tab);
+        } else {
+            container.innerHTML = "MODULE OFFLINE";
+        }
+    }
+
+    selectItem(item) {
+        this.selectedItem = item;
+        this.renderInspector();
+        
+        document.querySelectorAll('.tac-slot').forEach(slot => {
+            slot.classList.toggle('selected', slot.dataset.itemId === item.instanceId?.toString() || slot.dataset.itemId === item.id);
+        });
+    }
+
+    renderInspector() {
+        const panel = document.getElementById('tac-inspector-panel');
+        if (!this.selectedItem) {
+            panel.innerHTML = `<div style="padding-top:100px; text-align:center; color:#555;">NO SIGNAL TARGET ACQUIRED</div>`;
+            return;
+        }
+
+        const item = this.selectedItem;
+        const power = Math.floor(Math.random() * 100);
+        const dur = Math.floor(Math.random() * 100);
+
+        panel.innerHTML = `
+            <div class="inspect-preview q-${item.quality} border-${item.quality}">
+                ${item.icon}
+            </div>
+            <div class="inspect-title">${item.name}</div>
+            <div class="inspect-type">${item.type} // ${item.quality}</div>
+            <div class="inspect-stats">
+                <div class="stat-bar">
+                    <div class="stat-label"><span>POWER OUTPUT</span> <span>${power}%</span></div>
+                    <div class="stat-track"><div class="stat-fill" style="width:${power}%"></div></div>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-label"><span>INTEGRITY</span> <span>${dur}%</span></div>
+                    <div class="stat-track"><div class="stat-fill" style="width:${dur}%"></div></div>
+                </div>
+            </div>
+            <div class="inspect-desc">
+                ${item.desc || "No description data available in database."}
+            </div>
+            <div class="inspect-actions">
+                <button class="action-btn">EQUIP</button>
+                <button class="action-btn">DROP</button>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            panel.querySelectorAll('.stat-fill').forEach(el => {});
+        }, 50);
+    }
+
+    toggle() {
+        this.isOpen ? this.close() : this.open();
+    }
+    
+    open() {
+        this.isOpen = true;
+        this.container.classList.add('open');
+        this.renderContent();
+    }
+    
+    close() {
+        this.isOpen = false;
+        this.container.classList.remove('open');
+    }
+}
+
+// Tactical Grid Renderer
+class TacticalGridRenderer {
+    constructor(inventory) {
+        this.inventory = inventory;
+    }
+
+    render(container, tabConfig) {
+        const grid = document.createElement('div');
+        grid.className = 'tac-grid';
+
+        const items = this.inventory.getAll();
+        
+        items.forEach((item, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'tac-slot';
+            slot.dataset.index = index;
+
+            if (item) {
+                slot.dataset.itemId = item.instanceId;
+                slot.classList.add(`border-${item.quality}`);
+                slot.innerHTML = `
+                    <div class="q-${item.quality}">${item.icon}</div>
+                    ${item.qty > 1 ? `<span class="qty">x${item.qty}</span>` : ''}
+                `;
+                
+                slot.onclick = () => window.TacticalSystem.selectItem(item);
+                slot.draggable = true;
+                
+                slot.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', index);
+                });
+            }
+
+            slot.addEventListener('dragover', (e) => e.preventDefault());
+            slot.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                const toIndex = index;
+                this.inventory.moveItem(fromIndex, toIndex);
+                window.TacticalSystem.renderContent();
+            });
+
+            grid.appendChild(slot);
+        });
+
+        container.appendChild(grid);
+    }
+}
+
+// Tactical Generic Renderer
+class TacticalGenericRenderer {
+    render(container, tabConfig) {
+        container.innerHTML = `
+            <div style="padding:40px; text-align:center; color: #555;">
+                <h1>${tabConfig.icon}</h1>
+                <p>DATA STREAM LOADING...</p>
+            </div>
+        `;
+    }
+}
+
+// Tabs Config
+const TABS_CONFIG = [
+    { id: "items", label: "Items", icon: "📦", type: "grid" },
+    { id: "gear", label: "Gear", icon: "⚔️", type: "grid" },
+    { id: "team", label: "Team", icon: "👥", type: "list" },
+    { id: "pets", label: "Pets", icon: "🐾", type: "grid" },
+    { id: "skins", label: "Skins", icon: "👤", type: "grid" },
+    { id: "talents", label: "Talents", icon: "⭐", type: "info" },
+    { id: "vehicles", label: "Vehicles", icon: "🚗", type: "list" },
+    { id: "ai", label: "AI", icon: "🤖", type: "info" },
+    { id: "alchemy", label: "Alchemy", icon: "⚗️", type: "list" },
+    { id: "skills", label: "Skills", icon: "🔰", type: "list" },
+    { id: "spirit", label: "Spirit", icon: "✨", type: "info" },
+    { id: "supernatural", label: "Supernatural", icon: "🔮", type: "info" },
+    { id: "quests", label: "Quests", icon: "📜", type: "list" },
+    { id: "drops", label: "Drop Systems", icon: "🎁", type: "info" },
+    { id: "bestiary", label: "Bestiary", icon: "📖", type: "list" },
+    { id: "missions", label: "Mission Board", icon: "🗺️", type: "list" },
+    { id: "map", label: "Map", icon: "🗺️", type: "info" },
+    { id: "shop", label: "Shop", icon: "🏪", type: "grid" },
+    { id: "settings", label: "Settings", icon: "⚙️", type: "info" },
+    { id: "controls", label: "Controls", icon: "🕹️", type: "info" }
+];
+
+// Initialize
+const sys = new TacticalSystem();
+const inv = new Inventory();
+
+if (inv.getAll().filter(i => i).length === 0) {
+    for(let i=0; i<15; i++) {
+        inv.addItem(ItemGenerator.generate());
+    }
+}
+
+sys.registerRenderer('grid', new TacticalGridRenderer(inv));
+sys.registerRenderer('list', new TacticalGenericRenderer());
+sys.registerRenderer('info', new TacticalGenericRenderer());
+sys.registerRenderer('items', new TacticalGridRenderer(inv));
+sys.registerRenderer('gear', new TacticalGridRenderer(inv));
+
+sys.init({
+    tabs: TABS_CONFIG,
+    defaultTab: 'items'
+});
+
+window.TacticalSystem = sys;
+
+document.getElementById('btn-deploy').onclick = () => sys.toggle();
+
+// Matrix Rain Animation
+const canvas = document.getElementById('radar-canvas');
+const ctx = canvas.getContext('2d');
+let w, h;
+
+function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const columns = Math.floor(window.innerWidth / 20);
+const drops = new Array(columns).fill(1);
+
+function animate() {
+    ctx.fillStyle = 'rgba(5, 5, 5, 0.05)';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.fillStyle = '#ff9f43';
+    ctx.font = '15px monospace';
+
+    for(let i = 0; i < drops.length; i++) {
+        const text = String.fromCharCode(0x30A0 + Math.random() * 96);
+        ctx.fillText(text, i * 20, drops[i] * 20);
+
+        if(drops[i] * 20 > h && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+    requestAnimationFrame(animate);
+}
+animate();
+    </script>
+</body>
+</html>

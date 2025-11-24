@@ -1,0 +1,389 @@
+:root {
+  color-scheme: dark;
+  --bg: #030305;
+  --panel: #0d0d16;
+  --text: #f5f5ff;
+  --muted: #8a8ab2;
+  --accent: #ff7edb;
+  --cinematic-intensity: 1;
+  font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #141430, #05060c 60%);
+  color: var(--text);
+  padding: 2rem;
+}
+
+body.colorblind-mode {
+  --accent: #ffb703;
+  --text: #fefae0;
+  --muted: #adb5bd;
+  background: radial-gradient(circle at top, #112a46, #08121f 60%);
+}
+
+body.auto-feed-mode {
+  background: radial-gradient(circle at top, #0f1c10, #040806 60%);
+  box-shadow: inset 0 0 80px rgba(126, 240, 255, 0.08);
+}
+
+.layout-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  margin: 0 0 0.25rem;
+}
+
+.lede {
+  color: var(--muted);
+  max-width: 40ch;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.controls label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.toggle input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+.slider input {
+  margin-top: 0.5rem;
+  width: 160px;
+}
+
+select,
+button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+button {
+  cursor: pointer;
+  border-color: var(--accent);
+}
+
+.status-panel {
+  min-height: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+body.auto-feed-mode .status-panel::after {
+  content: "Auto-feed assist active";
+  display: block;
+  color: #7effb3;
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.hero-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  background: var(--panel);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 220px;
+}
+
+.hero-card__aura {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-card__aura::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent);
+  mix-blend-mode: screen;
+}
+
+.hero-card__body {
+  padding: 1.25rem;
+}
+
+.hero-card__rank {
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+.hero-card__name {
+  margin: 0.25rem 0;
+}
+
+.hero-card__summary {
+  color: var(--muted);
+  margin-top: 0;
+}
+
+.hero-card__stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.hero-card__stats dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.hero-card__stats dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.hero-card__skills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hero-card__skills div {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.colorblind-mode .hero-card__skills div {
+  border: 1px solid rgba(255, 183, 3, 0.35);
+}
+
+.hero-card__skills h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.hero-card__skills p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.hero-card__acquisition,
+.hero-card__synergy {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.ribbon-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(13, 13, 22, 0.9);
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.ribbon-panel__controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#ribbonCanvas {
+  width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 calc(40px * var(--cinematic-intensity)) rgba(255, 255, 255, 0.05);
+}
+
+.economy-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(5, 6, 12, 0.95);
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.economy-panel__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.economy-panel__controls input {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: var(--text);
+}
+
+.economy-panel__readout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+#currencyReadout {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: var(--muted);
+}
+
+.event-log {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-log__entry {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.9rem;
+}
+
+.snapshot-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.snapshot-panel textarea {
+  margin-top: 0.5rem;
+  width: 100%;
+  min-height: 120px;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  padding: 0.75rem;
+  font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+}
+
+.snapshot-panel__buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/*
+ * Rank-specific glow animations. Using CSS keeps motion cheap on canvas builds.
+ */
+.rank-E {
+  box-shadow: 0 0 calc(20px * var(--cinematic-intensity)) rgba(111, 177, 255, 0.2);
+}
+
+.rank-C {
+  animation: pulseC 4s ease-in-out infinite;
+}
+
+.rank-A {
+  animation: pulseA 3s ease-in-out infinite;
+}
+
+.rank-S,
+.rank-SS,
+.rank-SSS,
+.rank-SSSS {
+  animation: pulseS 2.4s ease-in-out infinite;
+}
+
+.rank-SSS {
+  animation-duration: 2s;
+}
+
+.rank-SSSS {
+  animation-duration: 1.6s;
+}
+
+@keyframes pulseC {
+  0%,
+  100% {
+    box-shadow: 0 0 calc(25px * var(--cinematic-intensity)) rgba(255, 206, 84, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 calc(45px * var(--cinematic-intensity)) rgba(255, 206, 84, 0.35);
+  }
+}
+
+@keyframes pulseA {
+  0%,
+  100% {
+    box-shadow: 0 0 calc(30px * var(--cinematic-intensity)) rgba(130, 51, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 calc(55px * var(--cinematic-intensity)) rgba(130, 51, 255, 0.45);
+  }
+}
+
+@keyframes pulseS {
+  0%,
+  100% {
+    box-shadow: 0 0 calc(35px * var(--cinematic-intensity)) rgba(255, 126, 219, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 calc(75px * var(--cinematic-intensity)) rgba(255, 255, 255, 0.55);
+  }
+}

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 1: HD Pixel Art - Hero Sprites Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .type-info {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .type-info h2 {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        .type-info p {
+            color: #bbb;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .traits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .trait {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            color: #a0b0ff;
+        }
+
+        .trait::before {
+            content: '✓ ';
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(102, 126, 234, 0.4);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .card-features {
+            list-style: none;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .card-features li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .card-features li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>TYPE 1: HD PIXEL ART</h1>
+            <p class="subtitle">Soul Knight / Hyper Light Drifter / Eastward Style</p>
+        </header>
+
+        <div class="type-info">
+            <h2>📖 About This Style</h2>
+            <p>
+                HD Pixel Art represents the pinnacle of hand-crafted pixel art aesthetics, combining the nostalgia of
+                8-bit/16-bit era
+                with modern high-density pixel placement and expressive animation. Each sprite is built with
+                pixel-perfect precision,
+                featuring selective contrast for facial features, color ramping for material depth, and subpixel
+                rim-lighting for weapons.
+            </p>
+            <p>
+                This style is perfect for Action RPGs, roguelikes, and side-scrollers that need cinematic flair without
+                sacrificing
+                the charm of traditional pixel art.
+            </p>
+
+            <div class="traits">
+                <div class="trait">64×64 to 128×128 resolution</div>
+                <div class="trait">High-density pixel placement</div>
+                <div class="trait">1-3 pixels per eye detail</div>
+                <div class="trait">3-5 color tones per material</div>
+                <div class="trait">Subpixel weapon rim-lighting</div>
+                <div class="trait">Hand-keyed expressive animation</div>
+                <div class="trait">Under 64 colors per sprite sheet</div>
+                <div class="trait">Black hair/fur locked (unique)</div>
+            </div>
+        </div>
+
+        <div class="gallery">
+            <a href="warrior-dual-swords.html" class="card">
+                <div class="card-title">⚔️ Warrior (Dual Swords)</div>
+                <div class="card-desc">
+                    Dark-skinned warrior with baseball cap, black curly hair, and dual glowing energy swords.
+                    Features red glowing eyes and dynamic combat animations.
+                </div>
+                <ul class="card-features">
+                    <li>Black hair (locked across palettes)</li>
+                    <li>Dual energy swords with rim glow</li>
+                    <li>3 animations (idle, walk, attack)</li>
+                    <li>5 color palettes available</li>
+                    <li>128×128 native resolution</li>
+                </ul>
+                <span class="btn">Launch Character →</span>
+            </a>
+
+            <a href="cat-angel-gunner.html" class="card">
+                <div class="card-title">😇 Cat Angel Gunner</div>
+                <div class="card-desc">
+                    Anthropomorphic black cat with floating halo, pink wing, and handgun.
+                    Angelic aesthetic meets tactical combat in this unique character design.
+                </div>
+                <ul class="card-features">
+                    <li>Black fur (locked across palettes)</li>
+                    <li>Floating animated halo</li>
+                    <li>Single wing (left side)</li>
+                    <li>Green eye with 1-pixel detail</li>
+                    <li>Themed suit colors per palette</li>
+                </ul>
+                <span class="btn">Launch Character →</span>
+            </a>
+
+            <a href="cyborg-rifle-operative.html" class="card">
+                <div class="card-title">🤖 Cyborg Rifle Operative</div>
+                <div class="card-desc">
+                    Dark-skinned female operative with black pigtails and futuristic energy rifle.
+                    Segmented armor with glowing cyan accents and advanced weaponry.
+                </div>
+                <ul class="card-features">
+                    <li>Black pigtails (locked across palettes)</li>
+                    <li>Segmented armor plating</li>
+                    <li>Energy rifle with glow sections</li>
+                    <li>White pixel eyes (determined look)</li>
+                    <li>Themed armor accents per palette</li>
+                </ul>
+                <span class="btn">Launch Character →</span>
+            </a>
+        </div>
+
+        <div class="type-info" style="background: rgba(102,126,234,0.05); border-color: rgba(102,126,234,0.3);">
+            <h2>🎨 Technical Specifications</h2>
+            <p><strong>Resolution:</strong> 128×128 pixels native (scalable display 2x-5x)</p>
+            <p><strong>Animation Frames:</strong> Idle (8 frames, 250ms each), Walk (8 frames, 125ms each), Attack (6
+                frames, 83ms each)</p>
+            <p><strong>Color Palettes:</strong> Fire, Ice, Shadow, Light, Nature (hair/fur always black)</p>
+            <p><strong>Export Formats:</strong> PNG (single frame), PNG (sprite sheet), JSON (metadata)</p>
+            <p><strong>Frame Rate:</strong> 60fps (real-time rendering)</p>
+            <p><strong>File Size:</strong> ~10-15KB per HTML file (self-contained)</p>
+            <p><strong>Browser Support:</strong> Chrome, Firefox, Safari, Edge (Canvas2D)</p>
+            <p><strong>Best For:</strong> Action RPGs, roguelikes, side-scrollers, hack-and-slash games</p>
+        </div>
+
+        <div class="back-link">
+            <a href="../START_HERE.html">← Back to Main Gallery</a>
+        </div>
+    </div>
+</body>
+
+</html>

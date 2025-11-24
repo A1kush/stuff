@@ -1,0 +1,56 @@
+{
+  "entities": [
+    {
+      "id": 1,
+      "type": "NPC",
+      "name": "C Rank NPC",
+      "rank": "C",
+      "attributes": {
+        "health": 100,
+        "strength": 10,
+        "intelligence": 15,
+        "agility": 12
+      },
+      "behavior": "Friendly and helpful to players."
+    },
+    {
+      "id": 2,
+      "type": "Villain",
+      "name": "C Rank Villain",
+      "rank": "C",
+      "attributes": {
+        "health": 120,
+        "strength": 15,
+        "intelligence": 10,
+        "agility": 8
+      },
+      "behavior": "Schemes against the player."
+    },
+    {
+      "id": 3,
+      "type": "Slayer",
+      "name": "C Rank Slayer",
+      "rank": "C",
+      "attributes": {
+        "health": 90,
+        "strength": 12,
+        "intelligence": 14,
+        "agility": 16
+      },
+      "behavior": "Hunts down enemies."
+    },
+    {
+      "id": 4,
+      "type": "Hunter",
+      "name": "C Rank Hunter",
+      "rank": "C",
+      "attributes": {
+        "health": 110,
+        "strength": 11,
+        "intelligence": 13,
+        "agility": 15
+      },
+      "behavior": "Tracks and captures targets."
+    }
+  ]
+}

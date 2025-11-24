@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unique - Glitch</title>
+    <style>
+        body {margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        canvas {border: 2px solid #0F0;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        let f = 0;
+        function d() {
+            x.fillStyle = '#000'; x.fillRect(0, 0, 512, 512);
+            const g = Math.sin(f / 10) * 10;
+            x.fillStyle = '#F00'; x.globalAlpha = 0.5; x.fillRect(200 + g, 250, 112, 150);
+            x.fillStyle = '#0F0'; x.fillRect(200, 250, 112, 150);
+            x.fillStyle = '#00F'; x.fillRect(200 - g, 250, 112, 150);
+            x.globalAlpha = 1;
+            x.fillStyle = '#0FF'; x.fillRect(200, 150, 112, 100);
+            x.fillStyle = '#000'; x.fillRect(200, 150, 112, 30); x.fillRect(180, 175, 12, 28); x.fillRect(320, 175, 12, 28); x.fillStyle = '#FFF'; x.fillRect(220, 195, 22, 22); x.fillRect(270, 195, 22, 22);
+            x.fillStyle = '#F0F'; x.fillRect(150, 285, 45, 25);
+            x.fillRect(317, 285, 45, 25);
+            for (let i = 0; i < 5; i++) {x.fillStyle = '#0F0'; x.fillRect(0, Math.random() * 512, 512, 2);}
+        }
+        function l() {f++; d(); requestAnimationFrame(l);}
+        l();
+    </script>
+</body>
+</html>

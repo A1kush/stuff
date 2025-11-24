@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Comparison Tool - Side-by-Side Style Analysis</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+        .header { background: rgba(102, 126, 234, 0.1); padding: 30px 20px; border-bottom: 2px solid rgba(102, 126, 234, 0.3); text-align: center; }
+        h1 { font-size: 42px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .tagline { color: #999; font-size: 16px; }
+        .main { display: grid; grid-template-columns: 1fr 1fr; max-width: 1800px; margin: 0 auto; gap: 20px; padding: 30px 20px; }
+        .comparison-panel { background: rgba(0,0,0,0.6); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 12px; padding: 25px; }
+        .comparison-panel h2 { color: #667eea; font-size: 20px; margin-bottom: 20px; text-align: center; padding-bottom: 15px; border-bottom: 1px solid rgba(102, 126, 234, 0.3); }
+        iframe { width: 100%; height: 500px; border: 3px solid #667eea; border-radius: 8px; box-shadow: 0 0 30px rgba(102, 126, 234, 0.3); background: #000; margin-bottom: 20px; }
+        select { width: 100%; padding: 12px; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); color: #e0e0e0; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+        .sync-controls { background: rgba(102, 126, 234, 0.05); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 6px; padding: 15px; margin-bottom: 20px; }
+        .sync-controls h3 { color: #667eea; font-size: 14px; margin-bottom: 10px; }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: #fff; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; margin-top: 5px; transition: all 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5); }
+        .stats-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .stat-box { background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.3); }
+        .stat-label { font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 8px; }
+        .stat-value { font-size: 24px; color: #667eea; font-weight: bold; }
+        .analysis { background: rgba(255, 215, 0, 0.1); border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 20px; margin-top: 20px; }
+        .analysis h3 { color: #FFD700; font-size: 16px; margin-bottom: 15px; }
+        .analysis-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 13px; color: #ccc; }
+        .analysis-value { color: #FFD700; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 SPRITE COMPARISON TOOL</h1>
+        <div class="tagline">Side-by-Side Style Analysis • Compare Rendering Techniques • Performance Benchmarking</div>
+    </div>
+
+    <div class="main">
+        <div class="comparison-panel">
+            <h2>LEFT PANEL</h2>
+            <div class="sync-controls">
+                <h3>Style Selection</h3>
+                <select id="typeLeft">
+                    <option value="type-1-hd-pixel-art">Type 1: HD Pixel Art</option>
+                    <option value="type-2-vector-cel-shaded">Type 2: Vector Cel-Shaded</option>
+                    <option value="type-3-3d-prerendered">Type 3: 3D Pre-rendered</option>
+                    <option value="type-4-procedural-shader">Type 4: Procedural Shader</option>
+                    <option value="type-5-hybrid-enhanced">Type 5: Hybrid Enhanced</option>
+                    <option value="type-6-voxel-minecraft">Type 6: Voxel/Minecraft</option>
+                    <option value="type-7-chibi-kawaii">Type 7: Chibi/Kawaii</option>
+                    <option value="type-8-neon-cyberpunk">Type 8: Neon Cyberpunk</option>
+                    <option value="type-9-low-poly-3d">Type 9: Low-Poly 3D</option>
+                    <option value="type-10-metroidvania-hires">Type 10: Metroidvania Hi-Res</option>
+                    <option value="type-11-retro-8bit">Type 11: Retro 8-Bit</option>
+                    <option value="type-12-sketch-art">Type 12: Hand-Drawn Sketch</option>
+                    <option value="type-13-stained-glass">Type 13: Stained Glass</option>
+                    <option value="type-14-comic-halftone">Type 14: Comic Book Halftone</option>
+                    <option value="type-15-glitch-art">Type 15: Glitch Art</option>
+                    <option value="type-16-watercolor-paint">Type 16: Watercolor Paint</option>
+                    <option value="type-17-ascii-terminal">Type 17: ASCII/Terminal</option>
+                    <option value="type-18-paper-cutout">Type 18: Paper Cut-Out</option>
+                    <option value="type-19-hologram-wireframe">Type 19: Hologram/Wireframe</option>
+                </select>
+                <select id="charLeft">
+                    <option value="warrior-dual-swords">⚔️ A1 Warrior</option>
+                    <option value="cat-angel-gunner">👑 Missy Cat Angel</option>
+                    <option value="cyborg-rifle-operative">🔫 Unique Cyborg</option>
+                </select>
+            </div>
+            <iframe id="frameLeft"></iframe>
+            <div class="stats-comparison">
+                <div class="stat-box"><div class="stat-label">Type</div><div class="stat-value" id="typeNumLeft">1</div></div>
+                <div class="stat-box"><div class="stat-label">Technique</div><div class="stat-value" id="techLeft">Canvas2D</div></div>
+            </div>
+        </div>
+
+        <div class="comparison-panel">
+            <h2>RIGHT PANEL</h2>
+            <div class="sync-controls">
+                <h3>Style Selection</h3>
+                <select id="typeRight">
+                    <option value="type-1-hd-pixel-art">Type 1: HD Pixel Art</option>
+                    <option value="type-2-vector-cel-shaded">Type 2: Vector Cel-Shaded</option>
+                    <option value="type-3-3d-prerendered">Type 3: 3D Pre-rendered</option>
+                    <option value="type-4-procedural-shader" selected>Type 4: Procedural Shader</option>
+                    <option value="type-5-hybrid-enhanced">Type 5: Hybrid Enhanced</option>
+                    <option value="type-6-voxel-minecraft">Type 6: Voxel/Minecraft</option>
+                    <option value="type-7-chibi-kawaii">Type 7: Chibi/Kawaii</option>
+                    <option value="type-8-neon-cyberpunk">Type 8: Neon Cyberpunk</option>
+                    <option value="type-9-low-poly-3d">Type 9: Low-Poly 3D</option>
+                    <option value="type-10-metroidvania-hires">Type 10: Metroidvania Hi-Res</option>
+                    <option value="type-11-retro-8bit">Type 11: Retro 8-Bit</option>
+                    <option value="type-12-sketch-art">Type 12: Hand-Drawn Sketch</option>
+                    <option value="type-13-stained-glass">Type 13: Stained Glass</option>
+                    <option value="type-14-comic-halftone">Type 14: Comic Book Halftone</option>
+                    <option value="type-15-glitch-art">Type 15: Glitch Art</option>
+                    <option value="type-16-watercolor-paint">Type 16: Watercolor Paint</option>
+                    <option value="type-17-ascii-terminal">Type 17: ASCII/Terminal</option>
+                    <option value="type-18-paper-cutout">Type 18: Paper Cut-Out</option>
+                    <option value="type-19-hologram-wireframe">Type 19: Hologram/Wireframe</option>
+                </select>
+                <select id="charRight">
+                    <option value="warrior-dual-swords">⚔️ A1 Warrior</option>
+                    <option value="cat-angel-gunner">👑 Missy Cat Angel</option>
+                    <option value="cyborg-rifle-operative">🔫 Unique Cyborg</option>
+                </select>
+            </div>
+            <iframe id="frameRight"></iframe>
+            <div class="stats-comparison">
+                <div class="stat-box"><div class="stat-label">Type</div><div class="stat-value" id="typeNumRight">4</div></div>
+                <div class="stat-box"><div class="stat-label">Technique</div><div class="stat-value" id="techRight">WebGL2</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="max-width: 1800px; margin: 0 auto; padding: 0 20px 30px;">
+        <div class="sync-controls" style="background: rgba(102, 126, 234, 0.1); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 12px; padding: 25px;">
+            <h3 style="color: #667eea; font-size: 18px; margin-bottom: 15px;">🎮 SYNC CONTROLS</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <button onclick="syncCharacter()">SYNC CHARACTER</button>
+                <button onclick="syncAnimation()">SYNC ANIMATION</button>
+                <button onclick="swapPanels()">⇄ SWAP PANELS</button>
+                <button onclick="randomizeLeft()">🎲 RANDOM LEFT</button>
+                <button onclick="randomizeRight()">🎲 RANDOM RIGHT</button>
+                <button onclick="exportComparison()">📸 EXPORT BOTH</button>
+            </div>
+        </div>
+
+        <div class="analysis">
+            <h3>📊 COMPARISON ANALYSIS</h3>
+            <div class="analysis-row"><span>Resolution Comparison:</span><span class="analysis-value" id="resolutionCompare">-</span></div>
+            <div class="analysis-row"><span>Rendering Technique:</span><span class="analysis-value" id="techniqueCompare">-</span></div>
+            <div class="analysis-row"><span>Best For:</span><span class="analysis-value" id="bestForCompare">-</span></div>
+            <div class="analysis-row"><span>Performance:</span><span class="analysis-value" id="performanceCompare">-</span></div>
+        </div>
+    </div>
+
+    <script>
+        const typeInfo = {
+            'type-1-hd-pixel-art': { num: 1, tech: 'Canvas2D', res: '128×128', perf: 'Excellent', bestFor: 'Retro games, pixel art purists' },
+            'type-2-vector-cel-shaded': { num: 2, tech: 'Canvas2D Path', res: '256×256', perf: 'Excellent', bestFor: 'Scalable indie games' },
+            'type-3-3d-prerendered': { num: 3, tech: 'Canvas2D + Lighting', res: '256×256', perf: 'Very Good', bestFor: 'HD RPGs, tactical games' },
+            'type-4-procedural-shader': { num: 4, tech: 'WebGL2 GLSL', res: '512×512', perf: 'Very Good', bestFor: 'Dynamic effects, sci-fi' },
+            'type-5-hybrid-enhanced': { num: 5, tech: 'Canvas2D + WebGL2', res: '256×256', perf: 'Good', bestFor: 'Premium effects' },
+            'type-6-voxel-minecraft': { num: 6, tech: 'Canvas2D Isometric', res: '320×320', perf: 'Excellent', bestFor: 'Voxel/block games' },
+            'type-7-chibi-kawaii': { num: 7, tech: 'Canvas2D', res: '256×256', perf: 'Excellent', bestFor: 'Cute casual games' },
+            'type-8-neon-cyberpunk': { num: 8, tech: 'Canvas2D + Glow', res: '320×320', perf: 'Very Good', bestFor: 'Cyberpunk aesthetics' },
+            'type-9-low-poly-3d': { num: 9, tech: 'Three.js WebGL', res: '3D', perf: 'Good', bestFor: 'Real-time 3D' },
+            'type-10-metroidvania-hires': { num: 10, tech: 'Canvas2D HD', res: '400×400', perf: 'Very Good', bestFor: 'HD Metroidvania' },
+            'type-11-retro-8bit': { num: 11, tech: 'Canvas2D Limited', res: '160×160', perf: 'Excellent', bestFor: 'Retro NES/GB style' },
+            'type-12-sketch-art': { num: 12, tech: 'Canvas2D Jitter', res: '320×320', perf: 'Very Good', bestFor: 'Artistic indie games' },
+            'type-13-stained-glass': { num: 13, tech: 'Canvas2D Translucent', res: '320×320', perf: 'Very Good', bestFor: 'Fantasy cathedral style' },
+            'type-14-comic-halftone': { num: 14, tech: 'Canvas2D Dots', res: '320×320', perf: 'Very Good', bestFor: 'Comic book games' },
+            'type-15-glitch-art': { num: 15, tech: 'Canvas2D + RGB Split', res: '400×400', perf: 'Very Good', bestFor: 'Cyberpunk glitch effects' },
+            'type-16-watercolor-paint': { num: 16, tech: 'Canvas2D Gradients', res: '400×400', perf: 'Very Good', bestFor: 'Artistic watercolor style' },
+            'type-17-ascii-terminal': { num: 17, tech: 'Text Rendering', res: 'Text', perf: 'Excellent', bestFor: 'Retro terminal games' },
+            'type-18-paper-cutout': { num: 18, tech: 'Canvas2D Shadow', res: '400×400', perf: 'Excellent', bestFor: 'Storybook games' },
+            'type-19-hologram-wireframe': { num: 19, tech: 'Canvas2D Wireframe', res: '400×400', perf: 'Excellent', bestFor: 'Sci-fi hologram UI' }
+        };
+
+        function updateFrame(side) {
+            const typeSelect = document.getElementById(`type${side}`);
+            const charSelect = document.getElementById(`char${side}`);
+            const frame = document.getElementById(`frame${side}`);
+            
+            const typeFolder = typeSelect.value;
+            const charFile = charSelect.value;
+            const url = `${typeFolder}/${charFile}.html`;
+            
+            frame.src = url;
+
+            const info = typeInfo[typeFolder];
+            document.getElementById(`typeNum${side}`).textContent = info.num;
+            document.getElementById(`tech${side}`).textContent = info.tech;
+            
+            updateAnalysis();
+        }
+
+        function updateAnalysis() {
+            const leftInfo = typeInfo[document.getElementById('typeLeft').value];
+            const rightInfo = typeInfo[document.getElementById('typeRight').value];
+            
+            document.getElementById('resolutionCompare').textContent = `${leftInfo.res} vs ${rightInfo.res}`;
+            document.getElementById('techniqueCompare').textContent = `${leftInfo.tech} vs ${rightInfo.tech}`;
+            document.getElementById('bestForCompare').textContent = `L: ${leftInfo.bestFor} | R: ${rightInfo.bestFor}`;
+            document.getElementById('performanceCompare').textContent = `${leftInfo.perf} vs ${rightInfo.perf}`;
+        }
+
+        function syncCharacter() {
+            const char = document.getElementById('charLeft').value;
+            document.getElementById('charRight').value = char;
+            updateFrame('Left');
+            updateFrame('Right');
+        }
+
+        function syncAnimation() {
+            // Animation syncing would require postMessage to iframes
+            alert('Animation sync: Would synchronize animation states via postMessage API');
+        }
+
+        function swapPanels() {
+            const tempType = document.getElementById('typeLeft').value;
+            const tempChar = document.getElementById('charLeft').value;
+            
+            document.getElementById('typeLeft').value = document.getElementById('typeRight').value;
+            document.getElementById('charLeft').value = document.getElementById('charRight').value;
+            
+            document.getElementById('typeRight').value = tempType;
+            document.getElementById('charRight').value = tempChar;
+            
+            updateFrame('Left');
+            updateFrame('Right');
+        }
+
+        function randomizeLeft() {
+            const types = Object.keys(typeInfo);
+            const chars = ['warrior-dual-swords', 'cat-angel-gunner', 'cyborg-rifle-operative'];
+            
+            document.getElementById('typeLeft').value = types[Math.floor(Math.random() * types.length)];
+            document.getElementById('charLeft').value = chars[Math.floor(Math.random() * chars.length)];
+            updateFrame('Left');
+        }
+
+        function randomizeRight() {
+            const types = Object.keys(typeInfo);
+            const chars = ['warrior-dual-swords', 'cat-angel-gunner', 'cyborg-rifle-operative'];
+            
+            document.getElementById('typeRight').value = types[Math.floor(Math.random() * types.length)];
+            document.getElementById('charRight').value = chars[Math.floor(Math.random() * chars.length)];
+            updateFrame('Right');
+        }
+
+        function exportComparison() {
+            alert('Export comparison: Would capture both frames side-by-side as a single image');
+        }
+
+        document.getElementById('typeLeft').addEventListener('change', () => updateFrame('Left'));
+        document.getElementById('charLeft').addEventListener('change', () => updateFrame('Left'));
+        document.getElementById('typeRight').addEventListener('change', () => updateFrame('Right'));
+        document.getElementById('charRight').addEventListener('change', () => updateFrame('Right'));
+
+        // Initial load
+        updateFrame('Left');
+        updateFrame('Right');
+    </script>
+</body>
+</html>

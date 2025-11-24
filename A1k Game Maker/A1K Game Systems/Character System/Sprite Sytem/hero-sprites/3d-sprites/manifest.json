@@ -1,0 +1,588 @@
+[
+  {
+    "slug": "a1-celestial-ascension",
+    "title": "Celestial Ascension",
+    "heroId": "A1",
+    "type": "type-10",
+    "goldCost": 120000,
+    "rewardTier": "gold",
+    "description": "Divine warrior with celestial light, glowing aura, and ethereal weapons.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["A1_S1", "A1_S3", "A1_S4", "A1_S5", "A1_X1"],
+    "palette": ["celestial", "light"],
+    "thumbnail": "thumbnails/a1-celestial-ascension.webp"
+  },
+  {
+    "slug": "missy-celestial-angel",
+    "title": "Celestial Angel",
+    "heroId": "MISSY",
+    "type": "type-10",
+    "goldCost": 110000,
+    "rewardTier": "gold",
+    "description": "Divine cat angel with radiant halo, ethereal wings, and holy light.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["MISSY_S1", "MISSY_S3", "MISSY_S4", "MISSY_S5", "MISSY_X1"],
+    "palette": ["celestial", "light"],
+    "thumbnail": "thumbnails/missy-celestial-angel.webp"
+  },
+  {
+    "slug": "unique-celestial-cyborg",
+    "title": "Celestial Cyborg",
+    "heroId": "UNIQUE",
+    "type": "type-10",
+    "goldCost": 130000,
+    "rewardTier": "gold",
+    "description": "Divine tech operative with celestial energy conduits and holy light systems.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["UNIQUE_S1", "UNIQUE_S3", "UNIQUE_S4", "UNIQUE_S5", "UNIQUE_X1"],
+    "palette": ["celestial", "light"],
+    "thumbnail": "thumbnails/unique-celestial-cyborg.webp"
+  },
+  {
+    "slug": "a1-neon-warrior",
+    "title": "Neon Warrior",
+    "heroId": "A1",
+    "type": "type-11",
+    "goldCost": 95000,
+    "rewardTier": "silver",
+    "description": "Cyberpunk warrior with neon energy blades and tech-enhanced combat systems.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["A1_S1", "A1_S3", "A1_S4", "A1_S5", "A1_X1"],
+    "palette": ["neon", "cyber"],
+    "thumbnail": "thumbnails/a1-neon-warrior.webp"
+  },
+  {
+    "slug": "missy-cyber-cat",
+    "title": "Cyber Cat",
+    "heroId": "MISSY",
+    "type": "type-11",
+    "goldCost": 90000,
+    "rewardTier": "silver",
+    "description": "Futuristic cat angel with neon halo, cyber wings, and tech-enhanced weaponry.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["MISSY_S1", "MISSY_S3", "MISSY_S4", "MISSY_S5", "MISSY_X1"],
+    "palette": ["neon", "cyber"],
+    "thumbnail": "thumbnails/missy-cyber-cat.webp"
+  },
+  {
+    "slug": "unique-tech-operative",
+    "title": "Tech Operative",
+    "heroId": "UNIQUE",
+    "type": "type-11",
+    "goldCost": 100000,
+    "rewardTier": "silver",
+    "description": "Advanced cyborg with neon energy systems, holographic displays, and cybernetic enhancements.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["UNIQUE_S1", "UNIQUE_S3", "UNIQUE_S4", "UNIQUE_S5", "UNIQUE_X1"],
+    "palette": ["neon", "cyber"],
+    "thumbnail": "thumbnails/unique-tech-operative.webp"
+  },
+  {
+    "slug": "a1-steam-knight",
+    "title": "Steam Knight",
+    "heroId": "A1",
+    "type": "type-12",
+    "goldCost": 85000,
+    "rewardTier": "silver",
+    "description": "Victorian-era warrior with steam-powered armor, mechanical gears, and brass weaponry.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["A1_S1", "A1_S3", "A1_S4", "A1_S5", "A1_X1"],
+    "palette": ["steam", "brass"],
+    "thumbnail": "thumbnails/a1-steam-knight.webp"
+  },
+  {
+    "slug": "missy-victorian-cat",
+    "title": "Victorian Cat",
+    "heroId": "MISSY",
+    "type": "type-12",
+    "goldCost": 80000,
+    "rewardTier": "silver",
+    "description": "Steampunk cat angel with mechanical wings, gear-powered halo, and brass accessories.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["MISSY_S1", "MISSY_S3", "MISSY_S4", "MISSY_S5", "MISSY_X1"],
+    "palette": ["steam", "brass"],
+    "thumbnail": "thumbnails/missy-victorian-cat.webp"
+  },
+  {
+    "slug": "unique-mech-cyborg",
+    "title": "Mech Cyborg",
+    "heroId": "UNIQUE",
+    "type": "type-12",
+    "goldCost": 90000,
+    "rewardTier": "silver",
+    "description": "Steampunk cyborg with clockwork mechanisms, steam vents, and mechanical precision.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["UNIQUE_S1", "UNIQUE_S3", "UNIQUE_S4", "UNIQUE_S5", "UNIQUE_X1"],
+    "palette": ["steam", "brass"],
+    "thumbnail": "thumbnails/unique-mech-cyborg.webp"
+  },
+  {
+    "slug": "a1-shadow-blade",
+    "title": "Shadow Blade",
+    "heroId": "A1",
+    "type": "type-13",
+    "goldCost": 140000,
+    "rewardTier": "platinum",
+    "description": "Dark warrior with void energy, shadow weapons, and mysterious aura.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["A1_S1", "A1_S3", "A1_S4", "A1_S5", "A1_X1"],
+    "palette": ["shadow", "void"],
+    "thumbnail": "thumbnails/a1-shadow-blade.webp"
+  },
+  {
+    "slug": "missy-void-angel",
+    "title": "Void Angel",
+    "heroId": "MISSY",
+    "type": "type-13",
+    "goldCost": 135000,
+    "rewardTier": "platinum",
+    "description": "Dark cat angel with shadow halo, void wings, and mysterious dark energy.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["MISSY_S1", "MISSY_S3", "MISSY_S4", "MISSY_S5", "MISSY_X1"],
+    "palette": ["shadow", "void"],
+    "thumbnail": "thumbnails/missy-void-angel.webp"
+  },
+  {
+    "slug": "unique-dark-cyborg",
+    "title": "Dark Cyborg",
+    "heroId": "UNIQUE",
+    "type": "type-13",
+    "goldCost": 145000,
+    "rewardTier": "platinum",
+    "description": "Void-powered cyborg with shadow energy systems and dark matter conduits.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["UNIQUE_S1", "UNIQUE_S3", "UNIQUE_S4", "UNIQUE_S5", "UNIQUE_X1"],
+    "palette": ["shadow", "void"],
+    "thumbnail": "thumbnails/unique-dark-cyborg.webp"
+  },
+  {
+    "slug": "a1-elemental-master",
+    "title": "Elemental Master",
+    "heroId": "A1",
+    "type": "type-14",
+    "goldCost": 105000,
+    "rewardTier": "gold",
+    "description": "Master of elements with fire, ice, and lightning powers swirling around.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["A1_S1", "A1_S3", "A1_S4", "A1_S5", "A1_X1"],
+    "palette": ["fire", "ice", "lightning"],
+    "thumbnail": "thumbnails/a1-elemental-master.webp"
+  },
+  {
+    "slug": "missy-prism-cat",
+    "title": "Prism Cat",
+    "heroId": "MISSY",
+    "type": "type-14",
+    "goldCost": 100000,
+    "rewardTier": "gold",
+    "description": "Elemental cat angel with prismatic halo, multi-element wings, and dynamic particle effects.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["MISSY_S1", "MISSY_S3", "MISSY_S4", "MISSY_S5", "MISSY_X1"],
+    "palette": ["fire", "ice", "lightning"],
+    "thumbnail": "thumbnails/missy-prism-cat.webp"
+  },
+  {
+    "slug": "unique-plasma-cyborg",
+    "title": "Plasma Cyborg",
+    "heroId": "UNIQUE",
+    "type": "type-14",
+    "goldCost": 110000,
+    "rewardTier": "gold",
+    "description": "Elemental cyborg with plasma energy systems, multi-element conduits, and dynamic particle effects.",
+    "summons": {
+      "pet": "pet_firecub",
+      "vehicle": "veh_hoverbike",
+      "spirit": "spirit_fire_spark"
+    },
+    "bundleOptions": {
+      "pets": ["pet_firecub", "pet_earthgolem", "pet_lightningbird"],
+      "vehicles": ["veh_hoverbike", "veh_jetcart", "veh_cybercar"],
+      "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"]
+    },
+    "npcs": {
+      "eRank": ["npc_recruit_guard", "npc_trainee_mage", "npc_apprentice_healer"],
+      "dRank": ["npc_veteran_warrior", "npc_skilled_archer", "npc_adept_rogue"],
+      "cRank": ["npc_elite_knight", "npc_master_wizard", "npc_expert_assassin"],
+      "bRank": ["npc_champion_fighter", "npc_archmage", "npc_shadowmaster"],
+      "aRank": ["npc_legendary_hero", "npc_grand_wizard", "npc_void_assassin"],
+      "sRank": ["npc_mythic_guardian", "npc_celestial_mage", "npc_eternal_blade"]
+    },
+    "equipment": {
+      "weapons": [
+        { "id": "gear_mythic_blade", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_shield", "rank": "S", "rarity": "legendary" },
+        { "id": "gear_mythic_ring", "rank": "S", "rarity": "legendary" }
+      ]
+    },
+    "spirits": ["spirit_fire_spark", "spirit_ice_shard", "spirit_lightning_bolt"],
+    "aiBots": ["robot_trainee_bot", "robot_combat_drone", "robot_support_bot"],
+    "skillLoadout": ["UNIQUE_S1", "UNIQUE_S3", "UNIQUE_S4", "UNIQUE_S5", "UNIQUE_X1"],
+    "palette": ["fire", "ice", "lightning"],
+    "thumbnail": "thumbnails/unique-plasma-cyborg.webp"
+  }
+]
+

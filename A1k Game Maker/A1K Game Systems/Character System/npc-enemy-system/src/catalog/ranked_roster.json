@@ -1,0 +1,48 @@
+{
+  "ranked_entities": [
+    {
+      "name": "C Rank NPC",
+      "type": "NPC",
+      "rank": "C",
+      "attributes": {
+        "health": 100,
+        "attack": 10,
+        "defense": 5
+      },
+      "description": "A common NPC with basic abilities."
+    },
+    {
+      "name": "C Rank Villain",
+      "type": "Enemy",
+      "rank": "C",
+      "attributes": {
+        "health": 120,
+        "attack": 15,
+        "defense": 3
+      },
+      "description": "A low-level villain that poses a minor threat."
+    },
+    {
+      "name": "C Rank Slayer",
+      "type": "NPC",
+      "rank": "C",
+      "attributes": {
+        "health": 110,
+        "attack": 12,
+        "defense": 6
+      },
+      "description": "An NPC skilled in combat, capable of defending against threats."
+    },
+    {
+      "name": "C Rank Hunter",
+      "type": "NPC",
+      "rank": "C",
+      "attributes": {
+        "health": 90,
+        "attack": 14,
+        "defense": 4
+      },
+      "description": "A skilled hunter with moderate abilities."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "modelo",
+  "name": "Modelo",
+  "rank": "S",
+  "role": "tank",
+  "summary": {
+    "hook": "Bare-knuckle sage channeling kaleidoscope auras.",
+    "gameplay": "Momentum striker who strengthens near A1 Kush and roots bosses.",
+    "why_it_matters": "Delivers the solo-leveling x DBZ brawler fantasy using pure canvas particles."
+  },
+  "stats": {"attack": 85, "defense": 85, "luck": 55, "support": 50, "speed": 70},
+  "skills": [
+    {
+      "name": "Chromatic Barrage",
+      "type": "attack",
+      "cooldown": 10,
+      "aura_cost": 25,
+      "effects": ["combo_counter", "shield_convert"],
+      "rationale": "Combo counters convert into shields so players feel rewarded for aggression."
+    },
+    {
+      "name": "Solo Resonance",
+      "type": "buff",
+      "cooldown": 22,
+      "aura_cost": 18,
+      "effects": ["stat_boost_when_no_melee", "a1_kush_synergy"],
+      "rationale": "Creates drama when he fights alone yet still encourages pairing with A1 Kush."
+    },
+    {
+      "name": "Starlit Anchor",
+      "type": "utility",
+      "cooldown": 24,
+      "aura_cost": 30,
+      "effects": ["root_boss", "aura_lock"],
+      "rationale": "Rooting bosses keeps cinematic combos centered on screen for canvas setups."
+    }
+  ],
+  "acquisition": {
+    "method": "Auction + duel",
+    "costs": {"gold": 3200, "battle_bonds": 2},
+    "spawn_logic": "Appears in Voidgreen auction rotation when Kush is in party."
+  },
+  "synergy": {
+    "combos": ["Brawler Choir", "Gun Eclipse support"],
+    "counters": ["Knockback immunity"]
+  },
+  "visuals": {
+    "palette": ["#ff73fa", "#6af0ff", "#ffe66d"],
+    "aura": "Kaleidoscope hex tiles erupting with each punch.",
+    "animation_notes": "Fists leave hex trails reminiscent of DBZ impact frames merged with hero academia lighting."
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "liam",
+  "name": "Liam",
+  "rank": "E",
+  "role": "striker",
+  "summary": {
+    "hook": "Jeff's hunter son chasing his first big break.",
+    "gameplay": "Early ranged unit that scales with morale and Jeff's mentorship.",
+    "why_it_matters": "Child-friendly entry point that also seeds twin synergy tutorials."
+  },
+  "stats": {"attack": 45, "defense": 30, "luck": 40, "support": 25, "speed": 55},
+  "skills": [
+    {
+      "name": "Ambition Shot",
+      "type": "attack",
+      "cooldown": 6,
+      "aura_cost": 8,
+      "effects": ["morale_scaled_damage"],
+      "rationale": "Helps new players understand morale without reading heavy tooltips."
+    },
+    {
+      "name": "Twin Spark",
+      "type": "buff",
+      "cooldown": 18,
+      "aura_cost": 12,
+      "effects": ["share_damage_with_leo"],
+      "rationale": "Promotes deploying Liam + Leo together for emotional payoff."
+    }
+  ],
+  "acquisition": {
+    "method": "Tutorial reward",
+    "costs": {"bond_sparks": 0},
+    "spawn_logic": "Auto-joins once player crafts first wooden bow."
+  },
+  "synergy": {
+    "combos": ["Twin Guard", "Clan Rally"],
+    "counters": ["Fear debuffs"]
+  },
+  "visuals": {
+    "palette": ["#ffdf7e", "#6fb1ff", "#333333"],
+    "aura": "Scarf trailing light to show motion study.",
+    "animation_notes": "Animate scarf separately to help depict youthful energy."
+  }
+}

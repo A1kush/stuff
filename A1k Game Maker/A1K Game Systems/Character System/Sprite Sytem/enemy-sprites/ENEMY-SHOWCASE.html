@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1K Enemy Sprite Showcase</title>
+    <script src="shared/enemy-sprite-data.js"></script>
+    <script src="shared/enemy-sprite-renderer.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a1220 0%, #1a2332 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 48px;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 18px;
+            color: #888;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 12px 24px;
+            background: rgba(0,255,255,0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover {
+            background: rgba(0,255,255,0.4);
+            transform: translateY(-2px);
+        }
+        .filter-btn.active {
+            background: #00ffff;
+            color: #000;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #00ffff;
+            padding: 15px 30px;
+            border-radius: 10px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            color: #00ffff;
+            font-weight: bold;
+        }
+        .enemy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .enemy-card {
+            background: rgba(0,0,0,0.6);
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .enemy-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,255,255,0.5);
+        }
+        .enemy-card.tier-C { border-color: #888; }
+        .enemy-card.tier-B { border-color: #4caf50; }
+        .enemy-card.tier-A { border-color: #2196f3; }
+        .enemy-card.tier-S { border-color: #9c27b0; }
+        .enemy-card.tier-SS { border-color: #ff9800; }
+        .enemy-sprite-preview {
+            width: 100%;
+            height: 200px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 72px;
+        }
+        .enemy-name {
+            font-size: 20px;
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .enemy-tier {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .tier-C { background: #666; }
+        .tier-B { background: #4caf50; }
+        .tier-A { background: #2196f3; }
+        .tier-S { background: #9c27b0; }
+        .tier-SS { background: #ff9800; color: #000; }
+        .enemy-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .stat-item {
+            background: rgba(0,255,255,0.1);
+            padding: 8px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 A1K ENEMY SPRITE SHOWCASE</h1>
+        <p class="subtitle">All Enemy Sprites from the A1K Bag System</p>
+    </div>
+
+    <div class="controls">
+        <button class="filter-btn active" onclick="filterEnemies('all')">ALL ENEMIES</button>
+        <button class="filter-btn" onclick="filterEnemies('C')">C-RANK (Basic)</button>
+        <button class="filter-btn" onclick="filterEnemies('B')">B-RANK (Elite)</button>
+        <button class="filter-btn" onclick="filterEnemies('A')">A-RANK (Advanced)</button>
+        <button class="filter-btn" onclick="filterEnemies('S')">S-RANK (Mini-Boss)</button>
+        <button class="filter-btn" onclick="filterEnemies('SS')">SS-RANK (Bosses)</button>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-box">
+            <div class="stat-label">TOTAL ENEMIES</div>
+            <div class="stat-value" id="totalCount">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">SPRITES CREATED</div>
+            <div class="stat-value" id="spriteCount">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">ART STYLES</div>
+            <div class="stat-value">3</div>
+        </div>
+    </div>
+
+    <div class="enemy-grid" id="enemyGrid"></div>
+
+    <script>
+        let currentFilter = 'all';
+
+        function renderEnemies() {
+            const enemies = currentFilter === 'all' 
+                ? window.EnemySpriteAPI.getAllEnemies()
+                : window.EnemySpriteAPI.getEnemiesByTier(currentFilter);
+
+            document.getElementById('totalCount').textContent = window.EnemySpriteAPI.getAllEnemies().length;
+            document.getElementById('spriteCount').textContent = enemies.length;
+
+            const grid = document.getElementById('enemyGrid');
+            grid.innerHTML = enemies.map(enemy => `
+                <div class="enemy-card tier-${enemy.tier}">
+                    <div class="enemy-sprite-preview">
+                        ${getEnemyIcon(enemy)}
+                    </div>
+                    <div class="enemy-name">${enemy.name}</div>
+                    <div class="enemy-tier tier-${enemy.tier}">${enemy.tier}-RANK</div>
+                    <div class="enemy-stats">
+                        <div class="stat-item">HP: ${enemy.hp}</div>
+                        <div class="stat-item">ATK: ${enemy.atk}</div>
+                        <div class="stat-item">DEF: ${enemy.def}</div>
+                        <div class="stat-item">SPD: ${enemy.speed}</div>
+                    </div>
+                    <p style="font-size:12px; color:#888; margin-top:10px;">${enemy.description}</p>
+                </div>
+            `).join('');
+        }
+
+        function getEnemyIcon(enemy) {
+            const icons = {
+                'enemy_slime': '🍬',
+                'enemy_goblin': '👹',
+                'enemy_skeleton': '💀',
+                'enemy_bat': '🦇',
+                'enemy_shadow_ninja': '🥷',
+                'boss_demon_lord': '😈',
+                'boss_slime_king': '👑'
+            };
+            return icons[enemy.id] || '👾';
+        }
+
+        function filterEnemies(tier) {
+            currentFilter = tier;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderEnemies();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            renderEnemies();
+        });
+    </script>
+</body>
+</html>
+

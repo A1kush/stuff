@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mage Sprite Generator - NPC & Enemy Rank System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a0033 0%, #000033 50%, #003300 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #ff6b6b;
+            text-shadow: 0 0 20px #ff6b6b;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ff9999;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .mage-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .controls-panel {
+            background: rgba(26, 0, 51, 0.9);
+            border: 2px solid #ff6b6b;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .canvas-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff6b6b;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: inset 0 0 30px rgba(255, 107, 107, 0.1);
+        }
+
+        .mage-card {
+            background: rgba(26, 0, 51, 0.8);
+            border: 1px solid #ff6b6b;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .mage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .mage-card canvas {
+            border: 1px solid #ff6b6b;
+            background: #000000;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-optimize-contrast: true;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .mage-card h3 {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            background: #ff6b6b;
+            color: #000000;
+        }
+
+        button {
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .generate-btn {
+            background: #ff6b6b !important;
+            color: #000000 !important;
+            font-weight: bold;
+            border: 2px solid #ff6b6b !important;
+        }
+
+        .generate-btn:hover {
+            background: #000000 !important;
+            color: #ff6b6b !important;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ff6b6b;
+        }
+
+        .export-section h3 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(26, 0, 51, 0.6);
+            border: 1px solid #ff6b6b;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: #ff9999;
+        }
+
+        .controls-title {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .stats-title {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .animation-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🔮 Mage Sprite Generator</h1>
+        <p class="subtitle">Generate mystical mage sprites with elemental magic • Fire, Ice, Lightning, Earth, Wind
+            mages</p>
+
+        <div class="mage-grid">
+            <div class="controls-panel">
+                <h2 class="controls-title">⚙️ Mage Controls</h2>
+
+                <div class="control-group">
+                    <label for="mage-type">Mage Type</label>
+                    <select id="mage-type">
+                        <option value="fire-mage">🔥 Fire Mage</option>
+                        <option value="ice-mage">❄️ Ice Mage</option>
+                        <option value="lightning-mage">⚡ Lightning Mage</option>
+                        <option value="earth-mage">🌍 Earth Mage</option>
+                        <option value="wind-mage">💨 Wind Mage</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="elemental-power">Elemental Power</label>
+                    <select id="elemental-power">
+                        <option value="novice">Novice (Level 1-10)</option>
+                        <option value="adept">Adept (Level 11-25)</option>
+                        <option value="master">Master (Level 26-50)</option>
+                        <option value="archmage">Archmage (Level 51+)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="spell-focus">Spell Focus</label>
+                    <select id="spell-focus">
+                        <option value="offensive">⚔️ Offensive Magic</option>
+                        <option value="defensive">🛡️ Defensive Magic</option>
+                        <option value="support">💚 Support Magic</option>
+                        <option value="summoning">👻 Summoning Magic</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="robe-style">Robe Style</label>
+                    <select id="robe-style">
+                        <option value="simple">Simple Robes</option>
+                        <option value="ornate">Ornate Robes</option>
+                        <option value="ancient">Ancient Robes</option>
+                        <option value="royal">Royal Robes</option>
+                    </select>
+                </div>
+
+                <button class="generate-btn" onclick="generateMage()">🔮 Generate Mage</button>
+
+                <div class="export-section">
+                    <h3>💾 Export Options</h3>
+                    <div class="btn-grid">
+                        <button onclick="exportPNG()">📷 PNG</button>
+                        <button onclick="exportSheet()">📄 Sprite Sheet</button>
+                    </div>
+                    <button onclick="exportJSON()">💾 JSON Data</button>
+                </div>
+
+                <div class="stats-panel">
+                    <h3 class="stats-title">📊 Mage Stats</h3>
+                    <div class="stats-grid" id="stats-display">
+                        <div class="stat-item">
+                            <span class="stat-label">HP:</span>
+                            <span class="stat-value" id="stat-hp">120</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">MP:</span>
+                            <span class="stat-value" id="stat-mp">200</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Attack:</span>
+                            <span class="stat-value" id="stat-attack">45</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Defense:</span>
+                            <span class="stat-value" id="stat-defense">25</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Magic:</span>
+                            <span class="stat-value" id="stat-magic">85</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Speed:</span>
+                            <span class="stat-value" id="stat-speed">35</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-panel">
+                <div class="mage-card">
+                    <h3>Mage Sprite Preview</h3>
+                    <canvas id="mage-canvas" width="512" height="512"></canvas>
+                    <div class="animation-buttons">
+                        <button onclick="setAnimation('idle')">😌 Idle</button>
+                        <button onclick="setAnimation('cast')">🔮 Cast</button>
+                        <button onclick="setAnimation('attack')">⚡ Attack</button>
+                        <button onclick="setAnimation('special')">💫 Special</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./hd-sprite-engine.js"></script>
+    <script>
+        let mageSystem;
+        let currentAnimation = 'idle';
+
+        const mageStats = {
+            'fire-mage': {
+                novice: { hp: 100, mp: 150, attack: 35, defense: 20, magic: 70, speed: 30 },
+                adept: { hp: 140, mp: 200, attack: 45, defense: 25, magic: 85, speed: 35 },
+                master: { hp: 180, mp: 250, attack: 55, defense: 30, magic: 100, speed: 40 },
+                archmage: { hp: 220, mp: 300, attack: 65, defense: 35, magic: 120, speed: 45 }
+            },
+            'ice-mage': {
+                novice: { hp: 95, mp: 160, attack: 30, defense: 25, magic: 75, speed: 25 },
+                adept: { hp: 135, mp: 210, attack: 40, defense: 30, magic: 90, speed: 30 },
+                master: { hp: 175, mp: 260, attack: 50, defense: 35, magic: 105, speed: 35 },
+                archmage: { hp: 215, mp: 310, attack: 60, defense: 40, magic: 125, speed: 40 }
+            },
+            'lightning-mage': {
+                novice: { hp: 90, mp: 170, attack: 40, defense: 15, magic: 80, speed: 40 },
+                adept: { hp: 130, mp: 220, attack: 50, defense: 20, magic: 95, speed: 45 },
+                master: { hp: 170, mp: 270, attack: 60, defense: 25, magic: 110, speed: 50 },
+                archmage: { hp: 210, mp: 320, attack: 70, defense: 30, magic: 130, speed: 55 }
+            },
+            'earth-mage': {
+                novice: { hp: 130, mp: 120, attack: 50, defense: 40, magic: 60, speed: 20 },
+                adept: { hp: 170, mp: 170, attack: 60, defense: 45, magic: 75, speed: 25 },
+                master: { hp: 210, mp: 220, attack: 70, defense: 50, magic: 90, speed: 30 },
+                archmage: { hp: 250, mp: 270, attack: 80, defense: 55, magic: 110, speed: 35 }
+            },
+            'wind-mage': {
+                novice: { hp: 85, mp: 140, attack: 25, defense: 15, magic: 65, speed: 50 },
+                adept: { hp: 125, mp: 190, attack: 35, defense: 20, magic: 80, speed: 55 },
+                master: { hp: 165, mp: 240, attack: 45, defense: 25, magic: 95, speed: 60 },
+                archmage: { hp: 205, mp: 290, attack: 55, defense: 30, magic: 115, speed: 65 }
+            }
+        };
+
+        function init() {
+            const canvas = document.getElementById('mage-canvas');
+            mageSystem = new HDSpriteSystem();
+            mageSystem.setCanvas(canvas);
+            mageSystem.setCharacter('mage', 'fire-mage');
+            mageSystem.setPalette('fire');
+            mageSystem.setScale(4);
+            mageSystem.draw();
+
+            updateStats();
+        }
+
+        function generateMage() {
+            const mageType = document.getElementById('mage-type').value;
+            const elementalPower = document.getElementById('elemental-power').value;
+            const spellFocus = document.getElementById('spell-focus').value;
+            const robeStyle = document.getElementById('robe-style').value;
+
+            // Map mage type to palette
+            const paletteMap = {
+                'fire-mage': 'fire',
+                'ice-mage': 'ice',
+                'lightning-mage': 'energy',
+                'earth-mage': 'nature',
+                'wind-mage': 'light'
+            };
+
+            mageSystem.setCharacter('mage', mageType);
+            mageSystem.setPalette(paletteMap[mageType]);
+            mageSystem.setScale(4);
+
+            // Apply customizations based on selections
+            if (robeStyle === 'ornate') {
+                mageSystem.addAccessory('crown');
+            } else if (robeStyle === 'ancient') {
+                mageSystem.addAccessory('amulet');
+            } else if (robeStyle === 'royal') {
+                mageSystem.addAccessory('cape');
+            }
+
+            mageSystem.draw();
+            updateStats();
+        }
+
+        function setAnimation(animation) {
+            currentAnimation = animation;
+            mageSystem.setAnimation(animation);
+            mageSystem.draw();
+        }
+
+        function updateStats() {
+            const mageType = document.getElementById('mage-type').value;
+            const elementalPower = document.getElementById('elemental-power').value;
+
+            const stats = mageStats[mageType][elementalPower];
+
+            document.getElementById('stat-hp').textContent = stats.hp;
+            document.getElementById('stat-mp').textContent = stats.mp;
+            document.getElementById('stat-attack').textContent = stats.attack;
+            document.getElementById('stat-defense').textContent = stats.defense;
+            document.getElementById('stat-magic').textContent = stats.magic;
+            document.getElementById('stat-speed').textContent = stats.speed;
+        }
+
+        function exportPNG() {
+            const dataURL = mageSystem.exportPNG();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `mage-${document.getElementById('mage-type').value}-${currentAnimation}.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportSheet() {
+            const dataURL = mageSystem.exportSpriteSheet();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `mage-${document.getElementById('mage-type').value}-sheet.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportJSON() {
+            const data = mageSystem.exportJSON();
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `mage-${document.getElementById('mage-type').value}-data.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

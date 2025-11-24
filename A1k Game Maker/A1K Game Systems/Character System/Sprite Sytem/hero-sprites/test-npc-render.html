@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NPC Rendering Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #1a1a2e;
+      color: white;
+      font-family: Arial;
+    }
+    canvas {
+      border: 2px solid #00e5ff;
+      display: block;
+      margin: 20px auto;
+      background: #0b0f17;
+    }
+    #log {
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      margin: 20px;
+      border: 1px solid #00e5ff;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .error { color: #ff4444; }
+    .success { color: #44ff44; }
+    .info { color: #44aaff; }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; color: #00e5ff;">🎨 NPC Sprite Rendering Test</h1>
+  <div id="log"></div>
+  <canvas id="canvas" width="1200" height="600"></canvas>
+
+  <script src="npc-database.js"></script>
+  <script src="npc-sprite-renderer.js"></script>
+
+  <script>
+    const log = document.getElementById('log');
+    
+    function logMsg(msg, type = 'info') {
+      const div = document.createElement('div');
+      div.className = type;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+      console.log(msg);
+    }
+
+    try {
+      logMsg('=== NPC SYSTEM TEST STARTED ===', 'info');
+      
+      // Check if functions exist
+      logMsg(`window.generateNPC exists: ${typeof window.generateNPC}`, 
+             typeof window.generateNPC === 'function' ? 'success' : 'error');
+      logMsg(`window.NPCSpriteRenderer exists: ${typeof window.NPCSpriteRenderer}`,
+             typeof window.NPCSpriteRenderer === 'function' ? 'success' : 'error');
+      logMsg(`window.NPC_RANK_CONFIG exists: ${typeof window.NPC_RANK_CONFIG}`,
+             typeof window.NPC_RANK_CONFIG === 'object' ? 'success' : 'error');
+      logMsg(`window.NPC_TYPE_TEMPLATES exists: ${typeof window.NPC_TYPE_TEMPLATES}`,
+             typeof window.NPC_TYPE_TEMPLATES === 'object' ? 'success' : 'error');
+
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Clear canvas
+      ctx.fillStyle = '#0b0f17';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Create renderer
+      const renderer = new window.NPCSpriteRenderer();
+      logMsg('✅ Renderer created', 'success');
+
+      // Create test NPCs
+      const npcs = [];
+      const types = ['warrior', 'mage', 'archer', 'healer', 'rogue', 'tank', 'merchant', 'crafter'];
+      const ranks = ['E', 'D', 'C'];
+
+      logMsg(`Creating ${types.length} NPCs...`, 'info');
+
+      types.forEach((type, idx) => {
+        try {
+          const npc = window.generateNPC(type, 'C', 0, 0);
+          npc.x = 150 + idx * 130;
+          npc.y = 300;
+          npc.state = 'idle';
+          npc.direction = 'right';
+          npcs.push(npc);
+          logMsg(`✅ Created ${type} NPC: ${npc.name}`, 'success');
+        } catch (err) {
+          logMsg(`❌ Error creating ${type}: ${err.message}`, 'error');
+        }
+      });
+
+      logMsg(`Total NPCs created: ${npcs.length}`, npcs.length > 0 ? 'success' : 'error');
+
+      // Render NPCs
+      const camera = { x: 0, y: 0 };
+
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('8 NPC Types Below:', canvas.width / 2, 30);
+
+      npcs.forEach((npc, idx) => {
+        try {
+          renderer.render(ctx, npc, camera);
+          
+          // Draw labels
+          ctx.fillStyle = '#ffd700';
+          ctx.font = 'bold 12px Arial';
+          ctx.fillText(npc.type.toUpperCase(), npc.x, npc.y + 40);
+          ctx.fillStyle = '#aaa';
+          ctx.font = '10px Arial';
+          ctx.fillText(`Rank ${npc.rank}`, npc.x, npc.y + 52);
+          
+          logMsg(`✅ Rendered ${npc.type}`, 'success');
+        } catch (err) {
+          logMsg(`❌ Error rendering ${npc.type}: ${err.message}`, 'error');
+          console.error(err);
+        }
+      });
+
+      logMsg('=== RENDERING COMPLETE ===', 'success');
+      logMsg(`✅ ${npcs.length} NPCs should be visible on canvas`, 'success');
+
+    } catch (error) {
+      logMsg(`❌ CRITICAL ERROR: ${error.message}`, 'error');
+      console.error(error);
+    }
+  </script>
+</body>
+</html>

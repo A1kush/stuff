@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique - Production Ready 3D Character</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+    <script src="shared/particle-system.js"></script>
+    <script src="shared/post-processing.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 50%, #1a1a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        #container {
+            display: flex;
+            gap: 20px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        #viewport {
+            flex: 1;
+            border: 4px solid #00ff88;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4), 0 0 60px rgba(0, 255, 136, 0.2);
+            overflow: hidden;
+            background: #000;
+        }
+
+        #controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            width: 320px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 22px;
+            color: #00ff88;
+            border-bottom: 3px solid #00ff88;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 255, 136, 0.3);
+        }
+
+        .control-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0a0e27;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            background: #f8f9fa;
+            color: #0a0e27;
+        }
+
+        select:hover {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #0a0e27;
+            border: none;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .info strong {
+            color: #00ff88;
+        }
+
+        @media (max-width: 1200px) {
+            #container {
+                flex-direction: column;
+            }
+            #controls {
+                width: 100%;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="viewport"></div>
+        <div id="controls">
+            <h1>🔫 UNIQUE GUNNER</h1>
+            
+            <div class="control-group">
+                <label>Animation State</label>
+                <select id="animState">
+                    <option value="idle">Idle - Tactical Stance</option>
+                    <option value="walk">Walk - Advance</option>
+                    <option value="attack">Attack - Dual Fire</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Weapon Energy Theme</label>
+                <select id="weaponColor">
+                    <option value="neon">Neon - Cyan Glow</option>
+                    <option value="plasma">Plasma - Purple</option>
+                    <option value="laser">Laser - Red</option>
+                    <option value="quantum">Quantum - Blue</option>
+                    <option value="photon">Photon - Gold</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Particle Effects</label>
+                <select id="particleToggle">
+                    <option value="all">All Effects ON</option>
+                    <option value="trails">Trails Only</option>
+                    <option value="ambient">Ambient Only</option>
+                    <option value="off">Effects OFF</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Visual Style</label>
+                <select id="colorGrading">
+                    <option value="default">Default</option>
+                    <option value="cinematic">Cinematic</option>
+                    <option value="vibrant">Vibrant</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="cool">Cool</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Screen Effects</label>
+                <select id="screenEffects">
+                    <option value="none">None</option>
+                    <option value="vignette">Vignette</option>
+                    <option value="scanlines">Scanlines</option>
+                    <option value="chromatic">Chromatic</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Export Options</label>
+                <button id="exportPNG">📸 Export PNG (512x512)</button>
+                <button id="exportPNGHD">📸 Export PNG HD (1024x1024)</button>
+                <button id="exportTransparent">📸 Export Transparent BG</button>
+            </div>
+
+            <div class="info">
+                <strong>Production Ready Character</strong><br>
+                • Dual-wielding ranged specialist<br>
+                • Futuristic armor & effects<br>
+                • Dynamic combat animations<br>
+                • Optimized performance<br>
+                • Instant game integration
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // PRODUCTION-READY UNIQUE DUAL-PISTOLS CHARACTER
+        // ============================================
+
+        let scene, camera, renderer, warrior;
+        let animationState = 'idle';
+        let animationTime = 0;
+        let transitionProgress = 0;
+        const TRANSITION_SPEED = 0.1;
+
+        // Weapon color palettes
+        const weaponPalettes = {
+            neon: { color: 0x00ffdd, emissive: 0x00ffcc, intensity: 0.9 },
+            plasma: { color: 0xbb44ff, emissive: 0x9922ff, intensity: 0.85 },
+            laser: { color: 0xff3344, emissive: 0xff0022, intensity: 0.8 },
+            quantum: { color: 0x4488ff, emissive: 0x2266ff, intensity: 0.75 },
+            photon: { color: 0xffdd44, emissive: 0xffbb00, intensity: 0.9 }
+        };
+
+        let currentWeaponPalette = weaponPalettes.neon;
+        
+        // Particle system
+        let particleSystem;
+        let particleMode = 'all';
+        let lastAmbientEmit = 0;
+        let lastWalkDust = 0;
+        let lastMuzzleFlashLeft = 0;
+        let lastMuzzleFlashRight = 0;
+        
+        // Post-processing
+        let postProcessing;
+
+        // Character body parts references
+        let bodyParts = {
+            head: null,
+            body: null,
+            leftArm: null,
+            rightArm: null,
+            leftLeg: null,
+            rightLeg: null,
+            leftPistol: null,
+            rightPistol: null,
+            leftEye: null,
+            rightEye: null,
+            hair: null
+        };
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            scene.fog = new THREE.Fog(0x000000, 5, 15);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+            camera.position.set(0, 1.8, 5);
+            camera.lookAt(0, 1.2, 0);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                preserveDrawingBuffer: true,
+                alpha: true
+            });
+            renderer.setSize(512, 512);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('viewport').appendChild(renderer.domElement);
+
+            // Enhanced lighting
+            setupLighting();
+
+            // Create character
+            createWarrior();
+            
+            // Initialize particle system
+            particleSystem = new ParticleSystem(scene);
+            
+            // Initialize post-processing
+            postProcessing = new PostProcessing(renderer, scene, camera);
+
+            // Start animation
+            animate();
+
+            // Setup controls
+            setupEventListeners();
+        }
+
+        // ============================================
+        // LIGHTING SETUP
+        // ============================================
+
+        function setupLighting() {
+            // Ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            // Main directional light
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            mainLight.position.set(5, 10, 7);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            scene.add(mainLight);
+
+            // Rim light (cyan tint)
+            const rimLight = new THREE.DirectionalLight(0x00ffaa, 0.7);
+            rimLight.position.set(-5, 5, -5);
+            scene.add(rimLight);
+
+            // Fill light
+            const fillLight = new THREE.DirectionalLight(0xccddff, 0.3);
+            fillLight.position.set(-3, 2, 5);
+            scene.add(fillLight);
+
+            // Weapon glow lights (two for dual pistols)
+            const accentLight1 = new THREE.PointLight(0x00ffdd, 0.8, 8);
+            accentLight1.position.set(-0.5, 1.2, 0.5);
+            scene.add(accentLight1);
+            window.accentLight1 = accentLight1;
+
+            const accentLight2 = new THREE.PointLight(0x00ffdd, 0.8, 8);
+            accentLight2.position.set(0.5, 1.2, 0.5);
+            scene.add(accentLight2);
+            window.accentLight2 = accentLight2;
+        }
+
+        // ============================================
+        // CHARACTER CREATION
+        // ============================================
+
+        function createWarrior() {
+            warrior = new THREE.Group();
+
+            // Materials
+            const matBodyDark = new THREE.MeshPhongMaterial({ 
+                color: 0x1a1a2e, 
+                flatShading: true,
+                shininess: 40,
+                specular: 0x3a3a5e
+            });
+
+            const matBodyLight = new THREE.MeshPhongMaterial({ 
+                color: 0x2a2a4e, 
+                flatShading: true,
+                shininess: 35,
+                specular: 0x4a4a6e
+            });
+
+            const matSkin = new THREE.MeshPhongMaterial({ 
+                color: 0x5a3a2a, 
+                flatShading: true,
+                shininess: 15,
+                specular: 0x3a2a1a
+            });
+
+            const matHair = new THREE.MeshPhongMaterial({ 
+                color: 0x1a1a1a, 
+                flatShading: true,
+                shininess: 60,
+                specular: 0x4a4a4a
+            });
+
+            const matEye = new THREE.MeshPhongMaterial({ 
+                color: 0xffffff, 
+                flatShading: true,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.8
+            });
+
+            const matWeaponMetal = new THREE.MeshPhongMaterial({ 
+                color: 0x555555, 
+                flatShading: true,
+                shininess: 90,
+                specular: 0xdddddd
+            });
+
+            const matWeaponGlow = new THREE.MeshPhongMaterial({ 
+                color: currentWeaponPalette.color, 
+                flatShading: true,
+                emissive: currentWeaponPalette.emissive,
+                emissiveIntensity: currentWeaponPalette.intensity,
+                shininess: 100,
+                specular: 0xffffff
+            });
+
+            const matArmorGlow = new THREE.MeshPhongMaterial({ 
+                color: currentWeaponPalette.color, 
+                flatShading: true,
+                emissive: currentWeaponPalette.emissive,
+                emissiveIntensity: 0.5
+            });
+
+            // Body (futuristic armor suit)
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.68, 0.34), matBodyDark);
+            body.position.y = 1.0;
+            body.castShadow = true;
+            bodyParts.body = body;
+            warrior.add(body);
+
+            // Chest plate with glowing accents
+            const chestPlate = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.40, 0.36), matBodyLight);
+            chestPlate.position.y = 1.15;
+            warrior.add(chestPlate);
+
+            // Glowing chest core
+            const chestCore = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.05), matArmorGlow);
+            chestCore.position.set(0, 1.15, 0.18);
+            warrior.add(chestCore);
+
+            // Glowing line accents on chest
+            const accentLeft = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.25, 0.04), matArmorGlow);
+            accentLeft.position.set(-0.12, 1.1, 0.17);
+            warrior.add(accentLeft);
+
+            const accentRight = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.25, 0.04), matArmorGlow);
+            accentRight.position.set(0.12, 1.1, 0.17);
+            warrior.add(accentRight);
+
+            // Belt/waist
+            const belt = new THREE.Mesh(new THREE.BoxGeometry(0.50, 0.10, 0.35), new THREE.MeshPhongMaterial({ 
+                color: 0x0a0a1a, 
+                flatShading: true,
+                shininess: 30
+            }));
+            belt.position.y = 0.68;
+            warrior.add(belt);
+
+            // Head
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.40, 0.35), matSkin);
+            head.position.y = 1.58;
+            head.castShadow = true;
+            bodyParts.head = head;
+            warrior.add(head);
+
+            // Hair (side swept)
+            const hair = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.25, 0.37), matHair);
+            hair.position.y = 1.68;
+            bodyParts.hair = hair;
+            warrior.add(hair);
+
+            // Hair bang
+            const hairBang = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.15, 0.10), matHair);
+            hairBang.position.set(0.08, 1.65, 0.2);
+            warrior.add(hairBang);
+
+            // Large expressive eyes
+            const leftEye = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.10, 0.05), matEye);
+            leftEye.position.set(-0.09, 1.58, 0.18);
+            bodyParts.leftEye = leftEye;
+            warrior.add(leftEye);
+
+            const rightEye = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.10, 0.05), matEye);
+            rightEye.position.set(0.09, 1.58, 0.18);
+            bodyParts.rightEye = rightEye;
+            warrior.add(rightEye);
+
+            // Smile
+            const smile = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, 0.03), new THREE.MeshPhongMaterial({ 
+                color: 0x3a2a1a, 
+                flatShading: true 
+            }));
+            smile.position.set(0, 1.45, 0.18);
+            warrior.add(smile);
+
+            // Legs with armor panels
+            const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.60, 0.18), matBodyDark);
+            leftLeg.position.set(-0.15, 0.32, 0);
+            leftLeg.castShadow = true;
+            bodyParts.leftLeg = leftLeg;
+            warrior.add(leftLeg);
+
+            const leftKnee = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.14, 0.20), matBodyLight);
+            leftKnee.position.set(-0.15, 0.46, 0);
+            warrior.add(leftKnee);
+
+            const leftKneeGlow = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.04), matArmorGlow);
+            leftKneeGlow.position.set(-0.15, 0.46, 0.11);
+            warrior.add(leftKneeGlow);
+
+            const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.60, 0.18), matBodyDark);
+            rightLeg.position.set(0.15, 0.32, 0);
+            rightLeg.castShadow = true;
+            bodyParts.rightLeg = rightLeg;
+            warrior.add(rightLeg);
+
+            const rightKnee = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.14, 0.20), matBodyLight);
+            rightKnee.position.set(0.15, 0.46, 0);
+            warrior.add(rightKnee);
+
+            const rightKneeGlow = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.04), matArmorGlow);
+            rightKneeGlow.position.set(0.15, 0.46, 0.11);
+            warrior.add(rightKneeGlow);
+
+            // Arms with shoulder armor
+            const leftShoulder = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.20, 0.20), matBodyLight);
+            leftShoulder.position.set(-0.34, 1.24, 0);
+            warrior.add(leftShoulder);
+
+            const leftShoulderGlow = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.05, 0.05), matArmorGlow);
+            leftShoulderGlow.position.set(-0.34, 1.24, 0.11);
+            warrior.add(leftShoulderGlow);
+
+            const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.50, 0.14), matSkin);
+            leftArm.position.set(-0.40, 0.88, 0);
+            leftArm.castShadow = true;
+            bodyParts.leftArm = leftArm;
+            warrior.add(leftArm);
+
+            const rightShoulder = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.20, 0.20), matBodyLight);
+            rightShoulder.position.set(0.34, 1.24, 0);
+            warrior.add(rightShoulder);
+
+            const rightShoulderGlow = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.05, 0.05), matArmorGlow);
+            rightShoulderGlow.position.set(0.34, 0.24, 0.11);
+            warrior.add(rightShoulderGlow);
+
+            const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.50, 0.14), matSkin);
+            rightArm.position.set(0.40, 0.88, 0);
+            rightArm.castShadow = true;
+            bodyParts.rightArm = rightArm;
+            warrior.add(rightArm);
+
+            // LEFT PISTOL (detailed futuristic design)
+            const leftPistolBody = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.10, 0.24), matWeaponMetal);
+            leftPistolBody.position.set(-0.52, 0.92, 0.08);
+            leftPistolBody.rotation.x = -0.2;
+            bodyParts.leftPistol = leftPistolBody;
+            warrior.add(leftPistolBody);
+
+            const leftPistolBarrel = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.18), matWeaponMetal);
+            leftPistolBarrel.position.set(-0.52, 0.92, 0.28);
+            leftPistolBarrel.rotation.x = -0.2;
+            warrior.add(leftPistolBarrel);
+
+            const leftPistolGlow = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.12), matWeaponGlow);
+            leftPistolGlow.position.set(-0.52, 0.92, 0.35);
+            leftPistolGlow.rotation.x = -0.2;
+            warrior.add(leftPistolGlow);
+
+            const leftPistolAccent = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.02), matWeaponGlow);
+            leftPistolAccent.position.set(-0.52, 0.96, 0.08);
+            leftPistolAccent.rotation.x = -0.2;
+            warrior.add(leftPistolAccent);
+
+            // RIGHT PISTOL (detailed futuristic design)
+            const rightPistolBody = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.10, 0.24), matWeaponMetal);
+            rightPistolBody.position.set(0.52, 0.92, 0.08);
+            rightPistolBody.rotation.x = -0.2;
+            bodyParts.rightPistol = rightPistolBody;
+            warrior.add(rightPistolBody);
+
+            const rightPistolBarrel = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.18), matWeaponMetal);
+            rightPistolBarrel.position.set(0.52, 0.92, 0.28);
+            rightPistolBarrel.rotation.x = -0.2;
+            warrior.add(rightPistolBarrel);
+
+            const rightPistolGlow = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.12), matWeaponGlow);
+            rightPistolGlow.position.set(0.52, 0.92, 0.35);
+            rightPistolGlow.rotation.x = -0.2;
+            warrior.add(rightPistolGlow);
+
+            const rightPistolAccent = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.02, 0.02), matWeaponGlow);
+            rightPistolAccent.position.set(0.52, 0.96, 0.08);
+            rightPistolAccent.rotation.x = -0.2;
+            warrior.add(rightPistolAccent);
+
+            scene.add(warrior);
+        }
+
+        // ============================================
+        // ANIMATION SYSTEM
+        // ============================================
+
+        function updateAnimation(deltaTime) {
+            animationTime += deltaTime;
+
+            if (transitionProgress < 1) {
+                transitionProgress = Math.min(1, transitionProgress + TRANSITION_SPEED);
+            }
+
+            switch (animationState) {
+                case 'idle':
+                    animateIdle();
+                    break;
+                case 'walk':
+                    animateWalk();
+                    break;
+                case 'attack':
+                    animateAttack();
+                    break;
+            }
+
+            // Gentle rotation for display
+            warrior.rotation.y = Math.sin(animationTime * 0.0003) * 0.3;
+        }
+
+        function animateIdle() {
+            const t = animationTime * 0.001;
+            const breathe = Math.sin(t * 2) * 0.015;
+            const sway = Math.sin(t * 1.5) * 0.02;
+
+            // Breathing
+            if (bodyParts.body) {
+                bodyParts.body.scale.y = 1 + breathe * 0.5;
+                bodyParts.body.position.y = 1.0 + breathe * 2;
+            }
+
+            // Head slight movement
+            if (bodyParts.head) {
+                bodyParts.head.position.y = 1.58 + breathe * 1.5;
+                bodyParts.head.rotation.z = sway * 0.3;
+                bodyParts.head.rotation.x = Math.sin(t * 1.2) * 0.05;
+            }
+
+            // Hair follows head
+            if (bodyParts.hair) {
+                bodyParts.hair.rotation.z = sway * 0.2;
+            }
+
+            // Tactical pistol stance (slight movement)
+            if (bodyParts.leftPistol) {
+                bodyParts.leftPistol.position.y = 0.92 + Math.sin(t * 2) * 0.02;
+                bodyParts.leftPistol.rotation.x = -0.2 + Math.sin(t * 1.5) * 0.03;
+            }
+            if (bodyParts.rightPistol) {
+                bodyParts.rightPistol.position.y = 0.92 + Math.sin(t * 2 + 1) * 0.02;
+                bodyParts.rightPistol.rotation.x = -0.2 + Math.sin(t * 1.5 + 1) * 0.03;
+            }
+
+            // Eye glow pulse
+            const eyePulse = 0.7 + Math.sin(t * 3) * 0.2;
+            if (bodyParts.leftEye) bodyParts.leftEye.material.emissiveIntensity = eyePulse;
+            if (bodyParts.rightEye) bodyParts.rightEye.material.emissiveIntensity = eyePulse;
+            
+            // Ambient particles
+            if ((particleMode === 'all' || particleMode === 'ambient') && Date.now() - lastAmbientEmit > 200) {
+                const pos = new THREE.Vector3(0, 1.2, 0);
+                particleSystem.emitAmbientAura(pos, currentWeaponPalette.emissive, 0.75);
+                particleSystem.emitEnergyOrb(pos, currentWeaponPalette.emissive, 3);
+                lastAmbientEmit = Date.now();
+            }
+        }
+
+        function animateWalk() {
+            const t = animationTime * 0.003;
+            const walkCycle = Math.sin(t * 4);
+            const walkCycleCos = Math.cos(t * 4);
+
+            // Body bob and slight lean
+            if (bodyParts.body) {
+                bodyParts.body.position.y = 1.0 + Math.abs(walkCycle) * 0.08;
+                bodyParts.body.rotation.z = walkCycle * 0.06;
+                bodyParts.body.position.z = walkCycle * 0.03;
+            }
+
+            // Head bob and look forward
+            if (bodyParts.head) {
+                bodyParts.head.position.y = 1.58 + Math.abs(walkCycle) * 0.08;
+                bodyParts.head.rotation.y = walkCycle * 0.08;
+            }
+
+            // Hair bounce
+            if (bodyParts.hair) {
+                bodyParts.hair.position.y = 1.68 + Math.abs(walkCycleCos) * 0.04;
+                bodyParts.hair.rotation.z = walkCycle * 0.1;
+            }
+
+            // Leg march
+            if (bodyParts.leftLeg) {
+                bodyParts.leftLeg.rotation.x = walkCycle * 0.5;
+                bodyParts.leftLeg.position.y = 0.32 + Math.max(0, walkCycle * 0.08);
+            }
+            if (bodyParts.rightLeg) {
+                bodyParts.rightLeg.rotation.x = -walkCycle * 0.5;
+                bodyParts.rightLeg.position.y = 0.32 + Math.max(0, -walkCycle * 0.08);
+            }
+
+            // Arms move with pistols (tactical movement)
+            if (bodyParts.leftArm) {
+                bodyParts.leftArm.rotation.x = walkCycleCos * 0.2;
+            }
+            if (bodyParts.rightArm) {
+                bodyParts.rightArm.rotation.x = -walkCycleCos * 0.2;
+            }
+
+            // Pistols move with arms
+            if (bodyParts.leftPistol) {
+                bodyParts.leftPistol.rotation.x = -0.2 + walkCycleCos * 0.15;
+                bodyParts.leftPistol.position.z = 0.08 + walkCycleCos * 0.03;
+            }
+            if (bodyParts.rightPistol) {
+                bodyParts.rightPistol.rotation.x = -0.2 - walkCycleCos * 0.15;
+                bodyParts.rightPistol.position.z = 0.08 - walkCycleCos * 0.03;
+            }
+        }
+
+        function animateAttack() {
+            const t = animationTime * 0.005;
+            const attackCycle = Math.sin(t * 3);
+            const rapidFire = Math.sin(t * 8);
+            const attackProgress = (attackCycle + 1) / 2;
+
+            // Body recoil motion
+            if (bodyParts.body) {
+                bodyParts.body.rotation.z = rapidFire * 0.08;
+                bodyParts.body.position.z = Math.abs(rapidFire) * 0.04;
+            }
+
+            // Head tracks targets
+            if (bodyParts.head) {
+                bodyParts.head.rotation.y = attackCycle * 0.2;
+                bodyParts.head.rotation.x = Math.sin(t * 2) * 0.1;
+            }
+
+            // Hair dynamic movement
+            if (bodyParts.hair) {
+                bodyParts.hair.rotation.z = attackCycle * 0.15;
+                bodyParts.hair.rotation.y = attackCycle * 0.1;
+            }
+
+            // Alternating pistol fire (rapid)
+            if (bodyParts.leftPistol) {
+                const leftFire = Math.sin(t * 8);
+                bodyParts.leftPistol.rotation.x = -0.2 + Math.abs(leftFire) * 0.15;
+                bodyParts.leftPistol.position.z = 0.08 - Math.abs(leftFire) * 0.08;
+                bodyParts.leftPistol.position.y = 0.92 + Math.abs(leftFire) * 0.05;
+
+                // Muzzle flash effect
+                if (attackProgress > 0.45 && attackProgress < 0.55 && leftFire > 0) {
+                    bodyParts.leftPistol.scale.set(1.15, 1.15, 1.15);
+                } else {
+                    bodyParts.leftPistol.scale.set(1, 1, 1);
+                }
+            }
+
+            if (bodyParts.rightPistol) {
+                const rightFire = Math.sin(t * 8 + Math.PI / 2);
+                bodyParts.rightPistol.rotation.x = -0.2 + Math.abs(rightFire) * 0.15;
+                bodyParts.rightPistol.position.z = 0.08 - Math.abs(rightFire) * 0.08;
+                bodyParts.rightPistol.position.y = 0.92 + Math.abs(rightFire) * 0.05;
+
+                // Muzzle flash effect (offset from left)
+                if (attackProgress > 0.2 && attackProgress < 0.3 && rightFire > 0) {
+                    bodyParts.rightPistol.scale.set(1.15, 1.15, 1.15);
+                } else {
+                    bodyParts.rightPistol.scale.set(1, 1, 1);
+                }
+            }
+
+            // Arms recoil
+            if (bodyParts.leftArm) {
+                bodyParts.leftArm.rotation.z = Math.abs(Math.sin(t * 8)) * 0.3;
+                bodyParts.leftArm.rotation.x = Math.sin(t * 8) * 0.2;
+            }
+            if (bodyParts.rightArm) {
+                bodyParts.rightArm.rotation.z = -Math.abs(Math.sin(t * 8 + Math.PI / 2)) * 0.3;
+                bodyParts.rightArm.rotation.x = Math.sin(t * 8 + Math.PI / 2) * 0.2;
+            }
+
+            // Eyes focused intensity
+            const eyeIntensity = 0.8 + attackProgress * 0.3;
+            if (bodyParts.leftEye) bodyParts.leftEye.material.emissiveIntensity = eyeIntensity;
+            if (bodyParts.rightEye) bodyParts.rightEye.material.emissiveIntensity = eyeIntensity;
+
+            // Weapon glow pulses with firing
+            warrior.children.forEach(child => {
+                if (child.material && child.material.emissive && 
+                    child.material.emissive.getHex() === currentWeaponPalette.emissive) {
+                    const isPistolPart = Math.abs(child.position.x) > 0.45 && child.position.z > 0.2;
+                    if (isPistolPart) {
+                        child.material.emissiveIntensity = currentWeaponPalette.intensity * (1 + Math.abs(rapidFire) * 0.5);
+                    }
+                }
+            });
+            
+            // Dual pistol muzzle flashes and bullet tracers
+            if (particleMode === 'all' || particleMode === 'trails') {
+                // Left pistol
+                if (Date.now() - lastMuzzleFlashLeft > 150 && Math.sin(t * 8) > 0) {
+                    const leftPos = new THREE.Vector3();
+                    bodyParts.leftPistol.getWorldPosition(leftPos);
+                    const direction = new THREE.Vector3(0, 0, 1);
+                    particleSystem.emitMuzzleFlash(leftPos, direction, currentWeaponPalette.emissive);
+                    
+                    // Bullet tracer
+                    const targetPos = leftPos.clone().add(new THREE.Vector3(
+                        (Math.random() - 0.5) * 2,
+                        (Math.random() - 0.5) * 1,
+                        5
+                    ));
+                    particleSystem.emitBulletTracer(leftPos, targetPos, currentWeaponPalette.emissive);
+                    lastMuzzleFlashLeft = Date.now();
+                }
+                
+                // Right pistol
+                if (Date.now() - lastMuzzleFlashRight > 150 && Math.sin(t * 8 + Math.PI / 2) > 0) {
+                    const rightPos = new THREE.Vector3();
+                    bodyParts.rightPistol.getWorldPosition(rightPos);
+                    const direction = new THREE.Vector3(0, 0, 1);
+                    particleSystem.emitMuzzleFlash(rightPos, direction, currentWeaponPalette.emissive);
+                    
+                    // Bullet tracer
+                    const targetPos = rightPos.clone().add(new THREE.Vector3(
+                        (Math.random() - 0.5) * 2,
+                        (Math.random() - 0.5) * 1,
+                        5
+                    ));
+                    particleSystem.emitBulletTracer(rightPos, targetPos, currentWeaponPalette.emissive);
+                    lastMuzzleFlashRight = Date.now();
+                }
+            }
+        }
+
+        // ============================================
+        // ANIMATION LOOP
+        // ============================================
+
+        let lastTime = performance.now();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            updateAnimation(deltaTime);
+            
+            // Update particle system
+            if (particleSystem) {
+                particleSystem.update(deltaTime);
+            }
+            
+            // Render with post-processing
+            if (postProcessing) {
+                postProcessing.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+
+        function setupEventListeners() {
+            // Animation state
+            document.getElementById('animState').addEventListener('change', (e) => {
+                animationState = e.target.value;
+                transitionProgress = 0;
+                resetBodyParts();
+            });
+
+            // Weapon color
+            document.getElementById('weaponColor').addEventListener('change', (e) => {
+                const paletteKey = e.target.value;
+                currentWeaponPalette = weaponPalettes[paletteKey];
+                
+                // Update all glowing parts
+                warrior.children.forEach(child => {
+                    if (child.material && child.material.emissive && child.material.emissive.getHex() !== 0) {
+                        child.material.color.setHex(currentWeaponPalette.color);
+                        child.material.emissive.setHex(currentWeaponPalette.emissive);
+                        
+                        // Different intensity for weapons vs armor
+                        const isWeaponPart = Math.abs(child.position.x) > 0.45;
+                        child.material.emissiveIntensity = isWeaponPart ? 
+                            currentWeaponPalette.intensity : 
+                            currentWeaponPalette.intensity * 0.6;
+                    }
+                });
+
+                // Update lights
+                if (window.accentLight1) window.accentLight1.color.setHex(currentWeaponPalette.emissive);
+                if (window.accentLight2) window.accentLight2.color.setHex(currentWeaponPalette.emissive);
+            });
+            
+            // Particle effects toggle
+            document.getElementById('particleToggle').addEventListener('change', (e) => {
+                particleMode = e.target.value;
+            });
+            
+            // Color grading
+            document.getElementById('colorGrading').addEventListener('change', (e) => {
+                if (postProcessing) {
+                    postProcessing.setColorGrading(e.target.value);
+                }
+            });
+            
+            // Screen effects
+            document.getElementById('screenEffects').addEventListener('change', (e) => {
+                if (postProcessing) {
+                    const effect = e.target.value;
+                    postProcessing.setVignette(false);
+                    postProcessing.setScanlines(false);
+                    postProcessing.setChromaticAberration(false);
+                    
+                    switch(effect) {
+                        case 'vignette':
+                            postProcessing.setVignette(true, 0.6, 0.5);
+                            break;
+                        case 'scanlines':
+                            postProcessing.setScanlines(true, 4, 0.3);
+                            break;
+                        case 'chromatic':
+                            postProcessing.setChromaticAberration(true, 0.004);
+                            break;
+                    }
+                }
+            });
+
+            // Export buttons
+            document.getElementById('exportPNG').addEventListener('click', () => {
+                exportImage(512, false, 'unique-gunner-512.png');
+            });
+
+            document.getElementById('exportPNGHD').addEventListener('click', () => {
+                exportImage(1024, false, 'unique-gunner-1024.png');
+            });
+
+            document.getElementById('exportTransparent').addEventListener('click', () => {
+                exportImage(512, true, 'unique-gunner-transparent.png');
+            });
+        }
+
+        // ============================================
+        // EXPORT FUNCTIONALITY
+        // ============================================
+
+        function exportImage(size, transparent, filename) {
+            const originalSize = renderer.domElement.width;
+            const originalBg = scene.background;
+
+            if (transparent) {
+                scene.background = null;
+            }
+
+            renderer.setSize(size, size);
+            renderer.render(scene, camera);
+
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = renderer.domElement.toDataURL('image/png');
+            link.click();
+
+            renderer.setSize(originalSize, originalSize);
+            scene.background = originalBg;
+            renderer.render(scene, camera);
+
+            console.log(`Exported: ${filename} (${size}x${size})`);
+        }
+
+        // ============================================
+        // HELPER FUNCTIONS
+        // ============================================
+
+        function resetBodyParts() {
+            Object.keys(bodyParts).forEach(key => {
+                const part = bodyParts[key];
+                if (part) {
+                    part.rotation.x = 0;
+                    part.rotation.z = 0;
+                    part.scale.set(1, 1, 1);
+                }
+            });
+
+            // Reset pistol rotations
+            if (bodyParts.leftPistol) bodyParts.leftPistol.rotation.x = -0.2;
+            if (bodyParts.rightPistol) bodyParts.rightPistol.rotation.x = -0.2;
+        }
+
+        // ============================================
+        // START APPLICATION
+        // ============================================
+
+        init();
+    </script>
+</body>
+</html>
+

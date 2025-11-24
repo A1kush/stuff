@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyborg Rifle Operative - 3D Pre-rendered</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #container {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+  }
+  #canvas-wrapper {
+    flex-shrink: 0;
+  }
+  canvas {
+    border: 2px solid #333;
+    background: #0a0a0a;
+  }
+  #controls {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+  }
+  h1 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #fff;
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
+  }
+  .control-group {
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  select, button {
+    width: 100%;
+    padding: 8px 12px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  select:hover, button:hover {
+    border-color: #666;
+    background: #222;
+  }
+  button {
+    margin-top: 8px;
+    background: #2a2a2a;
+  }
+  button:active {
+    transform: translateY(1px);
+  }
+  .btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .info {
+    font-size: 11px;
+    color: #666;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    line-height: 1.6;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.02);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #333;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+  }
+  .stat-value {
+    font-size: 14px;
+    color: #0f0;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="canvas-wrapper">
+    <canvas id="sprite" width="256" height="256"></canvas>
+  </div>
+  
+  <div id="controls">
+    <h1>🤖 CYBORG RIFLE OPERATIVE</h1>
+    
+    <div class="control-group">
+      <label>Animation State</label>
+      <select id="animState">
+        <option value="idle">Idle (Ready Stance)</option>
+        <option value="walk">Walk Cycle</option>
+        <option value="attack">Attack Fire</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Color Palette</label>
+      <select id="palette">
+        <option value="fire">🔥 Fire (Red/Orange)</option>
+        <option value="ice">❄️ Ice (Cyan/Blue)</option>
+        <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+        <option value="light">✨ Light (Gold/White)</option>
+        <option value="nature">🌿 Nature (Green/Earth)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Animation Speed</label>
+      <select id="speed">
+        <option value="0.5">0.5x Slow</option>
+        <option value="1" selected>1x Normal</option>
+        <option value="1.5">1.5x Fast</option>
+        <option value="2">2x Very Fast</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Display Scale</label>
+      <select id="scale">
+        <option value="1">1x (256px)</option>
+        <option value="1.5">1.5x (384px)</option>
+        <option value="2" selected>2x (512px)</option>
+        <option value="2.5">2.5x (640px)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Export</label>
+      <div class="btn-group">
+        <button id="exportFrame">PNG Frame</button>
+        <button id="exportSheet">Sprite Sheet</button>
+      </div>
+      <button id="exportJSON">Export JSON Data</button>
+    </div>
+    
+    <div class="info">
+      <strong>TYPE 3: 3D PRE-RENDERED</strong><br>
+      Octopath Traveler / FF Tactics Style<br><br>
+      • Resolution: 256×256 native<br>
+      • Technique: Simulated 3D lighting<br>
+      • Baked shadows + specular<br>
+      • Hair: Unique black (locked)<br>
+      • Frame Rate: 60fps<br><br>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Frame</div>
+          <div class="stat-value" id="frameCount">0/8</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">FPS</div>
+          <div class="stat-value" id="fpsCount">60</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('sprite');
+const ctx = canvas.getContext('2d');
+
+let currentAnim = 'idle';
+let currentFrame = 0;
+let frameTimer = 0;
+let animSpeed = 1;
+let palette = 'fire';
+let lastTime = 0;
+let fps = 60;
+let frameCount = 0;
+let lastFpsTime = 0;
+
+const palettes = {
+  fire: {
+    skin: {
+      base: '#5c4033',
+      highlight: '#8b6347',
+      shadow: '#3a2820',
+      specular: 'rgba(255,255,255,0.25)'
+    },
+    armor: {
+      base: '#2a1a2a',
+      highlight: '#4a3a4a',
+      shadow: '#1a0a1a',
+      metallic: 'rgba(255,255,255,0.4)',
+      rim: 'rgba(255,100,0,0.5)'
+    },
+    accent: {
+      base: '#ff3333',
+      glow: '#ff6666',
+      bloom: 'rgba(255,80,0,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    rifle: {
+      base: '#1a1a1a',
+      highlight: '#3a3a3a',
+      shadow: '#0a0a0a',
+      metallic: 'rgba(255,255,255,0.5)'
+    },
+    eyes: '#ffffff',
+    ambient: 'rgba(255,80,0,0.12)'
+  },
+  ice: {
+    skin: {
+      base: '#5c4033',
+      highlight: '#8b6347',
+      shadow: '#3a2820',
+      specular: 'rgba(255,255,255,0.25)'
+    },
+    armor: {
+      base: '#0a1a2a',
+      highlight: '#2a3a4a',
+      shadow: '#050a15',
+      metallic: 'rgba(255,255,255,0.4)',
+      rim: 'rgba(0,200,255,0.5)'
+    },
+    accent: {
+      base: '#00ccff',
+      glow: '#66eeff',
+      bloom: 'rgba(0,200,255,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    rifle: {
+      base: '#1a1a1a',
+      highlight: '#3a3a3a',
+      shadow: '#0a0a0a',
+      metallic: 'rgba(255,255,255,0.5)'
+    },
+    eyes: '#ffffff',
+    ambient: 'rgba(0,200,255,0.12)'
+  },
+  shadow: {
+    skin: {
+      base: '#5c4033',
+      highlight: '#8b6347',
+      shadow: '#3a2820',
+      specular: 'rgba(255,255,255,0.25)'
+    },
+    armor: {
+      base: '#1a0a2a',
+      highlight: '#3a2a4a',
+      shadow: '#0a0515',
+      metallic: 'rgba(255,255,255,0.4)',
+      rim: 'rgba(170,0,255,0.5)'
+    },
+    accent: {
+      base: '#aa00ff',
+      glow: '#dd66ff',
+      bloom: 'rgba(170,0,255,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    rifle: {
+      base: '#1a1a1a',
+      highlight: '#3a3a3a',
+      shadow: '#0a0a0a',
+      metallic: 'rgba(255,255,255,0.5)'
+    },
+    eyes: '#ffffff',
+    ambient: 'rgba(170,0,255,0.12)'
+  },
+  light: {
+    skin: {
+      base: '#5c4033',
+      highlight: '#8b6347',
+      shadow: '#3a2820',
+      specular: 'rgba(255,255,255,0.3)'
+    },
+    armor: {
+      base: '#2a2a1a',
+      highlight: '#4a4a3a',
+      shadow: '#1a1a0a',
+      metallic: 'rgba(255,255,255,0.5)',
+      rim: 'rgba(255,200,0,0.6)'
+    },
+    accent: {
+      base: '#ffcc00',
+      glow: '#ffee66',
+      bloom: 'rgba(255,200,0,0.8)',
+      specular: 'rgba(255,255,255,1.0)'
+    },
+    rifle: {
+      base: '#1a1a1a',
+      highlight: '#3a3a3a',
+      shadow: '#0a0a0a',
+      metallic: 'rgba(255,255,255,0.5)'
+    },
+    eyes: '#ffffff',
+    ambient: 'rgba(255,200,0,0.15)'
+  },
+  nature: {
+    skin: {
+      base: '#5c4033',
+      highlight: '#8b6347',
+      shadow: '#3a2820',
+      specular: 'rgba(255,255,255,0.25)'
+    },
+    armor: {
+      base: '#0a2a1a',
+      highlight: '#2a4a3a',
+      shadow: '#05150a',
+      metallic: 'rgba(255,255,255,0.4)',
+      rim: 'rgba(0,255,100,0.5)'
+    },
+    accent: {
+      base: '#00ff66',
+      glow: '#66ffaa',
+      bloom: 'rgba(0,255,100,0.7)',
+      specular: 'rgba(255,255,255,0.9)'
+    },
+    rifle: {
+      base: '#1a1a1a',
+      highlight: '#3a3a3a',
+      shadow: '#0a0a0a',
+      metallic: 'rgba(255,255,255,0.5)'
+    },
+    eyes: '#ffffff',
+    ambient: 'rgba(0,255,100,0.12)'
+  }
+};
+
+const animations = {
+  idle: { frames: 8, frameTime: 250, loop: true },
+  walk: { frames: 8, frameTime: 125, loop: true },
+  attack: { frames: 6, frameTime: 83, loop: false }
+};
+
+function drawCyborg3D(frame, anim) {
+  const pal = palettes[palette];
+  const centerX = 128;
+  const centerY = 128;
+  
+  let bobY = 0;
+  let legOffset = 0;
+  let rifleRecoil = 0;
+  let muzzleFlash = false;
+  
+  if (anim === 'idle') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 3;
+  } else if (anim === 'walk') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 5;
+    legOffset = Math.sin(frame / 4 * Math.PI) * 9;
+  } else if (anim === 'attack') {
+    rifleRecoil = frame < 2 ? frame * 8 : 0;
+    muzzleFlash = frame < 2;
+  }
+  
+  ctx.clearRect(0, 0, 256, 256);
+  
+  // Ground shadow
+  const shadowGrad = ctx.createRadialGradient(centerX, 245, 0, centerX, 245, 70);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.4)');
+  shadowGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = shadowGrad;
+  ctx.beginPath();
+  ctx.ellipse(centerX, 245, 52, 14, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Ambient light removed per user request
+  
+  // Legs (armored with 3D shading)
+  drawCyborgLeg3D(centerX - 28, centerY + 52 - bobY + legOffset, pal);
+  drawCyborgLeg3D(centerX + 14, centerY + 52 - bobY - legOffset, pal);
+  
+  // Torso (segmented armor with metallic shading)
+  drawCyborgTorso3D(centerX, centerY + 12 - bobY, pal);
+  
+  // Head with pigtails
+  drawCyborgHead3D(centerX, centerY - 42 - bobY, pal);
+  
+  // Arms (armored)
+  drawCyborgArm3D(centerX - 48, centerY + 22 - bobY, pal, -0.4);
+  drawCyborgArm3D(centerX + 34, centerY + 18 - bobY, pal, 0.4);
+  
+  // Energy rifle (with 3D metallic shading)
+  drawRifle3D(centerX - 22 + rifleRecoil, centerY + 28 - bobY, muzzleFlash, pal);
+  
+  // Rim bloom removed per user request
+  // drawRimBloom(centerX, centerY - bobY, pal);
+}
+
+function drawCyborgLeg3D(x, y, pal) {
+  // Armored leg with metallic gradient
+  const legGrad = ctx.createLinearGradient(x, y, x + 16, y);
+  legGrad.addColorStop(0, pal.armor.shadow);
+  legGrad.addColorStop(0.3, pal.armor.base);
+  legGrad.addColorStop(0.6, pal.armor.highlight);
+  legGrad.addColorStop(1, pal.armor.shadow);
+  
+  ctx.fillStyle = legGrad;
+  ctx.fillRect(x, y, 16, 38);
+  
+  // Knee accent with energy glow
+  ctx.shadowColor = pal.accent.glow;
+  ctx.shadowBlur = 16;
+  ctx.fillStyle = pal.accent.base;
+  ctx.fillRect(x + 3, y + 22, 10, 7);
+  ctx.shadowBlur = 0;
+  
+  // Accent specular
+  ctx.fillStyle = pal.accent.specular;
+  ctx.fillRect(x + 5, y + 23, 6, 2);
+  
+  // Shin (skin with 3D shading)
+  const shinGrad = ctx.createRadialGradient(x + 8, y + 38, 3, x + 8, y + 50, 12);
+  shinGrad.addColorStop(0, pal.skin.highlight);
+  shinGrad.addColorStop(0.6, pal.skin.base);
+  shinGrad.addColorStop(1, pal.skin.shadow);
+  
+  ctx.fillStyle = shinGrad;
+  ctx.fillRect(x + 3, y + 38, 10, 32);
+  
+  // Leg specular (metallic shine)
+  ctx.fillStyle = pal.armor.metallic;
+  ctx.fillRect(x + 7, y + 8, 3, 25);
+}
+
+function drawCyborgTorso3D(x, y, pal) {
+  // Segmented armor plates with directional lighting
+  const torsoGrad = ctx.createRadialGradient(x - 22, y + 12, 12, x, y + 28, 62);
+  torsoGrad.addColorStop(0, pal.armor.highlight);
+  torsoGrad.addColorStop(0.5, pal.armor.base);
+  torsoGrad.addColorStop(1, pal.armor.shadow);
+  
+  ctx.fillStyle = torsoGrad;
+  ctx.fillRect(x - 36, y, 72, 52);
+  
+  // Energy conduits (glowing accents)
+  ctx.shadowColor = pal.accent.glow;
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = pal.accent.base;
+  ctx.fillRect(x - 24, y + 14, 10, 24);
+  ctx.fillRect(x + 14, y + 14, 10, 24);
+  ctx.shadowBlur = 0;
+  
+  // Conduit cores (bright)
+  ctx.fillStyle = pal.accent.glow;
+  ctx.fillRect(x - 21, y + 18, 4, 16);
+  ctx.fillRect(x + 17, y + 18, 4, 16);
+  
+  // Conduit specular highlights
+  ctx.fillStyle = pal.accent.specular;
+  ctx.fillRect(x - 23, y + 16, 2, 18);
+  ctx.fillRect(x + 15, y + 16, 2, 18);
+  
+  // Armor plate specular (metallic)
+  const metalSpec = ctx.createLinearGradient(x - 36, y + 5, x, y + 25);
+  metalSpec.addColorStop(0, 'transparent');
+  metalSpec.addColorStop(0.3, pal.armor.metallic);
+  metalSpec.addColorStop(0.7, 'transparent');
+  ctx.fillStyle = metalSpec;
+  ctx.fillRect(x - 36, y + 5, 36, 30);
+  
+  // Ambient occlusion
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(x - 36, y + 47, 72, 5);
+}
+
+function drawCyborgHead3D(x, y, pal) {
+  // Head sphere with 3D lighting
+  const headGrad = ctx.createRadialGradient(x - 12, y + 8, 8, x, y + 12, 32);
+  headGrad.addColorStop(0, pal.skin.highlight);
+  headGrad.addColorStop(0.5, pal.skin.base);
+  headGrad.addColorStop(1, pal.skin.shadow);
+  
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(x, y + 12, 28, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Black pigtails (LOCKED - with 3D shading)
+  // Left pigtail
+  const pigtailGradL = ctx.createRadialGradient(x - 42, y + 5, 5, x - 42, y + 5, 18);
+  pigtailGradL.addColorStop(0, '#2a2a2a');
+  pigtailGradL.addColorStop(0.4, '#1a1a1a');
+  pigtailGradL.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = pigtailGradL;
+  ctx.beginPath();
+  ctx.ellipse(x - 42, y + 5, 12, 28, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Right pigtail
+  const pigtailGradR = ctx.createRadialGradient(x + 42, y + 5, 5, x + 42, y + 5, 18);
+  pigtailGradR.addColorStop(0, '#2a2a2a');
+  pigtailGradR.addColorStop(0.4, '#1a1a1a');
+  pigtailGradR.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = pigtailGradR;
+  ctx.beginPath();
+  ctx.ellipse(x + 42, y + 5, 12, 28, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Pigtail speculars (subtle)
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.beginPath();
+  ctx.ellipse(x - 45, y, 4, 10, -0.2, 0, Math.PI);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + 45, y, 4, 10, 0.2, 0, Math.PI);
+  ctx.fill();
+  
+  // Top hair (black)
+  const hairGrad = ctx.createLinearGradient(x - 25, y - 12, x + 25, y - 12);
+  hairGrad.addColorStop(0, '#000000');
+  hairGrad.addColorStop(0.5, '#1a1a1a');
+  hairGrad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = hairGrad;
+  ctx.beginPath();
+  ctx.ellipse(x, y - 15, 28, 12, 0, 0, Math.PI);
+  ctx.fill();
+  
+  // Hair specular
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(x - 12, y - 18, 24, 4);
+  
+  // White eyes (determined expression)
+  ctx.fillStyle = pal.eyes;
+  ctx.shadowColor = 'rgba(255,255,255,0.8)';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.ellipse(x - 12, y + 6, 5, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + 12, y + 6, 5, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  
+  // Eye speculars (sharp highlights)
+  ctx.fillStyle = 'rgba(255,255,255,1.0)';
+  ctx.fillRect(x - 11, y + 4, 2, 3);
+  ctx.fillRect(x + 11, y + 4, 2, 3);
+  
+  // Face specular highlight
+  const faceSpec = ctx.createRadialGradient(x - 8, y + 2, 3, x - 8, y + 2, 15);
+  faceSpec.addColorStop(0, pal.skin.specular);
+  faceSpec.addColorStop(1, 'transparent');
+  ctx.fillStyle = faceSpec;
+  ctx.fillRect(x - 18, y - 5, 20, 15);
+}
+
+function drawCyborgArm3D(x, y, pal, normalX) {
+  // Armored arm with directional lighting
+  const armGrad = ctx.createLinearGradient(x, y, x, y + 28);
+  armGrad.addColorStop(0, pal.armor.shadow);
+  armGrad.addColorStop(0.4, pal.armor.base);
+  armGrad.addColorStop(0.7, pal.armor.highlight);
+  armGrad.addColorStop(1, pal.armor.shadow);
+  
+  ctx.fillStyle = armGrad;
+  ctx.fillRect(x, y, 16, 28);
+  
+  // Shoulder accent
+  ctx.shadowColor = pal.accent.glow;
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = pal.accent.base;
+  ctx.fillRect(x + 3, y + 3, 10, 7);
+  ctx.shadowBlur = 0;
+  
+  ctx.fillStyle = pal.accent.glow;
+  ctx.fillRect(x + 5, y + 4, 6, 3);
+  
+  // Forearm (skin)
+  const forearmGrad = ctx.createRadialGradient(x + 8, y + 28, 3, x + 8, y + 35, 10);
+  forearmGrad.addColorStop(0, pal.skin.highlight);
+  forearmGrad.addColorStop(0.6, pal.skin.base);
+  forearmGrad.addColorStop(1, pal.skin.shadow);
+  
+  ctx.fillStyle = forearmGrad;
+  ctx.fillRect(x + 3, y + 28, 10, 18);
+  
+  // Metallic specular on armor
+  ctx.fillStyle = pal.armor.metallic;
+  ctx.fillRect(x + normalX > 0 ? 10 : 4, y + 8, 3, 15);
+}
+
+function drawRifle3D(x, y, flash, pal) {
+  // Rifle body with metallic 3D shading
+  const rifleGrad = ctx.createLinearGradient(x, y, x, y + 16);
+  rifleGrad.addColorStop(0, pal.rifle.shadow);
+  rifleGrad.addColorStop(0.3, pal.rifle.base);
+  rifleGrad.addColorStop(0.7, pal.rifle.highlight);
+  rifleGrad.addColorStop(1, pal.rifle.shadow);
+  
+  ctx.fillStyle = rifleGrad;
+  ctx.fillRect(x, y, 70, 16);
+  
+  // Metallic specular on body
+  ctx.fillStyle = pal.rifle.metallic;
+  ctx.fillRect(x + 5, y + 2, 60, 3);
+  
+  // Energy sections with volumetric bloom
+  ctx.shadowColor = pal.accent.glow;
+  ctx.shadowBlur = 20;
+  ctx.fillStyle = pal.accent.base;
+  ctx.fillRect(x + 12, y + 3, 12, 10);
+  ctx.fillRect(x + 42, y + 3, 12, 10);
+  ctx.shadowBlur = 0;
+  
+  // Energy cores (bright)
+  ctx.fillStyle = pal.accent.glow;
+  ctx.fillRect(x + 15, y + 6, 6, 4);
+  ctx.fillRect(x + 45, y + 6, 6, 4);
+  
+  // Energy specular highlights
+  ctx.fillStyle = pal.accent.specular;
+  ctx.fillRect(x + 14, y + 4, 2, 2);
+  ctx.fillRect(x + 44, y + 4, 2, 2);
+  
+  // Barrel with metallic finish
+  ctx.fillStyle = pal.rifle.highlight;
+  ctx.fillRect(x + 70, y + 5, 10, 6);
+  
+  ctx.fillStyle = pal.rifle.metallic;
+  ctx.fillRect(x + 72, y + 6, 6, 1);
+  
+  // Muzzle flash (volumetric)
+  if (flash) {
+    const flashGrad = ctx.createRadialGradient(x + 80, y + 8, 8, x + 80, y + 8, 40);
+    flashGrad.addColorStop(0, pal.accent.bloom);
+    flashGrad.addColorStop(0.5, pal.accent.base);
+    flashGrad.addColorStop(1, 'transparent');
+    
+    ctx.fillStyle = flashGrad;
+    ctx.fillRect(x + 50, y - 25, 80, 66);
+    
+    ctx.shadowColor = pal.accent.glow;
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath();
+    ctx.moveTo(x + 80, y + 8);
+    ctx.lineTo(x + 100, y - 5);
+    ctx.lineTo(x + 110, y + 8);
+    ctx.lineTo(x + 100, y + 21);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+// Rim bloom effect removed per user request
+// function drawRimBloom(x, y, pal) {
+//   ctx.globalCompositeOperation = 'lighter';
+//   
+//   const rimGrad = ctx.createRadialGradient(x + 35, y - 15, 25, x + 35, y - 15, 95);
+//   rimGrad.addColorStop(0, 'transparent');
+//   rimGrad.addColorStop(0.75, pal.armor.rim);
+//   rimGrad.addColorStop(1, 'transparent');
+//   
+//   ctx.fillStyle = rimGrad;
+//   ctx.fillRect(x - 60, y - 105, 190, 180);
+//   
+//   ctx.globalCompositeOperation = 'source-over';
+// }
+
+function animate(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+  
+  frameCount++;
+  if (timestamp - lastFpsTime >= 1000) {
+    fps = frameCount;
+    frameCount = 0;
+    lastFpsTime = timestamp;
+    document.getElementById('fpsCount').textContent = fps;
+  }
+  
+  const anim = animations[currentAnim];
+  frameTimer += deltaTime * animSpeed;
+  
+  if (frameTimer >= anim.frameTime) {
+    frameTimer = 0;
+    currentFrame++;
+    
+    if (currentFrame >= anim.frames) {
+      if (anim.loop) {
+        currentFrame = 0;
+      } else {
+        currentFrame = anim.frames - 1;
+      }
+    }
+    
+    document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+  }
+  
+  drawCyborg3D(currentFrame, currentAnim);
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('animState').addEventListener('change', (e) => {
+  currentAnim = e.target.value;
+  currentFrame = 0;
+  frameTimer = 0;
+});
+
+document.getElementById('palette').addEventListener('change', (e) => {
+  palette = e.target.value;
+});
+
+document.getElementById('speed').addEventListener('change', (e) => {
+  animSpeed = parseFloat(e.target.value);
+});
+
+document.getElementById('scale').addEventListener('change', (e) => {
+  const scale = parseFloat(e.target.value);
+  canvas.style.width = (256 * scale) + 'px';
+  canvas.style.height = (256 * scale) + 'px';
+});
+
+document.getElementById('exportFrame').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `cyborg-3d-${currentAnim}-f${currentFrame}-${palette}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+document.getElementById('exportSheet').addEventListener('click', () => {
+  const tempCanvas = document.createElement('canvas');
+  const anim = animations[currentAnim];
+  tempCanvas.width = 256 * anim.frames;
+  tempCanvas.height = 256;
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  for (let i = 0; i < anim.frames; i++) {
+    drawCyborg3D(i, currentAnim);
+    tempCtx.drawImage(canvas, i * 256, 0);
+  }
+  
+  const link = document.createElement('a');
+  link.download = `cyborg-3d-${currentAnim}-sheet-${palette}.png`;
+  link.href = tempCanvas.toDataURL('image/png');
+  link.click();
+  
+  drawCyborg3D(currentFrame, currentAnim);
+});
+
+document.getElementById('exportJSON').addEventListener('click', () => {
+  const data = {
+    character: 'Cyborg Rifle Operative',
+    type: '3D Pre-rendered Simulation',
+    resolution: '256x256',
+    animations: animations,
+    palettes: Object.keys(palettes),
+    currentState: {
+      animation: currentAnim,
+      frame: currentFrame,
+      palette: palette
+    },
+    metadata: {
+      hairColor: '#000000 (locked)',
+      weaponType: 'Energy Rifle',
+      style: 'Octopath Traveler Tier',
+      technique: 'Metallic armor with baked reflections',
+      specialFeatures: ['Segmented Armor', 'Energy Conduits', 'Pigtails']
+    }
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.download = `cyborg-3d-data-${palette}.json`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+});
+
+canvas.style.width = '512px';
+canvas.style.height = '512px';
+animate(0);
+</script>
+</body>
+</html>
+

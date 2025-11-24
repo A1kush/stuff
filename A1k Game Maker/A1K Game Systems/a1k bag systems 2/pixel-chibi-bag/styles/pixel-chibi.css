@@ -1,0 +1,1742 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   PIXEL CHIBI BAG SYSTEM - Production Theme Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+:root {
+  /* Pixel Chibi Color Palette - Bright Pastels & Retro Game Colors */
+  --pixel-bg-primary: #2d3436;
+  --pixel-bg-secondary: #636e72;
+  --pixel-bg-tertiary: #3d4144;
+  --pixel-accent-pink: #ff6b9d;
+  --pixel-accent-rose: #c44569;
+  --pixel-accent-yellow: #f8b500;
+  --pixel-accent-cyan: #4ecdc4;
+  --pixel-accent-mint: #95e1d3;
+  --pixel-accent-green: #00b894;
+  --pixel-accent-blue: #0984e3;
+  --pixel-accent-purple: #6c5ce7;
+  --pixel-accent-gold: #ffd93d;
+  --pixel-accent-coral: #ff6b6b;
+  --pixel-accent-lavender: #a29bfe;
+  --pixel-text-primary: #ffffff;
+  --pixel-text-secondary: #dfe6e9;
+  --pixel-text-muted: #b2bec3;
+  --pixel-border: #4ecdc4;
+  --pixel-border-strong: #ff6b9d;
+  --pixel-shadow: 0 4px 0 rgba(0, 0, 0, 0.8);
+  --pixel-shadow-inset: inset 0 2px 0 rgba(255, 255, 255, 0.2);
+  --pixel-glow: 0 0 8px rgba(255, 107, 157, 0.6);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+body {
+  font-family: 'VT323', 'Courier New', monospace;
+  background: 
+    linear-gradient(135deg, #2d3436 0%, #636e72 50%, #2d3436 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(78, 205, 196, 0.03) 10px,
+      rgba(78, 205, 196, 0.03) 20px
+    );
+  color: var(--pixel-text-primary);
+  overflow: hidden;
+  position: relative;
+  font-size: 18px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(78, 205, 196, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(248, 181, 0, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BAG WINDOW - Pixel Art Design
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-bag-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: 92vw;
+  max-width: 1400px;
+  height: 88vh;
+  max-height: 900px;
+  background: 
+    linear-gradient(135deg, 
+      rgba(45, 52, 54, 0.98) 0%, 
+      rgba(61, 65, 68, 0.98) 50%,
+      rgba(45, 52, 54, 0.98) 100%);
+  border: 4px solid var(--pixel-border);
+  border-radius: 0;
+  box-shadow: 
+    var(--pixel-shadow),
+    0 0 0 2px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+  display: none;
+  flex-direction: column;
+  z-index: 10000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.neo-bag-window::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--pixel-accent-pink);
+  pointer-events: none;
+  z-index: -1;
+  animation: pixelBorder 2s ease-in-out infinite;
+}
+
+@keyframes pixelBorder {
+  0%, 100% { 
+    border-color: var(--pixel-accent-pink);
+    opacity: 0.5;
+  }
+  50% { 
+    border-color: var(--pixel-accent-cyan);
+    opacity: 0.8;
+  }
+}
+
+.neo-bag-window.open {
+  display: flex;
+  transform: translate(-50%, -50%) scale(1);
+  animation: chibiBounce 0.5s ease-out;
+}
+
+@keyframes chibiBounce {
+  0% { transform: translate(-50%, -50%) scale(0.8); }
+  50% { transform: translate(-50%, -50%) scale(1.05); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.neo-bag-window.minimized {
+  height: auto;
+  max-height: 80px;
+}
+
+.neo-bag-window.maximized {
+  width: 98vw;
+  height: 98vh;
+  max-width: none;
+  max-height: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TITLEBAR - Pixel Retro Header
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-bag-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: 
+    linear-gradient(90deg, 
+      rgba(255, 107, 157, 0.3) 0%, 
+      rgba(78, 205, 196, 0.3) 50%,
+      rgba(255, 107, 157, 0.3) 100%);
+  border-bottom: 3px solid var(--pixel-border);
+  box-shadow: 
+    var(--pixel-shadow-inset),
+    0 2px 0 rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.neo-bag-titlebar::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pixel-accent-pink) 0px,
+    var(--pixel-accent-pink) 4px,
+    var(--pixel-accent-cyan) 4px,
+    var(--pixel-accent-cyan) 8px
+  );
+}
+
+.neo-titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.neo-icon {
+  font-size: 28px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  animation: chibiWiggle 3s ease-in-out infinite;
+  text-shadow: 0 0 0;
+}
+
+@keyframes chibiWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-5deg) scale(1.1); }
+  75% { transform: rotate(5deg) scale(1.1); }
+}
+
+.neo-title {
+  font-size: 20px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--pixel-text-primary);
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(255, 107, 157, 0.6);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  position: relative;
+  line-height: 1.4;
+}
+
+.neo-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pixel-accent-pink) 0px,
+    var(--pixel-accent-pink) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+}
+
+.neo-titlebar-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.neo-btn-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.3) 0%,
+    rgba(78, 205, 196, 0.3) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  color: var(--pixel-text-primary);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  box-shadow: 
+    var(--pixel-shadow-inset),
+    0 2px 0 rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-btn-icon:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.5) 0%,
+    rgba(78, 205, 196, 0.5) 100%);
+  border-color: var(--pixel-accent-pink);
+  transform: translateY(-1px);
+  box-shadow: 
+    var(--pixel-shadow-inset),
+    0 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.neo-btn-icon:active {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 0 2px 0 rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CURRENCIES - Pixel Treasure Display
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-bag-currencies {
+  display: flex;
+  gap: 16px;
+  padding: 12px 20px;
+  background: 
+    linear-gradient(180deg, 
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(45, 52, 54, 0.4) 100%);
+  border-bottom: 2px solid var(--pixel-border);
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-currency-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.2) 0%, 
+    rgba(78, 205, 196, 0.2) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  box-shadow: 
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset);
+  position: relative;
+  overflow: hidden;
+}
+
+.neo-currency-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(255, 255, 255, 0.05) 4px,
+    rgba(255, 255, 255, 0.05) 8px
+  );
+  pointer-events: none;
+}
+
+.neo-currency-icon {
+  font-size: 20px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  animation: chibiPulse 2s ease-in-out infinite;
+}
+
+@keyframes chibiPulse {
+  0%, 100% { 
+    transform: scale(1);
+    filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  }
+  50% { 
+    transform: scale(1.15);
+    filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.8));
+  }
+}
+
+.neo-currency-value {
+  font-weight: 400;
+  color: var(--pixel-accent-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(255, 217, 61, 0.6);
+  letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAIN TABS - Pixel Retro Tabs
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-bag-tabs {
+  padding: 4px 16px;
+  background: 
+    linear-gradient(180deg, 
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(45, 52, 54, 0.5) 100%);
+  border-bottom: 2px solid var(--pixel-border);
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-tabs-strip {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+  flex-wrap: nowrap;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.neo-tabs-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.neo-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 0;
+  border: 2px solid transparent;
+  border-bottom: none;
+  background: linear-gradient(180deg, 
+    rgba(255, 107, 157, 0.15) 0%,
+    rgba(78, 205, 196, 0.15) 100%);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  font-weight: 400;
+  font-family: 'VT323', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  position: relative;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-tab-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.05) 2px,
+    rgba(255, 255, 255, 0.05) 4px
+  );
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.neo-tab-btn:hover {
+  background: linear-gradient(180deg, 
+    rgba(255, 107, 157, 0.3) 0%,
+    rgba(78, 205, 196, 0.3) 100%);
+  color: var(--pixel-text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-tab-btn:hover::before {
+  opacity: 1;
+}
+
+.neo-tab-btn.active {
+  background: linear-gradient(180deg, 
+    rgba(255, 107, 157, 0.4) 0%,
+    rgba(78, 205, 196, 0.4) 100%);
+  border-color: var(--pixel-border-strong);
+  color: var(--pixel-text-primary);
+  box-shadow: 
+    0 0 12px rgba(255, 107, 157, 0.4) inset,
+    0 3px 0 rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.neo-tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pixel-accent-pink) 0px,
+    var(--pixel-accent-pink) 2px,
+    var(--pixel-accent-cyan) 2px,
+    var(--pixel-accent-cyan) 4px
+  );
+  box-shadow: 0 0 8px rgba(255, 107, 157, 0.6);
+}
+
+.neo-tab-icon {
+  font-size: 14px;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.8));
+}
+
+.neo-tab-label {
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SUBTABS - Pixel Subtabs
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-bag-subtabs {
+  display: none;
+  padding: 4px 16px;
+  background: 
+    linear-gradient(180deg, 
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(45, 52, 54, 0.4) 100%);
+  border-bottom: 2px solid var(--pixel-border);
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-subtabs-strip {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.neo-subtabs-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.neo-subtab-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.15) 0%,
+    rgba(78, 205, 196, 0.15) 100%);
+  border: 2px solid transparent;
+  border-radius: 0;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 10px;
+  font-weight: 400;
+  font-family: 'VT323', monospace;
+  white-space: nowrap;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-subtab-btn:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.3) 0%,
+    rgba(78, 205, 196, 0.3) 100%);
+  border-color: var(--pixel-border);
+  color: var(--pixel-text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-subtab-btn.active {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.4) 0%,
+    rgba(78, 205, 196, 0.4) 100%);
+  border-color: var(--pixel-border-strong);
+  color: var(--pixel-text-primary);
+  box-shadow: 
+    0 0 10px rgba(255, 107, 157, 0.3) inset,
+    0 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-subtab-icon {
+  font-size: 12px;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.8));
+}
+
+.neo-subtab-label {
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTENT AREA - Pixel Style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-bag-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(45, 52, 54, 0.3) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 8px,
+      rgba(78, 205, 196, 0.02) 8px,
+      rgba(78, 205, 196, 0.02) 16px
+    );
+  position: relative;
+}
+
+.neo-bag-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.neo-bag-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+}
+
+.neo-bag-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, 
+    rgba(255, 107, 157, 0.6) 0%, 
+    rgba(78, 205, 196, 0.6) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-bag-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, 
+    rgba(255, 107, 157, 0.8) 0%, 
+    rgba(78, 205, 196, 0.8) 100%);
+  box-shadow: 0 0 8px rgba(255, 107, 157, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GRIDS & CARDS - Chibi Pixel Cards
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-items-grid,
+.neo-skills-grid,
+.neo-shop-grid,
+.neo-monsters-grid,
+.neo-gear-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.neo-item-card,
+.neo-skill-card,
+.neo-shop-item,
+.neo-monster-card {
+  background: 
+    linear-gradient(135deg, 
+      rgba(45, 52, 54, 0.9) 0%, 
+      rgba(61, 65, 68, 0.9) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.6),
+    var(--pixel-shadow-inset);
+  transform-style: preserve-3d;
+}
+
+.neo-item-card::before,
+.neo-skill-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 4px,
+    rgba(255, 107, 157, 0.2) 4px,
+    rgba(255, 107, 157, 0.2) 8px
+  );
+  transition: left 0.6s;
+  z-index: 1;
+}
+
+.neo-item-card:hover::before,
+.neo-skill-card:hover::before {
+  left: 100%;
+}
+
+.neo-item-card:hover,
+.neo-skill-card:hover,
+.neo-shop-item:hover,
+.neo-monster-card:hover {
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 6px 0 rgba(0, 0, 0, 0.6),
+    var(--pixel-shadow-inset),
+    0 0 12px rgba(255, 107, 157, 0.4);
+  transform: translateY(-2px);
+  animation: chibiBounceCard 0.5s ease-out;
+}
+
+@keyframes chibiBounceCard {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Rarity Colors - Pixel Style */
+.neo-item-card[data-rarity="common"] {
+  border-color: rgba(200, 200, 200, 0.7);
+}
+
+.neo-item-card[data-rarity="uncommon"] {
+  border-color: rgba(9, 132, 227, 0.8);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(9, 132, 227, 0.4);
+}
+
+.neo-item-card[data-rarity="rare"],
+.neo-skill-card[data-tier="rare"] {
+  border-color: rgba(108, 92, 231, 0.8);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.6),
+    0 0 15px rgba(108, 92, 231, 0.5);
+}
+
+.neo-item-card[data-rarity="epic"],
+.neo-skill-card[data-tier="epic"] {
+  border-color: rgba(248, 181, 0, 0.8);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(248, 181, 0, 0.6);
+}
+
+.neo-item-card[data-rarity="legendary"],
+.neo-skill-card[data-tier="legendary"] {
+  border-color: rgba(255, 107, 157, 0.9);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(255, 107, 157, 0.8);
+  animation: pixelGlow 2s ease-in-out infinite;
+}
+
+@keyframes pixelGlow {
+  0%, 100% { 
+    box-shadow: 
+      0 4px 0 rgba(0, 0, 0, 0.6),
+      0 0 25px rgba(255, 107, 157, 0.8);
+  }
+  50% { 
+    box-shadow: 
+      0 4px 0 rgba(0, 0, 0, 0.6),
+      0 0 35px rgba(255, 107, 157, 1),
+      0 0 50px rgba(78, 205, 196, 0.6);
+  }
+}
+
+.neo-item-icon,
+.neo-skill-icon,
+.neo-shop-icon,
+.neo-monster-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 10px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  position: relative;
+  z-index: 2;
+  image-rendering: pixelated;
+}
+
+.neo-item-name,
+.neo-skill-name,
+.neo-shop-name,
+.neo-monster-name {
+  font-weight: 400;
+  font-size: 16px;
+  font-family: 'VT323', monospace;
+  margin-bottom: 8px;
+  color: var(--pixel-text-primary);
+  text-align: center;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(255, 107, 157, 0.4);
+  position: relative;
+  z-index: 2;
+  letter-spacing: 1px;
+}
+
+.neo-item-quantity,
+.neo-item-slot,
+.neo-skill-slot,
+.neo-item-level {
+  font-size: 14px;
+  color: var(--pixel-text-secondary);
+  margin-bottom: 8px;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  position: relative;
+  z-index: 2;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-item-description,
+.neo-monster-lore {
+  font-size: 12px;
+  color: var(--pixel-text-muted);
+  margin-bottom: 10px;
+  font-style: normal;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-item-stats,
+.neo-skill-info,
+.neo-monster-stats {
+  font-size: 12px;
+  color: var(--pixel-text-secondary);
+  margin-bottom: 10px;
+  line-height: 2;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  position: relative;
+  z-index: 2;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-item-actions,
+.neo-skill-actions {
+  margin-top: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTONS - Pixel Retro Buttons
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-btn,
+.neo-btn-small {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.3) 0%, 
+    rgba(78, 205, 196, 0.3) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  color: var(--pixel-text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-btn::before,
+.neo-btn-small::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.1) 2px,
+    rgba(255, 255, 255, 0.1) 4px
+  );
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.neo-btn-small {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.neo-btn:hover,
+.neo-btn-small:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.5) 0%, 
+    rgba(78, 205, 196, 0.5) 100%);
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset),
+    0 0 12px rgba(255, 107, 157, 0.4);
+  transform: translateY(-1px);
+}
+
+.neo-btn:hover::before,
+.neo-btn-small:hover::before {
+  opacity: 1;
+}
+
+.neo-btn:active,
+.neo-btn-small:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 2px 0 rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.neo-btn-small.active {
+  background: linear-gradient(135deg, 
+    rgba(0, 184, 148, 0.5) 0%,
+    rgba(0, 184, 148, 0.4) 100%);
+  border-color: var(--pixel-accent-green);
+  color: var(--pixel-text-primary);
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(0, 184, 148, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GEAR SYSTEM - Pixel Gear Display
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-gear-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.neo-gear-inventory,
+.neo-gear-equipped {
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(45, 52, 54, 0.4) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 20px;
+  box-shadow: 
+    inset 0 2px 0 rgba(0, 0, 0, 0.3),
+    0 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.neo-section-title {
+  font-size: 18px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  margin-bottom: 20px;
+  color: var(--pixel-accent-pink);
+  border-bottom: 3px solid var(--pixel-border);
+  padding-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(255, 107, 157, 0.6);
+  position: relative;
+}
+
+.neo-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pixel-accent-pink) 0px,
+    var(--pixel-accent-pink) 2px,
+    var(--pixel-accent-cyan) 2px,
+    var(--pixel-accent-cyan) 4px
+  );
+  opacity: 0.6;
+}
+
+.neo-character-gear {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.1) 0%,
+    rgba(78, 205, 196, 0.1) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-char-name {
+  font-size: 16px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  margin-bottom: 16px;
+  color: var(--pixel-accent-pink);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(255, 107, 157, 0.6);
+}
+
+.neo-gear-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.neo-gear-slot {
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(45, 52, 54, 0.5) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 12px;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.neo-gear-slot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 107, 157, 0.1) 2px,
+    rgba(255, 107, 157, 0.1) 4px
+  );
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.neo-gear-slot:hover {
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 0 12px rgba(255, 107, 157, 0.4),
+    inset 0 2px 0 rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.neo-gear-slot:hover::before {
+  opacity: 1;
+}
+
+.neo-slot-label {
+  font-size: 10px;
+  color: var(--pixel-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-slot-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.neo-slot-icon {
+  font-size: 24px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+}
+
+.neo-slot-name {
+  font-size: 11px;
+  color: var(--pixel-text-secondary);
+  text-align: center;
+  font-weight: 400;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-slot-empty {
+  font-size: 11px;
+  color: var(--pixel-text-muted);
+  font-style: normal;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKILLS SYSTEM - Chibi Pixel Skill Display
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-skills-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.neo-character-skills {
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(45, 52, 54, 0.4) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 20px;
+  box-shadow: 
+    inset 0 2px 0 rgba(0, 0, 0, 0.3),
+    0 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.neo-character-skill-box {
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(45, 52, 54, 0.5) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 
+    inset 0 2px 0 rgba(0, 0, 0, 0.3),
+    0 4px 0 rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.neo-skill-slot-box {
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(45, 52, 54, 0.4) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 10px;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.3);
+  position: relative;
+  cursor: pointer;
+}
+
+.neo-skill-slot-box:hover {
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 0 12px rgba(255, 107, 157, 0.4),
+    inset 0 2px 0 rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+  animation: chibiBounceCard 0.3s ease-out;
+}
+
+.neo-skill-card[data-unlocked="false"] {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.neo-skill-locked {
+  font-size: 12px;
+  color: var(--pixel-text-muted);
+  text-align: center;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 0;
+  text-transform: uppercase;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  border: 2px solid var(--pixel-border);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   QUESTS & MISSIONS - Pixel Quest Cards
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-quests-container,
+.neo-missions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.neo-quest-card,
+.neo-mission-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.15) 0%, 
+    rgba(78, 205, 196, 0.15) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 20px;
+  transition: all 0.3s;
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset);
+  position: relative;
+  overflow: hidden;
+}
+
+.neo-quest-card::before,
+.neo-mission-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(255, 255, 255, 0.05) 4px,
+    rgba(255, 255, 255, 0.05) 8px
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.neo-quest-card:hover,
+.neo-mission-card:hover {
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset),
+    0 0 12px rgba(255, 107, 157, 0.4);
+  transform: translateX(4px) translateY(-1px);
+}
+
+.neo-quest-card:hover::before,
+.neo-mission-card:hover::before {
+  opacity: 1;
+}
+
+.neo-quest-header,
+.neo-mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.neo-quest-name,
+.neo-mission-name {
+  font-size: 16px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--pixel-text-primary);
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(255, 107, 157, 0.4);
+  letter-spacing: 1px;
+}
+
+.neo-quest-status,
+.neo-mission-type {
+  font-size: 10px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.3) 0%,
+    rgba(78, 205, 196, 0.3) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  text-transform: uppercase;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--pixel-text-primary);
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.neo-quest-description,
+.neo-mission-description {
+  font-size: 14px;
+  color: var(--pixel-text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.8;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-quest-reward,
+.neo-mission-reward {
+  font-size: 12px;
+  color: var(--pixel-accent-green);
+  margin-top: 12px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(0, 184, 148, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BESTIARY - Pixel Monster Display
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-bestiary-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.neo-bestiary-rarity {
+  background: 
+    linear-gradient(135deg, 
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(45, 52, 54, 0.4) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 20px;
+  box-shadow: 
+    inset 0 2px 0 rgba(0, 0, 0, 0.3),
+    0 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+.neo-rarity-title {
+  font-size: 18px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--pixel-border);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 12px currentColor;
+}
+
+.neo-rarity-title[data-rarity="common"] { 
+  color: var(--pixel-text-primary); 
+}
+
+.neo-rarity-title[data-rarity="uncommon"] { 
+  color: var(--pixel-accent-blue);
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(9, 132, 227, 0.6);
+}
+
+.neo-rarity-title[data-rarity="rare"] { 
+  color: var(--pixel-accent-purple);
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(108, 92, 231, 0.6);
+}
+
+.neo-rarity-title[data-rarity="epic"] { 
+  color: var(--pixel-accent-yellow);
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(248, 181, 0, 0.6);
+}
+
+.neo-monster-level {
+  font-size: 12px;
+  color: var(--pixel-accent-green);
+  margin-bottom: 10px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(0, 184, 148, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHOP - Pixel Shop Display
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-shop-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.neo-shop-price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--pixel-accent-gold);
+  font-size: 16px;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(255, 217, 61, 0.6);
+}
+
+.neo-price-icon {
+  font-size: 18px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  animation: chibiPulse 2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PLAYER & TEAM - Pixel Character Display
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-player-stats,
+.neo-team-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.neo-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.neo-stat-card {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.2) 0%, 
+    rgba(78, 205, 196, 0.2) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset);
+  transition: all 0.2s;
+}
+
+.neo-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset),
+    0 0 12px rgba(255, 107, 157, 0.4);
+  animation: chibiBounceCard 0.3s ease-out;
+}
+
+.neo-stat-label {
+  font-size: 12px;
+  color: var(--pixel-text-secondary);
+  text-transform: uppercase;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-stat-value {
+  font-size: 24px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--pixel-accent-pink);
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(255, 107, 157, 0.6);
+}
+
+.neo-character-card {
+  background: linear-gradient(135deg, 
+    rgba(45, 52, 54, 0.9) 0%, 
+    rgba(61, 65, 68, 0.9) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  padding: 20px;
+  transition: all 0.3s;
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset);
+}
+
+.neo-character-card.active {
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset),
+    0 0 15px rgba(255, 107, 157, 0.5);
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.25) 0%, 
+    rgba(78, 205, 196, 0.25) 100%);
+}
+
+.neo-character-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 5px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset),
+    0 0 15px rgba(255, 107, 157, 0.5);
+  animation: chibiBounceCard 0.3s ease-out;
+}
+
+.neo-char-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.neo-char-title {
+  font-size: 12px;
+  color: var(--pixel-text-secondary);
+  font-style: normal;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-char-stats {
+  font-size: 12px;
+  color: var(--pixel-text-secondary);
+  line-height: 2;
+  margin-bottom: 16px;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-empty,
+.neo-content-placeholder {
+  text-align: center;
+  padding: 60px;
+  color: var(--pixel-text-muted);
+  font-style: normal;
+  font-size: 16px;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-error {
+  text-align: center;
+  padding: 24px;
+  color: var(--pixel-accent-coral);
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 107, 0.2) 0%,
+    rgba(255, 107, 107, 0.1) 100%);
+  border: 3px solid var(--pixel-accent-coral);
+  border-radius: 0;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(255, 107, 107, 0.4);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-note {
+  font-size: 12px;
+  color: var(--pixel-text-muted);
+  font-style: normal;
+  margin-top: 12px;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS - Pixel Toast
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.4) 0%, 
+    rgba(78, 205, 196, 0.4) 100%);
+  border: 3px solid var(--pixel-border);
+  border-radius: 0;
+  color: var(--pixel-text-primary);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  z-index: 20000;
+  opacity: 0;
+  transform: translateY(40px) scale(0.9);
+  transition: all 0.3s;
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(255, 107, 157, 0.5);
+  min-width: 200px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: chibiBounce 0.3s ease-out;
+}
+
+.neo-toast-error {
+  border-color: var(--pixel-accent-coral);
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 107, 0.4) 0%, 
+    rgba(255, 107, 107, 0.3) 100%);
+  color: var(--pixel-text-primary);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(255, 107, 107, 0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTROLS & SELECTS - Pixel Controls
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-controls-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.neo-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.neo-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.neo-select {
+  padding: 8px 14px;
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.2) 0%,
+    rgba(78, 205, 196, 0.2) 100%);
+  border: 2px solid var(--pixel-border);
+  border-radius: 0;
+  color: var(--pixel-text-primary);
+  font-size: 12px;
+  font-family: 'VT323', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-select:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 107, 157, 0.35) 0%,
+    rgba(78, 205, 196, 0.35) 100%);
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset),
+    0 0 10px rgba(255, 107, 157, 0.4);
+}
+
+.neo-select:focus {
+  outline: none;
+  border-color: var(--pixel-accent-pink);
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    var(--pixel-shadow-inset),
+    0 0 15px rgba(255, 107, 157, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOCKED & UPGRADE BADGES - Pixel Badges
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neo-locked-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 20px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  z-index: 10;
+  animation: chibiPulse 2s ease-in-out infinite;
+}
+
+.neo-locked-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 16px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+  animation: chibiPulse 2s ease-in-out infinite;
+}
+
+.neo-upgrade-level {
+  font-size: 11px;
+  color: var(--pixel-accent-gold);
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  margin-top: 4px;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(255, 217, 61, 0.6);
+}
+
+.neo-item-upgrade {
+  font-size: 11px;
+  color: var(--pixel-accent-gold);
+  font-weight: 400;
+  font-family: 'Press Start 2P', monospace;
+  margin-bottom: 4px;
+  text-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(255, 217, 61, 0.6);
+}
+
+.neo-item-power {
+  font-size: 10px;
+  color: var(--pixel-text-secondary);
+  margin-bottom: 8px;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.neo-char-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE - Mobile Optimizations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .neo-bag-window {
+    width: 98vw;
+    height: 96vh;
+  }
+
+  .neo-gear-container {
+    grid-template-columns: 1fr;
+  }
+
+  .neo-items-grid,
+  .neo-skills-grid,
+  .neo-shop-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .neo-bag-tabs {
+    padding: 6px 12px;
+  }
+
+  .neo-tab-label {
+    display: none;
+  }
+  
+  .neo-subtab-label {
+    display: none;
+  }
+}
+

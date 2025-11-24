@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missy Sword & Pistol - Retro 8-Bit</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #0f380f;
+            color: #9bbc0f;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #canvas-wrapper { flex-shrink: 0; }
+        canvas {
+            border: 4px solid #306230;
+            background: #0f380f;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        #controls {
+            background: #0f380f;
+            border: 4px solid #306230;
+            padding: 20px;
+            width: 420px;
+        }
+        h1 {
+            font-size: 10px;
+            margin-bottom: 20px;
+            color: #9bbc0f;
+            border-bottom: 2px solid #306230;
+            padding-bottom: 10px;
+        }
+        .control-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 8px;
+            color: #8bac0f;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            background: #0f380f;
+            border: 2px solid #306230;
+            color: #9bbc0f;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        select:hover, button:hover {
+            background: #306230;
+            color: #9bbc0f;
+        }
+        button { margin-top: 8px; }
+        button:active { transform: scale(0.98); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .info {
+            font-size: 8px;
+            color: #8bac0f;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #306230;
+            line-height: 1.8;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .stat {
+            background: #0f380f;
+            padding: 8px;
+            border: 2px solid #306230;
+        }
+        .stat-label { font-size: 7px; color: #8bac0f; }
+        .stat-value { font-size: 11px; color: #9bbc0f; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="retro8bit" width="160" height="144"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>MISSY SWORD PISTOL 8BIT</h1>
+
+            <div class="control-group">
+                <label>ANIMATION</label>
+                <select id="animState">
+                    <option value="idle">IDLE</option>
+                    <option value="walk">WALK</option>
+                    <option value="attack">ATTACK</option>
+                    <option value="jump">JUMP</option>
+                    <option value="hurt">HURT</option>
+                    <option value="victory">VICTORY</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>PALETTE</label>
+                <select id="palette">
+                    <option value="gameboy">GAME BOY</option>
+                    <option value="nes">NES CLASSIC</option>
+                    <option value="c64">COMMODORE 64</option>
+                    <option value="cga">CGA 4-COLOR</option>
+                    <option value="zx">ZX SPECTRUM</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>SPEED</label>
+                <select id="speed">
+                    <option value="0.5">0.5X SLOW</option>
+                    <option value="1" selected>1X NORMAL</option>
+                    <option value="1.5">1.5X FAST</option>
+                    <option value="2">2X TURBO</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>SCALE</label>
+                <select id="scale">
+                    <option value="2">2X (320PX)</option>
+                    <option value="3">3X (480PX)</option>
+                    <option value="4" selected>4X (640PX)</option>
+                    <option value="5">5X (800PX)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>EXPORT</label>
+                <div class="btn-group">
+                    <button id="exportFrame">PNG FRAME</button>
+                    <button id="exportSheet">SPRITESHEET</button>
+                </div>
+                <button id="exportJSON">JSON DATA</button>
+            </div>
+
+            <div class="info">
+                TYPE 11 RETRO 8BIT<br>
+                NES GAMEBOY STYLE<br><br>
+                RES 160X144 GB<br>
+                4 COLOR PALETTES<br>
+                PIXEL PERFECT<br>
+                HAIR BLACK LOCKED<br><br>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">FRAME</div>
+                        <div class="stat-value" id="frameCount">0/8</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">FPS</div>
+                        <div class="stat-value" id="fpsCount">60</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('retro8bit');
+        const ctx = canvas.getContext('2d');
+        
+        let currentAnim = 'idle';
+        let currentFrame = 0;
+        let frameTimer = 0;
+        let animSpeed = 1;
+        let palette = 'gameboy';
+        let lastTime = 0;
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        const palettes = {
+            gameboy: {
+                bg: '#0f380f',
+                dark: '#0f380f',
+                mid: '#306230',
+                light: '#8bac0f',
+                bright: '#9bbc0f'
+            },
+            nes: {
+                bg: '#000000',
+                dark: '#000000',
+                mid: '#881400',
+                light: '#f83800',
+                bright: '#fcbcb0'
+            },
+            c64: {
+                bg: '#40318d',
+                dark: '#000000',
+                mid: '#883932',
+                light: '#67b6bd',
+                bright: '#9ad284'
+            },
+            cga: {
+                bg: '#000000',
+                dark: '#000000',
+                mid: '#aa00aa',
+                light: '#00aaaa',
+                bright: '#ffffff'
+            },
+            zx: {
+                bg: '#000000',
+                dark: '#000000',
+                mid: '#d62816',
+                light: '#0000d7',
+                bright: '#00d8ff'
+            }
+        };
+
+        const animations = {
+            idle: { frames: 4, frameTime: 500, loop: true },
+            walk: { frames: 4, frameTime: 150, loop: true },
+            attack: { frames: 3, frameTime: 100, loop: false },
+            jump: { frames: 4, frameTime: 125, loop: false },
+            hurt: { frames: 2, frameTime: 200, loop: false },
+            victory: { frames: 4, frameTime: 250, loop: true }
+        };
+
+        function drawRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(Math.floor(x), Math.floor(y), w, h);
+        }
+
+        function drawMissySwordPistol(frame, anim) {
+            const pal = palettes[palette];
+            const centerX = 80;
+            const centerY = 80;
+            
+            let bobY = 0, legOffset = 0, gunRecoil = 0, swordSwing = 0, jumpHeight = 0;
+            
+            if (anim === 'idle') {
+                bobY = (frame % 2) * 1;
+            } else if (anim === 'walk') {
+                bobY = (frame % 2) * 2;
+                legOffset = (frame % 2) === 0 ? -2 : 2;
+            } else if (anim === 'attack') {
+                gunRecoil = frame === 0 ? 2 : 0;
+                swordSwing = frame === 1 ? 3 : 0;
+            } else if (anim === 'jump') {
+                jumpHeight = frame < 2 ? frame * 4 : (4 - frame) * 4;
+            } else if (anim === 'hurt') {
+                bobY = frame === 0 ? 2 : 0;
+            } else if (anim === 'victory') {
+                bobY = (frame % 2) * 1;
+                swordSwing = 2;
+            }
+
+            ctx.fillStyle = pal.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const y = centerY - bobY - jumpHeight;
+
+            // Legs
+            drawRect(centerX - 4, y + 10, 3, 8, pal.mid);
+            drawRect(centerX + 2, y + 10, 3, 8, pal.mid);
+            if (anim === 'walk') {
+                drawRect(centerX - 4, y + 10 + legOffset, 3, 8, pal.mid);
+                drawRect(centerX + 2, y + 10 - legOffset, 3, 8, pal.mid);
+            }
+
+            // Pink/beige wings (left side)
+            drawRect(centerX - 10, y + 2, 3, 5, pal.light);
+            drawRect(centerX - 12, y + 3, 2, 3, pal.light);
+            
+            // Body (dark jacket with orange detail)
+            drawRect(centerX - 5, y + 2, 11, 8, pal.dark);
+            drawRect(centerX - 4, y + 3, 9, 6, pal.mid);
+            // Orange chest detail
+            drawRect(centerX - 1, y + 4, 3, 2, pal.bright);
+
+            // Left arm (gun hand - black paw)
+            drawRect(centerX - 7, y + 4, 2, 6, pal.dark);
+
+            // Right arm (sword hand - black paw)
+            drawRect(centerX + 6, y + 4, 2, 6, pal.dark);
+
+            // Orange halo (floating above)
+            drawRect(centerX - 3, y - 9, 7, 2, pal.bright); // Orange ring
+            drawRect(centerX - 4, y - 8, 1, 1, pal.bright);
+            drawRect(centerX + 4, y - 8, 1, 1, pal.bright);
+            
+            // Cat head (black fur)
+            drawRect(centerX - 5, y - 6, 11, 8, pal.dark);
+            
+            // Pointed cat ears
+            drawRect(centerX - 6, y - 7, 2, 3, pal.dark); // Left ear
+            drawRect(centerX + 5, y - 7, 2, 3, pal.dark); // Right ear
+            drawRect(centerX - 5, y - 8, 1, 1, pal.dark); // Left ear tip
+            drawRect(centerX + 5, y - 8, 1, 1, pal.dark); // Right ear tip
+
+            // Bright GREEN eye (single visible)
+            drawRect(centerX - 2, y - 3, 2, 2, pal.bright);
+            
+            // Black curved tail
+            drawRect(centerX + 5, y + 8, 2, 4, pal.dark);
+            drawRect(centerX + 7, y + 10, 2, 3, pal.dark);
+
+            // PISTOL - held in left hand
+            drawRect(centerX - 11 - gunRecoil, y + 6, 4, 3, pal.dark);
+            drawRect(centerX - 10 - gunRecoil, y + 7, 1, 1, pal.bright);
+
+            // Muzzle flash
+            if (anim === 'attack' && frame === 0) {
+                drawRect(centerX - 13 - gunRecoil, y + 6, 2, 3, pal.bright);
+                drawRect(centerX - 15 - gunRecoil, y + 7, 2, 1, pal.bright);
+            }
+
+            // SWORD - held in right hand (vertical)
+            drawRect(centerX + 8 + swordSwing, y + 3, 2, 8, pal.bright);
+            drawRect(centerX + 8 + swordSwing, y + 6, 3, 2, pal.mid); // Hilt
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0;
+                currentFrame++;
+                if (currentFrame >= anim.frames) {
+                    currentFrame = anim.loop ? 0 : anim.frames - 1;
+                }
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            drawMissySwordPistol(currentFrame, currentAnim);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', (e) => {
+            currentAnim = e.target.value;
+            currentFrame = 0;
+            frameTimer = 0;
+        });
+
+        document.getElementById('palette').addEventListener('change', (e) => {
+            palette = e.target.value;
+        });
+
+        document.getElementById('speed').addEventListener('change', (e) => {
+            animSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('scale').addEventListener('change', (e) => {
+            const scale = parseFloat(e.target.value);
+            canvas.style.width = (160 * scale) + 'px';
+            canvas.style.height = (144 * scale) + 'px';
+        });
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `missy-swordpistol-8bit-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            const anim = animations[currentAnim];
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 160 * anim.frames;
+            tempCanvas.height = 144;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            for (let i = 0; i < anim.frames; i++) {
+                drawMissySwordPistol(i, currentAnim);
+                tempCtx.drawImage(canvas, i * 160, 0);
+            }
+
+            const link = document.createElement('a');
+            link.download = `missy-swordpistol-8bit-${currentAnim}-sheet-${palette}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+
+            drawMissySwordPistol(currentFrame, currentAnim);
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = {
+                character: 'Missy (Sword & Pistol)',
+                type: 'Retro 8-Bit',
+                resolution: '160x144 (Game Boy)',
+                animations: animations,
+                palettes: Object.keys(palettes),
+                colorLimit: '4 colors per palette',
+                currentState: {
+                    animation: currentAnim,
+                    frame: currentFrame,
+                    palette: palette
+                },
+                metadata: {
+                    species: 'Cat Angel (black fur)',
+                    features: 'Orange halo, pink wings, green eyes, curved tail',
+                    weaponType: 'Pistol (left) + Sword (right)',
+                    clothingType: 'Dark jacket with orange chest detail',
+                    style: 'NES/Game Boy era pixel art',
+                    era: '1980s-1990s'
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `missy-swordpistol-8bit-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+
+        canvas.style.width = '640px';
+        canvas.style.height = '576px';
+        animate(0);
+    </script>
+</body>
+</html>

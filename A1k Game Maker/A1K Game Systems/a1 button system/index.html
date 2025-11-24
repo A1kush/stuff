@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1 Button System - Candy Style Demo</title>
+  <link rel="stylesheet" href="a1-buttons.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      min-height: 100vh;
+      color: #FFF;
+      overflow-x: hidden;
+    }
+
+    /* Demo Header */
+    .demo-header {
+      padding: 30px 20px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .demo-header h1 {
+      font-size: 42px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(135deg, #fff, #ffd1ff, #d1e8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .demo-header p {
+      font-size: 18px;
+      opacity: 0.9;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Event Logger */
+    .demo-content {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .event-logger,
+    .joystick-viz {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .logger-title,
+    .viz-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .event-list {
+      max-height: 300px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .event-item {
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-left: 3px solid #7AD5FF;
+      border-radius: 6px;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .event-time {
+      color: #FFB5E8;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .event-type {
+      color: #7AD5FF;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .event-data {
+      color: #A8FFE0;
+    }
+
+    /* Joystick Visualization */
+    .viz-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .viz-canvas {
+      width: 200px;
+      height: 200px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      border: 2px solid rgba(122, 213, 255, 0.5);
+      position: relative;
+      box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .viz-dot {
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #fff, #7AD5FF);
+      border-radius: 50%;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 20px rgba(122, 213, 255, 0.8);
+      transition: all 0.05s linear;
+    }
+
+    .viz-coords {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .viz-coords span {
+      color: #7AD5FF;
+    }
+
+    /* Controls */
+    .demo-controls {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .control-panel {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .control-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .control-btn {
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.2), rgba(122, 213, 255, 0.15));
+      color: #FFF;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .control-btn:hover {
+      transform: translateY(-2px);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.25), rgba(122, 213, 255, 0.25));
+      box-shadow: 0 6px 20px rgba(122, 213, 255, 0.3);
+    }
+
+    .control-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Info Section */
+    .info-section {
+      max-width: 1200px;
+      margin: 40px auto 60px;
+      padding: 0 20px;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-box h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #FFD1FF;
+    }
+
+    .info-box p {
+      line-height: 1.6;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+
+    .info-box code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #7AD5FF;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .demo-content {
+        grid-template-columns: 1fr;
+      }
+
+      .demo-header h1 {
+        font-size: 32px;
+      }
+
+      .demo-header p {
+        font-size: 16px;
+      }
+    }
+
+    /* Clear button */
+    .clear-btn {
+      margin-top: 12px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 100, 100, 0.5);
+      background: rgba(255, 100, 100, 0.2);
+      color: #FFF;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .clear-btn:hover {
+      background: rgba(255, 100, 100, 0.3);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="demo-header">
+    <h1>🍬 A1 Button System</h1>
+    <p>Production-ready candy/chibi/anime styled game controls</p>
+  </div>
+
+  <!-- Demo Content -->
+  <div class="demo-content">
+    <!-- Event Logger -->
+    <div class="event-logger">
+      <div class="logger-title">📋 Event Log</div>
+      <div class="event-list" id="event-list"></div>
+      <button class="clear-btn" id="clear-log">Clear Log</button>
+    </div>
+
+    <!-- Joystick Visualization -->
+    <div class="joystick-viz">
+      <div class="viz-title">🕹️ Joystick Position</div>
+      <div class="viz-container">
+        <div class="viz-canvas">
+          <div class="viz-dot" id="viz-dot"></div>
+        </div>
+        <div class="viz-coords">
+          X: <span id="coord-x">0.00</span> | Y: <span id="coord-y">0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Control Panel -->
+  <div class="demo-controls">
+    <div class="control-panel">
+      <div class="control-title">🎮 Demo Controls</div>
+      <div class="control-grid">
+        <button class="control-btn" id="toggle-ai">Toggle AI Overlay</button>
+        <button class="control-btn" id="ready-s1">Set S1 Ready</button>
+        <button class="control-btn" id="ready-s2">Set S2 Ready</button>
+        <button class="control-btn" id="ready-s3">Set S3 Ready</button>
+        <button class="control-btn" id="ready-joy">Set Joystick Ready</button>
+        <button class="control-btn" id="reset-all">Reset All Ready States</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Section -->
+  <div class="info-section">
+    <div class="info-box">
+      <h2>🎯 How to Use</h2>
+      <p>
+        <strong>Joystick:</strong> Touch or click and drag to control movement. The visualization above shows the
+        current position.
+      </p>
+      <p>
+        <strong>Skills (S1-S3):</strong> Click to activate skills. Use the demo controls to toggle "ready" states with
+        candy glow effects.
+      </p>
+      <p>
+        <strong>AI Button:</strong> Opens the AI robot control overlay where you can summon robots, change behavior
+        modes, and send commands.
+      </p>
+      <p>
+        <strong>Utilities:</strong> Pet, Vehicle, Action, Bag, and Switch buttons for game-specific features.
+      </p>
+      <p>
+        <strong>Attack Buttons:</strong> ATTACK, JUMP, RAGE, and SHIELD for combat actions.
+      </p>
+    </div>
+  </div>
+
+  <!-- Button System Container -->
+  <div id="button-container"></div>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { A1ButtonSystem } from './a1-buttons.js';
+
+    // Initialize the button system
+    const buttonSystem = new A1ButtonSystem({
+      theme: 'candy',
+      enableAI: true,
+      enableJoystick: true,
+      enableSkills: true,
+      enableUtilities: true,
+      enableAttack: true
+    });
+
+    // Mount to container
+    buttonSystem.mount('#button-container');
+
+    // Event logger
+    const eventList = document.getElementById('event-list');
+    const maxEvents = 50;
+    let eventCount = 0;
+
+    function logEvent(type, data) {
+      eventCount++;
+      const time = new Date().toLocaleTimeString();
+      const item = document.createElement('div');
+      item.className = 'event-item';
+      item.innerHTML = `
+        <span class="event-time">${time}</span>
+        <span class="event-type">${type}</span>
+        <span class="event-data">${JSON.stringify(data)}</span>
+      `;
+      eventList.insertBefore(item, eventList.firstChild);
+
+      // Limit to max events
+      while (eventList.children.length > maxEvents) {
+        eventList.removeChild(eventList.lastChild);
+      }
+    }
+
+    // Listen to all events
+    buttonSystem.on('button:press', (data) => {
+      logEvent('BTN_PRESS', { button: data.button });
+    });
+
+    buttonSystem.on('button:release', (data) => {
+      logEvent('BTN_RELEASE', { button: data.button });
+    });
+
+    buttonSystem.on('skill:activate', (data) => {
+      logEvent('SKILL_ACTIVATE', { skill: data.skill });
+    });
+
+    buttonSystem.on('joystick:move', (data) => {
+      // Update visualization
+      updateJoystickViz(data.x, data.y);
+    });
+
+    buttonSystem.on('joystick:start', (data) => {
+      logEvent('JOYSTICK_START', { x: data.x.toFixed(2), y: data.y.toFixed(2) });
+    });
+
+    buttonSystem.on('joystick:end', (data) => {
+      logEvent('JOYSTICK_END', { x: 0, y: 0 });
+    });
+
+    buttonSystem.on('utility:press', (data) => {
+      logEvent('UTILITY_PRESS', { utility: data.utility });
+    });
+
+    buttonSystem.on('attack:press', (data) => {
+      logEvent('ATTACK_PRESS', { attack: data.attack });
+    });
+
+    buttonSystem.on('ai:command', (data) => {
+      logEvent('AI_COMMAND', { command: data.command });
+    });
+
+    buttonSystem.on('ai:summon', (data) => {
+      logEvent('AI_SUMMON', { robot: data.robotType });
+    });
+
+    buttonSystem.on('ai:mode-change', (data) => {
+      logEvent('AI_MODE_CHANGE', { mode: data.mode });
+    });
+
+    buttonSystem.on('ai:target-change', (data) => {
+      logEvent('AI_TARGET_CHANGE', { target: data.targetMode });
+    });
+
+    // Joystick visualization
+    const vizDot = document.getElementById('viz-dot');
+    const coordX = document.getElementById('coord-x');
+    const coordY = document.getElementById('coord-y');
+
+    function updateJoystickViz(x, y) {
+      // Convert -1 to 1 range to pixel positions
+      const offsetX = x * 90; // 90px max offset (half of 200px - 10px margin)
+      const offsetY = y * 90;
+
+      vizDot.style.left = `calc(50% + ${offsetX}px)`;
+      vizDot.style.top = `calc(50% + ${offsetY}px)`;
+
+      coordX.textContent = x.toFixed(2);
+      coordY.textContent = y.toFixed(2);
+    }
+
+    // Demo controls
+    document.getElementById('toggle-ai').addEventListener('click', () => {
+      buttonSystem.toggleAIOverlay();
+    });
+
+    document.getElementById('ready-s1').addEventListener('click', () => {
+      const current = buttonSystem.skillStates.S1.ready;
+      buttonSystem.setSkillReady('S1', !current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_s1_ready', ready: !current });
+    });
+
+    document.getElementById('ready-s2').addEventListener('click', () => {
+      const current = buttonSystem.skillStates.S2.ready;
+      buttonSystem.setSkillReady('S2', !current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_s2_ready', ready: !current });
+    });
+
+    document.getElementById('ready-s3').addEventListener('click', () => {
+      const current = buttonSystem.skillStates.S3.ready;
+      buttonSystem.setSkillReady('S3', !current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_s3_ready', ready: !current });
+    });
+
+    document.getElementById('ready-joy').addEventListener('click', () => {
+      const current = buttonSystem.joystickReady;
+      buttonSystem.setJoystickReady(!current);
+      logEvent('DEMO_CONTROL', { action: 'toggle_joystick_ready', ready: !current });
+    });
+
+    document.getElementById('reset-all').addEventListener('click', () => {
+      buttonSystem.setSkillReady('S1', false);
+      buttonSystem.setSkillReady('S2', false);
+      buttonSystem.setSkillReady('S3', false);
+      buttonSystem.setJoystickReady(false);
+      logEvent('DEMO_CONTROL', { action: 'reset_all' });
+    });
+
+    document.getElementById('clear-log').addEventListener('click', () => {
+      eventList.innerHTML = '';
+      eventCount = 0;
+    });
+
+    // Auto-demo: stagger ready states after 2 seconds
+    setTimeout(() => {
+      buttonSystem.setSkillReady('S1', true);
+      logEvent('AUTO_DEMO', { action: 'S1 ready' });
+    }, 2000);
+
+    setTimeout(() => {
+      buttonSystem.setSkillReady('S2', true);
+      logEvent('AUTO_DEMO', { action: 'S2 ready' });
+    }, 3000);
+
+    setTimeout(() => {
+      buttonSystem.setSkillReady('S3', true);
+      logEvent('AUTO_DEMO', { action: 'S3 ready' });
+    }, 4000);
+
+    setTimeout(() => {
+      buttonSystem.setJoystickReady(true);
+      logEvent('AUTO_DEMO', { action: 'Joystick ready' });
+    }, 5000);
+
+    // Log initialization
+    logEvent('SYSTEM', { status: 'initialized' });
+  </script>
+</body>
+
+</html>
+

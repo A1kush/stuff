@@ -1,0 +1,68 @@
+{
+  "id": "a1-kush",
+  "name": "A1 Kush",
+  "rank": "S",
+  "role": "striker",
+  "summary": {
+    "hook": "Gun-sword legend who can secretly reach SSS rank.",
+    "gameplay": "Transforms at 50% HP, unleashing five insane skills that shred timelines.",
+    "why_it_matters": "Acts as the aspirational DPS for auction economy loops and hidden evolutions."
+  },
+  "stats": {"attack": 98, "defense": 70, "luck": 60, "support": 40, "speed": 80},
+  "skills": [
+    {
+      "name": "Meteoric Slide",
+      "type": "attack",
+      "cooldown": 8,
+      "aura_cost": 20,
+      "effects": ["gap_close", "trail_damage"],
+      "rationale": "Keeps melee pressure high despite canvas grid limitations."
+    },
+    {
+      "name": "Blade Sonata",
+      "type": "attack",
+      "cooldown": 14,
+      "aura_cost": 28,
+      "effects": ["combo_hits", "stance_swap"],
+      "rationale": "Defines his hybrid gun-sword identity so players feel the weapon fusion."
+    },
+    {
+      "name": "Singularity Burst",
+      "type": "attack",
+      "cooldown": 25,
+      "aura_cost": 40,
+      "effects": ["aoe_implosion", "armor_break"],
+      "rationale": "Provides the late-game nuke designers expect from a secret evolution."
+    },
+    {
+      "name": "Kush Counterseal",
+      "type": "utility",
+      "cooldown": 18,
+      "aura_cost": 22,
+      "effects": ["perfect_parry", "reflect"],
+      "rationale": "Rewards skillful defense to trigger his evolution faster."
+    },
+    {
+      "name": "Nebula Metamorph",
+      "type": "buff",
+      "cooldown": 60,
+      "aura_cost": 50,
+      "effects": ["sss_transform", "afterimage"],
+      "rationale": "Transformation at 50% HP sells the anime surge moment without new sprites."
+    }
+  ],
+  "acquisition": {
+    "method": "Secret auction",
+    "costs": {"gold": 5000, "clan_relics": 2},
+    "spawn_logic": "Low odds caravan event; guarantee after clearing Voidgreen stealth challenge."
+  },
+  "synergy": {
+    "combos": ["Gun Eclipse", "Brawler Choir", "Solo Resonance with Modelo"],
+    "counters": ["Anti-transform seals"]
+  },
+  "visuals": {
+    "palette": ["#8233ff", "#ff4d88", "#1b0036"],
+    "aura": "Violet energy ribs that flare into translucent afterimages at 50% HP.",
+    "animation_notes": "Blend modes should shift to additive when transformation triggers."
+  }
+}

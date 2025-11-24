@@ -1,0 +1,44 @@
+{
+  "id": "phantom-phoenix",
+  "name": "Phantom Phoenix",
+  "rank": "A",
+  "role": "pet",
+  "summary": {
+    "hook": "Ethereal evolution that slips between realms.",
+    "gameplay": "Only two skills, both devastating aura amplifiers.",
+    "why_it_matters": "Shows how minimal kits can still feel legendary through aura manipulation."
+  },
+  "stats": {"attack": 80, "defense": 60, "luck": 85, "support": 55, "speed": 95},
+  "skills": [
+    {
+      "name": "Spectral Rift",
+      "type": "buff",
+      "cooldown": 18,
+      "aura_cost": 24,
+      "effects": ["double_aura_rates", "phase_shift"],
+      "rationale": "Doubles aura gains briefly so feed/heal beats can keep pace with S-tier damage."
+    },
+    {
+      "name": "Oblivion Wings",
+      "type": "attack",
+      "cooldown": 16,
+      "aura_cost": 26,
+      "effects": ["armor_ignore", "phase_strike"],
+      "rationale": "Piercing damage justifies its rarity without bloating skill counts."
+    }
+  ],
+  "acquisition": {
+    "method": "Pet evolution",
+    "costs": {"bond_sparks": 20, "phoenix_essence": 1},
+    "spawn_logic": "Evolve Phoenix after completing aura resonance trial."
+  },
+  "synergy": {
+    "combos": ["Pet Nova", "Aura rush builds"],
+    "counters": ["Phase-lock totems"]
+  },
+  "visuals": {
+    "palette": ["#d2f1ff", "#9f7bff", "#ffffff"],
+    "aura": "Prismatic ghost outline flickering like glitch film.",
+    "animation_notes": "Alternate opacity every other frame to sell ethereal movement."
+  }
+}

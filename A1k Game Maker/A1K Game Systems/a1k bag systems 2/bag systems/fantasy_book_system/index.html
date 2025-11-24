@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grimoire</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background: Wooden Table -->
+    <div class="wood-table"></div>
+    
+    <!-- Candle Effect -->
+    <canvas id="candle-canvas"></canvas>
+
+    <!-- The Book Container -->
+    <div id="book-container">
+        <div class="book">
+            <!-- Left Page: Navigation -->
+            <div class="page left-page">
+                <div class="page-content">
+                    <h1 class="chapter-title">Index</h1>
+                    <div class="ink-separator"></div>
+                    <nav id="book-nav"></nav>
+                </div>
+                <div class="page-number">I</div>
+            </div>
+
+            <!-- Right Page: Content -->
+            <div class="page right-page">
+                <div class="page-content">
+                    <h2 id="page-header">Inventory</h2>
+                    <div id="book-view-container"></div>
+                </div>
+                <div class="page-number">II</div>
+            </div>
+            
+            <!-- Book Spine/Cover effects -->
+            <div class="book-spine"></div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="ui-controls">
+        <button id="btn-toggle-book" class="magic-btn">Open Grimoire (B)</button>
+    </div>
+
+    <!-- Main Script (No Module) -->
+    <script src="script.js"></script>
+</body>
+</html>

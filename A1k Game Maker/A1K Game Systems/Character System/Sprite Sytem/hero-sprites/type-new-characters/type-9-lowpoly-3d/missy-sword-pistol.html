@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Missy - Low-Poly</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {margin: 0; background: linear-gradient(135deg, #2c3e50, #34495e); display: flex; align-items: center; justify-content: center; height: 100vh;}
+        #v {border: 3px solid #3498db; border-radius: 10px;}
+    </style>
+</head>
+<body>
+    <div id="v"></div>
+    <script>
+        let s, c, r, w;
+        s = new THREE.Scene();
+        s.background = new THREE.Color(0x2c3e50);
+        c = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+        c.position.set(0, 1.5, 4);
+        r = new THREE.WebGLRenderer({antialias: true});
+        r.setSize(512, 512);
+        document.getElementById('v').appendChild(r.domElement);
+        s.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const l = new THREE.DirectionalLight(0xffffff, 0.8);
+        l.position.set(5, 10, 5);
+        s.add(l);
+        w = new THREE.Group();
+        const m1 = new THREE.MeshPhongMaterial({color: 0x1a1a1a, flatShading: true});
+        const m2 = new THREE.MeshPhongMaterial({color: 0x8b6347, flatShading: true});
+        const m3 = new THREE.MeshPhongMaterial({color: 0x000000, flatShading: true});
+        const m4 = new THREE.MeshPhongMaterial({color: 0xff4444, flatShading: true});
+        w.add(new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.3), m1));
+        w.children[0].position.y = 1;
+        w.add(new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.3), m2));
+        w.children[1].position.y = 1.5;
+        w.add(new THREE.Mesh(new THREE.BoxGeometry(0.37, 0.15, 0.32), m3));
+        w.children[2].position.y = 1.65;
+        const p = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.05), m4);
+        p.position.set(-0.35, 1.1, 0);
+        w.add(p);
+        const sw = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.6, 0.02), m4);
+        sw.position.set(0.35, 1.0, 0);
+        w.add(sw);
+        s.add(w);
+        function a() {w.rotation.y += 0.01; r.render(s, c); requestAnimationFrame(a);}
+        a();
+    </script>
+</body>
+</html>

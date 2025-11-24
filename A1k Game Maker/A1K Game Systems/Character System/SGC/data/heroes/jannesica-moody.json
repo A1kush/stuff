@@ -1,0 +1,44 @@
+{
+  "id": "jannesica-moody",
+  "name": "Jannesica Moody",
+  "rank": "S",
+  "role": "hybrid",
+  "summary": {
+    "hook": "Scholar aunt who weaponizes luminous ledgers.",
+    "gameplay": "Teaches mechanics, rains gold, and heals through knowledge rituals.",
+    "why_it_matters": "Tutorializes advanced systems diegetically so onboarding feels epic."
+  },
+  "stats": {"attack": 45, "defense": 55, "luck": 70, "support": 85, "speed": 65},
+  "skills": [
+    {
+      "name": "Glyph Lessons",
+      "type": "utility",
+      "cooldown": 30,
+      "aura_cost": 22,
+      "effects": ["unlock_passive", "knowledge_rune_spend"],
+      "rationale": "Lets designers gate mechanics behind narrative progress while rewarding curiosity."
+    },
+    {
+      "name": "Golden Thesis",
+      "type": "buff",
+      "cooldown": 18,
+      "aura_cost": 15,
+      "effects": ["perfect_parry_gold_rain", "timing_indicator"],
+      "rationale": "Encourages players to master parries by tying economy gains to skill expression."
+    }
+  ],
+  "acquisition": {
+    "method": "Knowledge contract",
+    "costs": {"bond_sparks": 15, "reputation_shards": 20},
+    "spawn_logic": "Appears after player completes three tutorial scrolls without damage."
+  },
+  "synergy": {
+    "combos": ["Clan Ascension", "Economy rush setups"],
+    "counters": ["Silence debuffs"]
+  },
+  "visuals": {
+    "palette": ["#bba3ff", "#fcecc9", "#4d3aff"],
+    "aura": "Orbiting holographic books synchronized with beats.",
+    "animation_notes": "Flip book pages as sequential sprite layers to emulate techno-calligraphy."
+  }
+}

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Sprite Generator - NPC & Enemy Rank System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 50%, #0f172a 100%);
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #3b82f6;
+            text-shadow: 0 0 20px #3b82f6;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #60a5fa;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .guardian-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .controls-panel {
+            background: rgba(30, 58, 138, 0.9);
+            border: 2px solid #3b82f6;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .canvas-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #3b82f6;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: inset 0 0 30px rgba(59, 130, 246, 0.1);
+        }
+
+        .guardian-card {
+            background: rgba(30, 58, 138, 0.8);
+            border: 1px solid #3b82f6;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .guardian-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .guardian-card canvas {
+            border: 1px solid #3b82f6;
+            background: #000000;
+            image-rendering: -webkit-optimize-contrast;
+            -webkit-optimize-contrast: true;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .guardian-card h3 {
+            color: #3b82f6;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #3b82f6;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            background: #3b82f6;
+            color: #000000;
+        }
+
+        button {
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .generate-btn {
+            background: #3b82f6 !important;
+            color: #000000 !important;
+            font-weight: bold;
+            border: 2px solid #3b82f6 !important;
+        }
+
+        .generate-btn:hover {
+            background: #000000 !important;
+            color: #3b82f6 !important;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #3b82f6;
+        }
+
+        .export-section h3 {
+            color: #3b82f6;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .stats-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(30, 58, 138, 0.6);
+            border: 1px solid #3b82f6;
+        }
+
+        .stats-title {
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: #60a5fa;
+        }
+
+        .stat-value {
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .controls-title {
+            color: #3b82f6;
+            margin-bottom: 20px;
+        }
+
+        .animation-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🛡️ Guardian Sprite Generator</h1>
+        <p class="subtitle">Generate stalwart guardian sprites with heavy armor and defensive abilities •
+            Shield-bearers, Wardens, Protectors, Sentinels</p>
+
+        <div class="guardian-grid">
+            <div class="controls-panel">
+                <h2 class="controls-title">⚙️ Guardian Controls</h2>
+
+                <div class="control-group">
+                    <label for="guardian-type">Guardian Type</label>
+                    <select id="guardian-type">
+                        <option value="shield-bearer">🛡️ Shield-bearer</option>
+                        <option value="warden">⚖️ Warden</option>
+                        <option value="protector">👑 Protector</option>
+                        <option value="sentinel">🏰 Sentinel</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="rank-level">Rank Level</label>
+                    <select id="rank-level">
+                        <option value="guard">Guard (Level 1-10)</option>
+                        <option value="veteran">Veteran (Level 11-25)</option>
+                        <option value="champion">Champion (Level 26-50)</option>
+                        <option value="legend">Legend (Level 51+)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="specialty">Specialty</label>
+                    <select id="specialty">
+                        <option value="tank">🛡️ Tank Specialist</option>
+                        <option value="paladin">✨ Paladin</option>
+                        <option value="berserker">💀 Berserker</option>
+                        <option value="commander">👑 Commander</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="weapon-type">Weapon Type</label>
+                    <select id="weapon-type">
+                        <option value="sword-shield">Sword & Shield</option>
+                        <option value="greatsword">Greatsword</option>
+                        <option value="hammer">War Hammer</option>
+                        <option value="spear">Spear & Shield</option>
+                    </select>
+                </div>
+
+                <button class="generate-btn" onclick="generateGuardian()">🛡️ Generate Guardian</button>
+
+                <div class="export-section">
+                    <h3>💾 Export Options</h3>
+                    <div class="btn-grid">
+                        <button onclick="exportPNG()">📷 PNG</button>
+                        <button onclick="exportSheet()">📄 Sprite Sheet</button>
+                    </div>
+                    <button onclick="exportJSON()">💾 JSON Data</button>
+                </div>
+
+                <div class="stats-panel">
+                    <h3 class="stats-title">📊 Guardian Stats</h3>
+                    <div class="stats-grid" id="stats-display">
+                        <div class="stat-item">
+                            <span class="stat-label">HP:</span>
+                            <span class="stat-value" id="stat-hp">180</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">MP:</span>
+                            <span class="stat-value" id="stat-mp">60</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Attack:</span>
+                            <span class="stat-value" id="stat-attack">55</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Defense:</span>
+                            <span class="stat-value" id="stat-defense">70</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Block:</span>
+                            <span class="stat-value" id="stat-block">85</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Speed:</span>
+                            <span class="stat-value" id="stat-speed">30</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-panel">
+                <div class="guardian-card">
+                    <h3>Guardian Sprite Preview</h3>
+                    <canvas id="guardian-canvas" width="512" height="512"></canvas>
+                    <div class="animation-buttons">
+                        <button onclick="setAnimation('idle')">😌 Idle</button>
+                        <button onclick="setAnimation('block')">🛡️ Block</button>
+                        <button onclick="setAnimation('attack')">⚔️ Attack</button>
+                        <button onclick="setAnimation('special')">💫 Special</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./hd-sprite-engine.js"></script>
+    <script>
+        let guardianSystem;
+        let currentAnimation = 'idle';
+
+        const guardianStats = {
+            'shield-bearer': {
+                guard: { hp: 160, mp: 50, attack: 45, defense: 60, block: 75, speed: 25 },
+                veteran: { hp: 200, mp: 65, attack: 55, defense: 70, block: 85, speed: 30 },
+                champion: { hp: 240, mp: 80, attack: 65, defense: 80, block: 95, speed: 35 },
+                legend: { hp: 280, mp: 95, attack: 75, defense: 90, block: 105, speed: 40 }
+            },
+            'warden': {
+                guard: { hp: 170, mp: 55, attack: 50, defense: 65, block: 70, speed: 30 },
+                veteran: { hp: 210, mp: 70, attack: 60, defense: 75, block: 80, speed: 35 },
+                champion: { hp: 250, mp: 85, attack: 70, defense: 85, block: 90, speed: 40 },
+                legend: { hp: 290, mp: 100, attack: 80, defense: 95, block: 100, speed: 45 }
+            },
+            'protector': {
+                guard: { hp: 175, mp: 60, attack: 55, defense: 70, block: 80, speed: 28 },
+                veteran: { hp: 215, mp: 75, attack: 65, defense: 80, block: 90, speed: 33 },
+                champion: { hp: 255, mp: 90, attack: 75, defense: 90, block: 100, speed: 38 },
+                legend: { hp: 295, mp: 105, attack: 85, defense: 100, block: 110, speed: 43 }
+            },
+            'sentinel': {
+                guard: { hp: 180, mp: 45, attack: 60, defense: 75, block: 85, speed: 20 },
+                veteran: { hp: 220, mp: 60, attack: 70, defense: 85, block: 95, speed: 25 },
+                champion: { hp: 260, mp: 75, attack: 80, defense: 95, block: 105, speed: 30 },
+                legend: { hp: 300, mp: 90, attack: 90, defense: 105, block: 115, speed: 35 }
+            }
+        };
+
+        function init() {
+            const canvas = document.getElementById('guardian-canvas');
+            guardianSystem = new HDSpriteSystem();
+            guardianSystem.setCanvas(canvas);
+            guardianSystem.setCharacter('guardian', 'shield-bearer');
+            guardianSystem.setPalette('light');
+            guardianSystem.setScale(4);
+            guardianSystem.draw();
+
+            updateStats();
+        }
+
+        function generateGuardian() {
+            const guardianType = document.getElementById('guardian-type').value;
+            const rankLevel = document.getElementById('rank-level').value;
+            const specialty = document.getElementById('specialty').value;
+            const weaponType = document.getElementById('weapon-type').value;
+
+            guardianSystem.setCharacter('guardian', guardianType);
+            guardianSystem.setPalette('light');
+            guardianSystem.setScale(4);
+
+            // Apply customizations based on selections
+            if (weaponType === 'greatsword') {
+                guardianSystem.addAccessory('two-handed');
+            } else if (weaponType === 'hammer') {
+                guardianSystem.addAccessory('spiked');
+            } else if (weaponType === 'spear') {
+                guardianSystem.addAccessory('polearm');
+            }
+
+            guardianSystem.draw();
+            updateStats();
+        }
+
+        function setAnimation(animation) {
+            currentAnimation = animation;
+            guardianSystem.setAnimation(animation);
+            guardianSystem.draw();
+        }
+
+        function updateStats() {
+            const guardianType = document.getElementById('guardian-type').value;
+            const rankLevel = document.getElementById('rank-level').value;
+
+            const stats = guardianStats[guardianType][rankLevel];
+
+            document.getElementById('stat-hp').textContent = stats.hp;
+            document.getElementById('stat-mp').textContent = stats.mp;
+            document.getElementById('stat-attack').textContent = stats.attack;
+            document.getElementById('stat-defense').textContent = stats.defense;
+            document.getElementById('stat-block').textContent = stats.block;
+            document.getElementById('stat-speed').textContent = stats.speed;
+        }
+
+        function exportPNG() {
+            const dataURL = guardianSystem.exportPNG();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `guardian-${document.getElementById('guardian-type').value}-${currentAnimation}.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportSheet() {
+            const dataURL = guardianSystem.exportSpriteSheet();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `guardian-${document.getElementById('guardian-type').value}-sheet.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportJSON() {
+            const data = guardianSystem.exportJSON();
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `guardian-${document.getElementById('guardian-type').value}-data.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

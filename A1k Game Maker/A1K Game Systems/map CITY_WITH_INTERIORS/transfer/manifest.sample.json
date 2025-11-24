@@ -1,0 +1,49 @@
+{
+  "basePath": ".",
+  "player": {
+    "id": "hero",
+    "x": 128,
+    "y": 96,
+    "sprite": "assets/player/hero.png",
+    "speed": 2.0
+  },
+  "npcs": [
+    {
+      "id": "npc_bob",
+      "x": 256,
+      "y": 96,
+      "sprite": "assets/npcs/bob.png",
+      "name": "Bob",
+      "dialogue": "Welcome to the city!"
+    },
+    {
+      "id": "npc_amy",
+      "x": 300,
+      "y": 120,
+      "sprite": "assets/npcs/amy.png",
+      "name": "Amy",
+      "dialogue": "Need directions?"
+    }
+  ],
+  "houses": [
+    {
+      "id": "house_1",
+      "x": 320,
+      "y": 80,
+      "width": 64,
+      "height": 64,
+      "label": "Starter Home",
+      "interiorManifest": "./sample-interior.json"
+    },
+    {
+      "id": "inn_1",
+      "x": 420,
+      "y": 100,
+      "width": 72,
+      "height": 56,
+      "label": "City Inn"
+    }
+  ]
+}
+
+

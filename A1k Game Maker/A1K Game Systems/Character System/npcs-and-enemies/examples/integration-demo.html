@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC & Enemy Rank System - Integration Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(94, 234, 212, 0.3);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.2em;
+        }
+
+        .controls {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        button.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        select {
+            background: rgba(15, 23, 42, 0.8);
+            color: #f1f5f9;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .info-panel {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .info-panel h3 {
+            color: #06b6d4;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #06b6d4;
+            margin-top: 5px;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                #0f172a;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(94, 234, 212, 0.2);
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .entity {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .entity:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.8));
+        }
+
+        .entity img {
+            max-width: 64px;
+            max-height: 64px;
+            image-rendering: pixelated;
+        }
+
+        .rank-legend {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .rank-badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid;
+        }
+
+        .code-example {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .code-example pre {
+            color: #06b6d4;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .entity-tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            color: #f1f5f9;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(6, 182, 212, 0.5);
+            pointer-events: none;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .log {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .log-entry.success {
+            color: #10b981;
+        }
+
+        .log-entry.error {
+            color: #ef4444;
+        }
+
+        .log-entry.info {
+            color: #06b6d4;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 NPC & Enemy Rank System</h1>
+            <p class="subtitle">Universal rank-based entity system for HTML games</p>
+        </header>
+
+        <div class="controls">
+            <button onclick="spawnRandomNPC()" class="success">Spawn Random NPC</button>
+            <button onclick="spawnRandomEnemy()" class="danger">Spawn Random Enemy</button>
+
+            <select id="rankSelect">
+                <option value="">All Ranks</option>
+                <option value="E">E Rank</option>
+                <option value="D">D Rank</option>
+                <option value="C">C Rank</option>
+                <option value="B">B Rank</option>
+                <option value="A">A Rank</option>
+                <option value="S">S Rank</option>
+                <option value="SS">SS Rank</option>
+            </select>
+
+            <select id="categorySelect">
+                <option value="">All Categories</option>
+                <option value="hero">Hero</option>
+                <option value="villain">Villain</option>
+                <option value="slayer">Slayer</option>
+                <option value="hunter">Hunter</option>
+                <option value="guardian">Guardian</option>
+                <option value="mage">Mage</option>
+                <option value="assassin">Assassin</option>
+                <option value="minion">Minion</option>
+                <option value="elite">Elite</option>
+                <option value="boss">Boss</option>
+            </select>
+
+            <button onclick="loadCatalog()">Load Full Catalog</button>
+            <button onclick="clearAll()" class="danger">Clear All</button>
+            <button onclick="toggleAutoSpawn()">Toggle Auto Spawn</button>
+            <button onclick="exportData()">Export Data</button>
+        </div>
+
+        <div class="info-panel">
+            <h3>📊 System Statistics</h3>
+            <div class="stats-grid" id="stats"></div>
+        </div>
+
+        <div id="game-container"></div>
+        <div class="entity-tooltip" id="tooltip"></div>
+
+        <div class="rank-legend" id="rankLegend"></div>
+
+        <div class="log" id="log"></div>
+
+        <div class="code-example">
+            <h3>📝 Quick Integration Example</h3>
+            <pre>// Import the system
+import { createGame, entityManager } from './dist/index.js';
+
+// Initialize the game
+const game = createGame({ 
+  containerSelector: '#game-container',
+  autoUpdate: true 
+});
+
+// Load entities from JSON
+await game.loadEntitiesFromURL('entities.json');
+
+// Or create entities programmatically
+const hero = game.addNPC({
+  name: 'C Rank Hero',
+  rank: { tier: 'C', category: 'hero' },
+  interactionType: 'quest_giver'
+});
+
+// Start the game loop
+game.start();</pre>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createGame, entityManager, rankSystem } from '../dist/index.js';
+
+        let game;
+        let autoSpawnInterval = null;
+        let entityCatalog = null;
+
+        // Initialize
+        async function init() {
+            game = createGame({
+                containerSelector: '#game-container',
+                autoUpdate: true,
+                enableAutoRender: true
+            });
+
+            // Load catalog
+            const response = await fetch('../src/catalog/ranked_entities.json');
+            entityCatalog = await response.json();
+
+            game.start();
+            updateStats();
+            createRankLegend();
+            log('System initialized', 'success');
+
+            // Update stats periodically
+            setInterval(updateStats, 1000);
+        }
+
+        window.spawnRandomNPC = function () {
+            if (!entityCatalog) return;
+
+            const npc = entityCatalog.npcs[Math.floor(Math.random() * entityCatalog.npcs.length)];
+            const entity = game.addNPC({
+                ...npc,
+                position: { x: Math.random() * 800, y: Math.random() * 500 }
+            });
+
+            log(`Spawned ${npc.name}`, 'success');
+            updateStats();
+        };
+
+        window.spawnRandomEnemy = function () {
+            if (!entityCatalog) return;
+
+            const enemy = entityCatalog.enemies[Math.floor(Math.random() * entityCatalog.enemies.length)];
+            const entity = game.addEnemy({
+                ...enemy,
+                position: { x: Math.random() * 800, y: Math.random() * 500 }
+            });
+
+            log(`Spawned ${enemy.name}`, 'error');
+            updateStats();
+        };
+
+        window.loadCatalog = async function () {
+            if (!entityCatalog) return;
+
+            const allEntities = [...entityCatalog.npcs, ...entityCatalog.enemies];
+            let loaded = 0;
+
+            allEntities.forEach((data, i) => {
+                setTimeout(() => {
+                    const isNPC = entityCatalog.npcs.includes(data);
+                    const entity = isNPC ? game.addNPC(data) : game.addEnemy(data);
+
+                    entity.position = {
+                        x: 100 + (i % 10) * 80,
+                        y: 100 + Math.floor(i / 10) * 100
+                    };
+
+                    loaded++;
+                    if (loaded === allEntities.length) {
+                        log(`Loaded ${loaded} entities from catalog`, 'success');
+                        updateStats();
+                    }
+                }, i * 50);
+            });
+        };
+
+        window.clearAll = function () {
+            game.clearAll();
+            log('Cleared all entities', 'info');
+            updateStats();
+        };
+
+        window.toggleAutoSpawn = function () {
+            if (autoSpawnInterval) {
+                clearInterval(autoSpawnInterval);
+                autoSpawnInterval = null;
+                log('Auto spawn disabled', 'info');
+            } else {
+                autoSpawnInterval = setInterval(() => {
+                    if (Math.random() > 0.5) {
+                        spawnRandomNPC();
+                    } else {
+                        spawnRandomEnemy();
+                    }
+                }, 2000);
+                log('Auto spawn enabled', 'success');
+            }
+        };
+
+        window.exportData = function () {
+            const data = entityManager.exportToJSON();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'entities-export.json';
+            a.click();
+            log('Data exported', 'success');
+        };
+
+        function updateStats() {
+            const stats = game.getStats();
+            const statsHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Total Entities</div>
+          <div class="stat-value">${stats.total}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">NPCs</div>
+          <div class="stat-value">${stats.npcs}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Enemies</div>
+          <div class="stat-value">${stats.enemies}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active</div>
+          <div class="stat-value">${stats.active}</div>
+        </div>
+        ${Object.entries(stats.byRank).filter(([k, v]) => v > 0).map(([tier, count]) => `
+          <div class="stat-card">
+            <div class="stat-label">${tier} Rank</div>
+            <div class="stat-value">${count}</div>
+          </div>
+        `).join('')}
+      `;
+            document.getElementById('stats').innerHTML = statsHTML;
+        }
+
+        function createRankLegend() {
+            const tiers = rankSystem.getAllTiers();
+            const legendHTML = tiers.map(tier => {
+                const config = rankSystem.getRankTierConfig(tier);
+                return `<div class="rank-badge" style="border-color: ${config.accentColor}; color: ${config.accentColor}">
+          ${config.label}
+        </div>`;
+            }).join('');
+            document.getElementById('rankLegend').innerHTML = legendHTML;
+        }
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.insertBefore(entry, logDiv.firstChild);
+
+            // Keep only last 50 entries
+            while (logDiv.children.length > 50) {
+                logDiv.removeChild(logDiv.lastChild);
+            }
+        }
+
+        // Make functions global
+        window.game = game;
+        window.entityManager = entityManager;
+        window.rankSystem = rankSystem;
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>

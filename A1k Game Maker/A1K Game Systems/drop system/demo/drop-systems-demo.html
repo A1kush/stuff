@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1K Drop Systems - Standalone Demo</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a1220 0%, #1a2332 100%);
+      color: #cfe3ff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4fc3f7;
+      margin-bottom: 10px;
+      font-size: 32px;
+      text-shadow: 0 0 20px rgba(79, 195, 247, 0.6);
+    }
+
+    .demo-subtitle {
+      text-align: center;
+      color: rgba(207, 227, 255, 0.7);
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    /* Section Tabs */
+    .drop-section-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .drop-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: rgba(79, 195, 247, 0.1);
+      border: 2px solid rgba(79, 195, 247, 0.3);
+      border-radius: 10px;
+      color: #cfe3ff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .drop-tab:hover {
+      background: rgba(79, 195, 247, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3);
+    }
+
+    .drop-tab.active {
+      background: rgba(79, 195, 247, 0.3);
+      border-color: rgba(79, 195, 247, 0.6);
+      box-shadow: 0 0 20px rgba(79, 195, 247, 0.4);
+    }
+
+    .tab-icon {
+      font-size: 20px;
+    }
+
+    /* Section Headers */
+    .drop-section-header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .drop-section-header h3 {
+      color: #4fc3f7;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .drop-section-header p {
+      color: rgba(207, 227, 255, 0.7);
+      font-size: 13px;
+    }
+
+    /* Enemy Type Cards */
+    .enemy-types-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .enemy-type-card {
+      background: linear-gradient(135deg, rgba(15, 24, 38, 0.95), rgba(25, 34, 48, 0.95));
+      border: 3px solid;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .enemy-type-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 30px currentColor;
+    }
+
+    .enemy-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .enemy-sprite {
+      font-size: 48px;
+      min-width: 60px;
+      text-align: center;
+      filter: drop-shadow(0 0 10px rgba(79, 195, 247, 0.5));
+    }
+
+    .enemy-info h4 {
+      color: #ffd77a;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .enemy-info p {
+      color: rgba(207, 227, 255, 0.7);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Drop Rarity Sections */
+    .drop-rarity-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .drop-rarity-row {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .rarity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .drop-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px;
+    }
+
+    .drop-item-icon {
+      font-size: 24px;
+      padding: 6px;
+      background: rgba(79, 195, 247, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+
+    .drop-item-icon:hover {
+      transform: scale(1.2);
+      border-color: #4fc3f7;
+      box-shadow: 0 0 16px rgba(79, 195, 247, 0.6);
+    }
+
+    .drop-more {
+      font-size: 11px;
+      color: rgba(207, 227, 255, 0.5);
+      padding: 6px 12px;
+      align-self: center;
+    }
+
+    /* Boss Cards */
+    .boss-loot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+    }
+
+    .boss-card {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(79, 195, 247, 0.15));
+      border: 3px solid rgba(255, 215, 0, 0.5);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(255, 215, 0, 0.2);
+    }
+
+    .boss-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(79, 195, 247, 0.3);
+    }
+
+    .boss-icon {
+      font-size: 56px;
+      filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.8));
+    }
+
+    .boss-info h4 {
+      color: #ffd700;
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .boss-type-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(79, 195, 247, 0.3);
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .boss-info p {
+      color: rgba(207, 227, 255, 0.8);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .boss-rewards {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .reward-tier {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .tier-label {
+      font-weight: 700;
+      font-size: 11px;
+      margin-bottom: 8px;
+      color: #4fc3f7;
+    }
+
+    .reward-tier.guaranteed .tier-label { color: #38ef7d; }
+    .reward-tier.rare .tier-label { color: #3b82f6; }
+    .reward-tier.epic .tier-label { color: #9333ea; }
+    .reward-tier.legendary .tier-label { color: #ffd700; }
+
+    .reward-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .reward-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(79, 195, 247, 0.1);
+      border-radius: 6px;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .reward-item:hover {
+      background: rgba(79, 195, 247, 0.2);
+      transform: translateX(4px);
+    }
+
+    .reward-item .item-icon {
+      font-size: 20px;
+    }
+
+    .reward-item .item-name {
+      flex: 1;
+      color: #cfe3ff;
+    }
+
+    .gold-bonus {
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      color: #ffd700;
+      font-size: 14px;
+    }
+
+    /* Quest Cards */
+    .quest-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 16px;
+    }
+
+    .quest-card {
+      background: linear-gradient(135deg, rgba(15, 24, 38, 0.98), rgba(25, 34, 48, 0.98));
+      border: 2px solid rgba(167, 139, 250, 0.4);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .quest-card:hover {
+      border-color: rgba(167, 139, 250, 0.7);
+      box-shadow: 0 4px 16px rgba(167, 139, 250, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .quest-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .quest-icon {
+      font-size: 40px;
+      filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.6));
+    }
+
+    .quest-info h4 {
+      color: #a78bfa;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .quest-info p {
+      color: rgba(207, 227, 255, 0.7);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .quest-type-badge, .quest-level-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: rgba(79, 195, 247, 0.2);
+      border-radius: 4px;
+      font-size: 10px;
+      margin-right: 6px;
+    }
+
+    .quest-rewards {
+      margin-top: 12px;
+    }
+
+    .reward-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4fc3f7;
+      margin-bottom: 8px;
+    }
+
+    .reward-currency {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(255, 215, 0, 0.2);
+      border-radius: 6px;
+      font-size: 12px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .reward-items-section {
+      margin-top: 8px;
+    }
+
+    .reward-label {
+      font-size: 10px;
+      color: rgba(207, 227, 255, 0.6);
+      margin-bottom: 6px;
+    }
+
+    .reward-special {
+      padding: 8px;
+      background: rgba(167, 139, 250, 0.2);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      color: #a78bfa;
+      margin-top: 8px;
+    }
+
+    /* Mission Cards */
+    .missions-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .mission-group-title {
+      color: #4fc3f7;
+      font-size: 20px;
+      margin-bottom: 16px;
+      text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+    }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .mission-card {
+      background: linear-gradient(135deg, rgba(15, 24, 38, 0.98), rgba(25, 34, 48, 0.98));
+      border: 2px solid rgba(56, 239, 125, 0.4);
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .mission-card.weekly {
+      border-color: rgba(255, 215, 0, 0.5);
+    }
+
+    .mission-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(56, 239, 125, 0.3);
+    }
+
+    .mission-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .mission-icon {
+      font-size: 32px;
+      filter: drop-shadow(0 0 8px rgba(56, 239, 125, 0.5));
+    }
+
+    .mission-info h5 {
+      color: #38ef7d;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .mission-info p {
+      color: rgba(207, 227, 255, 0.7);
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .mission-progress-bar {
+      position: relative;
+      height: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38ef7d, #4fc3f7);
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .mission-rewards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .reward-mini {
+      padding: 4px 8px;
+      background: rgba(79, 195, 247, 0.2);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Hidden section */
+    .hidden {
+      display: none;
+    }
+
+    .drop-content {
+      margin-top: 20px;
+    }
+
+    /* Info Banner */
+    .info-banner {
+      background: linear-gradient(135deg, rgba(79, 195, 247, 0.2), rgba(167, 139, 250, 0.2));
+      border: 2px solid rgba(79, 195, 247, 0.4);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .info-banner h2 {
+      color: #4fc3f7;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+
+    .info-banner p {
+      color: rgba(207, 227, 255, 0.8);
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="demo-container">
+    <h1>🎁 A1K Drop Systems - Demo</h1>
+    <div class="demo-subtitle">Complete visualization of all enemy drops, boss loot, quest rewards, and daily missions</div>
+
+    <div class="info-banner">
+      <h2>✨ 300+ Items Available</h2>
+      <p>Click any item to see where you can find it. Click enemy types to expand details.</p>
+    </div>
+
+    <div id="dropSystemsRoot"></div>
+  </div>
+
+  <!-- Load Scripts -->
+  <script src="../sprite-generator.js"></script>
+  <script src="../drop-tables.js"></script>
+  
+  <!-- Mock GameDatabase for demo -->
+  <script>
+    // Mock data for demo (normally loaded from game)
+    window.GameDatabase = {
+      pets: [
+        { id: 'pet_dog', name: 'Golden Retriever', icon: '🐕', rarity: 'common', description: 'Loyal companion' },
+        { id: 'pet_cat', name: 'Black Cat', icon: '🐈', rarity: 'common', description: 'Nimble feline' },
+        { id: 'pet_wolf', name: 'Grey Wolf', icon: '🐺', rarity: 'uncommon', description: 'Fierce pack leader' },
+        { id: 'pet_dragon_wyrmling', name: 'Dragon Wyrmling', icon: '🐉', rarity: 'rare', description: 'Baby dragon' },
+        { id: 'pet_ancient_dragon', name: 'Ancient Dragon God', icon: '🐉👑', rarity: 'legendary', description: 'Most powerful dragon' }
+      ],
+      spirits: [
+        { id: 'spirit_fire', name: 'Fire Spirit', icon: '🔥', rarity: 'common', description: 'Burning spirit' },
+        { id: 'spirit_inferno', name: 'Inferno Spirit', icon: '🔥💥', rarity: 'uncommon', description: 'Raging flames' }
+      ],
+      gear: [
+        { id: 'weapon_wooden_sword', name: 'Wooden Sword', icon: '🗡️', rarity: 'common', description: 'Basic weapon' },
+        { id: 'weapon_katana', name: 'Katana', icon: '⚔️', rarity: 'uncommon', description: 'Sharp blade' },
+        { id: 'armor_knight', name: 'Knight Armor', icon: '🛡️', rarity: 'uncommon', description: 'Sturdy armor' }
+      ],
+      items: [
+        { id: 'potion_hp', name: 'Health Potion', icon: '🧪', rarity: 'common', description: 'Restores HP' },
+        { id: 'scroll_heal', name: 'Healing Scroll', icon: '📜', rarity: 'common', description: 'Magic healing' },
+        { id: 'essence_fire', name: 'Fire Essence', icon: '💎', rarity: 'common', description: 'Fire elemental essence' }
+      ],
+      vehicles: [
+        { id: 'vehicle_bike', name: 'Mountain Bike', icon: '🚴', rarity: 'common', description: 'Fast transport' }
+      ],
+      robots: []
+    };
+
+    // Flatten for easy lookup
+    window.DROP_SYSTEMS.getItemDetails = function(itemId) {
+      for (let cat in window.GameDatabase) {
+        const item = window.GameDatabase[cat].find(i => i.id === itemId);
+        if (item) return item;
+      }
+      return null;
+    };
+  </script>
+
+  <!-- Render Logic -->
+  <script src="../drop-renderer.js"></script>
+
+  <script>
+    // Initialize demo
+    window.DropSystemsRenderer.currentSection = 'enemies';
+    document.getElementById('dropSystemsRoot').innerHTML = `
+      <div class="drop-section-tabs">
+        <button class="drop-tab active" data-section="enemies">
+          <span class="tab-icon">👾</span>
+          <span class="tab-label">Enemy Drops</span>
+        </button>
+        <button class="drop-tab" data-section="bosses">
+          <span class="tab-icon">👑</span>
+          <span class="tab-label">Boss Loot</span>
+        </button>
+        <button class="drop-tab" data-section="quests">
+          <span class="tab-icon">📜</span>
+          <span class="tab-label">Quest Rewards</span>
+        </button>
+        <button class="drop-tab" data-section="missions">
+          <span class="tab-icon">⭐</span>
+          <span class="tab-label">Daily Missions</span>
+        </button>
+      </div>
+      <div class="drop-content" id="dropContent"></div>
+    `;
+
+    function renderSection(section) {
+      window.DropSystemsRenderer.currentSection = section;
+      const content = window.DropSystemsRenderer.renderCurrentSection();
+      document.getElementById('dropContent').innerHTML = content;
+
+      // Update active tab
+      document.querySelectorAll('.drop-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.section === section);
+      });
+
+      // Reattach listeners
+      window.DropSystemsRenderer.attachEventListeners();
+    }
+
+    // Initial render
+    renderSection('enemies');
+
+    // Tab switching
+    document.querySelectorAll('.drop-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        renderSection(tab.dataset.section);
+      });
+    });
+
+    console.log('🎮 Drop Systems Demo loaded successfully!');
+    console.log('📦 Click tabs to explore different sections');
+  </script>
+
+</body>
+</html>
+

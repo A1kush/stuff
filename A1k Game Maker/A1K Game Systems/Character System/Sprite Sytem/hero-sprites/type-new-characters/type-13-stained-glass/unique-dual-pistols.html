@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unique Dual Pistols - Stained Glass</title>
+    <style>
+        body {margin: 0; background: #1a0033; display: flex; align-items: center; justify-content: center; height: 100vh;}
+        canvas {border: 5px solid #FFD700;}
+    </style>
+</head>
+<body>
+    <canvas id="c" width="512" height="512"></canvas>
+    <script>
+        const c = document.getElementById('c'), x = c.getContext('2d');
+        x.fillStyle = '#330066'; x.fillRect(0, 0, 512, 512);
+        x.fillStyle = '#CC0000'; x.fillRect(200, 250, 112, 150);
+        x.strokeStyle = '#000'; x.lineWidth = 8; x.strokeRect(200, 250, 112, 150);
+        x.fillStyle = '#FFB380'; x.fillRect(200, 150, 112, 100); x.strokeRect(200, 150, 112, 100);
+        x.fillStyle = '#000'; x.fillRect(200, 150, 112, 30); x.strokeRect(200, 150, 112, 30);
+        x.fillRect(180, 175, 12, 25); x.fillRect(320, 175, 12, 25); x.fillStyle = '#FFF'; x.fillRect(220, 195, 20, 20); x.strokeRect(220, 195, 20, 20); x.fillRect(272, 195, 20, 20); x.strokeRect(272, 195, 20, 20); x.fillStyle = '#00FFFF'; x.fillRect(245, 265, 22, 15); x.fillRect(215, 275, 10, 8); x.fillRect(287, 275, 10, 8);
+        x.fillRect(150, 290, 40, 20); x.strokeRect(150, 290, 40, 20);
+        x.fillRect(322, 290, 40, 20); x.strokeRect(322, 290, 40, 20);
+    </script>
+</body>
+</html>

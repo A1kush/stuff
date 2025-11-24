@@ -1,0 +1,31 @@
+{
+  "name": "npc-enemy-system",
+  "version": "1.0.0",
+  "description": "A system for managing NPCs and enemies with a ranking system for integration into HTML games.",
+  "main": "src/core/GameIntegration.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "http-server ./examples",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/npc-enemy-system.git"
+  },
+  "keywords": [
+    "npc",
+    "enemy",
+    "ranking",
+    "game",
+    "html"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.12.3",
+    "jest": "^27.0.6"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}

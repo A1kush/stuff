@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Type 15: Glitch Art - Digital Corruption Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 42px; color: #0f0; margin-bottom: 20px; text-shadow: 0 0 20px #0f0; text-align: center; animation: glitch 2s infinite; }
+        @keyframes glitch { 0%, 100% { text-shadow: 2px 0 #f0f, -2px 0 #0ff; } 50% { text-shadow: -2px 0 #f0f, 2px 0 #0ff; } }
+        .subtitle { text-align: center; color: #0a0; margin-bottom: 40px; font-size: 14px; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .feature { background: #001100; border: 2px solid #0f0; border-radius: 8px; padding: 20px; }
+        .feature h3 { color: #0f0; margin-bottom: 10px; font-size: 14px; }
+        .feature p { color: #0a0; font-size: 12px; line-height: 1.6; }
+        .characters { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 40px; }
+        .char-card { background: #001100; border: 2px solid #0f0; border-radius: 12px; padding: 25px; text-align: center; transition: all 0.3s; }
+        .char-card:hover { border-color: #0ff; box-shadow: 0 0 30px rgba(0, 255, 0, 0.5); transform: translateY(-5px); }
+        .char-card h2 { color: #0f0; margin-bottom: 15px; font-size: 24px; }
+        .char-card a { display: block; background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 15px; transition: all 0.3s; }
+        .char-card a:hover { background: #001100; box-shadow: 0 0 15px #0f0; }
+        .tech-specs { background: #001100; border: 2px solid #0f0; border-radius: 8px; padding: 25px; margin-top: 40px; }
+        .tech-specs h3 { color: #0f0; margin-bottom: 15px; font-size: 18px; }
+        .tech-specs ul { list-style: none; color: #0a0; font-size: 13px; line-height: 2; }
+        .tech-specs li:before { content: '▸ '; color: #0f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ TYPE 15: GLITCH ART</h1>
+        <div class="subtitle">Digital Corruption · RGB Separation · Scan Lines · Data Artifacts</div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🔀 RGB Channel Separation</h3>
+                <p>Red/Green/Blue channels randomly offset for authentic digital corruption effect. Additive blending creates chromatic aberration.</p>
+            </div>
+            <div class="feature">
+                <h3>📺 Scan Line Overlay</h3>
+                <p>CRT-style scan lines sweep across sprites. Horizontal artifacts appear randomly for corrupted data aesthetic.</p>
+            </div>
+            <div class="feature">
+                <h3>⚡ Random Glitch Events</h3>
+                <p>15% chance per frame for full glitch activation. Position offsets, color shifts, and digital artifacts trigger simultaneously.</p>
+            </div>
+            <div class="feature">
+                <h3>🎨 Digital Palette</h3>
+                <p>5 color schemes with high-contrast primaries. Green/Magenta/Cyan UI themes for cyberpunk aesthetic with locked black hair/fur.</p>
+            </div>
+        </div>
+
+        <div class="characters">
+            <div class="char-card">
+                <h2>⚔️ A1 WARRIOR</h2>
+                <p style="color: #0a0; margin-bottom: 15px;">Dual swords with glitch trail effects. Attack animations leave pixelated after-images. Green UI theme.</p>
+                <a href="warrior-dual-swords.html">OPEN SPRITE →</a>
+            </div>
+            
+            <div class="char-card">
+                <h2>👑 MISSY CAT ANGEL</h2>
+                <p style="color: #0a0; margin-bottom: 15px;">2 eyes, 2 arms, 1 gun, 1 sword. Angel wings with transparency. Magenta UI theme. Tail with sine-wave motion.</p>
+                <a href="cat-angel-gunner.html">OPEN SPRITE →</a>
+            </div>
+            
+            <div class="char-card">
+                <h2>🔫 UNIQUE CYBORG</h2>
+                <p style="color: #0a0; margin-bottom: 15px;">Energy rifle with muzzle flash on attack. Visor with accent color glow. Cyan UI theme. Heavy armor plating.</p>
+                <a href="cyborg-rifle-operative.html">OPEN SPRITE →</a>
+            </div>
+        </div>
+
+        <div class="tech-specs">
+            <h3>TECHNICAL SPECIFICATIONS</h3>
+            <ul>
+                <li><strong>Rendering:</strong> Canvas2D with additive blending (globalCompositeOperation = 'lighter')</li>
+                <li><strong>Glitch Trigger:</strong> Math.random() < 0.15 (15% per frame)</li>
+                <li><strong>RGB Offset:</strong> ±2px per channel, 60% opacity, layered with additive mode</li>
+                <li><strong>Scan Lines:</strong> 2px spacing, 5% opacity, magenta/green/cyan per character</li>
+                <li><strong>Digital Artifacts:</strong> 5 random rectangles (10-40px × 2-7px) on glitch trigger</li>
+                <li><strong>Position Jitter:</strong> ±10px horizontal offset during glitch events</li>
+                <li><strong>Animations:</strong> 6 states (Idle, Walk, Attack, Jump, Hurt, Victory)</li>
+                <li><strong>Palettes:</strong> 5 variants (Fire, Ice, Shadow, Light, Nature)</li>
+                <li><strong>Export:</strong> PNG frame, sprite sheet (48 frames), JSON animation data</li>
+                <li><strong>Performance:</strong> 60 FPS maintained with glitch effects active</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="../START_HERE.html" style="color: #0f0; text-decoration: none; font-size: 14px; border: 1px solid #0f0; padding: 10px 20px; border-radius: 6px; display: inline-block;">← BACK TO GALLERY</a>
+        </div>
+    </div>
+</body>
+</html>

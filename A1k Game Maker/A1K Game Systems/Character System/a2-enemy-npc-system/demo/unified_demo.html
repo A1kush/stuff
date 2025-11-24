@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A2 Entity System - Complete Demo (103 Entities)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0B1421 0%, #1a1a2e 100%);
+      color: #cfe3ff;
+      overflow: hidden;
+    }
+
+    #app {
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      height: 100vh;
+      gap: 1px;
+      background: #0B1421;
+    }
+
+    .panel {
+      background: #0f1826;
+      border: 1px solid #293854;
+      overflow-y: auto;
+    }
+
+    .panel-header {
+      position: sticky;
+      top: 0;
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f1826 100%);
+      padding: 20px;
+      border-bottom: 2px solid #5ba3ff;
+      z-index: 10;
+    }
+
+    h1 {
+      color: #00d4ff;
+      font-size: 20px;
+      text-shadow: 0 0 10px #00d4ff88;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #7a9cc6;
+      font-size: 12px;
+    }
+
+    .tabs {
+      display: flex;
+      background: #0a0f1a;
+      border-bottom: 1px solid #293854;
+      position: sticky;
+      top: 80px;
+      z-index: 9;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      background: #0f1826;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #7a9cc6;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      background: #1e3a5f;
+      color: #cfe3ff;
+    }
+
+    .tab.active {
+      background: #1e3a5f;
+      border-bottom-color: #5ba3ff;
+      color: #00d4ff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    h3 {
+      color: #5ba3ff;
+      font-size: 14px;
+      margin: 15px 0 10px;
+      text-transform: uppercase;
+    }
+
+    .entity-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .entity-btn {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+      border: 1px solid #5ba3ff;
+      color: #cfe3ff;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .entity-btn:hover {
+      background: linear-gradient(135deg, #2c5282 0%, #3a6fa0 100%);
+      box-shadow: 0 0 10px #5ba3ff66;
+      transform: translateY(-1px);
+    }
+
+    .entity-btn.enemy { border-left: 3px solid #5ba3ff; }
+    .entity-btn.boss { border-left: 3px solid #ff6b35; }
+    .entity-btn.zombie { border-left: 3px solid #00ff88; }
+    .entity-btn.villain { border-left: 3px solid #8b008b; }
+    .entity-btn.hero { border-left: 3px solid #ffd700; }
+    .entity-btn.runner-gold { border-left: 3px solid #ffd700; }
+    .entity-btn.runner-gift { border-left: 3px solid #ff69b4; }
+
+    #canvas {
+      background: #0B1421;
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f1826 100%);
+      border: 1px solid #293854;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #7a9cc6;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #00d4ff;
+      text-shadow: 0 0 8px #00d4ff88;
+      margin-top: 4px;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: linear-gradient(135deg, #2c5282 0%, #1e3a5f 100%);
+      border: 1px solid #5ba3ff;
+      color: #cfe3ff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(135deg, #3a6fa0 0%, #2c5282 100%);
+      box-shadow: 0 0 15px #5ba3ff88;
+    }
+
+    .action-btn.danger {
+      background: linear-gradient(135deg, #8b2500 0%, #ff4500 100%);
+      border-color: #ff6347;
+    }
+
+    .renderer-selector {
+      display: flex;
+      gap: 6px;
+      margin: 15px 0;
+    }
+
+    .renderer-selector button {
+      flex: 1;
+      padding: 8px;
+      background: #1e3a5f;
+      border: 1px solid #293854;
+      color: #7a9cc6;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .renderer-selector button.active {
+      background: linear-gradient(135deg, #5ba3ff 0%, #00d4ff 100%);
+      border-color: #5ba3ff;
+      color: #0B1421;
+      font-weight: bold;
+    }
+
+    .info-panel {
+      background: #0a0f1a;
+      border: 1px solid #1e3a5f;
+      border-radius: 4px;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .info-panel h4 {
+      color: #5bffaa;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+      padding: 4px 0;
+      border-bottom: 1px solid #1e3a5f22;
+    }
+
+    .info-label {
+      color: #7a9cc6;
+    }
+
+    .info-value {
+      color: #00d4ff;
+      font-weight: 600;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0f1a; }
+    ::-webkit-scrollbar-thumb { background: #2c5282; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a6fa0; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+
+    .badge.gold { background: #ffd700; color: #000; }
+    .badge.gift { background: #ff69b4; color: #fff; }
+    .badge.pool { background: #00ffff; color: #000; }
+
+    .search-box {
+      width: 100%;
+      padding: 8px;
+      background: #0a0f1a;
+      border: 1px solid #293854;
+      border-radius: 4px;
+      color: #cfe3ff;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #5ba3ff;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Left Panel: Entity Spawning -->
+    <div class="panel">
+      <div class="panel-header">
+        <h1>🎮 A2 Entity System</h1>
+        <div class="subtitle">103 Entities | 6 Categories</div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(0)">Enemies<br><small>35</small></button>
+        <button class="tab" onclick="switchTab(1)">Bosses<br><small>29</small></button>
+        <button class="tab" onclick="switchTab(2)">Zombies<br><small>12</small></button>
+        <button class="tab" onclick="switchTab(3)">Villains<br><small>7</small></button>
+        <button class="tab" onclick="switchTab(4)">Heroes<br><small>20</small></button>
+      </div>
+
+      <!-- Tab Contents -->
+      <div id="tab-0" class="tab-content active">
+        <input type="text" class="search-box" placeholder="🔍 Search enemies..." oninput="filterEntities(0, this.value)">
+        <h3>Enemies (35)</h3>
+        <div class="entity-grid" id="enemies-grid"></div>
+      </div>
+
+      <div id="tab-1" class="tab-content">
+        <h3>💰 Gold Bosses (3)</h3>
+        <div class="entity-grid" id="gold-bosses-grid"></div>
+        <h3>🎁 Gift Bosses (7)</h3>
+        <div class="entity-grid" id="gift-bosses-grid"></div>
+        <h3>⚔️ Core Bosses (10)</h3>
+        <div class="entity-grid" id="core-bosses-grid"></div>
+        <h3>🎲 Pool Bosses (9)</h3>
+        <div class="entity-grid" id="pool-bosses-grid"></div>
+      </div>
+
+      <div id="tab-2" class="tab-content">
+        <input type="text" class="search-box" placeholder="🔍 Search zombies..." oninput="filterEntities(2, this.value)">
+        <h3>Zombies (12)</h3>
+        <div class="entity-grid" id="zombies-grid"></div>
+      </div>
+
+      <div id="tab-3" class="tab-content">
+        <input type="text" class="search-box" placeholder="🔍 Search villains..." oninput="filterEntities(3, this.value)">
+        <h3>Villains (7)</h3>
+        <div class="entity-grid" id="villains-grid"></div>
+      </div>
+
+      <div id="tab-4" class="tab-content">
+        <input type="text" class="search-box" placeholder="🔍 Search heroes..." oninput="filterEntities(4, this.value)">
+        <h3>Heroes (20)</h3>
+        <div class="entity-grid" id="heroes-grid"></div>
+      </div>
+
+      <div style="padding: 20px;">
+        <button class="action-btn" onclick="spawnRandom()">🎲 Spawn Random</button>
+        <button class="action-btn danger" onclick="clearAll()">🗑️ Clear All</button>
+      </div>
+    </div>
+
+    <!-- Center Panel: Battle Arena -->
+    <div class="panel" style="padding: 0; display: flex; flex-direction: column;">
+      <div class="panel-header">
+        <h1>⚔️ Battle Arena</h1>
+        <div class="subtitle">Click anywhere to spawn | Click entities to select</div>
+      </div>
+      <canvas id="canvas" style="flex: 1;"></canvas>
+    </div>
+
+    <!-- Right Panel: Info & Stats -->
+    <div class="panel">
+      <div class="panel-header">
+        <h1>📊 System Info</h1>
+        <div class="subtitle">Entity Stats & Rendering</div>
+      </div>
+
+      <div style="padding: 20px;">
+        <h3>Renderer</h3>
+        <div class="renderer-selector">
+          <button class="active" onclick="setRenderer('v1')">V1<br>Robot</button>
+          <button onclick="setRenderer('v2')">V2<br>Limbs</button>
+          <button onclick="setRenderer('runner')">Runner</button>
+        </div>
+
+        <h3>Entity Counts</h3>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-label">Enemies</div>
+            <div class="stat-value" id="enemyCount">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Bosses</div>
+            <div class="stat-value" id="bossCount">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Zombies</div>
+            <div class="stat-value" id="zombieCount">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Villains</div>
+            <div class="stat-value" id="villainCount">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Heroes</div>
+            <div class="stat-value" id="heroCount">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" id="totalCount">0</div>
+          </div>
+        </div>
+
+        <h3>Performance</h3>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <div class="stat-label">FPS</div>
+            <div class="stat-value" id="fps">60</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Available</div>
+            <div class="stat-value">103</div>
+          </div>
+        </div>
+
+        <h3>Selected Entity</h3>
+        <div class="info-panel" id="selectedInfo">
+          <p style="color: #7a9cc6; font-style: italic;">Click an entity to view details...</p>
+        </div>
+
+        <h3>Quick Actions</h3>
+        <button class="action-btn" onclick="spawnAll()">✨ Spawn All Types</button>
+        <button class="action-btn" onclick="spawnBossWave()">🌊 Spawn Boss Wave</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { EnemyManager } from '../core/EnemyManager.js';
+    import { getAllEnemies } from '../data/enemies_db.js';
+    import { getAllBosses } from '../data/bosses_db.js';
+    import { getAllZombies } from '../data/zombies_db.js';
+    import { getAllVillains } from '../data/villains_db.js';
+    import { getAllHeroes } from '../data/superheroes_db.js';
+    import { getAllRunnerBosses, getAllPoolNames } from '../data/runner_bosses_db.js';
+
+    // Initialize
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const manager = new EnemyManager();
+    
+    let selectedEntity = null;
+    let currentRenderer = 'v1';
+    let frameCount = 0;
+    let lastFpsUpdate = performance.now();
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Load all entity lists
+    const enemies = getAllEnemies();
+    const bosses = getAllBosses();
+    const zombies = getAllZombies();
+    const villains = getAllVillains();
+    const heroes = getAllHeroes();
+    const runnerBosses = getAllRunnerBosses();
+
+    // Populate entity grids
+    function populateGrid(gridId, entities, className) {
+      const grid = document.getElementById(gridId);
+      entities.forEach(entity => {
+        const btn = document.createElement('button');
+        btn.className = `entity-btn ${className}`;
+        btn.textContent = entity.name;
+        btn.onclick = () => spawnEntity(entity.id);
+        grid.appendChild(btn);
+      });
+    }
+
+    populateGrid('enemies-grid', enemies.slice(0, 35), 'enemy');
+    populateGrid('zombies-grid', zombies, 'zombie');
+    populateGrid('villains-grid', villains, 'villain');
+    populateGrid('heroes-grid', heroes, 'hero');
+    populateGrid('core-bosses-grid', bosses, 'boss');
+    
+    // Runner bosses
+    const goldBosses = runnerBosses.filter(b => b.category === 'gold');
+    const giftBosses = runnerBosses.filter(b => b.category === 'gift');
+    const poolBosses = runnerBosses.filter(b => b.pool && !['gold', 'gift'].includes(b.category));
+    
+    populateGrid('gold-bosses-grid', goldBosses, 'runner-gold');
+    populateGrid('gift-bosses-grid', giftBosses, 'runner-gift');
+    populateGrid('pool-bosses-grid', poolBosses, 'boss');
+
+    // Tab switching
+    window.switchTab = function(index) {
+      document.querySelectorAll('.tab').forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+      document.querySelectorAll('.tab-content').forEach((content, i) => {
+        content.classList.toggle('active', i === index);
+      });
+    };
+
+    // Spawn entity
+    window.spawnEntity = function(entityId) {
+      const x = 200 + Math.random() * (canvas.width - 400);
+      const y = 200 + Math.random() * (canvas.height - 400);
+      
+      const entity = manager.spawnEnemy(entityId, x, y, 1);
+      if (entity) {
+        console.log(`Spawned: ${entity.name}`);
+        updateStats();
+      }
+    };
+
+    // Spawn random
+    window.spawnRandom = function() {
+      const allIds = [
+        ...enemies.map(e => e.id),
+        ...bosses.map(b => b.id),
+        ...zombies.map(z => z.id),
+        ...villains.map(v => v.id),
+        ...heroes.map(h => h.id),
+        ...runnerBosses.map(r => r.id)
+      ];
+      const randomId = allIds[Math.floor(Math.random() * allIds.length)];
+      spawnEntity(randomId);
+    };
+
+    // Spawn all types (one of each category)
+    window.spawnAll = function() {
+      if (manager.getAllActive().length > 0) {
+        if (!confirm('Clear existing entities first?')) return;
+        manager.clearAll();
+      }
+      
+      spawnEntity(enemies[0].id);
+      spawnEntity(bosses[0].id);
+      spawnEntity(zombies[0].id);
+      spawnEntity(villains[0].id);
+      spawnEntity(heroes[0].id);
+      spawnEntity(goldBosses[0].id);
+      spawnEntity(giftBosses[0].id);
+      
+      console.log('Spawned one of each type');
+    };
+
+    // Spawn boss wave
+    window.spawnBossWave = function() {
+      const spawnArea = {
+        x: 100,
+        y: 100,
+        width: canvas.width - 200,
+        height: canvas.height - 200
+      };
+      
+      const wave = Math.floor(Math.random() * 9) + 1;
+      const wBosses = manager.spawnWaveBosses(wave, spawnArea, 1);
+      console.log(`Spawned wave ${wave}: ${wBosses.length} bosses`);
+      updateStats();
+    };
+
+    // Clear all
+    window.clearAll = function() {
+      manager.clearAll();
+      selectedEntity = null;
+      updateStats();
+      updateSelectedInfo();
+      console.log('Cleared all entities');
+    };
+
+    // Set renderer
+    window.setRenderer = function(type) {
+      currentRenderer = type;
+      document.querySelectorAll('.renderer-selector button').forEach((btn, i) => {
+        btn.classList.toggle('active', 
+          (type === 'v1' && i === 0) ||
+          (type === 'v2' && i === 1) ||
+          (type === 'runner' && i === 2)
+        );
+      });
+      console.log(`Renderer: ${type}`);
+    };
+
+    // Update stats
+    function updateStats() {
+      const active = manager.getAllActive();
+      
+      const counts = {
+        enemies: active.filter(e => e.type === 'enemy').length,
+        bosses: active.filter(e => e.type === 'boss' || e.phases).length,
+        zombies: active.filter(e => e.type === 'zombie' || e.category === 'walker' || e.category === 'tank' || e.category === 'special').length,
+        villains: active.filter(e => e.type === 'villain').length,
+        heroes: active.filter(e => e.type === 'hero' || e.category === 'ally' || e.category === 'rival').length
+      };
+
+      document.getElementById('enemyCount').textContent = counts.enemies;
+      document.getElementById('bossCount').textContent = counts.bosses;
+      document.getElementById('zombieCount').textContent = counts.zombies;
+      document.getElementById('villainCount').textContent = counts.villains;
+      document.getElementById('heroCount').textContent = counts.heroes;
+      document.getElementById('totalCount').textContent = active.length;
+    }
+
+    // Update selected entity info
+    function updateSelectedInfo() {
+      const infoPanel = document.getElementById('selectedInfo');
+      
+      if (!selectedEntity) {
+        infoPanel.innerHTML = '<p style="color: #7a9cc6; font-style: italic;">Click an entity to view details...</p>';
+        return;
+      }
+
+      const e = selectedEntity;
+      infoPanel.innerHTML = `
+        <h4>${e.name}</h4>
+        <div class="info-row"><span class="info-label">Type:</span><span class="info-value">${e.type || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">HP:</span><span class="info-value">${e.currentHp}/${e.maxHp}</span></div>
+        <div class="info-row"><span class="info-label">ATK:</span><span class="info-value">${e.atk}</span></div>
+        <div class="info-row"><span class="info-label">DEF:</span><span class="info-value">${e.def}</span></div>
+        <div class="info-row"><span class="info-label">Element:</span><span class="info-value">${e.element || 'None'}</span></div>
+        ${e.category ? `<div class="info-row"><span class="info-label">Category:</span><span class="info-value">${e.category}</span></div>` : ''}
+        ${e.rank ? `<div class="info-row"><span class="info-label">Rank:</span><span class="info-value">${e.rank}</span></div>` : ''}
+      `;
+    }
+
+    // Canvas click - select entity
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Check if clicked on entity
+      const active = manager.getAllActive();
+      let clicked = null;
+      let minDist = 50;
+
+      for (const entity of active) {
+        const dx = entity.x - x;
+        const dy = entity.y - y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < minDist && dist < (entity.size || 32)) {
+          minDist = dist;
+          clicked = entity;
+        }
+      }
+
+      if (clicked) {
+        selectedEntity = clicked;
+        updateSelectedInfo();
+        console.log(`Selected: ${clicked.name}`);
+      }
+    });
+
+    // Filter entities
+    window.filterEntities = function(tabIndex, searchTerm) {
+      const grids = [
+        'enemies-grid',
+        null, // Bosses have multiple grids
+        'zombies-grid',
+        'villains-grid',
+        'heroes-grid'
+      ];
+
+      const gridId = grids[tabIndex];
+      if (!gridId) return;
+
+      const grid = document.getElementById(gridId);
+      const buttons = grid.querySelectorAll('button');
+      
+      buttons.forEach(btn => {
+        const matches = btn.textContent.toLowerCase().includes(searchTerm.toLowerCase());
+        btn.style.display = matches ? 'block' : 'none';
+      });
+    };
+
+    // Simple renderer (unified for demo)
+    function renderEntity(ctx, entity, time) {
+      const x = entity.x;
+      const y = entity.y;
+      const size = entity.size || 32;
+      const hover = Math.sin(time / 200) * size * 0.08;
+      const pulse = 0.95 + Math.sin(time / 150) * 0.05;
+
+      // Color by type
+      let color;
+      if (entity.category === 'gold' || entity.bossCategory === 'gold') {
+        color = { base: '#ffd700', bright: '#ffed4e', glow: '#ffff00' };
+      } else if (entity.category === 'gift' || entity.bossCategory === 'gift') {
+        color = { base: '#ff69b4', bright: '#ff1493', glow: '#ffb6c1' };
+      } else if (entity.type === 'boss' || entity.phases) {
+        color = { base: '#ff6b35', bright: '#ff9f6b', glow: '#ffb347' };
+      } else if (entity.type === 'zombie') {
+        color = { base: '#00ff88', bright: '#66ffaa', glow: '#a5d6a7' };
+      } else if (entity.type === 'villain') {
+        color = { base: '#8b008b', bright: '#da70d6', glow: '#ff00ff' };
+      } else if (entity.type === 'hero') {
+        color = { base: '#ffd700', bright: '#ffed4e', glow: '#fffacd' };
+      } else {
+        color = { base: '#5ba3ff', bright: '#00d4ff', glow: '#a8d8ff' };
+      }
+
+      ctx.save();
+      ctx.translate(x, y + hover);
+      ctx.scale(pulse, pulse);
+
+      // Glow
+      ctx.shadowColor = color.glow;
+      ctx.shadowBlur = 15;
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = color.glow;
+      ctx.beginPath();
+      ctx.arc(0, 0, size * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Body
+      const grad = ctx.createRadialGradient(0, -size * 0.2, 0, 0, 0, size * 0.5);
+      grad.addColorStop(0, color.bright);
+      grad.addColorStop(0.5, color.base);
+      grad.addColorStop(1, color.base + '66');
+      
+      ctx.fillStyle = grad;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(0, 0, size * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Selection indicator
+      if (selectedEntity === entity) {
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      ctx.restore();
+
+      // Health bar
+      renderHealthBar(ctx, x, y - size * 0.7, size * 1.2, entity.currentHp, entity.maxHp, color);
+
+      // Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px Arial';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = 3;
+      ctx.fillText(entity.name, x, y - size * 0.9);
+      ctx.shadowBlur = 0;
+    }
+
+    function renderHealthBar(ctx, x, y, width, currentHp, maxHp, color) {
+      const barWidth = width;
+      const barHeight = 5;
+      const hpPercent = Math.max(0, Math.min(1, currentHp / maxHp));
+
+      ctx.save();
+      ctx.translate(x - barWidth / 2, y);
+
+      ctx.fillStyle = '#000000aa';
+      ctx.fillRect(0, 0, barWidth, barHeight);
+
+      ctx.fillStyle = color.base;
+      ctx.fillRect(1, 1, (barWidth - 2) * hpPercent, barHeight - 2);
+
+      ctx.strokeStyle = color.bright;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, barWidth, barHeight);
+
+      ctx.restore();
+    }
+
+    // Render loop
+    function render() {
+      ctx.fillStyle = '#0B1421';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid
+      ctx.strokeStyle = '#1e3a5f22';
+      ctx.lineWidth = 1;
+      const gridSize = 50;
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Render entities
+      const time = performance.now();
+      const entities = manager.getAllActive();
+      
+      for (const entity of entities) {
+        renderEntity(ctx, entity, time);
+      }
+
+      // FPS
+      frameCount++;
+      const now = performance.now();
+      if (now - lastFpsUpdate >= 1000) {
+        const fps = Math.round(frameCount * 1000 / (now - lastFpsUpdate));
+        document.getElementById('fps').textContent = fps;
+        frameCount = 0;
+        lastFpsUpdate = now;
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    // Start
+    console.log('✅ A2 Unified Entity System Loaded');
+    console.log(`📊 ${enemies.length + bosses.length + zombies.length + villains.length + heroes.length + runnerBosses.length} entities available`);
+    updateStats();
+    render();
+  </script>
+</body>
+</html>
+

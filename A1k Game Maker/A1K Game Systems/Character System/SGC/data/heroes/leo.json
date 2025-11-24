@@ -1,0 +1,44 @@
+{
+  "id": "leo",
+  "name": "Leo",
+  "rank": "E",
+  "role": "striker",
+  "summary": {
+    "hook": "Calm twin who maps weak points before striking.",
+    "gameplay": "Marks targets and halves damage taken by Liam when both are deployed.",
+    "why_it_matters": "Teaches debuffing and protection within a single family story beat."
+  },
+  "stats": {"attack": 40, "defense": 35, "luck": 35, "support": 30, "speed": 50},
+  "skills": [
+    {
+      "name": "Precision Slash",
+      "type": "attack",
+      "cooldown": 7,
+      "aura_cost": 9,
+      "effects": ["mark_target", "weakspot_multiplier"],
+      "rationale": "Introduces mark mechanics early so late-game enemies can leverage them."
+    },
+    {
+      "name": "Twin Guard",
+      "type": "utility",
+      "cooldown": 16,
+      "aura_cost": 10,
+      "effects": ["share_damage", "counter_window"],
+      "rationale": "Protects Liam while showcasing counter tutorials."
+    }
+  ],
+  "acquisition": {
+    "method": "Story unlock",
+    "costs": {"bond_sparks": 0},
+    "spawn_logic": "Joins alongside Liam but becomes playable after counter tutorial."
+  },
+  "synergy": {
+    "combos": ["Twin Guard", "Clan Rally"],
+    "counters": ["Silence traps"]
+  },
+  "visuals": {
+    "palette": ["#8fd1ff", "#ffe29a", "#1f1f1f"],
+    "aura": "Twin blade arcs forming minimalist chakra patterns.",
+    "animation_notes": "Use thin-line energy trails to hint at ninja inspiration without copying."
+  }
+}

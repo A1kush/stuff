@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A1 Dual Swords - HD Pixel Art</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+        }
+
+        #canvas-wrapper {
+            flex-shrink: 0;
+        }
+
+        canvas {
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #1a1a1a;
+        }
+
+        #controls {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            width: 350px;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            border-color: #666;
+            background: #222;
+        }
+
+        button {
+            margin-top: 8px;
+            background: #2a2a2a;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .info {
+            font-size: 11px;
+            color: #666;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            color: #0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="sprite" width="128" height="128"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>⚔️ A1 (DUAL SWORDS)</h1>
+
+            <div class="control-group">
+                <label>Animation State</label>
+                <select id="animState">
+                    <option value="idle">Idle (Breathing)</option>
+                    <option value="walk">Walk Cycle</option>
+                    <option value="attack">Attack Swing</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Color Palette</label>
+                <select id="palette">
+                    <option value="fire">🔥 Fire (Red/Orange)</option>
+                    <option value="ice">❄️ Ice (Cyan/Blue)</option>
+                    <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+                    <option value="light">✨ Light (Gold/White)</option>
+                    <option value="nature">🌿 Nature (Green/Earth)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Animation Speed</label>
+                <select id="speed">
+                    <option value="0.5">0.5x Slow</option>
+                    <option value="1" selected>1x Normal</option>
+                    <option value="1.5">1.5x Fast</option>
+                    <option value="2">2x Very Fast</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Display Scale</label>
+                <select id="scale">
+                    <option value="2">2x (256px)</option>
+                    <option value="3" selected>3x (384px)</option>
+                    <option value="4">4x (512px)</option>
+                    <option value="5">5x (640px)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Export</label>
+                <div class="btn-group">
+                    <button id="exportFrame">PNG Frame</button>
+                    <button id="exportSheet">Sprite Sheet</button>
+                </div>
+                <button id="exportJSON">Export JSON Data</button>
+            </div>
+
+            <div class="info">
+                <strong>TYPE 1: HD PIXEL ART</strong><br>
+                Soul Knight / Hyper Light Drifter Style<br><br>
+                • Resolution: 128×128 native<br>
+                • Technique: Pixel-perfect Canvas2D<br>
+                • Colors: Under 64 per sprite<br>
+                • Hair: Black (locked)<br>
+                • Frame Rate: 60fps<br><br>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-label">Frame</div>
+                        <div class="stat-value" id="frameCount">0/8</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">FPS</div>
+                        <div class="stat-value" id="fpsCount">60</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('sprite');
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        let currentAnim = 'idle';
+        let currentFrame = 0;
+        let frameTimer = 0;
+        let animSpeed = 1;
+        let palette = 'fire';
+        let lastTime = 0;
+        let fps = 60;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        const palettes = {
+            fire: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                clothes: ['#1a1a1a', '#2a2a2a', '#3a3a3a', '#4a4a4a'],
+                weapon: ['#ff0000', '#ff3333', '#ff6666', '#ff9999'],
+                eyes: ['#ff0000', '#ff4444'],
+                aura: 'rgba(255,80,0,',
+                glow: '#ff5500'
+            },
+            ice: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                clothes: ['#0a1a2a', '#1a2a3a', '#2a3a4a', '#3a4a5a'],
+                weapon: ['#00ffff', '#33ffff', '#66ffff', '#99ffff'],
+                eyes: ['#00ffff', '#44ffff'],
+                aura: 'rgba(0,200,255,',
+                glow: '#00ccff'
+            },
+            shadow: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                clothes: ['#1a0a2a', '#2a1a3a', '#3a2a4a', '#4a3a5a'],
+                weapon: ['#aa00ff', '#cc33ff', '#dd66ff', '#ee99ff'],
+                eyes: ['#aa00ff', '#cc44ff'],
+                aura: 'rgba(150,0,255,',
+                glow: '#9900ff'
+            },
+            light: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                clothes: ['#2a2a1a', '#3a3a2a', '#4a4a3a', '#5a5a4a'],
+                weapon: ['#ffff00', '#ffff33', '#ffff66', '#ffff99'],
+                eyes: ['#ffff00', '#ffff44'],
+                aura: 'rgba(255,220,0,',
+                glow: '#ffdd00'
+            },
+            nature: {
+                skin: ['#4a3428', '#5c4033', '#6d4c3d'],
+                clothes: ['#0a2a1a', '#1a3a2a', '#2a4a3a', '#3a5a4a'],
+                weapon: ['#00ff00', '#33ff33', '#66ff66', '#99ff99'],
+                eyes: ['#00ff00', '#44ff44'],
+                aura: 'rgba(0,255,100,',
+                glow: '#00ff66'
+            }
+        };
+
+        const animations = {
+            idle: {
+                frames: 8,
+                frameTime: 250,
+                loop: true
+            },
+            walk: {
+                frames: 8,
+                frameTime: 125,
+                loop: true
+            },
+            attack: {
+                frames: 6,
+                frameTime: 83,
+                loop: false
+            }
+        };
+
+        function drawPixel(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 1, 1);
+        }
+
+        function drawRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, w, h);
+        }
+
+        function drawA1DualSwords(frame, anim) {
+            const pal = palettes[palette];
+            const centerX = 64;
+            const centerY = 64;
+
+            let bobY = 0;
+            let armAngle = 0;
+            let legOffset = 0;
+
+            if (anim === 'idle') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 1;
+            } else if (anim === 'walk') {
+                bobY = Math.sin(frame / 4 * Math.PI) * 2;
+                legOffset = Math.sin(frame / 4 * Math.PI) * 3;
+            } else if (anim === 'attack') {
+                armAngle = (frame / 6) * 90;
+            }
+
+            ctx.clearRect(0, 0, 128, 128);
+
+            const gradient = ctx.createRadialGradient(centerX, centerY - bobY, 0, centerX, centerY - bobY, 40);
+            gradient.addColorStop(0, pal.aura + '0.15)');
+            gradient.addColorStop(0.5, pal.aura + '0.05)');
+            gradient.addColorStop(1, pal.aura + '0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 128, 128);
+
+            // Legs
+            drawRect(centerX - 10, centerY + 20 - bobY + legOffset, 6, 16, pal.clothes[2]);
+            drawRect(centerX - 10, centerY + 36 - bobY + legOffset, 6, 8, pal.skin[1]);
+            drawRect(centerX + 4, centerY + 20 - bobY - legOffset, 6, 16, pal.clothes[2]);
+            drawRect(centerX + 4, centerY + 36 - bobY - legOffset, 6, 8, pal.skin[1]);
+
+            // Torso
+            drawRect(centerX - 12, centerY + 4 - bobY, 24, 20, pal.clothes[1]);
+            drawRect(centerX - 10, centerY + 6 - bobY, 20, 16, pal.clothes[2]);
+
+            if (anim === 'walk') {
+                drawRect(centerX - 16, centerY + 8 - bobY - legOffset, 5, 14, pal.skin[1]);
+            }
+
+            // Head
+            drawRect(centerX - 10, centerY - 16 - bobY, 20, 18, pal.skin[2]);
+            drawRect(centerX - 6, centerY + 2 - bobY, 12, 4, pal.skin[1]);
+
+            // Black baseball cap
+            drawRect(centerX - 12, centerY - 20 - bobY, 24, 6, '#000000');
+            drawRect(centerX - 14, centerY - 18 - bobY, 8, 3, '#000000');
+
+            // Black curly hair (under cap)
+            drawPixel(centerX - 11, centerY - 14 - bobY, '#000000');
+            drawPixel(centerX - 10, centerY - 15 - bobY, '#000000');
+            drawPixel(centerX - 12, centerY - 13 - bobY, '#000000');
+            drawPixel(centerX - 9, centerY - 14 - bobY, '#111111');
+            drawPixel(centerX + 11, centerY - 14 - bobY, '#000000');
+            drawPixel(centerX + 10, centerY - 15 - bobY, '#000000');
+            drawPixel(centerX + 12, centerY - 13 - bobY, '#000000');
+
+            // Glowing RED eyes
+            drawPixel(centerX - 6, centerY - 8 - bobY, '#ff0000');
+            drawPixel(centerX - 5, centerY - 8 - bobY, '#ff3333');
+            drawPixel(centerX + 5, centerY - 8 - bobY, '#ff0000');
+            drawPixel(centerX + 6, centerY - 8 - bobY, '#ff3333');
+
+            // Right arm
+            drawRect(centerX + 12, centerY + 8 - bobY + Math.sin(armAngle * Math.PI / 180) * 5, 5, 14, pal.skin[1]);
+
+            // Left sword (in LEFT hand)
+            ctx.save();
+            ctx.translate(centerX - 20, centerY + 10 - bobY);
+            ctx.rotate((-45 + armAngle) * Math.PI / 180);
+            drawRect(-2, -20, 4, 24, pal.weapon[0]);
+            drawRect(-1, -20, 2, 24, pal.weapon[2]);
+            drawPixel(1, -18, pal.weapon[3]);
+            drawPixel(1, -10, pal.weapon[3]);
+            drawPixel(1, -2, pal.weapon[3]);
+            drawRect(-2, 4, 4, 6, pal.clothes[0]);
+            ctx.restore();
+
+            // Right sword (in RIGHT hand)
+            ctx.save();
+            ctx.translate(centerX + 20, centerY + 10 - bobY);
+            ctx.rotate((45 - armAngle) * Math.PI / 180);
+            drawRect(-2, -20, 4, 24, pal.weapon[0]);
+            drawRect(-1, -20, 2, 24, pal.weapon[2]);
+            drawPixel(-2, -18, pal.weapon[3]);
+            drawPixel(-2, -10, pal.weapon[3]);
+            drawPixel(-2, -2, pal.weapon[3]);
+            drawRect(-2, 4, 4, 6, pal.clothes[0]);
+            ctx.restore();
+
+            // RED glow aura around swords
+            ctx.fillStyle = '#ff0000';
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            ctx.arc(centerX - 20, centerY - 5 - bobY, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + 20, centerY - 5 - bobY, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0;
+                currentFrame++;
+
+                if (currentFrame >= anim.frames) {
+                    if (anim.loop) {
+                        currentFrame = 0;
+                    } else {
+                        currentFrame = anim.frames - 1;
+                    }
+                }
+
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            drawA1DualSwords(currentFrame, currentAnim);
+
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', (e) => {
+            currentAnim = e.target.value;
+            currentFrame = 0;
+            frameTimer = 0;
+        });
+
+        document.getElementById('palette').addEventListener('change', (e) => {
+            palette = e.target.value;
+        });
+
+        document.getElementById('speed').addEventListener('change', (e) => {
+            animSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('scale').addEventListener('change', (e) => {
+            const scale = parseInt(e.target.value);
+            canvas.style.width = (128 * scale) + 'px';
+            canvas.style.height = (128 * scale) + 'px';
+        });
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `a1-dualswords-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => {
+            const tempCanvas = document.createElement('canvas');
+            const anim = animations[currentAnim];
+            tempCanvas.width = 128 * anim.frames;
+            tempCanvas.height = 128;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            for (let i = 0; i < anim.frames; i++) {
+                drawA1DualSwords(i, currentAnim);
+                tempCtx.drawImage(canvas, i * 128, 0);
+            }
+
+            const link = document.createElement('a');
+            link.download = `a1-dualswords-${currentAnim}-sheet-${palette}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+
+            drawA1DualSwords(currentFrame, currentAnim);
+        });
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = {
+                character: 'A1 (Dual Swords)',
+                type: 'HD Pixel Art',
+                resolution: '128x128',
+                animations: animations,
+                palettes: Object.keys(palettes),
+                currentState: {
+                    animation: currentAnim,
+                    frame: currentFrame,
+                    palette: palette
+                },
+                metadata: {
+                    hairColor: '#000000 (locked)',
+                    weaponType: 'Dual Energy Swords',
+                    style: 'Soul Knight Tier'
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `a1-dualswords-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        });
+
+        canvas.style.width = '384px';
+        canvas.style.height = '384px';
+        animate(0);
+    </script>
+</body>
+
+</html>

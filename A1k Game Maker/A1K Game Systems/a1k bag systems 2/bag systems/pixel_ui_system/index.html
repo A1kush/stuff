@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Pixel System</title>
+    <!-- Pixel Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/pixel.css">
+</head>
+<body>
+    <!-- Cyberpunk Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Game HUD Layer -->
+    <div id="game-hud">
+        <div class="hud-top-left">
+            <div class="pixel-box">
+                <div>❤️ HP: 100/100</div>
+                <div>🔋 MP: 50/50</div>
+            </div>
+        </div>
+        
+        <div class="hud-bottom-right">
+            <button id="btn-menu" class="pixel-btn">SYSTEM MENU (TAB)</button>
+        </div>
+    </div>
+
+    <!-- The System Injection Point -->
+    <div id="pixel-system-root"></div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

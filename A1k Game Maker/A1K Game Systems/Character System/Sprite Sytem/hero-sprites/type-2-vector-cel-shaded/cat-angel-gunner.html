@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cat Angel Gunner - Vector Cel-Shaded</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #container {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+  }
+  #canvas-wrapper {
+    flex-shrink: 0;
+  }
+  canvas {
+    border: 2px solid #333;
+    background: #1a1a1a;
+  }
+  #controls {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    width: 350px;
+  }
+  h1 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #fff;
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
+  }
+  .control-group {
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  select, button {
+    width: 100%;
+    padding: 8px 12px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  select:hover, button:hover {
+    border-color: #666;
+    background: #222;
+  }
+  button {
+    margin-top: 8px;
+    background: #2a2a2a;
+  }
+  button:active {
+    transform: translateY(1px);
+  }
+  .btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .info {
+    font-size: 11px;
+    color: #666;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    line-height: 1.6;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .stat {
+    background: rgba(255,255,255,0.02);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #333;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+  }
+  .stat-value {
+    font-size: 14px;
+    color: #0f0;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="canvas-wrapper">
+    <canvas id="sprite" width="256" height="256"></canvas>
+  </div>
+  
+  <div id="controls">
+    <h1>😇 CAT ANGEL GUNNER</h1>
+    
+    <div class="control-group">
+      <label>Animation State</label>
+      <select id="animState">
+        <option value="idle">Idle (Floating)</option>
+        <option value="walk">Walk Cycle</option>
+        <option value="attack">Attack Shoot</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Color Palette</label>
+      <select id="palette">
+        <option value="fire">🔥 Fire (Red/Orange)</option>
+        <option value="ice">❄️ Ice (Cyan/Blue)</option>
+        <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+        <option value="light">✨ Light (Gold/White)</option>
+        <option value="nature">🌿 Nature (Green/Earth)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Animation Speed</label>
+      <select id="speed">
+        <option value="0.5">0.5x Slow</option>
+        <option value="1" selected>1x Normal</option>
+        <option value="1.5">1.5x Fast</option>
+        <option value="2">2x Very Fast</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Display Scale</label>
+      <select id="scale">
+        <option value="1">1x (256px)</option>
+        <option value="1.5">1.5x (384px)</option>
+        <option value="2" selected>2x (512px)</option>
+        <option value="2.5">2.5x (640px)</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Export</label>
+      <div class="btn-group">
+        <button id="exportFrame">PNG Frame</button>
+        <button id="exportSheet">Sprite Sheet</button>
+      </div>
+      <button id="exportJSON">Export JSON Data</button>
+    </div>
+    
+    <div class="info">
+      <strong>TYPE 2: VECTOR CEL-SHADED</strong><br>
+      Castle Crashers / Hollow Knight Style<br><br>
+      • Resolution: Infinite (vector-based)<br>
+      • Technique: Canvas path rendering<br>
+      • Bold outlines + soft gradients<br>
+      • Fur: Unique black (locked)<br>
+      • Frame Rate: 60fps<br><br>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Frame</div>
+          <div class="stat-value" id="frameCount">0/8</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">FPS</div>
+          <div class="stat-value" id="fpsCount">60</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('sprite');
+const ctx = canvas.getContext('2d');
+
+let currentAnim = 'idle';
+let currentFrame = 0;
+let frameTimer = 0;
+let animSpeed = 1;
+let palette = 'fire';
+let lastTime = 0;
+let fps = 60;
+let frameCount = 0;
+let lastFpsTime = 0;
+
+const palettes = {
+  fire: {
+    suit: ['#3a2a3a', '#4a3a4a', '#5a4a5a'],
+    halo: ['#ff6600', '#ff8833', '#ffaa66'],
+    wing: ['#ffb3cc', '#ffd9e6', '#fff0f5'],
+    badge: '#ff6600',
+    eye: '#00ff00',
+    gun: ['#1a1a1a', '#2a2a2a'],
+    glow: 'rgba(255,100,0,0.5)',
+    outline: '#0a0a0a'
+  },
+  ice: {
+    suit: ['#0a1a2a', '#1a2a3a', '#2a3a4a'],
+    halo: ['#00ccff', '#33ddff', '#66eeff'],
+    wing: ['#b3e6ff', '#d9f2ff', '#f0f9ff'],
+    badge: '#00ccff',
+    eye: '#00ffcc',
+    gun: ['#1a1a1a', '#2a2a2a'],
+    glow: 'rgba(0,200,255,0.5)',
+    outline: '#0a0a0a'
+  },
+  shadow: {
+    suit: ['#1a0a2a', '#2a1a3a', '#3a2a4a'],
+    halo: ['#aa00ff', '#cc33ff', '#dd66ff'],
+    wing: ['#d9b3ff', '#ebd9ff', '#f5f0ff'],
+    badge: '#aa00ff',
+    eye: '#aa00ff',
+    gun: ['#1a1a1a', '#2a2a2a'],
+    glow: 'rgba(170,0,255,0.5)',
+    outline: '#0a0a0a'
+  },
+  light: {
+    suit: ['#2a2a1a', '#3a3a2a', '#4a4a3a'],
+    halo: ['#ffcc00', '#ffdd33', '#ffee66'],
+    wing: ['#ffffcc', '#ffffe6', '#fffff0'],
+    badge: '#ffcc00',
+    eye: '#ffff00',
+    gun: ['#1a1a1a', '#2a2a2a'],
+    glow: 'rgba(255,200,0,0.5)',
+    outline: '#0a0a0a'
+  },
+  nature: {
+    suit: ['#0a2a1a', '#1a3a2a', '#2a4a3a'],
+    halo: ['#00ff66', '#33ff88', '#66ffaa'],
+    wing: ['#ccffdd', '#e6fff0', '#f0fff5'],
+    badge: '#00ff66',
+    eye: '#00ff66',
+    gun: ['#1a1a1a', '#2a2a2a'],
+    glow: 'rgba(0,255,100,0.5)',
+    outline: '#0a0a0a'
+  }
+};
+
+const animations = {
+  idle: { frames: 8, frameTime: 250, loop: true },
+  walk: { frames: 8, frameTime: 125, loop: true },
+  attack: { frames: 6, frameTime: 83, loop: false }
+};
+
+function drawCatAngel(frame, anim) {
+  const pal = palettes[palette];
+  const centerX = 128;
+  const centerY = 128;
+  
+  let bobY = 0;
+  let wingFlap = 0;
+  let gunRecoil = 0;
+  let legOffset = 0;
+  
+  if (anim === 'idle') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 5;
+    wingFlap = Math.sin(frame / 4 * Math.PI) * 8;
+  } else if (anim === 'walk') {
+    bobY = Math.sin(frame / 4 * Math.PI) * 3;
+    legOffset = Math.sin(frame / 4 * Math.PI) * 6;
+  } else if (anim === 'attack') {
+    gunRecoil = frame < 2 ? frame * 8 : 0;
+  }
+  
+  ctx.clearRect(0, 0, 256, 256);
+  
+  // Aura glow
+  const glowGrad = ctx.createRadialGradient(centerX, centerY - bobY, 0, centerX, centerY - bobY, 110);
+  glowGrad.addColorStop(0, pal.glow);
+  glowGrad.addColorStop(0.5, 'rgba(0,0,0,0.08)');
+  glowGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = glowGrad;
+  ctx.fillRect(0, 0, 256, 256);
+  
+  // Halo (floating above head)
+  drawHalo(centerX, centerY - 70 - bobY - Math.abs(Math.sin(frame / 4 * Math.PI)) * 5, pal);
+  
+  // Wing
+  drawWing(centerX - 50, centerY - 20 - bobY + wingFlap, pal);
+  
+  // Legs (black cat legs)
+  drawCatLeg(centerX - 20, centerY + 40 - bobY + legOffset, pal);
+  drawCatLeg(centerX + 8, centerY + 40 - bobY - legOffset, pal);
+  
+  // Body (purple suit)
+  drawCatBody(centerX, centerY + 5 - bobY, pal);
+  
+  // Head (black cat)
+  drawCatHead(centerX, centerY - 30 - bobY, pal);
+  
+  // Tail
+  drawCatTail(centerX + 25, centerY + 45 - bobY, pal);
+  
+  // Left arm (holding gun)
+  drawCatArm(centerX - 35, centerY + 15 - bobY, pal);
+  
+  // Right arm (holding sword)
+  drawCatArm(centerX + 22, centerY + 12 - bobY, pal);
+  
+  // Gun (left hand)
+  drawGun(centerX - 40 - gunRecoil, centerY + 15 - bobY, frame < 2 && anim === 'attack', pal);
+  
+  // Sword (right hand)
+  drawCatSword(centerX + 30, centerY + 12 - bobY, pal);
+}
+
+function drawHalo(x, y, pal) {
+  // Glow
+  ctx.shadowColor = pal.halo[0];
+  ctx.shadowBlur = 20;
+  
+  const grad = ctx.createRadialGradient(x, y, 5, x, y, 25);
+  grad.addColorStop(0, pal.halo[2]);
+  grad.addColorStop(0.7, pal.halo[1]);
+  grad.addColorStop(1, pal.halo[0]);
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(x, y, 28, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.shadowBlur = 0;
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(x, y, 28, 8, 0, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawWing(x, y, pal) {
+  const grad = ctx.createLinearGradient(x, y, x + 20, y + 35);
+  grad.addColorStop(0, pal.wing[2]);
+  grad.addColorStop(0.5, pal.wing[1]);
+  grad.addColorStop(1, pal.wing[0]);
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x - 10, y + 15, x - 5, y + 25, x + 5, y + 35);
+  ctx.bezierCurveTo(x + 15, y + 30, x + 20, y + 20, x + 18, y + 5);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Feather lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x + 5, y + 5 + i * 7);
+    ctx.lineTo(x + 12, y + 8 + i * 7);
+    ctx.stroke();
+  }
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x - 10, y + 15, x - 5, y + 25, x + 5, y + 35);
+  ctx.bezierCurveTo(x + 15, y + 30, x + 20, y + 20, x + 18, y + 5);
+  ctx.closePath();
+  ctx.stroke();
+}
+
+function drawCatLeg(x, y, pal) {
+  // Black fur gradient
+  const grad = ctx.createLinearGradient(x, y, x, y + 30);
+  grad.addColorStop(0, '#111111');
+  grad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(x, y, 12, 30, 6);
+  ctx.fill();
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(x, y, 12, 30, 6);
+  ctx.stroke();
+}
+
+function drawCatBody(x, y, pal) {
+  const grad = ctx.createLinearGradient(x - 25, y, x + 25, y);
+  grad.addColorStop(0, pal.suit[0]);
+  grad.addColorStop(0.5, pal.suit[1]);
+  grad.addColorStop(1, pal.suit[0]);
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(x - 25, y, 50, 45, 10);
+  ctx.fill();
+  
+  // Badge on chest
+  ctx.fillStyle = pal.badge;
+  ctx.shadowColor = pal.badge;
+  ctx.shadowBlur = 10;
+  ctx.fillRect(x - 8, y + 15, 16, 20);
+  ctx.shadowBlur = 0;
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(x - 25, y, 50, 45, 10);
+  ctx.stroke();
+}
+
+function drawCatHead(x, y, pal) {
+  // Black fur
+  const grad = ctx.createRadialGradient(x, y, 5, x, y, 25);
+  grad.addColorStop(0, '#1a1a1a');
+  grad.addColorStop(0.7, '#0a0a0a');
+  grad.addColorStop(1, '#000000');
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(x, y, 25, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Cat ears (triangular)
+  ctx.beginPath();
+  ctx.moveTo(x - 20, y - 15);
+  ctx.lineTo(x - 15, y - 28);
+  ctx.lineTo(x - 10, y - 15);
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(x + 20, y - 15);
+  ctx.lineTo(x + 15, y - 28);
+  ctx.lineTo(x + 10, y - 15);
+  ctx.fill();
+  
+  // Green eyes (both visible)
+  ctx.fillStyle = pal.eye;
+  ctx.shadowColor = pal.eye;
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.arc(x - 10, y, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 10, y, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  
+  // Outlines
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(x, y, 25, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(x - 20, y - 15);
+  ctx.lineTo(x - 15, y - 28);
+  ctx.lineTo(x - 10, y - 15);
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.moveTo(x + 20, y - 15);
+  ctx.lineTo(x + 15, y - 28);
+  ctx.lineTo(x + 10, y - 15);
+  ctx.stroke();
+}
+
+function drawCatTail(x, y, pal) {
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.bezierCurveTo(x, y, x + 15, y + 10, x + 10, y + 25);
+  ctx.bezierCurveTo(x + 10, y + 25, x, y + 30, x - 5, y + 28);
+  ctx.bezierCurveTo(x - 5, y + 28, x, y + 10, x, y);
+  ctx.fill();
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x + 15, y + 10, x + 10, y + 25, x - 5, y + 28);
+  ctx.stroke();
+}
+
+function drawCatArm(x, y, pal) {
+  // Black cat arm/paw
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.ellipse(x, y, 8, 15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.ellipse(x, y, 8, 15, 0, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function drawCatSword(x, y, pal) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(45 * Math.PI / 180);
+  
+  // Sword blade (glowing)
+  const swordGrad = ctx.createLinearGradient(0, -25, 0, 0);
+  swordGrad.addColorStop(0, pal.halo[2]);
+  swordGrad.addColorStop(1, pal.halo[0]);
+  ctx.fillStyle = swordGrad;
+  ctx.fillRect(-3, -25, 6, 28);
+  
+  // Blade outline
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(-3, -25, 6, 28);
+  
+  // Handle
+  ctx.fillStyle = pal.gun[0];
+  ctx.fillRect(-4, 3, 8, 6);
+  ctx.strokeRect(-4, 3, 8, 6);
+  
+  ctx.restore();
+}
+
+function drawGun(x, y, flash, pal) {
+  const grad = ctx.createLinearGradient(x, y, x + 25, y);
+  grad.addColorStop(0, pal.gun[0]);
+  grad.addColorStop(1, pal.gun[1]);
+  
+  ctx.fillStyle = grad;
+  ctx.fillRect(x, y, 25, 10);
+  ctx.fillRect(x - 10, y, 10, 10);
+  
+  if (flash) {
+    ctx.fillStyle = pal.halo[1];
+    ctx.shadowColor = pal.halo[0];
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y + 2);
+    ctx.lineTo(x - 20, y);
+    ctx.lineTo(x - 20, y + 10);
+    ctx.lineTo(x - 10, y + 8);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  
+  ctx.strokeStyle = pal.outline;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(x, y, 25, 10);
+  ctx.strokeRect(x - 10, y, 10, 10);
+}
+
+function animate(timestamp) {
+  if (!lastTime) lastTime = timestamp;
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+  
+  frameCount++;
+  if (timestamp - lastFpsTime >= 1000) {
+    fps = frameCount;
+    frameCount = 0;
+    lastFpsTime = timestamp;
+    document.getElementById('fpsCount').textContent = fps;
+  }
+  
+  const anim = animations[currentAnim];
+  frameTimer += deltaTime * animSpeed;
+  
+  if (frameTimer >= anim.frameTime) {
+    frameTimer = 0;
+    currentFrame++;
+    
+    if (currentFrame >= anim.frames) {
+      if (anim.loop) {
+        currentFrame = 0;
+      } else {
+        currentFrame = anim.frames - 1;
+      }
+    }
+    
+    document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+  }
+  
+  drawCatAngel(currentFrame, currentAnim);
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('animState').addEventListener('change', (e) => {
+  currentAnim = e.target.value;
+  currentFrame = 0;
+  frameTimer = 0;
+});
+
+document.getElementById('palette').addEventListener('change', (e) => {
+  palette = e.target.value;
+});
+
+document.getElementById('speed').addEventListener('change', (e) => {
+  animSpeed = parseFloat(e.target.value);
+});
+
+document.getElementById('scale').addEventListener('change', (e) => {
+  const scale = parseFloat(e.target.value);
+  canvas.style.width = (256 * scale) + 'px';
+  canvas.style.height = (256 * scale) + 'px';
+});
+
+document.getElementById('exportFrame').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `cat-angel-vector-${currentAnim}-f${currentFrame}-${palette}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+document.getElementById('exportSheet').addEventListener('click', () => {
+  const tempCanvas = document.createElement('canvas');
+  const anim = animations[currentAnim];
+  tempCanvas.width = 256 * anim.frames;
+  tempCanvas.height = 256;
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  for (let i = 0; i < anim.frames; i++) {
+    drawCatAngel(i, currentAnim);
+    tempCtx.drawImage(canvas, i * 256, 0);
+  }
+  
+  const link = document.createElement('a');
+  link.download = `cat-angel-vector-${currentAnim}-sheet-${palette}.png`;
+  link.href = tempCanvas.toDataURL('image/png');
+  link.click();
+  
+  drawCatAngel(currentFrame, currentAnim);
+});
+
+document.getElementById('exportJSON').addEventListener('click', () => {
+  const data = {
+    character: 'Cat Angel Gunner',
+    type: 'Vector Cel-Shaded',
+    resolution: 'Infinite (vector-based)',
+    animations: animations,
+    palettes: Object.keys(palettes),
+    currentState: {
+      animation: currentAnim,
+      frame: currentFrame,
+      palette: palette
+    },
+    metadata: {
+      furColor: '#000000 (locked)',
+      weaponType: 'Handgun',
+      style: 'Castle Crashers Tier',
+      specialFeatures: ['Floating Halo', 'Wing', 'Anthropomorphic Cat']
+    }
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.download = `cat-angel-vector-data-${palette}.json`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+});
+
+canvas.style.width = '512px';
+canvas.style.height = '512px';
+animate(0);
+</script>
+</body>
+</html>
+

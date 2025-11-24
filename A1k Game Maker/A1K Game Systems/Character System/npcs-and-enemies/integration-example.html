@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Game with NPC Rank System</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #game {
+            width: 800px;
+            height: 600px;
+            background: #16213e;
+            border: 2px solid #0f3460;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+
+        button {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #d6336c;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center;">My Game with NPC Rank System</h1>
+
+    <div class="controls">
+        <button onclick="addHero()">Add Hero</button>
+        <button onclick="addEnemy()">Add Enemy</button>
+        <button onclick="addBoss()">Add Boss</button>
+        <button onclick="clearAll()">Clear All</button>
+    </div>
+
+    <div id="game"></div>
+
+    <!-- Include the NPC Rank System -->
+    <script src="npc-rank-system.js"></script>
+
+    <!-- Your game code -->
+    <script>
+        // Initialize the game with NPC Rank System
+        const game = NPCRankSystem.createGame({
+            containerSelector: '#game'
+        });
+
+        game.start();
+
+        // Add entities to your game
+        function addHero() {
+            game.addNPC({
+                name: 'My Hero',
+                rank: NPCRankSystem.createRank('C', 'hero'),
+                position: { x: Math.random() * 700, y: Math.random() * 500 },
+                visuals: {
+                    assetPath: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="#06b6d4"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">H</text></svg>'),
+                    assetKey: 'hero'
+                }
+            });
+        }
+
+        function addEnemy() {
+            game.addEnemy({
+                name: 'My Enemy',
+                rank: NPCRankSystem.createRank('B', 'elite'),
+                position: { x: Math.random() * 700, y: Math.random() * 500 },
+                visuals: {
+                    assetPath: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="#ea580c"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">E</text></svg>'),
+                    assetKey: 'enemy'
+                }
+            });
+        }
+
+        function addBoss() {
+            game.addEnemy({
+                name: 'My Boss',
+                rank: NPCRankSystem.createRank('S', 'boss'),
+                position: { x: Math.random() * 700, y: Math.random() * 500 },
+                visuals: {
+                    assetPath: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="28" fill="#dc2626"/><text x="32" y="40" text-anchor="middle" font-size="32" fill="white">B</text></svg>'),
+                    assetKey: 'boss'
+                }
+            });
+        }
+
+        function clearAll() {
+            game.clearAll();
+        }
+
+        console.log('🎮 Game loaded with NPC Rank System!');
+    </script>
+</body>
+
+</html>

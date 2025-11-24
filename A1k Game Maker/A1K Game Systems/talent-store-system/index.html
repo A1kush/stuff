@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talent-Store System Demo</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <div class="container">
+    <header style="text-align: center; margin-bottom: 2rem;">
+      <h1>🎮 Talent-Store System</h1>
+      <p style="color: var(--text-secondary); font-size: 1.1rem;">
+        Production-ready talent tree, shop, and alchemy systems
+      </p>
+    </header>
+
+    <div class="system-tabs">
+      <button class="tab-button active" data-tab="talents">🌳 Talents</button>
+      <button class="tab-button" data-tab="shop">🏪 Shop</button>
+      <button class="tab-button" data-tab="alchemy">⚗️ Alchemy</button>
+    </div>
+
+    <div class="tab-content">
+      <div id="talentsTab" class="tab-pane active">
+        <div id="talentContainer"></div>
+      </div>
+
+      <div id="shopTab" class="tab-pane" style="display: none;">
+        <div id="shopContainer"></div>
+      </div>
+
+      <div id="alchemyTab" class="tab-pane" style="display: none;">
+        <div id="alchemyContainer"></div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: var(--bg-medium); border-radius: 8px;">
+      <h3>Save/Load</h3>
+      <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+        <button id="btnSave" class="btn-exchange">💾 Save Game</button>
+        <button id="btnLoad" class="btn-exchange">📂 Load Game</button>
+        <button id="btnExport" class="btn-exchange">📤 Export</button>
+        <button id="btnImport" class="btn-exchange">📥 Import</button>
+        <button id="btnReset" class="btn-reset">🔄 Reset All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ES Modules -->
+  <script type="module">
+    // Import all systems
+    import { createGameState } from './src/core/GameState.js';
+    import { createSaveSystem } from './src/core/SaveSystem.js';
+    import { createTalentController } from './src/talents/TalentController.js';
+    import { createShopController } from './src/shop/ShopController.js';
+    import { createAlchemyController } from './src/alchemy/AlchemyController.js';
+    import { createTalentUI } from './src/ui/TalentUI.js';
+    import { createShopUI } from './src/ui/ShopUI.js';
+    import { createAlchemyUI } from './src/ui/AlchemyUI.js';
+
+    // Initialize game state
+    const gameState = createGameState();
+    const saveSystem = createSaveSystem(gameState);
+
+    // Initialize controllers
+    const talentController = createTalentController(gameState);
+    const shopController = createShopController(gameState);
+    const alchemyController = createAlchemyController(gameState);
+
+    // Initialize UIs
+    const talentUI = createTalentUI(talentController);
+    const shopUI = createShopUI(shopController, gameState);
+    const alchemyUI = createAlchemyUI(alchemyController, gameState);
+
+    // Render initial view
+    talentUI.render('talentContainer');
+    shopUI.render('shopContainer');
+    alchemyUI.render('alchemyContainer');
+
+    // Try to load saved game
+    const loadResult = saveSystem.load();
+    if (loadResult.success) {
+      console.log('Game loaded from save');
+      talentUI.update();
+      shopUI.update();
+      alchemyUI.update();
+      showNotification('Game loaded successfully!', 'success');
+    }
+
+    // Enable auto-save
+    saveSystem.enableAutoSave(30000); // Save every 30 seconds
+
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabName = button.dataset.tab;
+        
+        // Update buttons
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        
+        // Update panes
+        tabPanes.forEach(pane => pane.style.display = 'none');
+        document.getElementById(`${tabName}Tab`).style.display = 'block';
+      });
+    });
+
+    // Save/Load buttons
+    document.getElementById('btnSave').addEventListener('click', () => {
+      const result = saveSystem.save();
+      if (result.success) {
+        showNotification('Game saved!', 'success');
+      } else {
+        showNotification('Save failed: ' + result.error, 'error');
+      }
+    });
+
+    document.getElementById('btnLoad').addEventListener('click', () => {
+      const result = saveSystem.load();
+      if (result.success) {
+        talentUI.update();
+        shopUI.update();
+        alchemyUI.update();
+        showNotification('Game loaded!', 'success');
+      } else {
+        showNotification('Load failed: ' + result.error, 'error');
+      }
+    });
+
+    document.getElementById('btnExport').addEventListener('click', () => {
+      const result = saveSystem.exportToFile();
+      if (result.success) {
+        showNotification('Exported to file!', 'success');
+      } else {
+        showNotification('Export failed: ' + result.error, 'error');
+      }
+    });
+
+    document.getElementById('btnImport').addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          try {
+            await saveSystem.importFromFile(file);
+            talentUI.update();
+            shopUI.update();
+            alchemyUI.update();
+            showNotification('Imported successfully!', 'success');
+          } catch (error) {
+            showNotification('Import failed: ' + error.message, 'error');
+          }
+        }
+      };
+      input.click();
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      if (confirm('Reset all progress? This cannot be undone!')) {
+        gameState.reset();
+        talentUI.update();
+        shopUI.update();
+        alchemyUI.update();
+        saveSystem.save();
+        showNotification('All progress reset!', 'warning');
+      }
+    });
+
+    // Subscribe to state changes for auto-update
+    gameState.subscribe((state) => {
+      // Auto-update UIs when state changes
+      // This ensures all displays stay in sync
+    });
+
+    // Notification helper
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification notification-${type}`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      setTimeout(() => notification.classList.add('show'), 10);
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Expose to window for debugging
+    window.gameState = gameState;
+    window.saveSystem = saveSystem;
+    window.talentController = talentController;
+    window.shopController = shopController;
+    window.alchemyController = alchemyController;
+
+    console.log('🎮 Talent-Store System loaded successfully!');
+    console.log('Use window.gameState, window.talentController, etc. for debugging');
+  </script>
+</body>
+</html>
+

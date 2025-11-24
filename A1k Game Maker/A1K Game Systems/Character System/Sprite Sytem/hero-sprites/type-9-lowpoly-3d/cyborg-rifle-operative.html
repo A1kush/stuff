@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique Cyborg - Low-Poly 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); font-family: 'Arial', sans-serif; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        #container { display: flex; gap: 30px; max-width: 1400px; }
+        #viewport { border: 3px solid #9b59b6; border-radius: 10px; box-shadow: 0 10px 40px rgba(155,89,182,0.5); }
+        #controls { background: rgba(255,255,255,0.95); border: 3px solid #9b59b6; border-radius: 10px; padding: 25px; width: 400px; }
+        h1 { font-size: 20px; margin-bottom: 20px; color: #8e44ad; border-bottom: 3px solid #9b59b6; padding-bottom: 12px; font-weight: bold; }
+        .control-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: #8e44ad; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        select, button { width: 100%; padding: 10px 15px; background: #ecf0f1; border: 2px solid #9b59b6; color: #8e44ad; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; }
+        button { margin-top: 8px; background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: #FFF; border: none; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info { font-size: 12px; color: #8e44ad; margin-top: 25px; padding-top: 25px; border-top: 2px solid #9b59b6; line-height: 1.8; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat { background: #ecf0f1; padding: 12px; border-radius: 8px; border: 2px solid #9b59b6; }
+        .stat-label { font-size: 11px; color: #8e44ad; font-weight: bold; }
+        .stat-value { font-size: 18px; color: #8e44ad; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="viewport"></div>
+        <div id="controls">
+            <h1>🤖 UNIQUE CYBORG - LOW-POLY 3D</h1>
+            <div class="control-group"><label>Animation</label>
+                <select id="animState">
+                    <option value="idle">Idle</option><option value="walk">Walk</option><option value="attack">Attack</option>
+                    <option value="jump">Jump</option><option value="hurt">Hurt</option><option value="victory">Victory</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Material Color</label>
+                <select id="palette">
+                    <option value="fire">🔥 Fire</option><option value="ice">❄️ Ice</option><option value="shadow">🌑 Shadow</option>
+                    <option value="light">✨ Light</option><option value="nature">🌿 Nature</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Camera</label><select id="cameraView"><option value="front">Front</option><option value="side">Side</option><option value="back">Back</option><option value="top">Top</option><option value="free" selected>Free</option></select></div>
+            <div class="control-group"><label>Speed</label><select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="1.5">1.5x</option><option value="2">2x</option></select></div>
+            <div class="control-group"><label>Export</label><div class="btn-group"><button id="exportFrame">PNG</button><button id="exportSheet">Sheet</button></div><button id="exportJSON">JSON</button></div>
+            <div class="info">
+                <strong>TYPE 9: LOW-POLY 3D</strong><br>Cyborg with Segmented Armor<br><br>
+                • Three.js rendering<br>• Faceted polygons<br>• Energy rifle<br>• Hair: Black (locked)<br><br>
+                <div class="stats">
+                    <div class="stat"><div class="stat-label">Frame</div><div class="stat-value" id="frameCount">0/8</div></div>
+                    <div class="stat"><div class="stat-label">FPS</div><div class="stat-value" id="fpsCount">60</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, cyborg;
+        let currentAnim = 'idle', currentFrame = 0, frameTimer = 0, animSpeed = 1, palette = 'fire';
+        let lastTime = 0, fps = 60, frameCount = 0, lastFpsTime = 0, autoRotate = true;
+
+        const palettes = { fire: 0xff4444, ice: 0x44ffff, shadow: 0xaa44ff, light: 0xffdd44, nature: 0x44ff44 };
+        const animations = {
+            idle: { frames: 8, frameTime: 250, loop: true }, walk: { frames: 8, frameTime: 125, loop: true },
+            attack: { frames: 6, frameTime: 83, loop: false }, jump: { frames: 6, frameTime: 100, loop: false },
+            hurt: { frames: 4, frameTime: 150, loop: false }, victory: { frames: 8, frameTime: 200, loop: true }
+        };
+
+        function init() {
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x2c3e50);
+            camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            camera.position.set(0, 1.5, 4); camera.lookAt(0, 1, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+            renderer.setSize(512, 512);
+            document.getElementById('viewport').appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 5); scene.add(dirLight);
+
+            createCyborg();
+        }
+
+        function createCyborg() {
+            cyborg = new THREE.Group();
+
+            // Head
+            const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const headMat = new THREE.MeshPhongMaterial({ color: 0xd4a574, flatShading: true });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 1.5; cyborg.add(head);
+
+            // Black pigtails
+            const pigtailGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.6, 4);
+            const pigtailMat = new THREE.MeshPhongMaterial({ color: 0x000000, flatShading: true });
+            const leftPigtail = new THREE.Mesh(pigtailGeo, pigtailMat);
+            leftPigtail.position.set(-0.35, 1.3, 0); cyborg.add(leftPigtail);
+            const rightPigtail = new THREE.Mesh(pigtailGeo, pigtailMat);
+            rightPigtail.position.set(0.35, 1.3, 0); cyborg.add(rightPigtail);
+
+            // Black hair top
+            const hairGeo = new THREE.BoxGeometry(0.6, 0.15, 0.6);
+            const hairMat = new THREE.MeshPhongMaterial({ color: 0x000000, flatShading: true });
+            const hair = new THREE.Mesh(hairGeo, hairMat);
+            hair.position.y = 1.8; cyborg.add(hair);
+
+            // Armor body (segmented)
+            const bodyGeo = new THREE.BoxGeometry(0.6, 0.8, 0.4);
+            const bodyMat = new THREE.MeshPhongMaterial({ color: palettes[palette], flatShading: true });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.8; cyborg.add(body);
+
+            // Armor accents
+            const accentGeo = new THREE.BoxGeometry(0.15, 0.4, 0.42);
+            const accentMat = new THREE.MeshPhongMaterial({ color: palettes[palette], flatShading: true, emissive: palettes[palette], emissiveIntensity: 0.3 });
+            const leftAccent = new THREE.Mesh(accentGeo, accentMat);
+            leftAccent.position.set(-0.25, 0.8, 0); cyborg.add(leftAccent);
+            const rightAccent = new THREE.Mesh(accentGeo, accentMat);
+            rightAccent.position.set(0.25, 0.8, 0); cyborg.add(rightAccent);
+
+            // Arms
+            const armGeo = new THREE.BoxGeometry(0.2, 0.6, 0.2);
+            const armMat = new THREE.MeshPhongMaterial({ color: 0xd4a574, flatShading: true });
+            const leftArm = new THREE.Mesh(armGeo, armMat);
+            leftArm.position.set(-0.5, 0.8, 0); cyborg.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeo, armMat);
+            rightArm.position.set(0.5, 0.8, 0); cyborg.add(rightArm);
+
+            // Legs (armor)
+            const legGeo = new THREE.BoxGeometry(0.25, 0.7, 0.25);
+            const legMat = new THREE.MeshPhongMaterial({ color: palettes[palette], flatShading: true });
+            const leftLeg = new THREE.Mesh(legGeo, legMat);
+            leftLeg.position.set(-0.15, 0.15, 0); cyborg.add(leftLeg);
+            const rightLeg = new THREE.Mesh(legGeo, legMat);
+            rightLeg.position.set(0.15, 0.15, 0); cyborg.add(rightLeg);
+
+            // Energy rifle
+            const rifleGeo = new THREE.BoxGeometry(0.7, 0.12, 0.12);
+            const rifleMat = new THREE.MeshPhongMaterial({ color: 0x1a1a1a, flatShading: true });
+            const rifle = new THREE.Mesh(rifleGeo, rifleMat);
+            rifle.position.set(-0.6, 0.8, 0); cyborg.add(rifle);
+
+            // Rifle glow
+            const glowGeo = new THREE.BoxGeometry(0.15, 0.13, 0.13);
+            const glowMat = new THREE.MeshPhongMaterial({ color: palettes[palette], flatShading: true, emissive: palettes[palette], emissiveIntensity: 0.5 });
+            const glow1 = new THREE.Mesh(glowGeo, glowMat);
+            glow1.position.set(-0.5, 0.8, 0); cyborg.add(glow1);
+            const glow2 = new THREE.Mesh(glowGeo, glowMat);
+            glow2.position.set(-0.7, 0.8, 0); cyborg.add(glow2);
+
+            cyborg.position.y = 0.5; scene.add(cyborg);
+        }
+
+        function updateCyborg() {
+            if (!cyborg) return;
+            const f = currentFrame;
+            if (currentAnim === 'idle') cyborg.position.y = 0.5 + Math.sin(f / 4 * Math.PI) * 0.03;
+            else if (currentAnim === 'walk') {
+                cyborg.position.y = 0.5 + Math.abs(Math.sin(f / 4 * Math.PI)) * 0.06;
+                cyborg.rotation.x = Math.sin(f / 4 * Math.PI) * 0.08;
+            }
+            if (autoRotate) cyborg.rotation.y += 0.01;
+        }
+
+        function animate(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime; lastTime = timestamp;
+
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                fps = frameCount; frameCount = 0; lastFpsTime = timestamp;
+                document.getElementById('fpsCount').textContent = fps;
+            }
+
+            const anim = animations[currentAnim];
+            frameTimer += deltaTime * animSpeed;
+
+            if (frameTimer >= anim.frameTime) {
+                frameTimer = 0; currentFrame++;
+                if (currentFrame >= anim.frames) currentFrame = anim.loop ? 0 : anim.frames - 1;
+                document.getElementById('frameCount').textContent = `${currentFrame + 1}/${anim.frames}`;
+            }
+
+            updateCyborg();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('animState').addEventListener('change', e => { currentAnim = e.target.value; currentFrame = 0; frameTimer = 0; });
+        document.getElementById('palette').addEventListener('change', e => { palette = e.target.value; scene.remove(cyborg); createCyborg(); });
+        document.getElementById('cameraView').addEventListener('change', e => {
+            const view = e.target.value; autoRotate = view === 'free';
+            if (view === 'front') { camera.position.set(0, 1.5, 4); camera.lookAt(0, 1, 0); }
+            else if (view === 'side') { camera.position.set(4, 1.5, 0); camera.lookAt(0, 1, 0); }
+            else if (view === 'back') { camera.position.set(0, 1.5, -4); camera.lookAt(0, 1, 0); }
+            else if (view === 'top') { camera.position.set(0, 5, 0.1); camera.lookAt(0, 1, 0); }
+        });
+        document.getElementById('speed').addEventListener('change', e => animSpeed = parseFloat(e.target.value));
+
+        document.getElementById('exportFrame').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = `cyborg-lowpoly-${currentAnim}-f${currentFrame}-${palette}.png`;
+            link.href = renderer.domElement.toDataURL('image/png'); link.click();
+        });
+
+        document.getElementById('exportSheet').addEventListener('click', () => alert('Sheet export: Capture frames manually'));
+
+        document.getElementById('exportJSON').addEventListener('click', () => {
+            const data = { character: 'Unique Cyborg', type: 'Low-Poly 3D', resolution: '512x512', animations, palettes: Object.keys(palettes),
+                currentState: { animation: currentAnim, frame: currentFrame, palette }, metadata: { hairColor: '#000000 (locked)', style: 'Three.js Low-Poly' }
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a'); link.download = `cyborg-lowpoly-data-${palette}.json`;
+            link.href = URL.createObjectURL(blob); link.click();
+        });
+
+        init(); animate(0);
+    </script>
+</body>
+</html>

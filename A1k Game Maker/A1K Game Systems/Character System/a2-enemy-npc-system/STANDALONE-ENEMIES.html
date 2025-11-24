@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A2 Enemy & NPC System - Standalone Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2a 100%);
+      color: #cfe3ff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4fc3f7;
+      margin-bottom: 10px;
+      font-size: 36px;
+      text-shadow: 0 0 20px rgba(79, 195, 247, 0.6);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: rgba(207, 227, 255, 0.7);
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: rgba(79, 195, 247, 0.1);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      color: #cfe3ff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      background: rgba(79, 195, 247, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3);
+    }
+
+    .tab.active {
+      background: rgba(79, 195, 247, 0.3);
+      border-color: #fbbf24;
+      box-shadow: 0 0 20px rgba(79, 195, 247, 0.4);
+    }
+
+    .content-panel {
+      background: rgba(10, 10, 26, 0.8);
+      border: 3px solid #4fc3f7;
+      border-radius: 15px;
+      padding: 30px;
+      min-height: 600px;
+    }
+
+    .entity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .entity-card {
+      background: rgba(26, 26, 42, 0.6);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .entity-card:hover {
+      border-color: #fbbf24;
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(251, 191, 36, 0.5);
+    }
+
+    .entity-canvas {
+      width: 100%;
+      height: 120px;
+      margin-bottom: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .entity-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #cfe3ff;
+      margin-bottom: 5px;
+    }
+
+    .entity-tier {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .tier-C { background: #9ca3af; color: #000; }
+    .tier-B { background: #60a5fa; color: #fff; }
+    .tier-A { background: #34d399; color: #000; }
+    .tier-S { background: #fbbf24; color: #000; }
+    .tier-SS { background: #f97316; color: #fff; }
+    .tier-SSS { background: #ef4444; color: #fff; }
+
+    .entity-stats {
+      font-size: 11px;
+      color: rgba(207, 227, 255, 0.7);
+      margin-top: 5px;
+      line-height: 1.6;
+    }
+
+    .info-panel {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: rgba(10, 10, 26, 0.95);
+      border: 3px solid #4fc3f7;
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 300px;
+      max-height: 80vh;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+    }
+
+    .info-panel.visible {
+      display: block;
+    }
+
+    .info-title {
+      color: #4fc3f7;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .info-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .info-label {
+      color: #4fc3f7;
+    }
+
+    .info-value {
+      color: #fbbf24;
+      font-weight: bold;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(239, 68, 68, 0.2);
+      border: 2px solid #ef4444;
+      border-radius: 5px;
+      color: #ef4444;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .close-btn:hover {
+      background: rgba(239, 68, 68, 0.4);
+    }
+
+    /* Arena Mode */
+    .arena-mode {
+      display: none;
+    }
+
+    .arena-mode.active {
+      display: block;
+    }
+
+    #arena-canvas {
+      width: 100%;
+      height: 600px;
+      background: #0a0a0a;
+      border: 3px solid #4fc3f7;
+      border-radius: 10px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 A2 Enemy & NPC System</h1>
+    <p class="subtitle">AI Robot Aesthetic - 64 Entities Showcase - Standalone Demo</p>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('enemies')">Enemies (35)</div>
+      <div class="tab" onclick="switchTab('bosses')">Bosses (10)</div>
+      <div class="tab" onclick="switchTab('zombies')">Zombies (12)</div>
+      <div class="tab" onclick="switchTab('villains')">Villains (7)</div>
+      <div class="tab" onclick="switchTab('arena')">Arena</div>
+    </div>
+
+    <div class="content-panel">
+      <div id="gallery-view" class="gallery-view">
+        <div class="entity-grid" id="entity-grid"></div>
+      </div>
+
+      <div id="arena-view" class="arena-mode">
+        <canvas id="arena-canvas" width="1200" height="600"></canvas>
+        <div style="margin-top: 20px; text-align: center;">
+          <button onclick="spawnRandomEntity()" style="padding: 12px 24px; background: rgba(79, 195, 247, 0.2); border: 2px solid #4fc3f7; border-radius: 8px; color: #cfe3ff; cursor: pointer; font-weight: bold;">Spawn Random Entity</button>
+          <button onclick="clearArena()" style="padding: 12px 24px; background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; border-radius: 8px; color: #ef4444; cursor: pointer; font-weight: bold; margin-left: 10px;">Clear Arena</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel" id="info-panel">
+      <button class="close-btn" onclick="closeInfoPanel()">✕</button>
+      <div class="info-title" id="info-name">Entity Name</div>
+      <div id="info-content"></div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // EMBEDDED ENTITY DATABASE (Representative Sample - 20 Entities)
+    // ═══════════════════════════════════════════════════════════════
+    
+    const ENTITY_DATABASE = {
+      // Enemies (7 representative)
+      enemy_slime: { id: 'enemy_slime', name: 'Slime', type: 'enemy', tier: 'C', hp: 100, atk: 15, def: 5, speed: 80, xp: 10, gold: 5, element: 'neutral', sprite: { shape: 'blob', color: '#4caf50', glow: '#a5d6a7' }, description: 'Gelatinous creature that oozes forward' },
+      enemy_goblin: { id: 'enemy_goblin', name: 'Goblin', type: 'enemy', tier: 'C', hp: 120, atk: 20, def: 8, speed: 110, xp: 15, gold: 8, element: 'dark', sprite: { shape: 'humanoid', color: '#8b4513', glow: '#2c3e50' }, description: 'Small aggressive creature with crude weapons' },
+      enemy_skeleton: { id: 'enemy_skeleton', name: 'Skeleton', type: 'enemy', tier: 'C', hp: 110, atk: 18, def: 10, speed: 100, xp: 12, gold: 7, element: 'dark', sprite: { shape: 'skeleton', color: '#e0e0e0', glow: '#7f8c8d' }, description: 'Undead warrior risen from the grave' },
+      enemy_bat: { id: 'enemy_bat', name: 'Bat', type: 'enemy', tier: 'C', hp: 80, atk: 12, def: 3, speed: 150, xp: 8, gold: 4, element: 'wind', sprite: { shape: 'wings', color: '#2c3e50', glow: '#95a5a6' }, description: 'Swift flying creature that swoops at enemies' },
+      enemy_dragon: { id: 'enemy_dragon', name: 'Dragon Whelp', type: 'enemy', tier: 'A', hp: 500, atk: 80, def: 40, speed: 120, xp: 100, gold: 50, element: 'fire', sprite: { shape: 'dragon', color: '#f97316', glow: '#fbbf24' }, description: 'Young dragon with fire breath' },
+      enemy_demon: { id: 'enemy_demon', name: 'Demon', type: 'enemy', tier: 'A', hp: 450, atk: 70, def: 35, speed: 100, xp: 90, gold: 45, element: 'dark', sprite: { shape: 'demon', color: '#7c2d12', glow: '#dc2626' }, description: 'Dark entity from the abyss' },
+      enemy_phoenix: { id: 'enemy_phoenix', name: 'Dark Phoenix', type: 'enemy', tier: 'S', hp: 1000, atk: 120, def: 60, speed: 140, xp: 200, gold: 100, element: 'fire', sprite: { shape: 'phoenix', color: '#dc2626', glow: '#f97316' }, description: 'Risen phoenix of darkness' },
+      
+      // Bosses (3 representative)
+      boss_slime_king: { id: 'boss_slime_king', name: 'Slime King', type: 'boss', tier: 'S', hp: 5000, atk: 150, def: 80, speed: 100, xp: 500, gold: 250, element: 'neutral', sprite: { shape: 'boss', color: '#34d399', glow: '#4ade80' }, description: 'Massive slime ruler', phases: 2 },
+      boss_dragon: { id: 'boss_dragon', name: 'Crimson Dragon', type: 'boss', tier: 'SS', hp: 8000, atk: 200, def: 100, speed: 120, xp: 800, gold: 400, element: 'fire', sprite: { shape: 'dragon_boss', color: '#ef4444', glow: '#f97316' }, description: 'Ancient dragon of fire', phases: 3 },
+      boss_void_lord: { id: 'boss_void_lord', name: 'Void Lord', type: 'boss', tier: 'SSS', hp: 15000, atk: 300, def: 150, speed: 140, xp: 1500, gold: 750, element: 'arcane', sprite: { shape: 'void', color: '#6b21a8', glow: '#a855f7' }, description: 'Lord of the void', phases: 4 },
+      
+      // Zombies (3 representative)
+      zombie_shambler: { id: 'zombie_shambler', name: 'Shambler', type: 'zombie', tier: 'C', hp: 150, atk: 20, def: 5, speed: 60, xp: 15, gold: 8, element: 'dark', sprite: { shape: 'zombie', color: '#84cc16', glow: '#a3e635' }, description: 'Slow shambling zombie', biteChance: 0.15 },
+      zombie_runner: { id: 'zombie_runner', name: 'Runner', type: 'zombie', tier: 'B', hp: 200, atk: 30, def: 10, speed: 120, xp: 25, gold: 12, element: 'dark', sprite: { shape: 'zombie_fast', color: '#65a30d', glow: '#84cc16' }, description: 'Fast running zombie', biteChance: 0.25 },
+      zombie_brute: { id: 'zombie_brute', name: 'Brute', type: 'zombie', tier: 'A', hp: 600, atk: 50, def: 30, speed: 80, xp: 60, gold: 30, element: 'dark', sprite: { shape: 'zombie_tank', color: '#4d7c0f', glow: '#65a30d' }, description: 'Heavy armored zombie', biteChance: 0.20 },
+      
+      // Villains (3 representative)
+      villain_shadow_blade: { id: 'villain_shadow_blade', name: 'Shadow Blade', type: 'villain', tier: 'SS', hp: 3000, atk: 180, def: 90, speed: 150, xp: 400, gold: 200, element: 'shadow', sprite: { shape: 'villain', color: '#1e293b', glow: '#475569' }, description: 'Master of shadows', phases: 3 },
+      villain_pyro_queen: { id: 'villain_pyro_queen', name: 'Pyro Queen', type: 'villain', tier: 'SS', hp: 3200, atk: 200, def: 80, speed: 130, xp: 450, gold: 225, element: 'fire', sprite: { shape: 'villain', color: '#dc2626', glow: '#f97316' }, description: 'Queen of flames', phases: 3 },
+      villain_void_emperor: { id: 'villain_void_emperor', name: 'Void Emperor', type: 'villain', tier: 'SSS', hp: 5000, atk: 250, def: 120, speed: 160, xp: 700, gold: 350, element: 'arcane', sprite: { shape: 'void_boss', color: '#581c87', glow: '#7c3aed' }, description: 'Emperor of the void', phases: 4 }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // AI ROBOT AESTHETIC RENDERER
+    // ═══════════════════════════════════════════════════════════════
+    
+    const TECH_PALETTE = {
+      core: '#00d4ff',
+      energy: '#5ba3ff',
+      accent: '#5bffaa',
+      warning: '#ff6b35',
+      critical: '#ff4444',
+      shield: '#74b9ff',
+      stealth: '#9b59b6'
+    };
+
+    function renderEntitySprite(canvas, entity) {
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      const size = 100;
+      canvas.width = size;
+      canvas.height = size;
+      
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const sprite = entity.sprite;
+      
+      // Clear canvas
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, 0, size, size);
+      
+      // Draw based on shape
+      switch(sprite.shape) {
+        case 'blob':
+          drawBlob(ctx, centerX, centerY, size * 0.4, sprite.color, sprite.glow);
+          break;
+        case 'humanoid':
+          drawHumanoid(ctx, centerX, centerY, size * 0.4, sprite.color, sprite.glow);
+          break;
+        case 'skeleton':
+          drawSkeleton(ctx, centerX, centerY, size * 0.4, sprite.color, sprite.glow);
+          break;
+        case 'wings':
+          drawWings(ctx, centerX, centerY, size * 0.5, sprite.color, sprite.glow);
+          break;
+        case 'dragon':
+          drawDragon(ctx, centerX, centerY, size * 0.6, sprite.color, sprite.glow);
+          break;
+        case 'demon':
+          drawDemon(ctx, centerX, centerY, size * 0.5, sprite.color, sprite.glow);
+          break;
+        case 'phoenix':
+          drawPhoenix(ctx, centerX, centerY, size * 0.6, sprite.color, sprite.glow);
+          break;
+        case 'boss':
+          drawBoss(ctx, centerX, centerY, size * 0.7, sprite.color, sprite.glow);
+          break;
+        case 'dragon_boss':
+          drawDragonBoss(ctx, centerX, centerY, size * 0.8, sprite.color, sprite.glow);
+          break;
+        case 'void':
+          drawVoid(ctx, centerX, centerY, size * 0.7, sprite.color, sprite.glow);
+          break;
+        case 'zombie':
+          drawZombie(ctx, centerX, centerY, size * 0.5, sprite.color, sprite.glow);
+          break;
+        case 'zombie_fast':
+          drawZombieFast(ctx, centerX, centerY, size * 0.5, sprite.color, sprite.glow);
+          break;
+        case 'zombie_tank':
+          drawZombieTank(ctx, centerX, centerY, size * 0.6, sprite.color, sprite.glow);
+          break;
+        case 'villain':
+          drawVillain(ctx, centerX, centerY, size * 0.6, sprite.color, sprite.glow);
+          break;
+        case 'void_boss':
+          drawVoidBoss(ctx, centerX, centerY, size * 0.8, sprite.color, sprite.glow);
+          break;
+        default:
+          drawDefault(ctx, centerX, centerY, size * 0.4, sprite.color, sprite.glow);
+      }
+    }
+
+    // Drawing functions
+    function drawBlob(ctx, x, y, size, color, glow) {
+      // Glow effect
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = glow;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(x, y, size, size * 0.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      
+      // Core
+      ctx.fillStyle = TECH_PALETTE.core;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawHumanoid(ctx, x, y, size, color, glow) {
+      // Body
+      ctx.fillStyle = color;
+      ctx.fillRect(x - size * 0.2, y - size * 0.3, size * 0.4, size * 0.6);
+      
+      // Head
+      ctx.fillRect(x - size * 0.15, y - size * 0.6, size * 0.3, size * 0.3);
+      
+      // Arms
+      ctx.fillRect(x - size * 0.4, y - size * 0.2, size * 0.2, size * 0.4);
+      ctx.fillRect(x + size * 0.2, y - size * 0.2, size * 0.2, size * 0.4);
+      
+      // Tech core
+      ctx.fillStyle = TECH_PALETTE.core;
+      ctx.fillRect(x - size * 0.1, y, size * 0.2, size * 0.2);
+    }
+
+    function drawSkeleton(ctx, x, y, size, color, glow) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      
+      // Skull
+      ctx.beginPath();
+      ctx.arc(x, y - size * 0.4, size * 0.2, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Body
+      ctx.beginPath();
+      ctx.moveTo(x, y - size * 0.2);
+      ctx.lineTo(x, y + size * 0.4);
+      ctx.stroke();
+      
+      // Arms
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.3, y);
+      ctx.lineTo(x, y - size * 0.1);
+      ctx.lineTo(x + size * 0.3, y);
+      ctx.stroke();
+      
+      // Legs
+      ctx.beginPath();
+      ctx.moveTo(x, y + size * 0.4);
+      ctx.lineTo(x - size * 0.2, y + size * 0.7);
+      ctx.moveTo(x, y + size * 0.4);
+      ctx.lineTo(x + size * 0.2, y + size * 0.7);
+      ctx.stroke();
+    }
+
+    function drawWings(ctx, x, y, size, color, glow) {
+      // Body
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(x, y, size * 0.15, size * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Wings
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x - size * 0.4, y - size * 0.3, x - size * 0.6, y, x - size * 0.4, y + size * 0.3);
+      ctx.bezierCurveTo(x - size * 0.2, y, x, y, x, y);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + size * 0.4, y - size * 0.3, x + size * 0.6, y, x + size * 0.4, y + size * 0.3);
+      ctx.bezierCurveTo(x + size * 0.2, y, x, y, x, y);
+      ctx.fill();
+    }
+
+    function drawDragon(ctx, x, y, size, color, glow) {
+      ctx.fillStyle = color;
+      // Body
+      ctx.beginPath();
+      ctx.ellipse(x, y, size * 0.5, size * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Head
+      ctx.beginPath();
+      ctx.arc(x - size * 0.3, y, size * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Wings
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + size * 0.2, y - size * 0.4, x + size * 0.5, y - size * 0.2, x + size * 0.3, y);
+      ctx.fill();
+      
+      // Fire
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(x - size * 0.4, y, size * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawDemon(ctx, x, y, size, color, glow) {
+      drawHumanoid(ctx, x, y, size, color, glow);
+      
+      // Horns
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.1, y - size * 0.6);
+      ctx.lineTo(x - size * 0.2, y - size * 0.8);
+      ctx.lineTo(x, y - size * 0.65);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.moveTo(x + size * 0.1, y - size * 0.6);
+      ctx.lineTo(x + size * 0.2, y - size * 0.8);
+      ctx.lineTo(x, y - size * 0.65);
+      ctx.fill();
+    }
+
+    function drawPhoenix(ctx, x, y, size, color, glow) {
+      // Body
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.ellipse(x, y, size * 0.3, size * 0.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Wings (flames)
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+      gradient.addColorStop(0, glow);
+      gradient.addColorStop(1, color + '00');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawBoss(ctx, x, y, size, color, glow) {
+      drawBlob(ctx, x, y, size, color, glow);
+      
+      // Crown effect
+      ctx.strokeStyle = glow;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(x, y - size * 0.5, size * 0.3, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function drawDragonBoss(ctx, x, y, size, color, glow) {
+      drawDragon(ctx, x, y, size * 1.2, color, glow);
+      
+      // Extra effects
+      ctx.strokeStyle = glow;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function drawVoid(ctx, x, y, size, color, glow) {
+      // Void portal
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+      gradient.addColorStop(0, '#000000');
+      gradient.addColorStop(0.5, color);
+      gradient.addColorStop(1, color + '00');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Core
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawZombie(ctx, x, y, size, color, glow) {
+      drawHumanoid(ctx, x, y, size, color, glow);
+      
+      // Decay effect
+      ctx.strokeStyle = glow;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(x, y - size * 0.3, size * 0.15, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function drawZombieFast(ctx, x, y, size, color, glow) {
+      drawZombie(ctx, x, y, size, color, glow);
+      // Speed lines
+      ctx.strokeStyle = glow;
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.5, y - size * 0.3 + i * 10);
+        ctx.lineTo(x + size * 0.7, y - size * 0.3 + i * 10);
+        ctx.stroke();
+      }
+    }
+
+    function drawZombieTank(ctx, x, y, size, color, glow) {
+      drawZombie(ctx, x, y, size * 1.2, color, glow);
+      
+      // Armor
+      ctx.strokeStyle = glow;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x - size * 0.3, y - size * 0.2, size * 0.6, size * 0.5);
+    }
+
+    function drawVillain(ctx, x, y, size, color, glow) {
+      drawHumanoid(ctx, x, y, size, color, glow);
+      
+      // Cape
+      ctx.fillStyle = color + '80';
+      ctx.beginPath();
+      ctx.moveTo(x, y + size * 0.3);
+      ctx.bezierCurveTo(x - size * 0.4, y + size * 0.5, x - size * 0.5, y + size * 0.8, x, y + size * 0.9);
+      ctx.bezierCurveTo(x + size * 0.5, y + size * 0.8, x + size * 0.4, y + size * 0.5, x, y + size * 0.3);
+      ctx.fill();
+    }
+
+    function drawVoidBoss(ctx, x, y, size, color, glow) {
+      drawVoid(ctx, x, y, size * 1.2, color, glow);
+      
+      // Multiple cores
+      for (let i = 0; i < 3; i++) {
+        const angle = (i * Math.PI * 2 / 3);
+        const cx = x + Math.cos(angle) * size * 0.3;
+        const cy = y + Math.sin(angle) * size * 0.3;
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawDefault(ctx, x, y, size, color, glow) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // UI FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+    
+    let currentTab = 'enemies';
+    let arenaEntities = [];
+    let arenaRunning = false;
+
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      // Update tabs
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // Update views
+      if (tab === 'arena') {
+        document.getElementById('gallery-view').style.display = 'none';
+        document.getElementById('arena-view').classList.add('active');
+        if (!arenaRunning) {
+          startArena();
+          arenaRunning = true;
+        }
+      } else {
+        document.getElementById('gallery-view').style.display = 'block';
+        document.getElementById('arena-view').classList.remove('active');
+        renderEntities(tab);
+      }
+    }
+
+    function renderEntities(type) {
+      const grid = document.getElementById('entity-grid');
+      grid.innerHTML = '';
+      
+      const entities = Object.values(ENTITY_DATABASE).filter(e => {
+        if (type === 'enemies') return e.type === 'enemy';
+        if (type === 'bosses') return e.type === 'boss';
+        if (type === 'zombies') return e.type === 'zombie';
+        if (type === 'villains') return e.type === 'villain';
+        return false;
+      });
+      
+      entities.forEach(entity => {
+        const card = document.createElement('div');
+        card.className = 'entity-card';
+        card.onclick = () => showEntityInfo(entity);
+        
+        const canvas = document.createElement('canvas');
+        canvas.className = 'entity-canvas';
+        renderEntitySprite(canvas, entity);
+        
+        card.innerHTML = `
+          ${canvas.outerHTML}
+          <div class="entity-name">${entity.name}</div>
+          <div class="entity-tier tier-${entity.tier}">${entity.tier}</div>
+          <div class="entity-stats">
+            HP: ${entity.hp} | ATK: ${entity.atk} | DEF: ${entity.def}
+          </div>
+        `;
+        
+        grid.appendChild(card);
+      });
+    }
+
+    function showEntityInfo(entity) {
+      const panel = document.getElementById('info-panel');
+      const name = document.getElementById('info-name');
+      const content = document.getElementById('info-content');
+      
+      name.textContent = entity.name;
+      content.innerHTML = `
+        <div class="info-stat">
+          <span class="info-label">Type:</span>
+          <span class="info-value">${entity.type}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">Tier:</span>
+          <span class="info-value">${entity.tier}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">HP:</span>
+          <span class="info-value">${entity.hp}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">Attack:</span>
+          <span class="info-value">${entity.atk}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">Defense:</span>
+          <span class="info-value">${entity.def}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">Speed:</span>
+          <span class="info-value">${entity.speed}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">Element:</span>
+          <span class="info-value">${entity.element}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">XP:</span>
+          <span class="info-value">${entity.xp}</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-label">Gold:</span>
+          <span class="info-value">${entity.gold}</span>
+        </div>
+        ${entity.description ? `<div style="margin-top: 15px; color: rgba(207,227,255,0.7); font-size: 12px;">${entity.description}</div>` : ''}
+      `;
+      
+      panel.classList.add('visible');
+    }
+
+    function closeInfoPanel() {
+      document.getElementById('info-panel').classList.remove('visible');
+    }
+
+    function startArena() {
+      const canvas = document.getElementById('arena-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      
+      function arenaLoop() {
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw grid
+        ctx.strokeStyle = '#1a1a2a';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < canvas.width; i += 50) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, canvas.height);
+          ctx.stroke();
+        }
+        
+        // Draw entities
+        arenaEntities.forEach((entity, index) => {
+          const data = ENTITY_DATABASE[entity.id];
+          if (!data) return;
+          
+          // Move entity
+          entity.x += entity.vx || 0;
+          entity.y += entity.vy || 0;
+          
+          // Bounce off walls
+          if (entity.x < 50 || entity.x > canvas.width - 50) entity.vx *= -1;
+          if (entity.y < 50 || entity.y > canvas.height - 50) entity.vy *= -1;
+          
+          // Draw entity
+          ctx.fillStyle = data.sprite.color;
+          ctx.beginPath();
+          ctx.arc(entity.x, entity.y, 30, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Draw name
+          ctx.fillStyle = '#cfe3ff';
+          ctx.font = '12px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText(data.name, entity.x, entity.y - 40);
+        });
+        
+        requestAnimationFrame(arenaLoop);
+      }
+      
+      arenaLoop();
+    }
+
+    function spawnRandomEntity() {
+      const canvas = document.getElementById('arena-canvas');
+      const entities = Object.values(ENTITY_DATABASE);
+      const random = entities[Math.floor(Math.random() * entities.length)];
+      
+      arenaEntities.push({
+        id: random.id,
+        x: 100 + Math.random() * (canvas.width - 200),
+        y: 100 + Math.random() * (canvas.height - 200),
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2
+      });
+    }
+
+    function clearArena() {
+      arenaEntities = [];
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      renderEntities('enemies');
+      console.log('✅ A2 Enemy & NPC System - Standalone Demo Loaded');
+      console.log(`   • ${Object.keys(ENTITY_DATABASE).length} entities in showcase`);
+      console.log('   • AI Robot Aesthetic rendering');
+    });
+  </script>
+</body>
+</html>
+

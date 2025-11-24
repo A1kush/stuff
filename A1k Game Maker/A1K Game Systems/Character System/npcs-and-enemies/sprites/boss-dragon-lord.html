@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss Dragon Lord - HD Pixel Art Sprite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+        }
+
+        #canvas-wrapper {
+            flex-shrink: 0;
+        }
+
+        canvas {
+            border: 2px solid #333;
+            background: #1a1a1a;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        #controls {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            width: 350px;
+        }
+
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #fff;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        select:hover,
+        button:hover {
+            border-color: #666;
+            background: #222;
+        }
+
+        button {
+            margin-top: 8px;
+            background: #2a2a2a;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            color: #ff6600;
+            font-weight: bold;
+        }
+
+        .info {
+            font-size: 11px;
+            color: #666;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="canvas-wrapper">
+            <canvas id="sprite" width="512" height="512"></canvas>
+        </div>
+
+        <div id="controls">
+            <h1>🐉 BOSS DRAGON LORD</h1>
+
+            <div class="control-group">
+                <label for="animState">Animation State</label>
+                <select id="animState" aria-label="Animation State">
+                    <option value="idle">Idle (Hovering)</option>
+                    <option value="walk">Walk Cycle</option>
+                    <option value="attack">Fire Breath</option>
+                    <option value="special">Dragon Rage</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="palette">Color Palette</label>
+                <select id="palette" aria-label="Color Palette">
+                    <option value="fire" selected>🔥 Fire (Red/Orange)</option>
+                    <option value="ice">❄️ Ice (Cyan/Blue)</option>
+                    <option value="shadow">🌑 Shadow (Purple/Dark)</option>
+                    <option value="light">✨ Light (Gold/White)</option>
+                    <option value="nature">🌿 Nature (Green/Earth)</option>
+                    <option value="energy">⚡ Energy (Purple/Pink)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="scale">Display Scale</label>
+                <select id="scale" aria-label="Display Scale">
+                    <option value="2">2x Zoom</option>
+                    <option value="3">3x Zoom</option>
+                    <option value="4" selected>4x Zoom</option>
+                    <option value="5">5x Zoom</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="speed">Animation Speed</label>
+                <select id="speed" aria-label="Animation Speed">
+                    <option value="0.5">0.5x Slow</option>
+                    <option value="1" selected>1x Normal</option>
+                    <option value="1.5">1.5x Fast</option>
+                    <option value="2">2x Very Fast</option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button onclick="startAnimation()">▶️ Start</button>
+                <button onclick="stopAnimation()">⏸️ Stop</button>
+            </div>
+
+            <button onclick="resetSprite()">🔄 Reset</button>
+
+            <div class="btn-group">
+                <button onclick="exportPNG()">📷 PNG</button>
+                <button onclick="exportSpriteSheet()">📄 Sheet</button>
+            </div>
+
+            <button onclick="exportJSON()">💾 JSON Data</button>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Power</div>
+                    <div class="stat-value">2.0x</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Defense</div>
+                    <div class="stat-value">1.5x</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Speed</div>
+                    <div class="stat-value">0.9x</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Magic</div>
+                    <div class="stat-value">1.8x</div>
+                </div>
+            </div>
+
+            <div class="info">
+                <strong>Boss Dragon Lord</strong><br>
+                Ancient dragon transformed into humanoid form.<br>
+                Master of fire magic and physical combat.<br><br>
+                <strong>Features:</strong><br>
+                • HD 128x128 pixel art<br>
+                • Dragon horns & wings<br>
+                • Fire breath attacks<br>
+                • Intimidating presence<br>
+                • Offline production-ready
+            </div>
+        </div>
+    </div>
+
+    <script src="./hd-sprite-engine.js"></script>
+    <script>
+        let spriteSystem;
+        let animationId;
+        let isAnimating = false;
+        let animSpeed = 1;
+
+        function init() {
+            const canvas = document.getElementById('sprite');
+            spriteSystem = new HDSpriteSystem();
+            spriteSystem.setCanvas(canvas);
+            spriteSystem.setCharacter('boss', 'dragon-lord');
+            spriteSystem.setPalette('fire');
+            spriteSystem.draw();
+
+            // Setup controls
+            document.getElementById('animState').addEventListener('change', (e) => {
+                spriteSystem.setAnimation(e.target.value);
+                if (isAnimating) {
+                    stopAnimation();
+                    startAnimation();
+                }
+            });
+
+            document.getElementById('palette').addEventListener('change', (e) => {
+                spriteSystem.setPalette(e.target.value);
+                spriteSystem.draw();
+            });
+
+            document.getElementById('scale').addEventListener('change', (e) => {
+                spriteSystem.setScale(parseInt(e.target.value));
+                spriteSystem.draw();
+            });
+
+            document.getElementById('speed').addEventListener('change', (e) => {
+                animSpeed = parseFloat(e.target.value);
+                if (isAnimating) {
+                    stopAnimation();
+                    startAnimation();
+                }
+            });
+        }
+
+        function startAnimation() {
+            if (isAnimating) return;
+            isAnimating = true;
+            animate();
+        }
+
+        function stopAnimation() {
+            isAnimating = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function animate() {
+            if (!isAnimating) return;
+
+            spriteSystem.animate();
+            animationId = setTimeout(() => animate(), 1000 / (60 * animSpeed));
+        }
+
+        function resetSprite() {
+            stopAnimation();
+            spriteSystem.setAnimation('idle');
+            spriteSystem.setPalette('fire');
+            spriteSystem.setScale(4);
+            document.getElementById('animState').value = 'idle';
+            document.getElementById('palette').value = 'fire';
+            document.getElementById('scale').value = '4';
+            document.getElementById('speed').value = '1';
+            animSpeed = 1;
+            spriteSystem.draw();
+        }
+
+        function exportPNG() {
+            const dataURL = spriteSystem.exportPNG();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `boss-dragon-lord-${spriteSystem.colorPalette}-${spriteSystem.animationState}.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportSpriteSheet() {
+            const dataURL = spriteSystem.exportSpriteSheet();
+            if (dataURL) {
+                const link = document.createElement('a');
+                link.download = `boss-dragon-lord-sprite-sheet-${spriteSystem.colorPalette}.png`;
+                link.href = dataURL;
+                link.click();
+            }
+        }
+
+        function exportJSON() {
+            const data = spriteSystem.exportJSON();
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.download = `boss-dragon-lord-data-${spriteSystem.colorPalette}.json`;
+            link.href = URL.createObjectURL(dataBlob);
+            link.click();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

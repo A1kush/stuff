@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NPC Sprite Showcase - Visual Reference</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #1a1a2e;
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+    h1 {
+      text-align: center;
+      color: #00e5ff;
+      margin-bottom: 30px;
+    }
+    .info-panel {
+      background: rgba(0, 229, 255, 0.1);
+      border: 2px solid #00e5ff;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 10px;
+    }
+    .info-panel h2 {
+      color: #ffd700;
+      margin-top: 0;
+    }
+    .info-panel ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    .info-panel li {
+      margin: 5px 0;
+    }
+    #canvas {
+      display: block;
+      margin: 0 auto;
+      background: #0b0f17;
+      border: 3px solid #00e5ff;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+    }
+    .controls {
+      text-align: center;
+      margin: 20px;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    .sprite-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .sprite-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .sprite-card h3 {
+      color: #ffd700;
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    .sprite-card p {
+      font-size: 12px;
+      color: #aaa;
+      margin: 3px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 NPC SPRITE SHOWCASE - 100 NPCs Across Map</h1>
+  
+  <div class="info-panel">
+    <h2>📊 NPC Sprite Features</h2>
+    <ul>
+      <li><strong>Total NPCs:</strong> 100 spread across entire 6000×5000 map</li>
+      <li><strong>Spawn Pattern:</strong> Grid-based (600px spacing)</li>
+      <li><strong>Visual Components:</strong> Head, Body, Arms, Legs, Weapons</li>
+      <li><strong>Head Types:</strong> Human, Elf, Orc, Dwarf, Angelic (5 types)</li>
+      <li><strong>Body Types:</strong> Muscular, Slim, Bulky, Stocky, Athletic, Average (6 types)</li>
+      <li><strong>Weapons:</strong> Sword, Staff, Bow, Dagger, Shield, Hammer, Wand (7 types)</li>
+      <li><strong>Ranks:</strong> E, D, C, B, A, S (different auras and colors)</li>
+      <li><strong>Animations:</strong> Idle, Walk, Attack</li>
+      <li><strong>Colors:</strong> Each NPC has unique primary + secondary color combinations</li>
+    </ul>
+  </div>
+
+  <div class="controls">
+    <button onclick="showAllTypes()">Show All 8 NPC Types</button>
+    <button onclick="showRankComparison()">Compare Ranks (E-S)</button>
+    <button onclick="animateNPCs()">Animate Walking</button>
+    <button onclick="resetView()">Reset View</button>
+  </div>
+
+  <canvas id="canvas" width="1200" height="800"></canvas>
+
+  <div id="spriteDetails" class="sprite-grid"></div>
+
+  <script src="npc-database.js"></script>
+  <script src="npc-sprite-renderer.js"></script>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const renderer = new NPCSpriteRenderer();
+    
+    let displayMode = 'grid';
+    let animating = false;
+    let animationFrame = 0;
+
+    // Camera for renderer
+    const camera = { x: 0, y: 0 };
+
+    // Generate sample NPCs
+    let sampleNPCs = [];
+
+    function generateSamples() {
+      sampleNPCs = [];
+      
+      // Create one of each type  
+      const types = ['warrior', 'mage', 'archer', 'healer', 'rogue', 'tank', 'merchant', 'crafter'];
+      
+      types.forEach((type, idx) => {
+        const npc = window.generateNPC(type, 'C', 600, 400);
+        npc.x = 200 + idx * 120;
+        npc.y = 400;
+        npc.state = 'idle';
+        npc.direction = 'right';
+        sampleNPCs.push(npc);
+      });
+    }
+
+    function showAllTypes() {
+      displayMode = 'types';
+      generateSamples();
+      updateSpriteDetails();
+      renderFrame();
+    }
+
+    function showRankComparison() {
+      displayMode = 'ranks';
+      sampleNPCs = [];
+      const ranks = ['E', 'D', 'C', 'B', 'A', 'S'];
+      
+      ranks.forEach((rank, idx) => {
+        const npc = window.generateNPC('warrior', rank, 600, 400);
+        npc.x = 150 + idx * 180;
+        npc.y = 400;
+        npc.state = 'idle';
+        npc.direction = 'right';
+        sampleNPCs.push(npc);
+      });
+      
+      updateSpriteDetails();
+      renderFrame();
+    }
+
+    function animateNPCs() {
+      animating = !animating;
+      if (animating) {
+        sampleNPCs.forEach(npc => npc.state = 'walk');
+        animate();
+      } else {
+        sampleNPCs.forEach(npc => npc.state = 'idle');
+      }
+    }
+
+    function resetView() {
+      animating = false;
+      displayMode = 'grid';
+      showAllTypes();
+    }
+
+    function animate() {
+      if (!animating) return;
+      
+      animationFrame++;
+      renderFrame();
+      requestAnimationFrame(animate);
+    }
+
+    function renderFrame() {
+      // Clear canvas
+      ctx.fillStyle = '#0b0f17';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 50) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Draw title text
+      ctx.fillStyle = '#00e5ff';
+      ctx.font = 'bold 16px Arial';
+      ctx.textAlign = 'center';
+      
+      if (displayMode === 'types') {
+        ctx.fillText('8 NPC Types: Warrior, Mage, Archer, Healer, Rogue, Tank, Merchant, Crafter', canvas.width / 2, 30);
+      } else if (displayMode === 'ranks') {
+        ctx.fillText('Rank Comparison: E → D → C → B → A → S (Notice size, auras, colors)', canvas.width / 2, 30);
+      }
+
+      // Render NPCs
+      sampleNPCs.forEach(npc => {
+        renderer.render(ctx, npc, camera);
+      });
+
+      // Draw labels
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 12px Arial';
+      sampleNPCs.forEach((npc, idx) => {
+        const x = npc.x - camera.x;
+        const y = npc.y - camera.y + 40;
+        
+        if (displayMode === 'types') {
+          ctx.fillText(npc.type.toUpperCase(), x, y);
+        } else if (displayMode === 'ranks') {
+          ctx.fillText(`RANK ${npc.rank}`, x, y);
+          ctx.fillStyle = '#aaa';
+          ctx.font = '10px Arial';
+          ctx.fillText(`Scale: ${npc.bodyScale.toFixed(1)}x`, x, y + 15);
+          ctx.fillStyle = '#ffd700';
+          ctx.font = 'bold 12px Arial';
+        }
+      });
+    }
+
+    function updateSpriteDetails() {
+      const detailsDiv = document.getElementById('spriteDetails');
+      detailsDiv.innerHTML = '<h2 style="grid-column: 1/-1; color: #00e5ff; text-align: center;">Sprite Details</h2>';
+      
+      sampleNPCs.forEach(npc => {
+        const card = document.createElement('div');
+        card.className = 'sprite-card';
+        card.innerHTML = `
+          <h3>${npc.name}</h3>
+          <p><strong>Type:</strong> ${npc.type}</p>
+          <p><strong>Rank:</strong> ${npc.rank}</p>
+          <p><strong>Head:</strong> ${npc.headType}</p>
+          <p><strong>Body:</strong> ${npc.bodyType}</p>
+          <p><strong>Weapon:</strong> ${npc.weapon}</p>
+          <p><strong>Colors:</strong> <span style="color: ${npc.primaryColor}">■</span> <span style="color: ${npc.secondaryColor}">■</span></p>
+          <p><strong>Scale:</strong> ${npc.bodyScale.toFixed(2)}x</p>
+        `;
+        detailsDiv.appendChild(card);
+      });
+    }
+
+    // Initialize
+    showAllTypes();
+  </script>
+</body>
+</html>

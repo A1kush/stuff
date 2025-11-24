@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Sprite Showcase - All 19 Types Live Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%); color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%); padding: 30px 20px; border-bottom: 2px solid rgba(102, 126, 234, 0.3); text-align: center; }
+        h1 { font-size: 42px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .tagline { color: #999; font-size: 16px; }
+        .main { display: flex; max-width: 1600px; margin: 0 auto; }
+        .controls { width: 320px; background: rgba(255,255,255,0.03); border-right: 2px solid rgba(102, 126, 234, 0.2); padding: 25px; overflow-y: auto; max-height: calc(100vh - 150px); }
+        .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+        iframe { border: 3px solid #667eea; box-shadow: 0 0 40px rgba(102, 126, 234, 0.5); border-radius: 8px; background: #000; }
+        .control-group { margin-bottom: 20px; }
+        .control-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; font-weight: 600; }
+        select, button { width: 100%; padding: 12px; background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); color: #e0e0e0; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 14px; transition: all 0.3s; }
+        select:hover, button:hover { background: rgba(102, 126, 234, 0.2); border-color: #667eea; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: #fff; font-weight: 600; margin-top: 5px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .type-option { padding: 10px; margin: 5px 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 6px; cursor: pointer; transition: all 0.3s; font-size: 13px; }
+        .type-option:hover { background: rgba(102, 126, 234, 0.2); border-color: #667eea; }
+        .type-option.active { background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%); border-color: #667eea; box-shadow: 0 0 15px rgba(102, 126, 234, 0.3); }
+        .type-badge { display: inline-block; background: #667eea; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-right: 8px; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .stat { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; text-align: center; border: 1px solid rgba(102, 126, 234, 0.2); }
+        .stat-label { font-size: 10px; color: #999; text-transform: uppercase; }
+        .stat-value { font-size: 18px; color: #667eea; font-weight: bold; margin-top: 4px; }
+        .loading { font-size: 14px; color: #667eea; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 ULTIMATE SPRITE SHOWCASE</h1>
+        <div class="tagline">Live Demo - All 19 Rendering Types × 3 Characters = 57 Sprites</div>
+    </div>
+    <div class="main">
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label">Select Character</label>
+                <select id="characterSelect">
+                    <option value="warrior-dual-swords">⚔️ A1 Warrior (Dual Swords)</option>
+                    <option value="cat-angel-gunner">👑 Missy Cat Angel (Gun + Sword)</option>
+                    <option value="cyborg-rifle-operative">🔫 Unique Cyborg (Energy Rifle)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Select Rendering Type</label>
+                <div id="typeList"></div>
+            </div>
+            <div class="control-group">
+                <button id="openFullBtn">Open in New Tab</button>
+                <button id="randomBtn">🎲 Random Combo</button>
+            </div>
+            <div class="stats">
+                <div class="stat"><div class="stat-label">Types</div><div class="stat-value">19</div></div>
+                <div class="stat"><div class="stat-label">Heroes</div><div class="stat-value">3</div></div>
+                <div class="stat"><div class="stat-label">Total</div><div class="stat-value">57</div></div>
+                <div class="stat"><div class="stat-label">Current</div><div class="stat-value" id="currentType">1</div></div>
+            </div>
+            <div class="loading" id="loadingText">Loading sprite...</div>
+        </div>
+        <div class="stage">
+            <iframe id="spriteFrame" width="600" height="600" frameborder="0"></iframe>
+        </div>
+    </div>
+    <script>
+        const types = [
+            { id: 1, name: 'HD Pixel Art', folder: 'type-1-hd-pixel-art' },
+            { id: 2, name: 'Vector Cel-Shaded', folder: 'type-2-vector-cel-shaded' },
+            { id: 3, name: '3D Pre-rendered', folder: 'type-3-3d-prerendered' },
+            { id: 4, name: 'Procedural Shader', folder: 'type-4-procedural-shader' },
+            { id: 5, name: 'Hybrid Enhanced', folder: 'type-5-hybrid-enhanced' },
+            { id: 6, name: 'Voxel/Minecraft', folder: 'type-6-voxel-minecraft' },
+            { id: 7, name: 'Chibi/Kawaii', folder: 'type-7-chibi-kawaii' },
+            { id: 8, name: 'Neon Cyberpunk', folder: 'type-8-neon-cyberpunk' },
+            { id: 9, name: 'Low-Poly 3D', folder: 'type-9-low-poly-3d' },
+            { id: 10, name: 'Metroidvania Hi-Res', folder: 'type-10-metroidvania-hires' },
+            { id: 11, name: 'Retro 8-Bit', folder: 'type-11-retro-8bit' },
+            { id: 12, name: 'Hand-Drawn Sketch', folder: 'type-12-sketch-art' },
+            { id: 13, name: 'Stained Glass', folder: 'type-13-stained-glass' },
+            { id: 14, name: 'Comic Book Halftone', folder: 'type-14-comic-halftone' },
+            { id: 15, name: 'Glitch Art', folder: 'type-15-glitch-art' },
+            { id: 16, name: 'Watercolor Paint', folder: 'type-16-watercolor-paint' },
+            { id: 17, name: 'ASCII/Terminal', folder: 'type-17-ascii-terminal' },
+            { id: 18, name: 'Paper Cut-Out', folder: 'type-18-paper-cutout' },
+            { id: 19, name: 'Hologram/Wireframe', folder: 'type-19-hologram-wireframe' }
+        ];
+
+        let currentCharacter = 'warrior-dual-swords';
+        let currentTypeId = 1;
+
+        function renderTypeList() {
+            const list = document.getElementById('typeList');
+            list.innerHTML = '';
+            types.forEach(type => {
+                const div = document.createElement('div');
+                div.className = 'type-option';
+                if (type.id === currentTypeId) div.classList.add('active');
+                div.innerHTML = `<span class="type-badge">${type.id}</span>${type.name}`;
+                div.onclick = () => selectType(type.id);
+                list.appendChild(div);
+            });
+        }
+
+        function selectType(typeId) {
+            currentTypeId = typeId;
+            loadSprite();
+            renderTypeList();
+            document.getElementById('currentType').textContent = typeId;
+        }
+
+        function loadSprite() {
+            const type = types.find(t => t.id === currentTypeId);
+            const url = `${type.folder}/${currentCharacter}.html`;
+            document.getElementById('spriteFrame').src = url;
+            document.getElementById('loadingText').textContent = `Loading Type ${type.id}: ${type.name}...`;
+            setTimeout(() => {
+                document.getElementById('loadingText').textContent = `✅ Loaded: ${type.name}`;
+            }, 500);
+        }
+
+        document.getElementById('characterSelect').addEventListener('change', (e) => {
+            currentCharacter = e.target.value;
+            loadSprite();
+        });
+
+        document.getElementById('openFullBtn').addEventListener('click', () => {
+            const type = types.find(t => t.id === currentTypeId);
+            window.open(`${type.folder}/${currentCharacter}.html`, '_blank');
+        });
+
+        document.getElementById('randomBtn').addEventListener('click', () => {
+            const characters = ['warrior-dual-swords', 'cat-angel-gunner', 'cyborg-rifle-operative'];
+            currentCharacter = characters[Math.floor(Math.random() * characters.length)];
+            currentTypeId = Math.floor(Math.random() * 19) + 1;
+            document.getElementById('characterSelect').value = currentCharacter;
+            loadSprite();
+            renderTypeList();
+            document.getElementById('currentType').textContent = currentTypeId;
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                currentTypeId = currentTypeId === 19 ? 1 : currentTypeId + 1;
+                selectType(currentTypeId);
+            } else if (e.key === 'ArrowLeft') {
+                currentTypeId = currentTypeId === 1 ? 19 : currentTypeId - 1;
+                selectType(currentTypeId);
+            } else if (e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('randomBtn').click();
+            }
+        });
+
+        renderTypeList();
+        loadSprite();
+    </script>
+</body>
+</html>
