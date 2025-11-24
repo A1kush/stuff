@@ -1,0 +1,7 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #0b0f17; color: #e5e7eb; font-family: 'Segoe UI', system-ui, sans-serif; }
+#topBar { position: fixed; top: 10px; left: 10px; right: 10px; display: flex; gap: 12px; align-items: center; background: rgba(11,20,33,0.85); border: 1px solid #2a2a3a; border-radius: 10px; padding: 10px 14px; z-index: 10; }
+select, .btn { background: #171723; color: #e5e7eb; border: 1px solid #34344a; border-radius: 8px; padding: 6px 10px; font-weight: 600; }
+.btn:hover, select:hover { border-color: #00E5FF; }
+canvas { display: block; margin: 70px auto 0; border: 1px solid #222235; background: #0f1018; max-width: 100%; width: 960px; height: 540px; }
+#legend { position: fixed; right: 12px; bottom: 12px; background: rgba(0,0,0,0.6); border: 1px solid #2a2a3a; border-radius: 10px; padding: 10px 14px; font-size: 12px; }

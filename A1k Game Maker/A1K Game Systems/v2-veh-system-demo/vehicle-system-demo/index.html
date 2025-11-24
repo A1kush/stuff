@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Production Vehicle System Demo</title>
+  <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+  <div id="app">
+    <h1>🚗 Production Vehicle System Demo</h1>
+    <div id="game-container">
+      <canvas id="gameCanvas" width="1080" height="648"></canvas>
+    </div>
+    <div class="controls">
+      <h2>Controls</h2>
+      <p><kbd>←</kbd> <kbd>→</kbd> Move | <kbd>↑</kbd> Jump (hold for higher) | <kbd>E</kbd> Board/Unboard Vehicle | <kbd>V</kbd> Toggle Vehicle Spawn</p>
+      <div class="info">
+        <p><strong>Features:</strong></p>
+        <p>• Golden pet orb follows you everywhere</p>
+        <p>• Hover-skiff vehicle with drifty physics</p>
+        <p>• Walking: Fast acceleration, tight control</p>
+        <p>• Riding: Slower acceleration, higher top speed, more drift</p>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="src/game/main.js"></script>
+</body>
+</html>
+

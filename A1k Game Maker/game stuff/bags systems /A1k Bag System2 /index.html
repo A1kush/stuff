@@ -1,0 +1,3452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>A1K Bag System – Standalone Demo</title>
+  <link id="a1k-bag-system-styles" rel="stylesheet" href="main-styles.css" />
+  <!-- Inline Core Styles (Bag + Arcade) -->
+  <style>
+    :root {
+      --candy-pink: #ff9a9e;
+      --candy-lilac: #fecfef;
+      --candy-sky: #a8edea;
+      --candy-sun: #ffecd2;
+      --candy-mint: #b9fbc0;
+      --candy-midnight: #0a0a0f;
+      --candy-text-primary: #fef7ff;
+      --candy-text-muted: rgba(245, 249, 255, 0.72);
+      --candy-border-soft: rgba(255, 255, 255, 0.35);
+      --candy-border-strong: rgba(255, 255, 255, 0.55);
+      --candy-window-shadow: 0 16px 32px rgba(12, 16, 35, 0.55), 0 32px 80px rgba(255, 154, 158, 0.35);
+      --candy-surface-glass: rgba(15, 24, 38, 0.94);
+      --candy-surface-gradient: linear-gradient(135deg, rgba(255, 154, 158, 0.18) 0%, rgba(254, 207, 239, 0.18) 50%, rgba(255, 236, 210, 0.18) 100%);
+      --candy-titlebar-gradient: linear-gradient(135deg, rgba(255, 154, 158, 0.22) 0%, rgba(168, 237, 234, 0.12) 100%);
+      --candy-tab-muted: rgba(255, 255, 255, 0.06);
+      --candy-tab-active: rgba(79, 195, 247, 0.28);
+      --candy-tab-border: rgba(79, 195, 247, 0.62);
+      --candy-button-gradient: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.32), rgba(255, 182, 255, 0.16), rgba(167, 139, 250, 0.18));
+      --candy-button-outline: rgba(255, 255, 255, 0.45);
+      --candy-button-text: #ffffff;
+      --candy-card-surface: rgba(12, 20, 34, 0.65);
+      --candy-card-border: rgba(255, 255, 255, 0.4);
+      --candy-hud-grid-gap: 10px;
+      --candy-hud-padding: 10px;
+
+      /* === A1 TALENT SYSTEM SIGNATURE THEME === */
+      --talent-bg-dark: #0a0e1a;
+      --talent-bg-medium: #141824;
+      --talent-bg-light: #1f2437;
+      --talent-glow-purple: #9d4edd;
+      --talent-glow-blue: #00e5ff;
+      --talent-glow-gold: #ffd700;
+      --talent-glow-red: #ff3864;
+      --talent-glow-green: #4ade80;
+      --talent-locked: rgba(255, 255, 255, 0.08);
+      --talent-locked-border: rgba(255, 255, 255, 0.15);
+      --talent-unlockable: rgba(157, 78, 221, 0.25);
+      --talent-unlockable-border: rgba(157, 78, 221, 0.8);
+      --talent-unlocked: rgba(0, 229, 255, 0.2);
+      --talent-unlocked-border: rgba(0, 229, 255, 0.7);
+      --talent-equipped: rgba(255, 215, 0, 0.3);
+      --talent-equipped-border: rgba(255, 215, 0, 0.95);
+      --talent-text-bright: #e0e7ff;
+      --talent-text-dim: rgba(224, 231, 255, 0.6);
+    }
+
+    body[data-candy-theme='sunset'] {
+      --candy-surface-gradient: linear-gradient(135deg, rgba(255, 154, 158, 0.25) 0%, rgba(255, 236, 210, 0.18) 50%, rgba(255, 200, 150, 0.18) 100%);
+      --candy-button-gradient: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.34), rgba(255, 205, 178, 0.22), rgba(255, 154, 158, 0.24));
+    }
+
+    body[data-candy-theme='sugar-mint'] {
+      --candy-surface-gradient: linear-gradient(135deg, rgba(168, 237, 234, 0.2) 0%, rgba(255, 236, 210, 0.18) 100%);
+      --candy-button-gradient: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.34), rgba(185, 251, 192, 0.2), rgba(168, 237, 234, 0.2));
+      --candy-tab-active: rgba(168, 255, 224, 0.28);
+      --candy-tab-border: rgba(122, 248, 200, 0.7);
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top, rgba(255, 154, 158, 0.08), transparent 55%), var(--candy-midnight);
+      color: var(--candy-text-primary);
+      overflow: hidden;
+      transition: background 0.6s ease, color 0.4s ease;
+    }
+
+    body.mission-grade-active:not(.raid-active) {
+      background:
+        radial-gradient(circle at 48% 18%, rgba(var(--mission-grade-color-rgb, 147, 51, 234), 0.22), transparent 62%),
+        radial-gradient(circle at 50% 120%, rgba(var(--mission-grade-color-rgb, 147, 51, 234), 0.26), rgba(10, 10, 15, 0.92));
+      filter: saturate(1.06) contrast(1.05);
+    }
+
+    body.mission-grade-active:not(.raid-active)::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 45% 15%, rgba(var(--mission-grade-color-rgb, 147, 51, 234), 0.18), transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.85;
+      animation: gradePulse 6s ease-in-out infinite;
+    }
+
+    body.mission-grade-active:not(.raid-active)::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(circle at 58% 24%, rgba(255, 255, 255, 0.08), transparent 70%);
+      mix-blend-mode: screen;
+    }
+
+    body.raid-active {
+      background: radial-gradient(
+          circle at var(--parallax-x, 50%) var(--parallax-y, 50%),
+          rgba(var(--raid-rank-color-rgb, 255, 154, 158), 0.22),
+          transparent 60%
+        ),
+        var(--candy-midnight);
+    }
+
+    body.raid-active::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 120% 80% at var(--bloom-x, 50%) var(--bloom-y, 50%),
+          rgba(var(--raid-rank-color-rgb, 255, 154, 158), 0.32),
+          transparent 72%);
+      animation: bloomSweep 2.2s ease-out;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.85;
+    }
+
+    body.raid-active::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at var(--parallax-x, 50%) var(--parallax-y, 50%),
+          rgba(255, 255, 255, 0.12),
+          transparent 70%);
+      mix-blend-mode: screen;
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.6s ease;
+    }
+
+    @keyframes bloomSweep {
+      0% {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      30% {
+        opacity: 0.7;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.25);
+      }
+    }
+
+    @keyframes overlayFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes headerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes gradePulse {
+      0%, 100% { opacity: 0.75; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    @keyframes subtitlePulse {
+      0% {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      30% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      60% {
+        transform: translateY(-3px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dungeon-flythrough {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(10, 14, 28, 0.82), rgba(5, 7, 16, 0.95));
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      z-index: 12000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      pointer-events: auto;
+      animation: flythroughFade 1.3s ease forwards;
+    }
+
+    .dungeon-flythrough.is-skip-ready {
+      cursor: pointer;
+    }
+
+    .dungeon-flythrough .flythrough-layer {
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(circle at center, rgba(79, 195, 247, 0.15), transparent 70%);
+      animation: flythroughParallax 1.8s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .dungeon-flythrough .flythrough-layer.layer-stars {
+      background: repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 6px);
+      mix-blend-mode: screen;
+      animation-duration: 2.4s;
+      opacity: 0.18;
+    }
+
+    .dungeon-flythrough .flythrough-layer.layer-grid {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 70%);
+      -webkit-mask-image: radial-gradient(circle at 50% 35%, rgba(0,0,0,0.8), transparent 70%);
+      mask-image: radial-gradient(circle at 50% 35%, rgba(0,0,0,0.8), transparent 70%);
+      animation-duration: 1.6s;
+    }
+
+    .dungeon-flythrough .flythrough-title {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      color: #f8fbff;
+      text-shadow: 0 10px 40px rgba(0,0,0,0.45);
+      animation: flythroughTitle 1s ease-out forwards;
+      padding: 0 24px;
+    }
+
+    .dungeon-flythrough .flythrough-rank {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 32px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .dungeon-flythrough .flythrough-name {
+      font-size: 22px;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
+    .dungeon-flythrough .flythrough-hint {
+      margin-top: 22px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.7);
+      animation: flythroughHint 1.2s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    @keyframes flythroughFade {
+      0% { opacity: 0; transform: scale(1.08); }
+      12% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1); }
+    }
+
+    @keyframes flythroughParallax {
+      0% { transform: translateY(12%) scale(1.1); opacity: 0.3; }
+      40% { opacity: 0.6; }
+      100% { transform: translateY(-8%) scale(1); opacity: 0; }
+    }
+
+    @keyframes flythroughTitle {
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      60% { opacity: 1; transform: translateY(0) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes flythroughHint {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .raid-reactive-shader {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9990;
+      background:
+        radial-gradient(circle at 50% 20%, var(--shader-primary, rgba(79, 195, 247, 0.28)), transparent 60%),
+        radial-gradient(circle at 15% 80%, var(--shader-secondary, rgba(147, 51, 234, 0.24)), transparent 70%),
+        radial-gradient(circle at 80% 85%, var(--shader-tertiary, rgba(255, 214, 153, 0.16)), transparent 75%);
+      opacity: var(--shader-opacity, 0);
+      mix-blend-mode: screen;
+      transition: background 0.6s ease, opacity 0.45s ease;
+    }
+
+    .raid-recap-card {
+      position: fixed;
+      bottom: 28px;
+      right: 32px;
+      width: 320px;
+      background: linear-gradient(135deg, rgba(15,24,38,0.94), rgba(25,34,48,0.96));
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 18px;
+      box-shadow: 0 28px 58px rgba(10,16,35,0.42);
+      z-index: 11000;
+      color: rgba(237,242,255,0.9);
+      overflow: hidden;
+    }
+
+    .raid-recap-card .recap-surface {
+      padding: 18px 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .raid-recap-card .recap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .raid-recap-card .recap-rank {
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .raid-recap-card .recap-runtime {
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+    }
+
+    .raid-recap-card .recap-close {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 10px;
+      width: 28px;
+      height: 28px;
+      color: rgba(255,255,255,0.85);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .raid-recap-card .recap-close:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .raid-recap-card .recap-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px;
+    }
+
+    .raid-recap-card .recap-metric {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .raid-recap-card .recap-metric-label {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .raid-recap-card .recap-metric-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .raid-recap-card .recap-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .raid-recap-card .recap-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .raid-recap-card .recap-badge.alert {
+      background: rgba(255,110,170,0.28);
+      border-color: rgba(255,110,170,0.42);
+      color: #ffd6ec;
+    }
+
+    .raid-recap-card .recap-branches ul {
+      list-style: none;
+      margin: 8px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .raid-recap-card .recap-branches li {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.72);
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .raid-recap-card .recap-branch-label {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .raid-recap-card .recap-section-title {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .raid-recap-card .recap-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .raid-recap-card .recap-share {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: linear-gradient(135deg, rgba(79,195,247,0.25), rgba(147,51,234,0.25));
+      color: rgba(255,255,255,0.88);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .raid-recap-card .recap-share:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(79,195,247,0.32);
+    }
+
+    .bag-window {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80vw;
+      height: 80vh;
+      max-width: 1100px;
+      max-height: 750px;
+      background: var(--candy-surface-gradient), var(--candy-surface-glass);
+      border: 3px solid var(--candy-border-strong);
+      border-radius: 20px;
+      box-shadow: var(--candy-window-shadow);
+      display: none;
+      flex-direction: column;
+      z-index: 999;
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      transition: box-shadow 0.4s ease, border-color 0.3s ease;
+    }
+
+    .bag-window.open { display: flex; }
+
+    .bag-titlebar {
+      display: flex;
+      align-items: center;
+      padding: 8px 14px;
+      background: var(--candy-titlebar-gradient), rgba(0, 0, 0, 0.28);
+      border-bottom: 2px solid var(--candy-border-soft);
+      border-radius: 20px 20px 0 0;
+      cursor: move;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .bag-titlebar-icon { font-size: 18px; margin-right: 10px; }
+    .bag-titlebar-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--candy-sky); letter-spacing: 0.5px; }
+
+    .bag-tabs-strip { display: flex; gap: 1px; overflow: hidden; padding: 2px 0; }
+    .bag-tab {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px 4px;
+      border-radius: 4px 4px 0 0;
+      background: var(--candy-tab-muted);
+      color: var(--candy-text-muted);
+      font-size: 7px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .bag-tab.active {
+      background: var(--candy-tab-active);
+      border: 1px solid var(--candy-tab-border);
+      color: var(--candy-sky);
+    }
+
+    #hud-wrap {
+      position: fixed;
+      inset: auto 0 0 0;
+      padding: var(--candy-hud-padding);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      pointer-events: none;
+      z-index: 55;
+      gap: var(--candy-hud-grid-gap);
+    }
+
+    #hud-left {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-left: 40px;
+    }
+
+    #hud-right {
+      pointer-events: auto;
+      justify-self: end;
+      display: grid;
+      grid-template-rows: auto auto;
+      gap: 10px;
+      align-content: end;
+      margin-right: 147px;
+      margin-bottom: 40px;
+    }
+
+    .utility-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; align-items: center; }
+    .utility-row { display: flex; gap: 10px; }
+
+    .utility-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 2px solid var(--candy-button-outline);
+      background: var(--candy-button-gradient);
+      color: var(--candy-button-text);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .utility-btn:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 10px 22px rgba(255, 154, 158, 0.28); }
+    .utility-row.top .utility-btn { background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(168,237,234,0.2), rgba(168,230,255,0.18)); border-color: rgba(168, 237, 234, 0.5); }
+    .utility-row.bot .utility-btn[data-btn=bag] { background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.3), rgba(255,214,102,0.22), rgba(255,235,153,0.18)); border-color: rgba(255,214,102,0.6); }
+    .utility-btn[data-btn=ai] { background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.16), rgba(186,85,211,0.2), rgba(233,215,255,0.12)); border: 2px dashed rgba(186,85,211,0.75); }
+
+    .skill-row { display: flex; gap: 10px; margin-bottom: 12px; justify-content: flex-end; }
+    .skill-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 3px solid rgba(255, 255, 255, 0.32);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.18));
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      font-size: 13px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .skill-pill:hover { transform: translateY(-1px); }
+    .skill-pill.s1 { border-color: rgba(255,122,217,0.78); background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(255,122,217,0.26), rgba(255,181,232,0.18)); }
+    .skill-pill.s2 { border-color: rgba(122,248,200,0.82); background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(122,248,200,0.25), rgba(168,255,224,0.18)); }
+    .skill-pill.s3 { border-color: rgba(122,213,255,0.82); background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(122,213,255,0.25), rgba(168,230,255,0.18)); }
+
+    .bag-content-pane { flex: 1; padding: 10px; overflow-y: auto; overflow-x: hidden; }
+
+    .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; }
+    .item-card {
+      background: var(--candy-card-surface);
+      border: 2px solid var(--candy-card-border);
+      border-radius: 14px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 12px 28px rgba(10, 16, 30, 0.35);
+    }
+    .item-icon { font-size: 28px; }
+    .item-name { font-size: 11px; font-weight: 700; color: rgba(207, 227, 255, 0.92); text-align: center; }
+
+    body[data-viewport-mode='tablet'] .bag-window {
+      width: 92vw;
+      height: 92vh;
+      border-radius: 18px;
+    }
+
+    body[data-viewport-mode='mobile'] .bag-window {
+      width: 96vw;
+      height: 96vh;
+      top: 52%;
+      border-radius: 16px;
+    }
+
+    body[data-viewport-mode='tablet'] #hud-right {
+      margin-right: 40px;
+      margin-bottom: 24px;
+      grid-template-rows: auto;
+    }
+
+    body[data-viewport-mode='tablet'] #hud-left {
+      margin-left: 20px;
+    }
+
+    body[data-viewport-mode='mobile'] #hud-wrap {
+      grid-template-columns: 1fr;
+      padding: 8px;
+      gap: 8px;
+    }
+
+    body[data-viewport-mode='mobile'] #hud-left,
+    body[data-viewport-mode='mobile'] #hud-right {
+      margin: 0;
+      justify-self: center;
+      width: 100%;
+    }
+
+    body[data-viewport-mode='mobile'] .utility-row {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    body[data-viewport-mode='mobile'] .bag-tabs-strip {
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    body[data-viewport-mode='mobile'] .bag-tab {
+      font-size: 8px;
+      padding: 4px 6px;
+    }
+
+    @media (max-width: 480px) {
+      .bag-titlebar-title { font-size: 13px; }
+      .utility-btn { font-size: 12px; padding: 9px 12px; }
+      .skill-pill { font-size: 12px; padding: 8px 12px; }
+    }
+
+    .candy-pane {
+      color: var(--candy-text-primary);
+    }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(245, 249, 255, 0.72);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease, border-color 0.22s ease;
+    }
+
+    .filter-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(10, 16, 35, 0.35);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .filter-chip.active {
+      background: linear-gradient(135deg, rgba(79, 195, 247, 0.55), rgba(168, 237, 234, 0.45));
+      border-color: rgba(79, 195, 247, 0.9);
+      color: var(--candy-text-primary);
+      box-shadow: 0 16px 34px rgba(79, 195, 247, 0.45);
+    }
+
+    .tab-empty {
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      background: rgba(15, 24, 38, 0.62);
+      padding: 24px;
+      text-align: center;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      color: var(--candy-text-muted);
+      box-shadow: 0 18px 38px rgba(10, 16, 35, 0.35);
+      transition: transform 0.18s ease, box-shadow 0.2s ease;
+    }
+
+    .tab-empty:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 42px rgba(10, 16, 35, 0.42);
+    }
+
+    .tab-empty .empty-icon {
+      font-size: 36px;
+      margin-bottom: 6px;
+      color: rgba(255, 214, 252, 0.9);
+    }
+
+    .tab-empty p {
+      margin: 4px 0;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+    }
+
+    .tab-empty .empty-hint {
+      font-size: 11px;
+      color: rgba(245, 249, 255, 0.55);
+    }
+
+    .candy-button {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: linear-gradient(135deg, rgba(255, 154, 158, 0.4), rgba(198, 228, 255, 0.35));
+      color: var(--candy-text-primary);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 14px 28px rgba(10, 16, 35, 0.35);
+      transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    .candy-button:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 36px rgba(10, 16, 35, 0.42);
+      filter: brightness(1.08);
+    }
+
+    .candy-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: grayscale(0.3);
+      box-shadow: none;
+    }
+
+    #bagWindow select {
+      border-radius: 12px;
+      background: rgba(10, 16, 30, 0.65);
+      border: 1px solid rgba(79, 195, 247, 0.35);
+      color: var(--candy-text-primary);
+      padding: 6px 12px;
+      font-size: 11px;
+      box-shadow: 0 12px 24px rgba(10, 16, 35, 0.35);
+      transition: border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    #bagWindow select:focus {
+      outline: none;
+      border-color: rgba(168, 237, 234, 0.7);
+      box-shadow: 0 16px 32px rgba(79, 195, 247, 0.35);
+    }
+
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(255, 255, 255, 0.12);
+      color: rgba(245, 249, 255, 0.82);
+      box-shadow: 0 10px 20px rgba(10, 16, 35, 0.28);
+    }
+    .mission-board-container .dungeon-card:hover {
+      box-shadow: 0 28px 60px rgba(255, 111, 199, 0.35);
+      transform: translateY(-6px);
+    }
+
+    .mission-board-container .dungeon-card {
+      cursor: pointer;
+      min-height: 100%;
+    }
+
+    .mission-board-container .dungeon-card .dungeon-card-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .mission-board-container .dungeon-card .dungeon-footer {
+      margin-top: auto;
+    }
+
+    .mission-board-container .btn-enter-dungeon {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mission-board-container .btn-enter-dungeon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.35) 55%, transparent 100%);
+      transform: translateX(-120%);
+      animation: candyShimmer 2.6s linear infinite;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mission-board-container .btn-enter-dungeon:hover::after {
+      opacity: 1;
+    }
+
+    @keyframes candyShimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .candy-dungeon-recap {
+      position: fixed;
+      bottom: 28px;
+      right: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 22px;
+      background: linear-gradient(135deg, rgba(255,154,158,0.75), rgba(167,139,250,0.75));
+      border: 2px solid rgba(255,255,255,0.55);
+      border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(13,16,35,0.42);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 160ms ease, transform 220ms ease;
+      z-index: 10005;
+      pointer-events: none;
+    }
+
+    .candy-dungeon-recap.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .candy-dungeon-recap .recap-icon {
+      font-size: 28px;
+    }
+
+    .candy-dungeon-recap .recap-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0d1226;
+    }
+
+    .candy-dungeon-recap .recap-subtitle {
+      font-size: 12px;
+      color: rgba(12,18,38,0.78);
+      margin-top: 2px;
+    }
+
+    .candy-dungeon-recap .recap-rewards {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .candy-dungeon-recap .recap-reward {
+      font-size: 11px;
+      padding: 4px 8px;
+      background: rgba(255,255,255,0.75);
+      border-radius: 8px;
+      color: #0d1226;
+    }
+
+    .candy-raid-panel {
+      margin-top: 18px;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(79,195,247,0.28), rgba(167,139,250,0.32));
+      border: 2px solid rgba(255,255,255,0.38);
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(12, 16, 35, 0.45);
+      color: var(--candy-text-primary);
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .candy-raid-panel .raid-panel-header {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .candy-raid-panel .raid-panel-icon {
+      font-size: 26px;
+    }
+
+    .candy-raid-panel .raid-panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
+
+    .candy-raid-panel .raid-panel-subtitle {
+      font-size: 11px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .candy-raid-panel .raid-panel-body {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px 14px;
+    }
+
+    .candy-raid-panel .raid-panel-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .candy-raid-panel .raid-panel-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.4px;
+    }
+
+    .candy-raid-panel .raid-panel-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .candy-raid-panel .raid-panel-footer {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .candy-raid-panel .raid-panel-leader {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 8px;
+    }
+
+    .candy-raid-panel .leader-head {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.5px;
+    }
+
+    .candy-raid-panel .leader-body {
+      font-size: 12px;
+      color: #ffffff;
+      margin-top: 4px;
+    }
+
+    .candy-dungeon-overlay {
+      position: fixed;
+      right: 28px;
+      bottom: 200px;
+      width: 320px;
+      background: linear-gradient(135deg, rgba(255,154,158,0.85), rgba(168,237,234,0.78));
+      border: 2px solid rgba(255,255,255,0.55);
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(13, 16, 35, 0.5);
+      color: #0d1226;
+      z-index: 10006;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(24px);
+      pointer-events: auto;
+      will-change: transform, opacity;
+      animation: overlayFadeIn 0.32s ease-out forwards;
+      outline: none;
+    }
+
+    .candy-dungeon-overlay .overlay-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px 10px;
+    }
+
+    .candy-dungeon-overlay .overlay-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .candy-dungeon-overlay .overlay-subtitle {
+      font-size: 11px;
+      color: rgba(13,18,38,0.7);
+    }
+
+    .candy-dungeon-overlay .overlay-close {
+      background: rgba(255,255,255,0.5);
+      border: none;
+      border-radius: 10px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #0d1226;
+      transition: background 0.2s ease;
+    }
+
+    .candy-dungeon-overlay .overlay-close:hover {
+      background: rgba(255,255,255,0.75);
+    }
+
+    .candy-dungeon-overlay .overlay-body {
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .overlay-entering .overlay-header {
+      animation: headerPulse 1s ease-in-out;
+    }
+
+    .overlay-metrics {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .timer-widget {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .timer-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .timer-label {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(13,18,38,0.65);
+      font-weight: 700;
+    }
+
+    .timer-countdown {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #0d1226;
+      transition: color 0.3s ease;
+    }
+
+    .timer-countdown.timer-expired {
+      color: #ff4d78;
+    }
+
+    .timer-progress {
+      position: relative;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(13,18,38,0.18);
+      overflow: hidden;
+    }
+
+    .timer-progress-bar {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(168,237,234,0.9), rgba(255,154,158,0.9));
+      transform-origin: left center;
+      transform: scaleX(1);
+      transition: transform 0.2s ease;
+    }
+
+    .audio-toggle {
+      border: 1px solid rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.22);
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #0d1226;
+      font-size: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .audio-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(10,16,35,0.25);
+    }
+
+    .audio-toggle.is-muted {
+      background: rgba(13,18,38,0.6);
+      color: rgba(255,255,255,0.8);
+    }
+
+    .audio-toggle .audio-icon {
+      pointer-events: none;
+    }
+
+    .reward-ticker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.32);
+      color: rgba(13,18,38,0.82);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .ticker-item.alert {
+      background: rgba(255,110,140,0.24);
+      border-color: rgba(255,110,140,0.6);
+      color: #8f1037;
+    }
+
+    .ticker-icon {
+      font-size: 13px;
+    }
+
+    .ticker-empty {
+      font-size: 11px;
+      color: rgba(13,18,38,0.6);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .story-beats {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(15, 24, 38, 0.82);
+      border: 1px solid rgba(255,255,255,0.24);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+      display: grid;
+      gap: 12px;
+    }
+
+    .story-beats-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    .story-beats-title {
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(13,18,38,0.68);
+    }
+
+    .story-beats-subtitle {
+      font-size: 11px;
+      color: rgba(13,18,38,0.5);
+    }
+
+    .story-beats-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 140px;
+      overflow-y: auto;
+      /* Firefox */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+    }
+
+    /* Webkit browsers (Chrome, Safari, Edge) */
+    .story-beats-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .story-beats-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    .story-beats-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    .story-beats-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .story-beat {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .story-beat.completed {
+      border-color: rgba(122, 248, 200, 0.35);
+      background: rgba(122, 248, 200, 0.16);
+    }
+
+    .story-beat.current {
+      border-color: rgba(79, 195, 247, 0.5);
+      background: rgba(79, 195, 247, 0.2);
+      transform: translateX(2px);
+    }
+
+    .story-beat.preset {
+      border-style: dashed;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .story-beat-index {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(13,18,38,0.6);
+    }
+
+    .story-beat-body {
+      display: grid;
+      gap: 4px;
+    }
+
+    .story-beat-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(13,18,38,0.82);
+    }
+
+    .story-beat-subtitle {
+      font-size: 11px;
+      color: rgba(13,18,38,0.6);
+    }
+
+    .story-beat-branch {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(13,18,38,0.55);
+    }
+
+    .story-empty {
+      font-size: 11px;
+      color: rgba(13,18,38,0.55);
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle-pulsing .overlay-subtitle {
+      animation: subtitlePulse 2.8s ease-out;
+    }
+
+    .overlay-footer {
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.18);
+      border-top: 1px solid rgba(255,255,255,0.28);
+      font-size: 10px;
+      color: rgba(13,18,38,0.78);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+    }
+
+    .overlay-footer .contextual-tip {
+      margin: 0;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1.4;
+    }
+
+    .floor-track {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .floor-track .floor-node {
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.65);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .floor-track .floor-node.current {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(13,16,35,0.25);
+      border-color: rgba(79,195,247,0.9);
+    }
+
+    .floor-track .floor-node.cleared {
+      opacity: 0.85;
+      border-style: dashed;
+    }
+
+    .floor-track .node-icon {
+      font-size: 22px;
+    }
+
+    .floor-track .node-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0d1226;
+    }
+
+    .floor-track .node-desc {
+      font-size: 11px;
+      color: rgba(13,18,38,0.75);
+      margin-top: 2px;
+    }
+
+    .floor-track .node-branch {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: rgba(13,18,38,0.7);
+      margin-top: 4px;
+      letter-spacing: 0.4px;
+    }
+
+    .branch-area {
+      background: rgba(255,255,255,0.45);
+      border-radius: 12px;
+      padding: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .branch-area .branch-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0d1226;
+    }
+
+    .branch-area .branch-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .branch-area .branch-btn {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(13,18,38,0.2);
+      background: rgba(255,255,255,0.75);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .branch-area .branch-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .branch-area .branch-btn.selected {
+      border-color: rgba(79,195,247,0.85);
+      box-shadow: 0 8px 18px rgba(13,16,35,0.25);
+    }
+
+    .branch-area .branch-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0d1226;
+    }
+
+    .branch-area .branch-mod {
+      font-size: 11px;
+      color: rgba(13,18,38,0.7);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .branch-area.branch-required {
+      animation: branchPulse 0.6s ease;
+    }
+
+    @keyframes branchPulse {
+      0% { box-shadow: 0 0 0 rgba(255,0,0,0.45); }
+      50% { box-shadow: 0 0 18px rgba(255,0,0,0.65); }
+      100% { box-shadow: 0 0 0 rgba(255,0,0,0.0); }
+    }
+
+    .overlay-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .overlay-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(13,18,38,0.85);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .overlay-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(13,16,35,0.35);
+    }
+
+    .timeline-panel {
+      background: rgba(13,16,35,0.74);
+      border-radius: 12px;
+      padding: 12px;
+      color: #fef7ff;
+      max-height: 220px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .timeline-panel.hidden {
+      display: none;
+    }
+
+    .timeline-panel .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .timeline-items {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 170px;
+    }
+
+    .timeline-item {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .timeline-item.active {
+      border-color: rgba(79,195,247,0.85);
+      box-shadow: 0 10px 24px rgba(79,195,247,0.35);
+    }
+
+    .timeline-head {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .timeline-body {
+      color: rgba(237,242,255,0.8);
+    }
+
+    .timeline-empty {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /* A1 TALENT SYSTEM ANIME STYLE                                */
+    /* ═══════════════════════════════════════════════════════════ */
+
+    /* AP Tracker HUD - Top Right Corner */
+    /* AP tracker is now rendered inline in talent tab content */
+
+    @keyframes apTrackerFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    #ap-tracker-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--talent-glow-purple);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #ap-tracker-icon {
+      font-size: 18px;
+      animation: apIconPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes apIconPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px var(--talent-glow-purple)); }
+      50% { transform: scale(1.15); filter: drop-shadow(0 0 8px var(--talent-glow-purple)); }
+    }
+
+    .ap-tracker-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 13px;
+      color: var(--talent-text-dim);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .ap-tracker-stat:last-child {
+      border-bottom: none;
+    }
+
+    .ap-tracker-value {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--talent-text-bright);
+    }
+
+    .ap-tracker-value.highlight {
+      color: var(--talent-glow-gold);
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    }
+
+    /* Talent System Container */
+    .talent-system-wrapper {
+      padding: 20px;
+      background: var(--talent-bg-dark);
+      min-height: 100%;
+      overflow-y: auto;
+    }
+
+    .talent-header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--talent-bg-medium) 0%, var(--talent-bg-dark) 100%);
+      border: 2px solid var(--talent-glow-blue);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 229, 255, 0.25);
+    }
+
+    .talent-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--talent-glow-blue);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .talent-ap-display {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .talent-ap-main {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--talent-glow-gold);
+      text-shadow: 0 0 16px rgba(255, 215, 0, 0.8);
+      letter-spacing: 1px;
+    }
+
+    .talent-ap-label {
+      font-size: 12px;
+      color: var(--talent-text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Filter Pills */
+    .talent-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .talent-filter-pill {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: 2px solid var(--talent-locked-border);
+      background: var(--talent-bg-medium);
+      color: var(--talent-text-dim);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .talent-filter-pill:hover {
+      transform: translateY(-2px);
+      border-color: var(--talent-glow-purple);
+      box-shadow: 0 8px 16px rgba(157, 78, 221, 0.3);
+    }
+
+    .talent-filter-pill.active {
+      background: linear-gradient(135deg, var(--talent-glow-purple) 0%, var(--talent-glow-blue) 100%);
+      border-color: var(--talent-glow-blue);
+      color: #ffffff;
+      box-shadow: 0 8px 24px rgba(0, 229, 255, 0.5);
+    }
+
+    /* Talent Lanes Grid */
+    .talent-lanes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .talent-lane {
+      background: linear-gradient(135deg, var(--talent-bg-medium) 0%, var(--talent-bg-dark) 100%);
+      border: 2px solid var(--talent-locked-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .talent-lane:hover {
+      border-color: var(--talent-glow-purple);
+      box-shadow: 0 12px 32px rgba(157, 78, 221, 0.3);
+    }
+
+    .talent-lane-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--talent-glow-purple);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--talent-locked-border);
+      text-shadow: 0 0 12px rgba(157, 78, 221, 0.5);
+    }
+
+    /* Talent Nodes */
+    .talent-node {
+      background: var(--talent-bg-light);
+      border: 2px solid var(--talent-locked-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .talent-node::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+      transform: rotate(45deg);
+      transition: all 0.6s ease;
+    }
+
+    .talent-node:hover::before {
+      animation: nodeShimmer 2s infinite;
+    }
+
+    @keyframes nodeShimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    /* Locked State */
+    .talent-node.locked {
+      background: var(--talent-locked);
+      border-color: var(--talent-locked-border);
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .talent-node.locked .talent-node-icon {
+      filter: grayscale(100%);
+    }
+
+    /* Unlockable State - Ready to unlock */
+    .talent-node.unlockable {
+      background: var(--talent-unlockable);
+      border-color: var(--talent-unlockable-border);
+      animation: nodeUnlockablePulse 2s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(157, 78, 221, 0.4);
+    }
+
+    @keyframes nodeUnlockablePulse {
+      0%, 100% { 
+        border-color: var(--talent-unlockable-border); 
+        box-shadow: 0 0 20px rgba(157, 78, 221, 0.4);
+      }
+      50% { 
+        border-color: var(--talent-glow-purple); 
+        box-shadow: 0 0 30px rgba(157, 78, 221, 0.7);
+      }
+    }
+
+    /* Unlocked State */
+    .talent-node.unlocked {
+      background: var(--talent-unlocked);
+      border-color: var(--talent-unlocked-border);
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.3);
+    }
+
+    .talent-node.unlocked:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 229, 255, 0.5);
+    }
+
+    /* Equipped State */
+    .talent-node.equipped {
+      background: var(--talent-equipped);
+      border-color: var(--talent-equipped-border);
+      box-shadow: 0 0 24px rgba(255, 215, 0, 0.6);
+      animation: nodeEquippedGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes nodeEquippedGlow {
+      0%, 100% { box-shadow: 0 0 24px rgba(255, 215, 0, 0.6); }
+      50% { box-shadow: 0 0 36px rgba(255, 215, 0, 0.9); }
+    }
+
+    /* Node Content */
+    .talent-node-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .talent-node-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--talent-text-bright);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .talent-node-icon {
+      font-size: 16px;
+    }
+
+    .talent-node-cost {
+      background: var(--talent-glow-purple);
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      box-shadow: 0 2px 8px rgba(157, 78, 221, 0.4);
+    }
+
+    .talent-node.locked .talent-node-cost {
+      background: rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .talent-node-desc {
+      font-size: 12px;
+      color: var(--talent-text-dim);
+      line-height: 1.4;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .talent-node-req {
+      font-size: 11px;
+      color: var(--talent-glow-red);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Node Buttons */
+    .talent-node-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .talent-node-btn.btn-unlock {
+      background: linear-gradient(135deg, var(--talent-glow-purple) 0%, var(--talent-glow-blue) 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(157, 78, 221, 0.4);
+    }
+
+    .talent-node-btn.btn-unlock:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(157, 78, 221, 0.6);
+    }
+
+    .talent-node-btn.btn-equip {
+      background: linear-gradient(135deg, var(--talent-glow-blue) 0%, var(--talent-glow-green) 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(0, 229, 255, 0.4);
+    }
+
+    .talent-node-btn.btn-equip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 229, 255, 0.6);
+    }
+
+    .talent-node-btn.btn-equipped {
+      background: linear-gradient(135deg, var(--talent-glow-gold) 0%, #ff8c00 100%);
+      color: #000000;
+      box-shadow: 0 4px 16px rgba(255, 215, 0, 0.6);
+    }
+
+    .talent-node-btn.btn-locked {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.4);
+      cursor: not-allowed;
+    }
+
+    .talent-node-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Unlock Modal - Positioned within bag window */
+    #talent-unlock-modal {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: modalFadeIn 0.3s ease;
+      border-radius: 20px;
+    }
+
+    #talent-unlock-modal.show {
+      display: flex;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .talent-modal-content {
+      background: linear-gradient(135deg, var(--talent-bg-dark) 0%, var(--talent-bg-medium) 100%);
+      border: 3px solid var(--talent-glow-purple);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(157, 78, 221, 0.6);
+      animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    @keyframes modalSlideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .talent-modal-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--talent-glow-purple);
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(157, 78, 221, 0.6);
+    }
+
+    .talent-modal-details {
+      background: var(--talent-bg-light);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .talent-modal-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--talent-text-bright);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .talent-modal-desc {
+      font-size: 14px;
+      color: var(--talent-text-dim);
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .talent-modal-cost-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(157, 78, 221, 0.15);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .talent-modal-cost-label {
+      font-size: 14px;
+      color: var(--talent-text-dim);
+    }
+
+    .talent-modal-cost-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--talent-glow-gold);
+      text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+    }
+
+    .talent-modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .talent-modal-btn {
+      flex: 1;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .talent-modal-btn.btn-confirm {
+      background: linear-gradient(135deg, var(--talent-glow-purple) 0%, var(--talent-glow-blue) 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 20px rgba(157, 78, 221, 0.5);
+    }
+
+    .talent-modal-btn.btn-confirm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(157, 78, 221, 0.7);
+    }
+
+    .talent-modal-btn.btn-cancel {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--talent-text-dim);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .talent-modal-btn.btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Unlock Animation Effect */
+    .talent-unlock-effect {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      animation: unlockExplosion 0.8s ease-out forwards;
+    }
+
+    @keyframes unlockExplosion {
+      0% {
+        opacity: 1;
+        transform: scale(0);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.5);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(2);
+      }
+    }
+
+    /* Reset Button */
+    .talent-reset-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--talent-glow-red) 0%, #ff1744 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 16px rgba(255, 56, 100, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .talent-reset-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 56, 100, 0.6);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+
+      .talent-title {
+        font-size: 20px;
+      }
+
+      .talent-lanes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .talent-modal-content {
+        padding: 24px;
+        width: 95%;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .candy-dungeon-overlay {
+        right: 16px;
+        bottom: 160px;
+        width: 86vw;
+      }
+    }
+    /* ═══════════════════════════════════════════════════════════════ */
+    /* STAT ANIMATIONS AND POLISH                                      */
+    /* ═══════════════════════════════════════════════════════════════ */
+
+    /* Stat value change animations */
+    .stat-value {
+      transition: transform 0.2s ease, color 0.3s ease;
+    }
+
+    .stat-value.changing {
+      animation: statPulse 0.4s ease;
+    }
+
+    @keyframes statPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); color: #4ade80; }
+      100% { transform: scale(1); }
+    }
+
+    .stat-pill {
+      transition: all 0.3s ease;
+    }
+
+    .stat-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(79, 195, 247, 0.3);
+    }
+
+    /* Stats footer polish */
+    .bag-stats-footer {
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(12, 20, 34, 0.5));
+      border-top: 2px solid rgba(79, 195, 247, 0.3);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Tab switching animations */
+    .bag-content-pane {
+      transition: opacity 0.2s ease;
+    }
+
+    .bag-content-pane.fade-out {
+      opacity: 0;
+    }
+
+    .bag-content-pane.fade-in {
+      opacity: 1;
+      animation: fadeInContent 0.3s ease;
+    }
+
+    @keyframes fadeInContent {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <script>
+    // --- PRODUCTION NOTES ---
+    // This standalone file is designed to work offline from a folder.
+    // To integrate into your game:
+    // 1. Copy the necessary .js and .css files into your project.
+    // 2. Ensure the paths in the <link> and <script> tags below are correct.
+    // 3. Replace the `window.gameState` object with your game's actual state data.
+    // 4. Call `window.BagSystem.init()` once your game has loaded.
+    window.A1K_ALL_MANIFESTS_PATH='all-manifests.json';
+    window.A1K_ASSET_MANIFEST_PATH='all-manifests.json';
+    window.A1K_ARCADE_MANIFEST_PATH='all-manifests.json';
+  </script>
+  <script>
+    // Inline Manifests (asset + arcade) for offline usage
+    window.__ASSET_MANIFEST = {
+      "assets": [
+        {"id":"pet_firecub","type":"pet","icon":"🐕","rarity":"common"},
+        {"id":"veh_hoverbike","type":"vehicle","icon":"🏍️","rarity":"uncommon"},
+        {"id":"veh_cybercar","type":"vehicle","icon":"🚗","rarity":"rare"}
+      ]
+    };
+    window.__ARCADE_MANIFEST = {
+      name:"A1K Arcade System",version:"1.0.0",games:[
+        {id:"slots",name:"Slot Machine",icon:"🎰"},
+        {id:"rps",name:"Rock Paper Scissors",icon:"✊✋✌️"},
+        {id:"dice",name:"Dice Duel",icon:"🎲"},
+        {id:"wheel",name:"Color Wheel",icon:"🎡"},
+        {id:"highlow",name:"High-Low Card",icon:"🃏"}
+      ]
+    };
+
+    // Fetch shim to intercept manifest requests (handles file://) 
+    const ORIG_FETCH = window.fetch;
+    window.fetch = async function(resource, init){
+      if(typeof resource === 'string'){
+        if(resource.includes('all-manifests.json')){
+          // Try to load the actual file first, fall back to inline data
+          try {
+            const response = await ORIG_FETCH('all-manifests.json', { cache: 'no-store' });
+            if(response.ok){
+              const data = await response.json();
+              window.__ALL_MANIFESTS = data;
+              return new Response(JSON.stringify(data), {status:200, headers:{'Content-Type':'application/json'}});
+            }
+          } catch(e) {
+            console.warn('[Fetch Shim] Could not load all-manifests.json, using inline data');
+          }
+          // Fallback: Return the merged manifest with all data nested under keys
+          const allManifests = {
+            assetManifest: window.__ASSET_MANIFEST || { version: 1, assets: [] },
+            bagManifest: window.__BAG_MANIFEST || {},
+            unifiedManifests: window.__UNIFIED_MANIFESTS || {},
+            arcadeManifest: window.__ARCADE_MANIFEST || { name: "A1K Arcade System", version: "1.0.0", games: [] }
+          };
+          window.__ALL_MANIFESTS = allManifests;
+          return new Response(JSON.stringify(allManifests), {status:200, headers:{'Content-Type':'application/json'}});
+        }
+        if(resource.includes('asset_manifest.json')){
+          // Try to load from all-manifests.json first
+          if(!window.__ALL_MANIFESTS){
+            try {
+              const response = await ORIG_FETCH('all-manifests.json', { cache: 'no-store' });
+              if(response.ok){
+                window.__ALL_MANIFESTS = await response.json();
+              }
+            } catch(e) {}
+          }
+          // Extract assetManifest from all-manifests if available
+          if(window.__ALL_MANIFESTS && window.__ALL_MANIFESTS.assetManifest){
+            return new Response(JSON.stringify(window.__ALL_MANIFESTS.assetManifest), {status:200, headers:{'Content-Type':'application/json'}});
+          }
+          // Fallback to inline data
+          return new Response(JSON.stringify(window.__ASSET_MANIFEST), {status:200, headers:{'Content-Type':'application/json'}});
+        }
+        if(resource.includes('arcade-manifest.json')){
+          // Try to load from all-manifests.json first
+          if(!window.__ALL_MANIFESTS){
+            try {
+              const response = await ORIG_FETCH('all-manifests.json', { cache: 'no-store' });
+              if(response.ok){
+                window.__ALL_MANIFESTS = await response.json();
+              }
+            } catch(e) {}
+          }
+          // Extract arcadeManifest from all-manifests if available
+          if(window.__ALL_MANIFESTS && window.__ALL_MANIFESTS.arcadeManifest){
+            return new Response(JSON.stringify(window.__ALL_MANIFESTS.arcadeManifest), {status:200, headers:{'Content-Type':'application/json'}});
+          }
+          // Fallback to inline data
+          return new Response(JSON.stringify(window.__ARCADE_MANIFEST), {status:200, headers:{'Content-Type':'application/json'}});
+        }
+      }
+      return ORIG_FETCH(resource, init);
+    };
+
+    const CANDY_THEME_MAP = {
+      classic: {
+        '--candy-surface-gradient': 'linear-gradient(135deg, rgba(255, 154, 158, 0.18) 0%, rgba(254, 207, 239, 0.18) 50%, rgba(255, 236, 210, 0.18) 100%)',
+        '--candy-button-gradient': 'radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.32), rgba(255, 182, 255, 0.16), rgba(167, 139, 250, 0.18))',
+        '--candy-tab-active': 'rgba(79, 195, 247, 0.28)',
+        '--candy-tab-border': 'rgba(79, 195, 247, 0.62)'
+      },
+      sunset: {
+        '--candy-surface-gradient': 'linear-gradient(135deg, rgba(255,154,158,0.25) 0%, rgba(255,236,210,0.18) 50%, rgba(255,200,150,0.18) 100%)',
+        '--candy-button-gradient': 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.34), rgba(255,205,178,0.22), rgba(255,154,158,0.24))',
+        '--candy-tab-active': 'rgba(255, 154, 158, 0.25)',
+        '--candy-tab-border': 'rgba(255, 178, 158, 0.65)'
+      },
+      'sugar-mint': {
+        '--candy-surface-gradient': 'linear-gradient(135deg, rgba(168,237,234,0.22) 0%, rgba(255,236,210,0.18) 100%)',
+        '--candy-button-gradient': 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.34), rgba(185,251,192,0.2), rgba(168,237,234,0.2))',
+        '--candy-tab-active': 'rgba(168,255,224,0.28)',
+        '--candy-tab-border': 'rgba(122,248,200,0.7)'
+      }
+    };
+
+    window.applyCandyTheme = function(themeName = 'classic') {
+      const palette = CANDY_THEME_MAP[themeName] || CANDY_THEME_MAP.classic;
+      const root = document.documentElement;
+      Object.entries(CANDY_THEME_MAP.classic).forEach(([token, value]) => {
+        root.style.setProperty(token, value);
+      });
+      Object.entries(palette).forEach(([token, value]) => {
+        root.style.setProperty(token, value);
+      });
+      document.body.dataset.candyTheme = themeName === 'classic' ? '' : themeName;
+      try {
+        localStorage.setItem('A1K_CANDY_THEME', themeName);
+      } catch (error) {
+        console.warn('[Candy Theme] Failed to persist theme selection', error);
+      }
+    };
+
+    window.restoreCandyTheme = function() {
+      try {
+        const stored = localStorage.getItem('A1K_CANDY_THEME');
+        if (stored) {
+          window.applyCandyTheme(stored);
+          return;
+        }
+      } catch (error) {
+        console.warn('[Candy Theme] Failed to read theme selection', error);
+      }
+      window.applyCandyTheme('classic');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => window.restoreCandyTheme());
+
+    let viewportUpdateTimer = null;
+    window.updateCandyViewportMode = function() {
+      const w = window.innerWidth;
+      const mode = w < 640 ? 'mobile' : w < 992 ? 'tablet' : 'desktop';
+      const current = document.body.dataset.viewportMode;
+      if (current !== mode) {
+        document.body.dataset.viewportMode = mode;
+      }
+    };
+
+    const scheduleViewportUpdate = () => {
+      if (viewportUpdateTimer) return;
+      viewportUpdateTimer = requestAnimationFrame(() => {
+        viewportUpdateTimer = null;
+        window.updateCandyViewportMode();
+      });
+    };
+
+    window.addEventListener('resize', scheduleViewportUpdate);
+    document.addEventListener('DOMContentLoaded', () => window.updateCandyViewportMode());
+
+    // Minimal supernatural powers database sample
+    window.SUPERNATURAL_POWERS_DATABASE = {
+      power_flame_touch:{id:"power_flame_touch",name:"Flame Touch",icon:"🔥",category:"elemental",rarity:"common",cooldown:8000,description:"Small burst of fire damage."},
+      power_frost_shield:{id:"power_frost_shield",name:"Frost Shield",icon:"🧊",category:"elemental",rarity:"common",cooldown:10000,description:"Temporary ice barrier."},
+      power_wind_step:{id:"power_wind_step",name:"Wind Step",icon:"🌪️",category:"elemental",rarity:"uncommon",cooldown:6000,description:"Quick dash using air."},
+      power_earth_blessing:{id:"power_earth_blessing",name:"Earth Blessing",icon:"🪨",category:"elemental",rarity:"uncommon",cooldown:12000,description:"Defense boost from earth."}
+    };
+
+  </script>
+
+  <script src="game-data.js"></script>
+  <!-- Mission Board System -->
+  <script src="candy-dungeon-bundle.js"></script>
+  <script>
+    const demoItems = [
+      { id:'item_chest_001', name:'Bronze Chest', icon:'📦', category:'container', quantity:3, rarity:'common' },
+      { id:'item_potion_001', name:'Health Potion', icon:'🧪', category:'consumable', quantity:10, rarity:'common' },
+      { id:'item_potion_002', name:'Mana Potion', icon:'💙', category:'consumable', quantity:6, rarity:'common' }
+    ];
+
+    // Advanced gear (vanguard/mythic) removed - now only available in shop
+    // Players start with only common Recruit gear
+
+    const starterEquipped = {
+      head: window.GearData.createInstance('gear_recruit_helm'),
+      chest: window.GearData.createInstance('gear_recruit_mail'),
+      gloves: window.GearData.createInstance('gear_recruit_gloves'),
+      pants: window.GearData.createInstance('gear_recruit_pants'),
+      boots: window.GearData.createInstance('gear_recruit_boots'),
+      weapon: window.GearData.createInstance('gear_recruit_blade'),
+      offhand: window.GearData.createInstance('gear_recruit_shield'),
+      ring1: window.GearData.createInstance('gear_recruit_ring'),
+      ring2: null,
+      necklace: window.GearData.createInstance('gear_recruit_amulet'),
+      vehicle: null,
+      pet: null,
+      spirit: null,
+      robot: null
+    };
+    
+    // Verify pants are created correctly
+    if (starterEquipped.pants) {
+      console.log('✅ Starter pants created:', starterEquipped.pants.name, 'Slot:', starterEquipped.pants.slot);
+    } else {
+      console.error('❌ Starter pants failed to create!');
+    }
+
+    // Only common Recruit gear in inventory - rare/epic/legendary gear available in shop
+    const inventoryGear = [
+      window.GearData.createInstance('gear_recruit_ring'),
+      window.GearData.createInstance('gear_recruit_boots'),
+      window.GearData.createInstance('gear_recruit_pants'), // Extra pair for auto-equip testing
+      window.GearData.createInstance('gear_recruit_amulet')
+    ];
+    
+    // Verify pants are in inventory
+    const inventoryPants = inventoryGear.filter(g => g && g.slot === 'pants');
+    console.log('✅ Inventory pants count:', inventoryPants.length, inventoryPants.map(p => p.name));
+
+    const demoPets = [ { id:'pet_fire_pup', name:'Fire Pup', icon:'🐕', rarity:'common' } ];
+    const demoVehicles = [ { id:'vehicle_basic_bike', name:'Basic Bike', icon:'🚲', rarity:'common' } ];
+    const demoSpirits = [ { id:'spirit_fire_spark', name:'Fire Spark', icon:'🔥', rarity:'common' } ];
+    const demoRobots = [ { id:'robot_trainee_bot', name:'Trainee Bot', icon:'🤖', rarity:'common' } ];
+
+    const demoPowers = [ 'power_flame_touch','power_frost_shield','power_wind_step','power_earth_blessing' ].map(pid => ({...window.SUPERNATURAL_POWERS_DATABASE[pid], level:1, equipped:false, active:false}));
+
+    const demoSkins = [ { id:'skin_default_a1', name:'Default Suit', icon:'🧍', rarity:'common', unlocked:true } ];
+    const demoTalents = [ { id:'talent_quick_reflexes', name:'Quick Reflexes', tier:1, icon:'⚡', unlocked:true } ];
+    const demoQuests = [ { id:'quest_intro_001', name:'First Steps', status:'active', description:'Open the bag and inspect your gear.' } ];
+    const demoShop = [
+      { id:'shop_hp_potion', name:'Health Potion', cost:150, price:150, icon:'🧪', currency:'gold', category:'consumable' },
+      // XP Boxes - Low/Mid/High Tier
+      { id:'shop_xp_box_low', name:'Small XP Box', cost:200, price:200, icon:'📦', currency:'gold', category:'consumable', xpAmount:50, rarity:'common' },
+      { id:'shop_xp_box_mid', name:'Medium XP Box', cost:500, price:500, icon:'📦', currency:'gold', category:'consumable', xpAmount:150, rarity:'uncommon' },
+      { id:'shop_xp_box_high', name:'Large XP Box', cost:1200, price:1200, icon:'📦', currency:'gold', category:'consumable', xpAmount:400, rarity:'rare' },
+      // Gear Items
+      { id:'gear_recruit_pants', name:'Recruit Greaves', icon:'🦿', category:'armor', slot:'pants', cost:260, currency:'gold', rarity:'common' },
+      { id:'gear_vanguard_pants', name:'Vanguard Greaves', icon:'🦿', category:'armor', slot:'pants', cost:820, currency:'gold', rarity:'rare' },
+      { id:'gear_mythic_pants', name:'Mythic Legplates', icon:'🦿', category:'armor', slot:'pants', cost:2460, currency:'gold', rarity:'legendary' }
+    ];
+
+    // Ensure currentCharacter is set BEFORE any BagSystem calls
+    if (!window.gameState) {
+      window.gameState = {};
+    }
+    window.gameState.currentCharacter = window.gameState.currentCharacter || 'A1';
+    
+    window.gameState = {
+      gold: 100000,
+      gems: 120,
+      keys: 6,
+      tickets: 4,
+      essence: 25,
+      currentCharacter: 'A1',
+      equipped: { ...starterEquipped },
+      inventory: {
+        items: demoItems,
+        gear: inventoryGear,
+        pets: demoPets,
+        vehicles: demoVehicles,
+        spirits: demoSpirits,
+        robots: demoRobots,
+        powers: demoPowers,
+        abilities: demoPowers,
+        skins: demoSkins,
+        talents: demoTalents,
+        quests: demoQuests,
+        shop: demoShop,
+        skills: []
+      },
+      missions: {
+        available: [],
+        active: null,
+        completed: [],
+        progress: {}
+      },
+      level: 20,
+      playerLevel: 20,
+      rank: 5,
+      settings: {
+        autoAI: false
+      },
+      bagOpen: false
+    };
+    
+    // Set shop inventory for shop tab
+    window.gameState.shop = {
+      inventory: demoShop
+    };
+    
+    // Initialize Talent Points System (for talent tree)
+    // Note: BagSystem.init() will also call initializeAbilityPointsSystem() which handles this,
+    // but we initialize here as a defensive fallback
+    if (!window.gameState.talents || typeof window.gameState.talents !== 'object') {
+      window.gameState.talents = {
+        points: 0,
+        tree: [],
+        allocated: [],
+        synergies: []
+      };
+    } else {
+      // Ensure required properties exist
+      if (typeof window.gameState.talents.points !== 'number') window.gameState.talents.points = 0;
+      if (!Array.isArray(window.gameState.talents.tree)) window.gameState.talents.tree = [];
+      if (!Array.isArray(window.gameState.talents.allocated)) window.gameState.talents.allocated = [];
+      if (!Array.isArray(window.gameState.talents.synergies)) window.gameState.talents.synergies = [];
+    }
+    
+    // Initialize Ability Points System (for stat allocation - A1 Talent style)
+    // Note: BagSystem.init() will also call initializeAbilityPointsSystem() which handles this,
+    // but we initialize here as a defensive fallback
+    if (typeof window.gameState.abilityPoints !== 'number') window.gameState.abilityPoints = 0;
+    if (typeof window.gameState.pointsInStrength !== 'number') window.gameState.pointsInStrength = 0;
+    if (typeof window.gameState.pointsInVitality !== 'number') window.gameState.pointsInVitality = 0;
+    if (typeof window.gameState.pointsInAgility !== 'number') window.gameState.pointsInAgility = 0;
+    if (typeof window.gameState.pointsInIntelligence !== 'number') window.gameState.pointsInIntelligence = 0;
+    
+    // Initialize XP/Level tracking for Ability Points System
+    if (typeof window.gameState.xp !== 'number') window.gameState.xp = 0;
+    if (typeof window.gameState.xpToNext !== 'number') {
+      // Will be recalculated by BagSystem.init() using calculateXPForLevel()
+      window.gameState.xpToNext = 100;
+    }
+    
+    console.log('✅ Offline gameState seeded', Object.keys(window.gameState.inventory));
+  </script>
+
+  <!-- Load unified skills manifest FIRST to ensure skills are synced -->
+  <script>
+      // Use skills from manifest (ensures perfect sync with bag system)
+      const UNIFIED_SKILLS_DB = window.UNIFIED_SKILLS_DB || [
+        // === A1 (WARRIOR) ===
+        { id: 'A1_S1', name: 'Crimson Slash', characterId: 'A1', slot: 1, baseDamage: 150, damage: 150, cooldown: 2.5, unlockLevel: 1, unlock: 1, icon: '⚔️', tier: 'common', element: 'PHYSICAL', description: '3-hit crimson X-wave slash', projectileCount: 3, shape: 'xwave', color: '#ff0000' },
+        { id: 'A1_S2', name: 'Summon Clone', characterId: 'A1', slot: 2, baseDamage: 0, damage: 0, cooldown: 15, unlockLevel: 20, unlock: 20, icon: '👥', tier: 'uncommon', element: 'SUMMON', description: 'Summon combat clone ally', projectileCount: 0, shape: 'summon', color: '#ff0000' },
+        { id: 'A1_S3', name: 'Power Wave', characterId: 'A1', slot: 3, baseDamage: 250, damage: 250, cooldown: 4, unlockLevel: 1, unlock: 1, icon: '⚔️', tier: 'rare', element: 'PHYSICAL', description: '4-hit power wave combo', projectileCount: 4, shape: 'xwave', enhanced: true, color: '#ff0000' },
+        { id: 'A1_S4', name: 'Phantom Step: Backstab Waltz', characterId: 'A1', slot: 4, baseDamage: 110, damage: 110, cooldown: 20, unlockLevel: 30, unlock: 30, icon: '⏰', tier: 'epic', element: 'SHADOW', description: 'Teleport backstab combo with time manipulation', setupSwings: 6, swingInterval: 0.12, finalPower: 320, executeThreshold: 0.30, arcRadius: 120, crescentRadius: 180, teleport: true, vacuumRadius: 80, shape: 'backstab_waltz', enhanced: true, color: '#00E5FF' },
+        { id: 'A1_S5', name: 'Crimson Cyclone: Blink Chain', characterId: 'A1', slot: 5, baseDamage: 150, damage: 150, cooldown: 24, unlockLevel: 40, unlock: 40, icon: '🌪️', tier: 'epic', element: 'PHYSICAL', description: '3-blink aerial spin attack', blinkCount: 3, spinTicks: 6, spinTickDamage: 50, slamDamage: 300, stunDuration: 0.4, vortexRadius: 200, shape: 'blink_chain', enhanced: true, color: '#FF0000' },
+        { id: 'A1_X1', name: 'World Splitter', characterId: 'A1', slot: 'X', baseDamage: 260, damage: 260, cooldown: 28, unlockLevel: 50, unlock: 50, icon: '🌌', tier: 'legendary', element: 'ARCANE', description: 'Twin dimension rifts (chargeable)', charge: { t1: 0.50, t2: 0.80 }, riftCount: 2, riftWidth: 60, riftSeparation: 36, pierceUnlimited: true, bossTailBonus: 0.25, bleedDps: 20, bleedDuration: 2.0, shape: 'world_splitter', color: '#00E5FF' },
+        
+        // === UNIQUE (CYBORG) ===
+        { id: 'UNIQUE_S1', name: 'Plasma Blast', characterId: 'UNIQUE', slot: 1, baseDamage: 120, damage: 120, cooldown: 2, unlockLevel: 1, unlock: 1, icon: '🔫', tier: 'common', element: 'PLASMA', description: 'Fire 3 plasma projectiles', projectileCount: 3, shape: 'plasma', color: '#00ffff' },
+        { id: 'UNIQUE_S2', name: 'Summon Drone', characterId: 'UNIQUE', slot: 2, baseDamage: 0, damage: 0, cooldown: 15, unlockLevel: 20, unlock: 20, icon: '🤖', tier: 'uncommon', element: 'SUMMON', description: 'Deploy a combat drone', projectileCount: 0, shape: 'summon', color: '#00ffff' },
+  { id: 'UNIQUE_S3', name: 'Aether Wave Beam', characterId: 'UNIQUE', slot: 3, baseDamage: 400, damage: 400, cooldown: 8, unlockLevel: 1, unlock: 1, icon: '💠', tier: 'rare', element: 'ENERGY', description: 'Channel a Kamehameha-style energy beam', projectileCount: 0, shape: 'beam', enhanced: true, color: '#00ffff' },
+        { id: 'UNIQUE_S4', name: 'Absolute Zero Rail + Cryo Barrage', characterId: 'UNIQUE', slot: 4, baseDamage: 45, damage: 45, cooldown: 20, unlockLevel: 30, unlock: 30, icon: '❄️', tier: 'epic', element: 'ICE', description: 'Freeze enemies with rail beam and cryo barrage', railDuration: 0.45, railTicksPerSec: 12, cryoCount: 4, cryoDamage: 180, cryoPierce: 2, cryoChain: 1, chainFalloff: 0.6, shape: 'cryo_rail', enhanced: true, color: '#87CEEB' },
+        { id: 'UNIQUE_S5', name: 'Ion Helix Drill', characterId: 'UNIQUE', slot: 5, baseDamage: 38, damage: 38, cooldown: 24, unlockLevel: 40, unlock: 40, icon: '🔩', tier: 'epic', element: 'PLASMA', description: 'Drill through enemies with rotating helix beam', drillDuration: 0.9, drillTicksPerSec: 15, pullStrength: 120, steerDegrees: 8, endBurst: 220, shape: 'helix_drill', enhanced: true, color: '#00FFFF' },
+  { id: 'UNIQUE_X1', name: 'Hyper Ion Wave', characterId: 'UNIQUE', slot: 'X', baseDamage: 34, damage: 34, cooldown: 28, unlockLevel: 50, unlock: 50, icon: '⚡', tier: 'legendary', element: 'ENERGY', description: 'Massive Goku-style beam wave (Chargeable Ultimate)', charge: { t1: 0.60, t2: 1.00 }, beamDuration: 1.6, beamTicksPerSec: 16, beamWidth: 80, steerDegrees: 10, endCone: 200, deepChillStacks: 3, shape: 'ion_beam', color: '#00FFFF' },
+        
+        // === MISSY (CAT ANGEL) ===
+        { id: 'MISSY_S1', name: 'Blade Dance', characterId: 'MISSY', slot: 1, baseDamage: 130, damage: 130, cooldown: 2.5, unlockLevel: 1, unlock: 1, icon: '🗡️', tier: 'common', element: 'PHYSICAL', description: 'Elegant blade dance launching 3 slashes', projectileCount: 3, shape: 'slash', color: '#ff69b4' },
+        { id: 'MISSY_S2', name: 'Summon Pet', characterId: 'MISSY', slot: 2, baseDamage: 0, damage: 0, cooldown: 15, unlockLevel: 20, unlock: 20, icon: '🐱', tier: 'uncommon', element: 'SUMMON', description: 'Summon a magical pet companion', projectileCount: 0, shape: 'summon', color: '#ff69b4' },
+        { id: 'MISSY_S3', name: 'Gun Barrage', characterId: 'MISSY', slot: 3, baseDamage: 200, damage: 200, cooldown: 4, unlockLevel: 1, unlock: 1, icon: '💰', tier: 'rare', element: 'LIGHT', description: 'Rapid-fire bullet barrage with golden effects', projectileCount: 4, shape: 'bullet', enhanced: true, color: '#ff69b4' },
+        { id: 'MISSY_S4', name: 'Golden Rail & Comets', characterId: 'MISSY', slot: 4, baseDamage: 560, damage: 560, cooldown: 6, unlockLevel: 30, unlock: 30, icon: '✨', tier: 'epic', element: 'ARCANE', description: 'Golden rail beam with orbiting magnetic comets', railDuration: 0.6, railTicksPerSec: 10, cometCount: 8, cometDamage: 180, cometPierce: 4, magnetRadius: 200, magnetTime: 2.0, boomerangDegrees: 45, shape: 'gold_rail', enhanced: true, color: '#ffd700' },
+        { id: 'MISSY_S5', name: 'Royal Typhoon', characterId: 'MISSY', slot: 5, baseDamage: 720, damage: 720, cooldown: 8, unlockLevel: 40, unlock: 40, icon: '🌀', tier: 'epic', element: 'LIGHT', description: 'Create a royal cyclone with gunfire volleys', cycloneDuration: 1.8, cycloneTicks: 18, cycloneTickDamage: 40, cycloneMagnet: 140, coneVolleys: 3, conePellets: 8, coneSpread: 35, conePower: 110, shape: 'royal_typhoon', enhanced: true, typhoonRadius: 150, color: '#ffd700' },
+  { id: 'MISSY_X1', name: 'Royal Coin Cannon', characterId: 'MISSY', slot: 'X', baseDamage: 1400, damage: 1400, cooldown: 20, unlockLevel: 50, unlock: 50, icon: '💎', tier: 'legendary', element: 'ARCANE', description: 'Royal coin beam cannon (Chargeable Ultimate)', charge: { t1: 0.5, t2: 0.9 }, beamDuration: 1.4, beamWidth: 70, beamMagnet: 180, beamTickDamage: 90, beamTicksPerSec: 12, finalNova: 1200, shape: 'royal_cannon', color: '#ffd700' },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // UPGRADED SKILLS - Advanced Abilities (from unified-skills-manifest.js)
+        // ═══════════════════════════════════════════════════════════════════
+
+        // A1 UPGRADED SKILLS
+        { id: 'A1_S7', name: 'Phantom Edge Combo', characterId: 'A1', slot: 7, baseDamage: 180, damage: 180, cooldown: 8, unlockLevel: 35, unlock: 35, icon: '⚔️', tier: 'epic', element: 'SHADOW', description: '3-hit phantom blade combo with void slashes', precastBullets: 3, precastInterval: 0.25, shape: 'phantom_combo', color: '#9966ff' },
+        { id: 'A1_S8', name: 'Phantom Void', characterId: 'A1', slot: 8, baseDamage: 220, damage: 220, cooldown: 10, unlockLevel: 40, unlock: 40, icon: '🌀', tier: 'rare', element: 'SHADOW', description: 'Void energy slash with dimensional rift', precastBullets: 2, precastInterval: 0.3, shape: 'phantom_void', color: '#6600cc' },
+        { id: 'A1_S9', name: 'Phantom Radiant', characterId: 'A1', slot: 9, baseDamage: 280, damage: 280, cooldown: 12, unlockLevel: 45, unlock: 45, icon: '✨', tier: 'epic', element: 'LIGHT', description: 'Radiant phantom slash with light burst', precastBullets: 4, precastInterval: 0.2, shape: 'phantom_radiant', color: '#ffdd00' },
+        { id: 'A1_X2', name: 'Phantom ULTIMATE', characterId: 'A1', slot: 'X2', baseDamage: 500, damage: 500, cooldown: 30, unlockLevel: 50, unlock: 50, icon: '💥', tier: 'legendary', element: 'SHADOW', description: 'Ultimate phantom barrage - massive combo attack', precastBullets: 6, precastInterval: 0.15, shape: 'phantom_ultimate', color: '#ff00ff' },
+
+        // UNIQUE UPGRADED SKILLS
+        { id: 'UNIQUE_S7', name: 'Voidlight Cannon', characterId: 'UNIQUE', slot: 7, baseDamage: 300, damage: 300, cooldown: 8, unlockLevel: 35, unlock: 35, icon: '🌌', tier: 'rare', element: 'ARCANE', description: 'Void energy cannon beam', precastBullets: 4, precastInterval: 0.2, shape: 'voidlight_cannon', color: '#00ffff' },
+        { id: 'UNIQUE_S8', name: 'Kinetic Sentry', characterId: 'UNIQUE', slot: 8, baseDamage: 150, damage: 150, cooldown: 15, unlockLevel: 30, unlock: 30, icon: '🤖', tier: 'uncommon', element: 'PLASMA', description: 'Deploy auto-firing kinetic turret', precastBullets: 2, precastInterval: 0.4, shape: 'sentry', color: '#00aaff' },
+        { id: 'UNIQUE_S9', name: 'Gauss Driver', characterId: 'UNIQUE', slot: 9, baseDamage: 400, damage: 400, cooldown: 10, unlockLevel: 40, unlock: 40, icon: '⚡', tier: 'rare', element: 'LIGHTNING', description: 'Heavy electromagnetic rail cannon shot', precastBullets: 2, precastInterval: 0.5, shape: 'gauss_driver', color: '#ffaa00' },
+        { id: 'UNIQUE_S10', name: 'Gauss Rail', characterId: 'UNIQUE', slot: 10, baseDamage: 350, damage: 350, cooldown: 9, unlockLevel: 42, unlock: 42, icon: '⚡', tier: 'epic', element: 'LIGHTNING', description: 'Piercing rail cannon with chain lightning', precastBullets: 3, precastInterval: 0.25, shape: 'gauss_rail', color: '#ff8800' },
+        { id: 'UNIQUE_S11', name: 'Gauss Pierce', characterId: 'UNIQUE', slot: 11, baseDamage: 380, damage: 380, cooldown: 11, unlockLevel: 44, unlock: 44, icon: '💫', tier: 'epic', element: 'LIGHTNING', description: 'Armor-piercing gauss shot', precastBullets: 4, precastInterval: 0.2, shape: 'gauss_pierce', color: '#ffcc00' },
+        { id: 'UNIQUE_S12', name: 'Sentry Plasma', characterId: 'UNIQUE', slot: 12, baseDamage: 180, damage: 180, cooldown: 14, unlockLevel: 38, unlock: 38, icon: '🔫', tier: 'rare', element: 'PLASMA', description: 'Deploy plasma-firing auto-turret', precastBullets: 3, precastInterval: 0.3, shape: 'sentry_plasma', color: '#00ffaa' },
+        { id: 'UNIQUE_S13', name: 'Voidlight Soul', characterId: 'UNIQUE', slot: 13, baseDamage: 320, damage: 320, cooldown: 13, unlockLevel: 43, unlock: 43, icon: '👻', tier: 'epic', element: 'SHADOW', description: 'Soul-draining void beam', precastBullets: 5, precastInterval: 0.18, shape: 'voidlight_soul', color: '#aa00ff' },
+        { id: 'UNIQUE_S14', name: 'Voidlight Radiant', characterId: 'UNIQUE', slot: 14, baseDamage: 340, damage: 340, cooldown: 12, unlockLevel: 46, unlock: 46, icon: '☀️', tier: 'epic', element: 'LIGHT', description: 'Radiant void-light fusion beam', precastBullets: 4, precastInterval: 0.22, shape: 'voidlight_radiant', color: '#ffff00' },
+        { id: 'UNIQUE_X2', name: 'Voidlight ULTIMATE', characterId: 'UNIQUE', slot: 'X2', baseDamage: 600, damage: 600, cooldown: 30, unlockLevel: 50, unlock: 50, icon: '💥', tier: 'legendary', element: 'ARCANE', description: 'Ultimate void-light convergence', precastBullets: 6, precastInterval: 0.12, shape: 'voidlight_ultimate', color: '#cc00ff' },
+
+        // MISSY UPGRADED SKILLS
+        { id: 'MISSY_S7', name: 'Divine Burst', characterId: 'MISSY', slot: 7, baseDamage: 260, damage: 260, cooldown: 7, unlockLevel: 35, unlock: 35, icon: '✨', tier: 'rare', element: 'LIGHT', description: 'Radiant burst of divine energy', precastBullets: 4, precastInterval: 0.2, shape: 'divine_burst', color: '#ffccff' },
+        { id: 'MISSY_S8', name: 'Angel Wings', characterId: 'MISSY', slot: 8, baseDamage: 180, damage: 180, cooldown: 10, unlockLevel: 30, unlock: 30, icon: '🪽', tier: 'uncommon', element: 'LIGHT', description: 'Feather projectiles with homing', precastBullets: 6, precastInterval: 0.15, shape: 'angel_wings', color: '#ffffff' },
+        { id: 'MISSY_S9', name: 'Celestial Strike', characterId: 'MISSY', slot: 9, baseDamage: 320, damage: 320, cooldown: 9, unlockLevel: 40, unlock: 40, icon: '⭐', tier: 'epic', element: 'LIGHT', description: 'Heavenly strike from above', precastBullets: 3, precastInterval: 0.25, shape: 'celestial_strike', color: '#ffd700' },
+        { id: 'MISSY_X2', name: 'Angel ULTIMATE', characterId: 'MISSY', slot: 'X2', baseDamage: 550, damage: 550, cooldown: 28, unlockLevel: 50, unlock: 50, icon: '👼', tier: 'legendary', element: 'LIGHT', description: 'Divine judgment from the heavens', precastBullets: 8, precastInterval: 0.1, shape: 'angel_ultimate', color: '#ffdd99' }
+      ];
+
+      // Seed all skills for equipping
+      // Populate all expected skill collections for BagSystem renderers
+      window.gameState.inventory.skills = UNIFIED_SKILLS_DB.map(skill => ({ ...skill, unlocked: true }));
+      window.gameState.skills = [...window.gameState.inventory.skills];
+      window.gameState.supernatural = [...window.gameState.inventory.skills];
+
+      // Build equippedSkills in object form per character (BagSystem expects {CHAR:{S1,S2,S3}})
+      const find = id => UNIFIED_SKILLS_DB.find(s => s.id === id) || null;
+      const defaultA1 = {
+        S1: find('A1_S1'), S2: find('A1_S2'), S3: find('A1_S3')
+      };
+      const defaultUnique = {
+        S1: find('UNIQUE_S1'), S2: find('UNIQUE_S2'), S3: find('UNIQUE_S3')
+      };
+      const defaultMissy = {
+        S1: find('MISSY_S1'), S2: find('MISSY_S2'), S3: find('MISSY_S3')
+      };
+
+      window.gameState.equippedSkills = {
+        // Global quick slots default to A1's primary kit
+        slot1: defaultA1.S1,
+        slot2: defaultA1.S2,
+        slot3: defaultA1.S3,
+        // Character-specific loadouts
+        A1: defaultA1,
+        UNIQUE: defaultUnique,
+        MISSY: defaultMissy
+      };
+
+      // Default active character to A1 so global slots align
+      // Note: This is set in gameState initialization below, but ensure it's set here too
+      if (!window.gameState) {
+        window.gameState = {};
+      }
+      // Ensure currentCharacter is set BEFORE any BagSystem initialization
+      // This must be set early to prevent the warning in ensureCurrentCharacter
+      window.gameState.currentCharacter = window.gameState.currentCharacter || 'A1';
+      console.log('[Init] Set currentCharacter to:', window.gameState.currentCharacter);
+
+      console.log('✅ Skills seeded. inventory.skills:', window.gameState.inventory.skills.length);
+      console.log('Equipped skills object:', window.gameState.equippedSkills);
+  </script>
+
+  <!-- Load full runtime after state so it picks up inventories -->
+  <script src="A1KBagSystem.js"></script>
+  <script src="arcade-bundle.js"></script>
+  <script>
+    (function waitForInit(){
+      if(window.BagSystem && typeof window.BagSystem.init === 'function'){
+        window.BagSystem.init().then(()=>{
+          console.log('✅ BagSystem initialized (offline)');
+          
+          // Ability Points System is now automatically initialized by BagSystem.init()
+          // You can test it with: window.BagSystem.gainXP(150) or window.BagSystem.handleLevelUp(21)
+          
+          // Verify pants are equipped after initialization
+          setTimeout(() => {
+          if(window.gameState.equipped && window.gameState.equipped.pants){
+            console.log('✅ Pants equipped:', window.gameState.equipped.pants.name, 'Slot:', window.gameState.equipped.pants.slot);
+            } else if(window.GearData && typeof window.GearData.createInstance === 'function'){
+              window.gameState.equipped = window.gameState.equipped || {};
+              window.gameState.equipped.pants = window.GearData.createInstance('gear_recruit_pants');
+              console.log('✅ Auto-re-equipped starter pants after init.');
+            }
+          }, 150);
+          
+          // Merge pants items into shop inventory (BagSystem overwrites shop, so we need to add pants back)
+          if(window.gameState.shop && window.gameState.shop.inventory){
+            const pantsItems = [
+              { id:'gear_recruit_pants', name:'Recruit Greaves', icon:'🦿', category:'armor', slot:'pants', cost:260, currency:'gold', rarity:'common' },
+              { id:'gear_vanguard_pants', name:'Vanguard Greaves', icon:'🦿', category:'armor', slot:'pants', cost:820, currency:'gold', rarity:'rare' },
+              { id:'gear_mythic_pants', name:'Mythic Legplates', icon:'🦿', category:'armor', slot:'pants', cost:2460, currency:'gold', rarity:'legendary' }
+            ];
+            pantsItems.forEach(pantsItem => {
+              // Check if item already exists
+              const exists = window.gameState.shop.inventory.find(i => i.id === pantsItem.id);
+              if(!exists){
+                window.gameState.shop.inventory.push(pantsItem);
+                console.log('✅ Added pants to shop:', pantsItem.name);
+              }
+            });
+          }
+          
+          if(window.ArcadeSystem && typeof window.ArcadeSystem.init==='function'){
+            window.ArcadeSystem.init(window.BagSystem);
+          }
+          // Auto-open the bag on load so controls are visible immediately
+          if(window.BagSystem?.open){
+            window.BagSystem.open();
+          }
+
+          window.dispatchEvent(new CustomEvent('bag-system:ready'));
+        });
+        window.addEventListener('keydown', (e)=>{ if((e.key==='b'||e.key==='B') && !e.ctrlKey && !e.metaKey){ window.BagSystem?.toggle(); }});
+      } else { setTimeout(waitForInit,100); }
+    })();
+  </script>
+  <script>
+    window.startCRankDemo = function startCRankDemo() {
+      try {
+        window.gameState = window.gameState || {};
+        window.gameState.gold = Math.max(window.gameState.gold || 0, 5000000);
+        window.gameState.raidKeys = Math.max(window.gameState.raidKeys || 0, 5);
+        window.gameState.playerLevel = Math.max(window.gameState.playerLevel || 1, 60);
+
+        // Mission Board has been moved to standalone system
+        // See: A1k Mission Board System/index.html
+        console.log('[Demo] Mission Board is now standalone. Open A1k Mission Board System/index.html');
+        
+        if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+          window.BagSystem.showToast('Demo mode primed: jump into Dungeon Raids!', '#8df5ff');
+        } else {
+          console.warn('[startCRankDemo] BagSystem not ready yet.');
+          return;
+        }
+      } catch (error) {
+        console.error('[startCRankDemo] Failed to configure demo', error);
+      }
+    };
+  </script>
+
+  <!-- Ability Points System Initialization -->
+  <script>
+// Production-ready initialization snippet for Ability Points System
+(function initializeAbilityPointsSystem() {
+  'use strict';
+  
+  // Wait for BagSystem to be available
+  function initWhenReady() {
+    if (window.BagSystem && typeof window.BagSystem.initializeAbilityPointsSystem === 'function') {
+      // Initialize the system
+      try {
+        window.BagSystem.initializeAbilityPointsSystem();
+        console.log('[AbilityPointsInit] System initialized successfully');
+      } catch (error) {
+        console.error('[AbilityPointsInit] Failed to initialize:', error);
+      }
+      
+      // Optional: Set up XP gain hook if your game has XP system
+      if (window.Game && typeof window.Game.gainXP === 'function') {
+        const originalGainXP = window.Game.gainXP;
+        window.Game.gainXP = function(amount) {
+          const result = originalGainXP.call(this, amount);
+          // Also call BagSystem's XP gain handler
+          if (window.BagSystem && typeof window.BagSystem.gainXP === 'function') {
+            try {
+              window.BagSystem.gainXP(amount);
+            } catch (error) {
+              console.error('[AbilityPointsInit] Error in gainXP hook:', error);
+            }
+          }
+          return result;
+        };
+        console.log('[AbilityPointsInit] XP gain hook installed');
+      }
+      
+      // Optional: Listen for level-up events from other systems
+      if (window.EventBus || (window.addEventListener && typeof window.addEventListener === 'function')) {
+        const eventTarget = window.EventBus || window;
+        const handler = function(event) {
+          if (event.detail && event.detail.newLevel && window.BagSystem && typeof window.BagSystem.handleLevelUp === 'function') {
+            try {
+              window.BagSystem.handleLevelUp(event.detail.newLevel, {
+                showAnimation: event.detail.showAnimation !== false,
+                abilityPoints: event.detail.abilityPoints || 3
+              });
+            } catch (error) {
+              console.error('[AbilityPointsInit] Error handling level-up event:', error);
+            }
+          }
+        };
+        
+        if (eventTarget.addEventListener) {
+          eventTarget.addEventListener('level-up', handler);
+          console.log('[AbilityPointsInit] Level-up event listener installed');
+        }
+      }
+    } else {
+      // Retry after 100ms if BagSystem not ready yet
+      setTimeout(initWhenReady, 100);
+    }
+  }
+  
+  // Start initialization when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWhenReady);
+  } else {
+    // DOM already loaded, start immediately
+    initWhenReady();
+  }
+})();
+  </script>
+
+  <script>
+// ═══════════════════════════════════════════════════════════════════
+// TALENT SYSTEM - A1 SIGNATURE STYLE UNLOCK SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+
+(function() {
+  'use strict';
+
+  // Talent System Namespace
+  window.TalentSystem = window.TalentSystem || {};
+
+  // ═══ TALENT DATA - From Standalone System ═══
+  const TALENT_LANES = {
+    atk: [
+      { id: 'atk_1', name: '+5% ATK', cost: 1, req: null, desc: 'Increase attack by 5%', fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+      { id: 'atk_2', name: '+8% ATK', cost: 2, req: ['atk_1'], desc: 'Increase attack by 8%', fx: s => s.atkMul = (s.atkMul || 0) + 0.08 },
+      { id: 'atk_3', name: '+12% ATK', cost: 3, req: ['atk_2'], desc: 'Increase attack by 12%', fx: s => s.atkMul = (s.atkMul || 0) + 0.12 },
+      { id: 'atk_4', name: '+15% ATK + Crit', cost: 4, req: ['atk_3'], desc: 'Increase attack by 15% and crit by 10%', fx: s => { s.atkMul = (s.atkMul || 0) + 0.15; s.crit = (s.crit || 0) + 0.10; } },
+      { id: 'atk_5', name: 'Berserker', cost: 5, req: ['atk_4'], desc: 'Unlock Berserker mode', fx: s => s.berserker = true },
+      { id: 'atk_ultimate', name: '⚔️ APEX HUNTER', cost: 8, req: ['atk_5'], desc: 'Massive ATK boost and kill rage', equippable: true, fx: s => { s.atkMul = (s.atkMul || 0) + 0.50; s.killRage = true; } }
+    ],
+    def: [
+      { id: 'def_1', name: '+80 HP', cost: 1, req: null, desc: 'Increase HP by 80', fx: s => s.hpFlat = (s.hpFlat || 0) + 80 },
+      { id: 'def_2', name: '+120 HP', cost: 2, req: ['def_1'], desc: 'Increase HP by 120', fx: s => s.hpFlat = (s.hpFlat || 0) + 120 },
+      { id: 'def_3', name: '+160 HP', cost: 3, req: ['def_2'], desc: 'Increase HP by 160', fx: s => s.hpFlat = (s.hpFlat || 0) + 160 },
+      { id: 'def_4', name: '+200 HP + DR', cost: 4, req: ['def_3'], desc: 'Increase HP by 200 and damage reduction by 10%', fx: s => { s.hpFlat = (s.hpFlat || 0) + 200; s.damageReduction = (s.damageReduction || 0) + 0.10; } },
+      { id: 'def_5', name: 'Guardian', cost: 5, req: ['def_4'], desc: 'Unlock Guardian ability', fx: s => s.guardian = true },
+      { id: 'def_ultimate', name: '🛡️ FORTRESS', cost: 8, req: ['def_5'], desc: 'Become an impenetrable fortress', equippable: true, fx: s => s.fortress = true }
+    ],
+    recovery: [
+      { id: 'rec_1', name: '+6% Lifesteal', cost: 1, req: null, desc: 'Gain 6% lifesteal', fx: s => s.ls = (s.ls || 0) + 0.06 },
+      { id: 'rec_2', name: '+10% Lifesteal', cost: 2, req: ['rec_1'], desc: 'Gain 10% lifesteal', fx: s => s.ls = (s.ls || 0) + 0.10 },
+      { id: 'rec_3', name: '+15% LS + Regen', cost: 3, req: ['rec_2'], desc: 'Gain 15% lifesteal and 2 HP regen', fx: s => { s.ls = (s.ls || 0) + 0.15; s.regen = (s.regen || 0) + 2; } },
+      { id: 'rec_4', name: 'Vampiric', cost: 4, req: ['rec_3'], desc: 'Unlock vampiric powers', fx: s => s.vampiric = true },
+      { id: 'rec_ultimate', name: '🔥 PHOENIX', cost: 7, req: ['rec_4'], desc: 'Rise from death like a phoenix', equippable: true, fx: s => s.phoenix = true }
+    ],
+    cooldown: [
+      { id: 'cd_1', name: '-8% CD', cost: 1, req: null, desc: 'Reduce cooldowns by 8%', fx: s => s.haste = (s.haste || 0) + 8 },
+      { id: 'cd_2', name: '-12% CD', cost: 2, req: ['cd_1'], desc: 'Reduce cooldowns by 12%', fx: s => s.haste = (s.haste || 0) + 12 },
+      { id: 'cd_3', name: '-15% CD + Speed', cost: 3, req: ['cd_2'], desc: 'Reduce cooldowns by 15% and gain speed', fx: s => { s.haste = (s.haste || 0) + 15; s.moveSpeed = (s.moveSpeed || 0) + 0.20; } },
+      { id: 'cd_4', name: 'Cascade', cost: 4, req: ['cd_3'], desc: 'Skills cascade into each other', fx: s => s.cascade = true },
+      { id: 'cd_dual_wield', name: '⚔️ Dual Wielding', cost: 3, req: ['cd_3'], desc: 'Wield two weapons at once', fx: s => { s.dualWield = true; } },
+      { id: 'cd_ultimate', name: '⏰ TIME MASTER', cost: 7, req: ['cd_4'], desc: 'Master time itself', equippable: true, fx: s => s.timeMaster = true }
+    ],
+    luck: [
+      { id: 'luck_1', name: '+8 Luck', cost: 1, req: null, desc: 'Increase luck by 8', fx: s => s.luck = (s.luck || 0) + 8 },
+      { id: 'luck_2', name: '+15 Luck', cost: 2, req: ['luck_1'], desc: 'Increase luck by 15', fx: s => s.luck = (s.luck || 0) + 15 },
+      { id: 'luck_3', name: '+25 Luck + Gold', cost: 3, req: ['luck_2'], desc: 'Increase luck by 25 and gold find by 30%', fx: s => { s.luck = (s.luck || 0) + 25; s.goldFind = (s.goldFind || 0) + 0.30; } },
+      { id: 'luck_4', name: 'Fortune', cost: 4, req: ['luck_3'], desc: 'Fortune favors you', fx: s => s.fortune = true },
+      { id: 'luck_5', name: 'Jackpot', cost: 5, req: ['luck_4'], desc: 'Hit the jackpot', fx: s => s.jackpot = true },
+      { id: 'luck_ultimate', name: '💰 GOLDEN TOUCH', cost: 8, req: ['luck_5'], desc: 'Everything you touch turns to gold', equippable: true, fx: s => s.goldenTouch = true }
+    ],
+    shadow: [
+      { id: 'shadow_1', name: '+5% ATK + Dark', cost: 1, req: null, desc: 'Gain dark affinity', fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+      { id: 'shadow_2', name: '+10% ATK + Shadow', cost: 2, req: ['shadow_1'], desc: 'Harness shadow power', fx: s => s.atkMul = (s.atkMul || 0) + 0.10 },
+      { id: 'shadow_3', name: '+15% ATK + Mastery', cost: 3, req: ['shadow_2'], desc: 'Master dark magic', fx: s => s.atkMul = (s.atkMul || 0) + 0.15 },
+      { id: 'shadow_4', name: '+20% ATK + Form', cost: 4, req: ['shadow_3'], desc: 'Transform into shadow', fx: s => s.atkMul = (s.atkMul || 0) + 0.20 },
+      { id: 'shadow_ultimate', name: '⚔️ SHADOW STRIKE', cost: 8, req: ['shadow_4'], equippable: true, desc: '3 shadow clones attack (150% ATK each, 6s CD)', fx: s => { s.shadowStrike = true; s.atkMul = (s.atkMul || 0) + 0.30; s.crit = (s.crit || 0) + 0.15; } }
+    ],
+    spirit: [
+      { id: 'spirit_1', name: '+5% ATK + Link', cost: 1, req: null, desc: 'Connect to spirit realm', fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+      { id: 'spirit_2', name: '+8% ATK + Power', cost: 2, req: ['spirit_1'], desc: 'Channel ethereal power', fx: s => { s.atkMul = (s.atkMul || 0) + 0.08; s.haste = (s.haste || 0) + 5; } },
+      { id: 'spirit_3', name: '+12% ATK + Weapon', cost: 3, req: ['spirit_2'], desc: 'Manifest soul weapon', fx: s => { s.atkMul = (s.atkMul || 0) + 0.12; s.haste = (s.haste || 0) + 8; } },
+      { id: 'spirit_4', name: '+18% ATK + Form', cost: 4, req: ['spirit_3'], desc: 'Enter spirit form', fx: s => { s.atkMul = (s.atkMul || 0) + 0.18; s.haste = (s.haste || 0) + 12; } },
+      { id: 'spirit_ultimate', name: '⚔️ SPIRIT BLADE', cost: 8, req: ['spirit_4'], equippable: true, desc: '5 floating swords attack continuously (80% ATK/hit)', fx: s => { s.spiritBlade = true; s.atkMul = (s.atkMul || 0) + 0.25; s.haste = (s.haste || 0) + 20; } }
+    ],
+    lightning: [
+      { id: 'lightning_1', name: '+5% ATK + Static', cost: 1, req: null, desc: 'Gain static charge', fx: s => s.atkMul = (s.atkMul || 0) + 0.05 },
+      { id: 'lightning_2', name: '+10% ATK + Shock', cost: 2, req: ['lightning_1'], desc: 'Create shock waves', fx: s => { s.atkMul = (s.atkMul || 0) + 0.10; s.crit = (s.crit || 0) + 0.05; } },
+      { id: 'lightning_3', name: '+15% ATK + Thunder', cost: 3, req: ['lightning_2'], desc: 'Strike with thunder', fx: s => { s.atkMul = (s.atkMul || 0) + 0.15; s.crit = (s.crit || 0) + 0.08; } },
+      { id: 'lightning_4', name: '+22% ATK + Storm', cost: 4, req: ['lightning_3'], desc: 'Summon the storm', fx: s => { s.atkMul = (s.atkMul || 0) + 0.22; s.crit = (s.crit || 0) + 0.12; } },
+      { id: 'lightning_ultimate', name: '⚡ LIGHTNING STEP', cost: 8, req: ['lightning_4'], equippable: true, desc: 'Teleport-strike with chain lightning (250% ATK, 8s CD)', fx: s => { s.lightningStep = true; s.atkMul = (s.atkMul || 0) + 0.35; s.crit = (s.crit || 0) + 0.25; } }
+    ],
+    monarch: [
+      { id: 'monarch_1', name: '+8% ATK + Command', cost: 1, req: null, desc: 'Command aura activated', fx: s => s.atkMul = (s.atkMul || 0) + 0.08 },
+      { id: 'monarch_2', name: '+15% ATK + Army', cost: 2, req: ['monarch_1'], desc: 'Build your army', fx: s => { s.atkMul = (s.atkMul || 0) + 0.15; s.hpFlat = (s.hpFlat || 0) + 100; } },
+      { id: 'monarch_3', name: '+25% ATK + Legion', cost: 3, req: ['monarch_2'], desc: 'Legion might empowers you', fx: s => { s.atkMul = (s.atkMul || 0) + 0.25; s.hpFlat = (s.hpFlat || 0) + 200; s.crit = (s.crit || 0) + 0.10; } },
+      { id: 'monarch_4', name: '+35% ATK + Shadows', cost: 5, req: ['monarch_3'], desc: 'Shadow legion rises', fx: s => { s.atkMul = (s.atkMul || 0) + 0.35; s.hpFlat = (s.hpFlat || 0) + 300; s.crit = (s.crit || 0) + 0.15; s.haste = (s.haste || 0) + 15; } },
+      { id: 'monarch_ultimate', name: '👑 MONARCH\'S ARMY', cost: 12, req: ['monarch_4'], equippable: true, desc: 'S-RANK: Command 10 shadow soldiers (200% ATK each) + 100% all stats!', fx: s => { s.monarchsArmy = true; s.atkMul = (s.atkMul || 0) + 1.0; s.hpMul = (s.hpMul || 0) + 1.0; s.crit = (s.crit || 0) + 0.50; s.ls = (s.ls || 0) + 0.30; s.haste = (s.haste || 0) + 50; } }
+    ]
+  };
+
+  const TALENT_STATE_KEY = 'soloTalentGrid';
+
+  // ═══ HELPER FUNCTIONS ═══
+  function getTalentState() {
+    window.gameState = window.gameState || {};
+    const hasExistingState = Boolean(window.gameState[TALENT_STATE_KEY]);
+    const state = window.gameState[TALENT_STATE_KEY] || {
+      unlocked: [],
+      equipped: [],
+      ap: { available: 5, total: 5, spent: 0 }
+    };
+
+    if (!(state.unlocked instanceof Array)) {
+      state.unlocked = Array.from(state.unlocked ? state.unlocked : []);
+    }
+    if (!(state.equipped instanceof Array)) {
+      state.equipped = Array.from(state.equipped ? state.equipped : []);
+    }
+    if (!state.ap) {
+      state.ap = { available: 5, total: 5, spent: 0 };
+    }
+
+    state.ap.available = Number.isFinite(state.ap.available) ? state.ap.available : 0;
+    state.ap.total = Number.isFinite(state.ap.total) ? state.ap.total : 0;
+    state.ap.spent = Number.isFinite(state.ap.spent) ? state.ap.spent : 0;
+
+    if (!hasExistingState || (state.ap.total === 0 && state.ap.spent === 0 && state.ap.available === 0)) {
+      state.ap.available = 5;
+      state.ap.total = Math.max(state.ap.total, 5);
+      state.ap.spent = 0;
+    }
+
+    window.gameState[TALENT_STATE_KEY] = state;
+    return state;
+  }
+
+  function initializeTalentState() {
+    return getTalentState();
+  }
+  
+  function getTalent(id) {
+    for (const lane of Object.values(TALENT_LANES)) {
+      const talent = lane.find(t => t.id === id);
+      if (talent) return talent;
+    }
+    return null;
+  }
+
+  function canUnlockTalent(id) {
+    const talent = getTalent(id);
+    if (!talent) return false;
+    const state = getTalentState();
+    const unlockedSet = new Set(state.unlocked);
+
+    if (unlockedSet.has(id)) return false;
+    if (state.ap.available < talent.cost) return false;
+    if (talent.req && !talent.req.every(r => unlockedSet.has(r))) {
+      return false;
+    }
+    return true;
+  }
+
+  function isUnlockable(id) {
+    const talent = getTalent(id);
+    if (!talent) return false;
+
+    const state = getTalentState();
+    const unlockedSet = new Set(state.unlocked);
+
+    if (unlockedSet.has(id)) return false;
+    if (talent.req && !talent.req.every(r => unlockedSet.has(r))) {
+      return false;
+    }
+    return true;
+  }
+
+  // ═══ AP MANAGEMENT ═══
+  
+  window.TalentSystem.gainAP = function(amount, source = 'unknown') {
+    const state = getTalentState();
+    state.ap.available += amount;
+    state.ap.total += amount;
+
+    updateAPTracker();
+    
+    // Show notification
+    if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+      window.BagSystem.showToast(`⚡ Gained ${amount} AP from ${source}!`, '#9d4edd');
+    }
+    
+    console.log(`[TalentSystem] Gained ${amount} AP from ${source}. Available: ${state.ap.available}`);
+  };
+
+  function spendAP(amount) {
+    const state = getTalentState();
+    if (state.ap.available < amount) return false;
+
+    state.ap.available -= amount;
+    state.ap.spent += amount;
+
+    updateAPTracker();
+    return true;
+  }
+
+  function updateAPTracker() {
+    const ap = getTalentState().ap;
+    
+    const availableEl = document.getElementById('ap-available');
+    const totalEl = document.getElementById('ap-total');
+    const spentEl = document.getElementById('ap-spent');
+    
+    if (availableEl) availableEl.textContent = ap.available;
+    if (totalEl) totalEl.textContent = ap.total;
+    if (spentEl) spentEl.textContent = ap.spent;
+  }
+
+  // ═══ UNLOCK MECHANICS ═══
+  
+  let pendingUnlockTalentId = null;
+
+  window.TalentSystem.showUnlockModal = function(talentId) {
+    const talent = getTalent(talentId);
+    if (!talent) return;
+    
+    pendingUnlockTalentId = talentId;
+    
+    // Ensure modal exists in bag window
+    let modal = document.getElementById('talent-unlock-modal');
+    if (!modal) {
+      const bagWindow = document.getElementById('bagWindow');
+      if (!bagWindow) return;
+      
+      modal = document.createElement('div');
+      modal.id = 'talent-unlock-modal';
+      modal.innerHTML = `
+        <div class="talent-modal-content">
+          <div class="talent-modal-title">⚡ UNLOCK A1 TALENT ⚡</div>
+          <div class="talent-modal-details">
+            <div class="talent-modal-name" id="modal-talent-name">A1 Talent Name</div>
+            <div class="talent-modal-desc" id="modal-talent-desc">A1 talent description goes here</div>
+            <div class="talent-modal-cost-display">
+              <span class="talent-modal-cost-label">Cost:</span>
+              <span class="talent-modal-cost-value" id="modal-talent-cost">0</span>
+              <span class="talent-modal-cost-label">AP</span>
+            </div>
+          </div>
+          <div class="talent-modal-actions">
+            <button class="talent-modal-btn btn-cancel" onclick="window.TalentSystem.closeUnlockModal()">Cancel</button>
+            <button class="talent-modal-btn btn-confirm" id="modal-confirm-btn" onclick="window.TalentSystem.confirmUnlock()">UNLOCK</button>
+          </div>
+        </div>
+      `;
+      bagWindow.appendChild(modal);
+    }
+    
+    document.getElementById('modal-talent-name').textContent = talent.name;
+    document.getElementById('modal-talent-desc').textContent = talent.desc || 'No description available';
+    document.getElementById('modal-talent-cost').textContent = talent.cost;
+    
+    modal.classList.add('show');
+  };
+
+  window.TalentSystem.closeUnlockModal = function() {
+    const modal = document.getElementById('talent-unlock-modal');
+    modal.classList.remove('show');
+    pendingUnlockTalentId = null;
+  };
+
+  window.TalentSystem.confirmUnlock = function() {
+    if (!pendingUnlockTalentId) return;
+    
+    const talent = getTalent(pendingUnlockTalentId);
+    if (!talent) return;
+    
+    // Final check
+    if (!canUnlockTalent(pendingUnlockTalentId)) {
+      if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+        window.BagSystem.showToast('❌ Cannot unlock this A1 talent!', '#ff3864');
+      }
+      window.TalentSystem.closeUnlockModal();
+      return;
+    }
+    
+    // Spend AP
+    if (!spendAP(talent.cost)) {
+      if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+        window.BagSystem.showToast('❌ Not enough AP!', '#ff3864');
+      }
+      window.TalentSystem.closeUnlockModal();
+      return;
+    }
+    
+    // Unlock A1 talent
+    const state = getTalentState();
+    if (!state.unlocked.includes(pendingUnlockTalentId)) {
+      state.unlocked.push(pendingUnlockTalentId);
+    }
+    
+    // Handle special talents
+    if (pendingUnlockTalentId === 'cd_dual_wield') {
+      if (window.gameState) {
+        window.gameState.maxEquippedSlots = 2;
+        if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+          window.BagSystem.showToast('🎉 Unlocked 2nd skill slot!', '#4ade80');
+        }
+      }
+    }
+    
+    // Show unlock effect
+    showUnlockEffect();
+    
+    // Success notification
+    if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+      window.BagSystem.showToast(`✨ Unlocked ${talent.name}!`, '#00e5ff');
+    }
+    
+    // Close modal and re-render
+    window.TalentSystem.closeUnlockModal();
+    window.TalentSystem.renderTalentTree();
+    
+    console.log(`[TalentSystem] Unlocked talent: ${talent.name}`);
+  };
+
+  function showUnlockEffect() {
+    // Create visual explosion effect
+    const effect = document.createElement('div');
+    effect.className = 'talent-unlock-effect';
+    effect.style.cssText = `
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(157, 78, 221, 0.8) 0%, transparent 70%);
+      border-radius: 50%;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+    `;
+    
+    document.body.appendChild(effect);
+    
+    setTimeout(() => {
+      effect.remove();
+    }, 800);
+  }
+
+  // ═══ EQUIP SYSTEM ═══
+  
+  window.TalentSystem.toggleEquip = function(talentId) {
+    const talent = getTalent(talentId);
+    if (!talent || !talent.equippable) return;
+    const state = getTalentState();
+    const unlocked = new Set(state.unlocked);
+    const equipped = new Set(state.equipped);
+    
+    if (!unlocked.has(talentId)) {
+      if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+        window.BagSystem.showToast('❌ Must unlock this A1 talent first!', '#ff3864');
+      }
+      return;
+    }
+    
+    if (equipped.has(talentId)) {
+      state.equipped = state.equipped.filter(id => id !== talentId);
+      if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+        window.BagSystem.showToast(`Unequipped ${talent.name}`, '#ffd700');
+      }
+    } else {
+      state.equipped.push(talentId);
+      if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+        window.BagSystem.showToast(`⚡ Equipped ${talent.name}!`, '#ffd700');
+      }
+    }
+    
+    window.TalentSystem.renderTalentTree();
+  };
+
+  // ═══ RENDERING ═══
+  
+  window.TalentSystem.renderTalentTree = function(container) {
+    const state = initializeTalentState();
+    updateAPTracker();
+
+    const targetContainer = container || document.querySelector('.bag-content-pane');
+    if (!targetContainer) return;
+
+    const ap = state.ap;
+    const unlockedSet = new Set(state.unlocked);
+    const equippedSet = new Set(state.equipped);
+    const totalTalents = Object.values(TALENT_LANES).reduce((sum, lane) => sum + lane.length, 0);
+    const unlockedCount = unlockedSet.size;
+    const completionPercent = totalTalents === 0 ? 0 : Math.round((unlockedCount / totalTalents) * 100);
+    const heroName = window.gameState.playerName || 'Road to Power';
+    const heroLevel = window.gameState.playerLevel || 1;
+    const loadoutCount = equippedSet.size;
+
+    let html = '<div class="talent-system-wrapper" style="padding: 20px;">';
+    html += '  <div class="talent-layout" style="display: grid; grid-template-columns: minmax(270px, 340px) 1fr; gap: 24px; align-items: start;">';
+
+    // Sidebar cards
+    html += '    <div class="talent-sidebar" style="display: flex; flex-direction: column; gap: 20px;">';
+
+    // Hunter profile
+    html += '      <div class="talent-card hero-card" style="background: radial-gradient(circle at 15% 20%, rgba(0,229,255,0.25), rgba(10,14,26,0.95)); border: 2px solid rgba(0,229,255,0.35); border-radius: 20px; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.55);">';
+    html += '        <div style="font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--talent-text-dim);">A1 Talent Profile</div>';
+    html += '        <div style="display:flex; align-items:center; gap: 14px; margin-top: 14px;">';
+    html += `          <div style="width:64px; height:64px; border-radius: 50%; border: 2px solid rgba(0,229,255,0.6); background: rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; font-size:28px;">${loadoutCount > 0 ? '👑' : '🌑'}</div>`;
+    html += `          <div><div style="font-size: 22px; font-weight: 800; color: #ffffff;">${heroName}</div>`;
+    html += `            <div style="font-size: 12px; color: var(--talent-text-dim); margin-top: 4px;">Lv. ${heroLevel} • ${loadoutCount} equipped</div>`;
+    html += '          </div></div>';
+    html += '        <div style="margin-top: 18px;">';
+    html += '          <div style="display:flex; justify-content: space-between; font-size: 11px; color: var(--talent-text-dim);">';
+    html += `            <span>A1 Talent Completion</span><span>${completionPercent}%</span>`;
+    html += '          </div>';
+    html += '          <div style="height: 8px; border-radius: 999px; background: rgba(255,255,255,0.08); margin-top: 6px; overflow: hidden;">';
+    html += `            <div style="width:${completionPercent}%; height:100%; background: linear-gradient(90deg, var(--talent-glow-purple), var(--talent-glow-blue)); border-radius: inherit;"></div>`;
+    html += '          </div>';
+    html += '          <div style="display:flex; justify-content: space-between; font-size: 10px; color: var(--talent-text-dim); margin-top: 6px;">';
+    html += `            <span>${unlockedCount}/${totalTalents} nodes unlocked</span>`;
+    html += `            <span>${ap.available} AP ready</span>`;
+    html += '          </div>';
+    html += '        </div>';
+    html += '      </div>';
+
+    // AP tracker card
+    html += '      <div class="talent-card ap-card" style="background: linear-gradient(135deg, rgba(157,78,221,0.25), rgba(0,229,255,0.35)); border: 2px solid rgba(157,78,221,0.35); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(157,78,221,0.35);">';
+    html += '        <div style="display:flex; justify-content: space-between; align-items:center; gap: 16px; flex-wrap: wrap;">';
+    html += '          <div>';
+    html += '            <div style="font-size: 12px; color: rgba(255,255,255,0.7); letter-spacing: 1px; text-transform: uppercase;">Ability Points</div>';
+    html += `            <div style="font-size: 44px; font-weight: 800; color: #fff; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.45);">${ap.available}</div>`;
+    html += '            <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px;">Click an energized node to invest</div>';
+    html += '          </div>';
+    html += '          <div style="display:flex; gap: 10px;">';
+    html += `            <div style="text-align:center; padding: 10px 14px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);">
+                          <div style="font-size: 11px; color: rgba(255,255,255,0.7);">Total</div>
+                          <div style="font-size: 22px; font-weight: 700; color: var(--talent-glow-gold);">${ap.total}</div>
+                        </div>`;
+    html += `            <div style="text-align:center; padding: 10px 14px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);">
+                          <div style="font-size: 11px; color: rgba(255,255,255,0.7);">Spent</div>
+                          <div style="font-size: 22px; font-weight: 700; color: var(--talent-glow-red);">${ap.spent}</div>
+                        </div>`;
+    html += '          </div>';
+    html += '        </div>';
+    html += '      </div>';
+
+    // Filter card
+    html += '      <div class="talent-card filter-card" style="background: rgba(10,13,22,0.92); border: 2px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 18px;">';
+    html += '        <div style="font-size: 13px; font-weight: 700; color: var(--talent-text-bright); margin-bottom: 12px;">A1 Lane Focus</div>';
+    html += '        <div style="display: flex; flex-wrap: wrap; gap: 10px;">';
+    html += '          <button class="talent-filter-pill active" onclick="window.TalentSystem.filterLanes(\'all\')" style="padding: 8px 16px; background: var(--talent-unlockable); border: 2px solid var(--talent-unlockable-border); border-radius: 20px; color: #ffffff; font-weight: 600; cursor: pointer; transition: all 0.2s;">All</button>';
+    html += '          <button class="talent-filter-pill" onclick="window.TalentSystem.filterLanes(\'atk\')" style="padding: 8px 16px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.15); border-radius: 20px; color: var(--talent-text-dim); font-weight: 600; cursor: pointer; transition: all 0.2s;">⚔️ Attack</button>';
+    html += '          <button class="talent-filter-pill" onclick="window.TalentSystem.filterLanes(\'def\')" style="padding: 8px 16px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.15); border-radius: 20px; color: var(--talent-text-dim); font-weight: 600; cursor: pointer; transition: all 0.2s;">🛡️ Defense</button>';
+    html += '          <button class="talent-filter-pill" onclick="window.TalentSystem.filterLanes(\'cooldown\')" style="padding: 8px 16px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.15); border-radius: 20px; color: var(--talent-text-dim); font-weight: 600; cursor: pointer; transition: all 0.2s;">⏰ Cooldown</button>';
+    html += '          <button class="talent-filter-pill" onclick="window.TalentSystem.filterLanes(\'special\')" style="padding: 8px 16px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.15); border-radius: 20px; color: var(--talent-text-dim); font-weight: 600; cursor: pointer; transition: all 0.2s;">✨ Special</button>';
+    html += '        </div>';
+    html += '      </div>';
+
+    // Quick actions
+    html += '      <div class="talent-card" style="background: rgba(255,255,255,0.02); border: 2px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 18px;">';
+    html += '        <div style="font-size: 13px; font-weight: 700; color: var(--talent-text-bright); margin-bottom: 10px;">Quick A1 Actions</div>';
+    html += '        <button onclick="window.TalentSystem.resetTalents()" style="width: 100%; padding: 12px 18px; background: linear-gradient(135deg, #ff3864, #ff6b35); border: none; border-radius: 12px; color: #ffffff; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; box-shadow: 0 8px 18px rgba(255,56,100,0.35);">🔄 Reset A1 Talents (💎100)</button>';
+    html += '        <p style="font-size: 11px; color: var(--talent-text-dim); margin-top: 10px; line-height: 1.5;">Refunds all spent AP and unequips every A1 talent. Perfect when you want to respec for a new raid.</p>';
+    html += '      </div>';
+
+    html += '    </div>'; // sidebar
+
+    // Main content
+    html += '    <div class="talent-content" style="display:flex; flex-direction:column; gap:24px;">';
+    html += '      <div style="background: rgba(8,11,22,0.95); border: 2px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; display:flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;">';
+    html += '        <div>'; 
+    html += '          <div style="font-size: 24px; font-weight: 800; color: #fff;">A1 Talent Grid</div>';
+    html += '          <p style="font-size: 12px; color: var(--talent-text-dim); margin-top: 6px; max-width: 420px;">Pick an A1 lane to specialize your hunter. Unlocking deeper nodes in a lane amplifies earlier bonuses.</p>';
+    html += '        </div>';
+    html += '        <div style="display:flex; gap: 12px; align-items:center;">';
+    html += `          <div style="min-width: 110px; text-align:center; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08);">
+                       <div style="font-size: 11px; color: var(--talent-text-dim);">Unlocked</div>
+                       <div style="font-size: 20px; font-weight: 700; color: #fff;">${unlockedCount}</div>
+                     </div>`;
+    html += `          <div style="min-width: 110px; text-align:center; background: rgba(255,255,255,0.04); border-radius: 12px; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08);">
+                       <div style="font-size: 11px; color: var(--talent-text-dim);">Equipped</div>
+                       <div style="font-size: 20px; font-weight: 700; color: var(--talent-glow-gold);">${loadoutCount}</div>
+                     </div>`;
+    html += '        </div>';
+    html += '      </div>';
+
+    html += '      <div class="talent-lanes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">';
+
+    for (const [laneName, talents] of Object.entries(TALENT_LANES)) {
+      const unlockedInLane = talents.filter(t => unlockedSet.has(t.id)).length;
+      const laneProgress = talents.length === 0 ? 0 : Math.round((unlockedInLane / talents.length) * 100);
+      html += `<div class="talent-lane" data-lane="${laneName}" style="background: var(--talent-bg-dark); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 18px; display:flex; flex-direction:column; gap: 12px;">`;
+      html += '  <div style="display:flex; justify-content: space-between; align-items:center;">';
+      html += `    <div style="display:flex; align-items:center; gap: 10px; text-transform: uppercase; font-size: 13px; font-weight: 700; color: var(--talent-glow-blue);">
+                    <span style="font-size: 20px;">${getLaneIcon(laneName)}</span>
+                    <span>${laneName}</span>
+                  </div>`;
+      html += `    <div style="font-size: 11px; color: var(--talent-text-dim);">${unlockedInLane}/${talents.length}</div>`;
+      html += '  </div>';
+      html += `  <div style="height: 4px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden;"><div style="width:${laneProgress}%; height: 100%; background: linear-gradient(90deg, var(--talent-glow-purple), var(--talent-glow-blue));"></div></div>`;
+
+      for (const talent of talents) {
+        const isLocked = !unlockedSet.has(talent.id);
+        const isUnlockableState = isUnlockable(talent.id);
+        const isEquipped = equippedSet.has(talent.id);
+
+        let bgColor, borderColor, iconEmoji, statusText, btnHtml;
+
+        if (isLocked && !isUnlockableState) {
+          bgColor = 'var(--talent-locked)';
+          borderColor = 'var(--talent-locked-border)';
+          iconEmoji = '🔒';
+          statusText = '<div style="font-size: 10px; color: var(--talent-glow-red); margin-top: 8px;">🔒 LOCKED</div>';
+          btnHtml = '<button class="talent-node-btn" disabled style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: none; border-radius: 8px; color: rgba(255, 255, 255, 0.3); font-weight: 600; cursor: not-allowed; margin-top: 10px;">LOCKED</button>';
+        } else if (isLocked && isUnlockableState) {
+          bgColor = 'var(--talent-unlockable)';
+          borderColor = 'var(--talent-unlockable-border)';
+          iconEmoji = '⚡';
+          statusText = '<div style="font-size: 10px; color: var(--talent-glow-purple); margin-top: 8px; animation: nodeUnlockablePulse 2s infinite;">⚡ READY TO UNLOCK</div>';
+          btnHtml = `<button class="talent-node-btn" onclick="window.TalentSystem.showUnlockModal('${talent.id}')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, var(--talent-glow-purple), var(--talent-glow-blue)); border: none; border-radius: 10px; color: #ffffff; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(157, 78, 221, 0.5); transition: transform 0.2s;">⚡ UNLOCK (${talent.cost} AP)</button>`;
+        } else if (isEquipped) {
+          bgColor = 'var(--talent-equipped)';
+          borderColor = 'var(--talent-equipped-border)';
+          iconEmoji = '👑';
+          statusText = '<div style="font-size: 10px; color: var(--talent-glow-gold); margin-top: 8px; animation: nodeEquippedGlow 3s infinite;">👑 EQUIPPED</div>';
+          btnHtml = `<button class="talent-node-btn" onclick="window.TalentSystem.toggleEquip('${talent.id}')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #ff8c00); border: none; border-radius: 10px; color: #000000; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);">UNEQUIP</button>`;
+        } else {
+          bgColor = 'var(--talent-unlocked)';
+          borderColor = 'var(--talent-unlocked-border)';
+          iconEmoji = '✨';
+          statusText = '<div style="font-size: 10px; color: var(--talent-glow-blue); margin-top: 8px;">✨ UNLOCKED</div>';
+          if (talent.equippable) {
+            btnHtml = `<button class="talent-node-btn" onclick="window.TalentSystem.toggleEquip('${talent.id}')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, var(--talent-glow-blue), var(--talent-glow-purple)); border: none; border-radius: 10px; color: #ffffff; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(0, 229, 255, 0.4);">⚔️ EQUIP</button>`;
+          } else {
+            btnHtml = '<button class="talent-node-btn" disabled style="width: 100%; padding: 10px; background: rgba(0, 229, 255, 0.2); border: none; border-radius: 10px; color: var(--talent-glow-blue); font-weight: 600; cursor: default; margin-top: 10px;">✅ UNLOCKED</button>';
+          }
+        }
+
+        html += `<div class="talent-node" style="background: ${bgColor}; border: 2px solid ${borderColor}; border-radius: 14px; padding: 14px; transition: all 0.3s; position: relative;">`;
+        html += '  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">';
+        html += `    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">`;
+        html += `      <span style="font-size: 24px;">${iconEmoji}</span>`;
+        html += '      <div>';
+        html += `        <div style="font-size: 13px; font-weight: 700; color: var(--talent-text-bright); line-height: 1.3;">${talent.name}</div>`;
+        if (talent.req && isLocked) {
+          html += `        <div style="font-size: 9px; color: var(--talent-glow-red); margin-top: 3px;">Requires: ${talent.req.join(', ')}</div>`;
+        }
+        html += '      </div>';
+        html += '    </div>';
+        html += `    <div style="font-size: 12px; font-weight: 700; color: var(--talent-glow-gold); white-space: nowrap; padding: 4px 10px; background: rgba(0, 0, 0, 0.25); border-radius: 12px;">${talent.cost} AP</div>`;
+        html += '  </div>';
+        html += `  <div style="font-size: 11px; color: var(--talent-text-dim); line-height: 1.5; margin-top: 8px;">${talent.desc}</div>`;
+        html += statusText;
+        html += btnHtml;
+        html += '</div>';
+      }
+
+      html += '</div>';
+    }
+
+    html += '      </div>'; // lanes grid
+    html += '      <div style="text-align: center; font-size: 11px; color: var(--talent-text-dim);">Tip: A1 talent unlocks stack with gear bonuses and can be respecced anytime.</div>';
+    html += '    </div>'; // content
+    html += '  </div>';
+    html += '</div>';
+
+    targetContainer.innerHTML = html;
+  };
+  
+  function getLaneIcon(laneName) {
+    const icons = {
+      atk: '⚔️',
+      def: '🛡️',
+      recovery: '💚',
+      cooldown: '⏰',
+      luck: '🍀',
+      shadow: '🌑',
+      spirit: '👻',
+      lightning: '⚡',
+      monarch: '👑'
+    };
+    return icons[laneName] || '✨';
+  }
+
+  window.TalentSystem.filterLanes = function(filter) {
+    // Update active filter button
+    document.querySelectorAll('.talent-filter-pill').forEach(btn => {
+      btn.classList.remove('active');
+      btn.style.background = 'rgba(255, 255, 255, 0.05)';
+      btn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+      btn.style.color = 'var(--talent-text-dim)';
+    });
+    event.target.classList.add('active');
+    event.target.style.background = 'var(--talent-unlockable)';
+    event.target.style.borderColor = 'var(--talent-unlockable-border)';
+    event.target.style.color = '#ffffff';
+    
+    // Filter lanes
+    const lanes = document.querySelectorAll('.talent-lane');
+    lanes.forEach(lane => {
+      const laneName = lane.getAttribute('data-lane');
+      
+      if (filter === 'all') {
+        lane.style.display = '';
+      } else if (filter === 'atk' && (laneName === 'atk' || laneName === 'shadow' || laneName === 'spirit' || laneName === 'lightning')) {
+        lane.style.display = '';
+      } else if (filter === 'def' && (laneName === 'def' || laneName === 'recovery')) {
+        lane.style.display = '';
+      } else if (filter === 'cooldown' && laneName === 'cooldown') {
+        lane.style.display = '';
+      } else if (filter === 'special' && (laneName === 'luck' || laneName === 'monarch')) {
+        lane.style.display = '';
+      } else {
+        lane.style.display = 'none';
+      }
+    });
+  };
+
+  window.TalentSystem.resetTalents = function() {
+    if (!confirm('Are you sure you want to reset all talents? This will cost 100 gems and refund all spent AP.')) {
+      return;
+    }
+    
+    const gemCost = 100;
+    if (window.gameState.gems < gemCost) {
+      if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+        window.BagSystem.showToast('❌ Not enough gems!', '#ff3864');
+      }
+      return;
+    }
+    
+    // Deduct gems
+    window.gameState.gems -= gemCost;
+    
+    // Refund AP
+    window.gameState.talents.ap.available += window.gameState.talents.ap.spent;
+    window.gameState.talents.ap.spent = 0;
+    
+    // Clear unlocked and equipped
+    window.gameState.talents.unlocked.clear();
+    window.gameState.talents.equipped.clear();
+    
+    if (window.BagSystem && typeof window.BagSystem.showToast === 'function') {
+      window.BagSystem.showToast('✨ Talents reset! AP refunded.', '#00e5ff');
+    }
+    
+    window.TalentSystem.renderTalentTree();
+    updateAPTracker();
+  };
+
+  // ═══ INITIALIZATION ═══
+  
+  window.TalentSystem.init = function() {
+    initializeTalentState();
+    updateAPTracker();
+    
+    // Give starting AP for testing
+    if (window.gameState.talents?.ap?.total === 0) {
+      window.TalentSystem.gainAP(15, 'starter bonus');
+    }
+    
+    console.log('[TalentSystem] Initialized successfully');
+  };
+
+  // Auto-initialize when document is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => window.TalentSystem.init(), 500);
+    });
+  } else {
+    setTimeout(() => window.TalentSystem.init(), 500);
+  }
+
+  // Expose for debugging
+  window.TALENT_LANES = TALENT_LANES;
+
+})();
+  </script>
+
+  <!-- HUD removed - utility buttons removed as requested -->
+</body>
+</html>
+

@@ -1,0 +1,149 @@
+const BAG_TEMPLATE = String.raw`
+        <div class="bag-window" id="bagWindow">
+          <div class="bag-titlebar" id="bagTitlebar">
+            <div class="bag-titlebar-icon">🎒</div>
+            <div class="bag-titlebar-title">A1K ULTIMATE - All Features</div>
+            <div class="bag-titlebar-controls">
+              <button class="titlebar-btn minimize" id="minimizeBagBtn">−</button>
+              <button class="titlebar-btn maximize" id="maximizeBagBtn">□</button>
+              <button class="titlebar-btn close" id="closeBagBtn">✕</button>
+            </div>
+          </div>
+          <div class="bag-tabs-bar">
+            <div class="bag-tabs-strip" id="bagTabsStrip"></div>
+            <div class="bag-titlebar-controls"></div>
+          </div>
+          <div class="bag-currencies">
+            <div class="currencies-strip" id="currenciesStrip"></div>
+          </div>
+          <div class="bag-actions">
+            <div class="actions-row">
+              <button class="auto-btn" id="openAllBtn">Open All</button>
+              <button class="auto-btn" id="autoUpBtn">Auto Up</button>
+              <button class="auto-btn" id="autoEqBtn">Auto Eq</button>
+              <button class="auto-btn" id="autoFuseBtn">Auto Fuse</button>
+              <button class="auto-btn" id="autoSellBtn">Auto Sell</button>
+              <button class="auto-btn" id="autoAlchemyBtn" title="Auto Alchemy (1x)">AUTO ALCHEMY</button>
+              <button class="auto-btn" id="autoAIBtn">Auto AI: OFF</button>
+            </div>
+          </div>
+          <div class="bag-content-pane" id="bagContentPane"></div>
+          <div class="bag-stats-footer">
+            <div class="stats-left" id="bagStatsLeft"></div>
+            <div class="stats-right" id="bagStatsRight"></div>
+          </div>
+          <div class="bag-diagnostics" id="bagDiagnostics">
+            <div class="bag-diagnostics__header">Diagnostics</div>
+            <div class="bag-diagnostics__content" id="bagDiagnosticsContent">
+              <div class="bag-diagnostics__empty">All systems nominal.</div>
+            </div>
+          </div>
+        </div>
+      `.trim();
+
+      const HUD_TEMPLATE = String.raw`
+        <div id="hud-wrap">
+          <div id="hud-left">
+            <div class="utility-stack">
+              <div class="utility-row top">
+                <button class="utility-btn" data-btn="pet">Pet</button>
+                <button class="utility-btn" data-btn="veh">Veh</button>
+                <button class="utility-btn" data-btn="act">Act</button>
+                <button class="utility-btn" data-btn="act2">Act2</button>
+              </div>
+              <div class="utility-row bot">
+                <button class="utility-btn" data-btn="bag">Bag</button>
+                <button class="utility-btn" data-btn="ai">AI</button>
+                <button class="utility-btn" data-btn="switch">Switch</button>
+              </div>
+            </div>
+            <div id="vj-root">
+              <div id="vj-base"></div>
+              <div id="vj-knob"></div>
+            </div>
+          </div>
+          <div id="hud-right">
+            <div class="skill-row">
+              <button class="skill-pill s1" data-skill="S1" data-btn="s1" aria-label="Skill 1"></button>
+              <button class="skill-pill s2" data-skill="S2" data-btn="s2" aria-label="Skill 2"></button>
+              <button class="skill-pill s3" data-skill="S3" data-btn="s3" aria-label="Skill 3"></button>
+            </div>
+            <div class="btn-container">
+              <button class="big-btn attack" data-btn="attack">ATTACK</button>
+              <button class="big-btn jump" data-btn="jump">JUMP</button>
+              <div class="rage-shield-container">
+                <button class="rage-shield-btn rage" data-btn="rage">RAGE</button>
+                <button class="rage-shield-btn shield" data-btn="shield">SHIELD</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `.trim();
+
+      const HUD_COLOR_PRESETS = [
+        {
+          id: 'candy-pink',
+          label: 'Pink',
+          values: {
+            '--candy-pink': '#ffb6d9',
+            '--candy-purple': '#fecfef',
+            '--candy-yellow': '#ffecd2',
+            '--candy-blue': '#a8edea',
+            '--candy-orange': '#ffd1ff'
+          }
+        },
+        {
+          id: 'candy-blue',
+          label: 'Blue',
+          values: {
+            '--candy-pink': '#a8edea',
+            '--candy-purple': '#b5ccff',
+            '--candy-yellow': '#e0f4ff',
+            '--candy-blue': '#7dd3fc',
+            '--candy-orange': '#c4f1ff'
+          }
+        },
+        {
+          id: 'candy-green',
+          label: 'Green',
+          values: {
+            '--candy-pink': '#c8f8d1',
+            '--candy-purple': '#92f2c0',
+            '--candy-yellow': '#e6ffe0',
+            '--candy-blue': '#8ef0d0',
+            '--candy-orange': '#d5ffd4'
+          }
+        },
+        {
+          id: 'candy-gold',
+          label: 'Gold',
+          values: {
+            '--candy-pink': '#ffdca8',
+            '--candy-purple': '#ffe4b5',
+            '--candy-yellow': '#ffe8a3',
+            '--candy-blue': '#ffe0b2',
+            '--candy-orange': '#ffcc80'
+          }
+        }
+      ];
+
+      // Tab Definitions (embedded for offline use)
+      const ensureStylesheet = (href = STYLESHEET_HREF) => {
+        if (document.getElementById(STYLESHEET_ID)) return;
+        const link = document.createElement('link');
+        link.id = STYLESHEET_ID;
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+      };
+
+      const injectHtmlIfMissing = (selector, template) => {
+        if (document.querySelector(selector)) return;
+        const tpl = document.createElement('template');
+        tpl.innerHTML = template;
+        document.body.appendChild(tpl.content.cloneNode(true));
+      };
+
+      const ensureUiInjected = () => {
+        ensureStylesheet();
+        if (!document.q

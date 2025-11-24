@@ -1,0 +1,39 @@
+{
+  "name": "game-systems-library",
+  "version": "1.0.0",
+  "description": "Production-ready, standalone game systems for any project",
+  "main": "unified/all-systems.js",
+  "scripts": {
+    "demo": "npx http-server -p 8080 -o demos/index.html"
+  },
+  "keywords": [
+    "game",
+    "gamedev",
+    "quest-system",
+    "inventory-system",
+    "rpg",
+    "game-systems",
+    "javascript",
+    "vanilla-js",
+    "standalone"
+  ],
+  "author": "Game Systems Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/game-systems.git"
+  },
+  "files": [
+    "systems/",
+    "unified/",
+    "utils/",
+    "data/",
+    "styles/",
+    "README.md",
+    "INTEGRATION_GUIDE.md"
+  ],
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
+

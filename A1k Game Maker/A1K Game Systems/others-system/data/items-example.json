@@ -1,0 +1,163 @@
+{
+  "items": {
+    "steel_sword": {
+      "id": "steel_sword",
+      "name": "Steel Sword",
+      "description": "A reliable steel sword for combat",
+      "category": "weapon",
+      "rarity": "common",
+      "value": 100,
+      "icon": "⚔️",
+      "stackable": false,
+      "stats": {
+        "attack": 15,
+        "speed": 1.0
+      }
+    },
+    "iron_armor": {
+      "id": "iron_armor",
+      "name": "Iron Armor",
+      "description": "Sturdy iron armor providing good protection",
+      "category": "armor",
+      "rarity": "common",
+      "value": 150,
+      "icon": "🛡️",
+      "stackable": false,
+      "stats": {
+        "defense": 20,
+        "hp": 50
+      }
+    },
+    "legendary_weapon": {
+      "id": "legendary_weapon",
+      "name": "Excalibur",
+      "description": "Legendary sword of immense power",
+      "category": "weapon",
+      "rarity": "legendary",
+      "value": 10000,
+      "icon": "⚔️",
+      "stackable": false,
+      "stats": {
+        "attack": 100,
+        "speed": 1.5,
+        "critRate": 0.25
+      }
+    },
+    "health_potion": {
+      "id": "health_potion",
+      "name": "Health Potion",
+      "description": "Restores 50 HP",
+      "category": "consumable",
+      "rarity": "common",
+      "value": 25,
+      "icon": "🧪",
+      "stackable": true,
+      "maxStack": 99,
+      "effects": {
+        "heal": 50
+      }
+    },
+    "greater_health_potion": {
+      "id": "greater_health_potion",
+      "name": "Greater Health Potion",
+      "description": "Restores 150 HP",
+      "category": "consumable",
+      "rarity": "uncommon",
+      "value": 75,
+      "icon": "🧪",
+      "stackable": true,
+      "maxStack": 99,
+      "effects": {
+        "heal": 150
+      }
+    },
+    "mana_potion": {
+      "id": "mana_potion",
+      "name": "Mana Potion",
+      "description": "Restores 50 MP",
+      "category": "consumable",
+      "rarity": "common",
+      "value": 30,
+      "icon": "💧",
+      "stackable": true,
+      "maxStack": 99,
+      "effects": {
+        "mana": 50
+      }
+    },
+    "resource_basic": {
+      "id": "resource_basic",
+      "name": "Basic Resource",
+      "description": "Common crafting material",
+      "category": "material",
+      "rarity": "common",
+      "value": 5,
+      "icon": "📦",
+      "stackable": true,
+      "maxStack": 999
+    },
+    "crystal_shard": {
+      "id": "crystal_shard",
+      "name": "Crystal Shard",
+      "description": "Rare magical crystal fragment",
+      "category": "material",
+      "rarity": "rare",
+      "value": 100,
+      "icon": "💎",
+      "stackable": true,
+      "maxStack": 99
+    },
+    "legendary_core": {
+      "id": "legendary_core",
+      "name": "Legendary Core",
+      "description": "Powerful core with immense energy",
+      "category": "accessory",
+      "rarity": "legendary",
+      "value": 5000,
+      "icon": "🔮",
+      "stackable": false,
+      "stats": {
+        "attack": 50,
+        "defense": 50,
+        "allDamage": 0.20
+      }
+    },
+    "epic_chest": {
+      "id": "epic_chest",
+      "name": "Epic Chest",
+      "description": "Contains rare treasures",
+      "category": "misc",
+      "rarity": "epic",
+      "value": 1000,
+      "icon": "🎁",
+      "stackable": true,
+      "maxStack": 10
+    },
+    "speed_ring": {
+      "id": "speed_ring",
+      "name": "Ring of Swiftness",
+      "description": "Increases movement speed",
+      "category": "accessory",
+      "rarity": "rare",
+      "value": 500,
+      "icon": "💍",
+      "stackable": false,
+      "stats": {
+        "speed": 0.25,
+        "attack": 10
+      }
+    },
+    "dragon_scale": {
+      "id": "dragon_scale",
+      "name": "Dragon Scale",
+      "description": "Scale from an ancient dragon",
+      "category": "material",
+      "rarity": "epic",
+      "value": 500,
+      "icon": "🐉",
+      "stackable": true,
+      "maxStack": 50
+    }
+  }
+}
+

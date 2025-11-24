@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All 5 Game Systems - Chibi Candy Demo (Production Ready)</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.container {
+  display: grid;
+  grid-template-rows: 42px 144px 102px 90px 90px;
+  gap: 5px;
+  padding: 5px;
+  height: 100vh;
+  max-height: 470px;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.header h1 {
+  font-size: 17px;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* Top Row - Characters, Abilities, Spirits */
+.top-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  padding: 7px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.card-title {
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  text-align: center;
+  color: #667eea;
+}
+
+/* Character display */
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.char-box {
+  text-align: center;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.char-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.char-canvas {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.char-name {
+  font-size: 7px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+/* Ability grid */
+.ability-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.ability-box {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ability-box:hover:not(.cd) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(103, 126, 234, 0.5);
+  border-color: rgba(103, 126, 234, 0.6);
+}
+
+.ability-box.cd {
+  opacity: 0.5;
+}
+
+.ability-canvas {
+  width: 29px;
+  height: 29px;
+  margin: 0 auto 2px;
+}
+
+.ability-name {
+  font-size: 7px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.cd-timer {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #FF6B6B;
+  color: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* Spirit grid */
+.spirit-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.spirit-box {
+  background: linear-gradient(135deg, #FFF 0%, #FFF5F7 100%);
+  border-radius: 12px;
+  padding: 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.spirit-box:hover {
+  transform: scale(1.08);
+}
+
+.spirit-box.equipped {
+  border: 3px solid #51CF66;
+  box-shadow: 0 0 20px rgba(81, 207, 102, 0.5);
+}
+
+.spirit-canvas {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 4px;
+}
+
+.spirit-name {
+  font-size: 9px;
+  font-weight: 700;
+  color: #9B59B6;
+}
+
+/* Mid Row - Quests */
+.mid-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.quest-list {
+  list-style: none;
+  max-height: 75px;
+  overflow-y: auto;
+}
+
+.quest-item {
+  background: rgba(255,255,255,0.05);
+  border-left: 2px solid #667eea;
+  padding: 5px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  font-size: 8px;
+}
+
+.quest-title {
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 3px;
+}
+
+.quest-progress {
+  height: 10px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.quest-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.3s;
+  font-size: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+}
+
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+}
+
+.inv-slot {
+  width: 100%;
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.inv-slot:hover {
+  transform: scale(1.08);
+}
+
+.inv-slot.legendary {
+  border-color: #F39C12;
+  box-shadow: 0 0 15px rgba(243, 156, 18, 0.4);
+  animation: sparkle 2s infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { box-shadow: 0 0 15px rgba(243, 156, 18, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(243, 156, 18, 0.7); }
+}
+
+.inv-slot.epic { border-color: #9B59B6; }
+.inv-slot.rare { border-color: #4C6EF5; }
+
+.inv-qty {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Bottom Row - Inventory, Settings, Stats, Console */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 8px;
+}
+
+.slider {
+  width: 40px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+
+.slider-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 5px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+}
+
+.stat-label {
+  font-size: 7px;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+}
+
+.console {
+  background: #000;
+  border-radius: 12px;
+  padding: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  max-height: 70px;
+  overflow-y: auto;
+}
+
+.log {
+  color: #0F0;
+  padding: 2px 0;
+}
+
+.btn {
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+}
+
+.btn-sm {
+  padding: 3px 6px;
+  font-size: 8px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>🍭 All 5 Game Systems • Chibi Candy Style</h1>
+  </div>
+
+  <!-- Top Row -->
+  <div class="top-row">
+    <!-- Characters -->
+    <div class="card">
+      <div class="card-title">👥 Skins</div>
+      <div class="char-grid">
+        <div class="char-box" onclick="selectChar('a1')">
+          <canvas id="char-a1" class="char-canvas" width="48" height="48"></canvas>
+          <div class="char-name" style="color:#FF6B9D">A1</div>
+        </div>
+        <div class="char-box" onclick="selectChar('unique')">
+          <canvas id="char-unique" class="char-canvas" width="48" height="48"></canvas>
+          <div class="char-name" style="color:#4ECDC4">Unique</div>
+        </div>
+        <div class="char-box" onclick="selectChar('missy')">
+          <canvas id="char-missy" class="char-canvas" width="48" height="48"></canvas>
+          <div class="char-name" style="color:#B4A7D6">Missy</div>
+        </div>
+      </div>
+      <button class="btn" style="width:100%; margin-top:8px;" onclick="cyclePalette()">Change Colors</button>
+    </div>
+
+    <!-- Abilities -->
+    <div class="card">
+      <div class="card-title">✨ Supernatural</div>
+      <div class="ability-grid">
+        <div class="ability-box" id="ab-0" onclick="useAbility(0)">
+          <canvas id="ab-canvas-0" class="ability-canvas" width="29" height="29"></canvas>
+          <div class="ability-name">Barrier</div>
+        </div>
+        <div class="ability-box" id="ab-1" onclick="useAbility(1)">
+          <canvas id="ab-canvas-1" class="ability-canvas" width="29" height="29"></canvas>
+          <div class="ability-name">Nova</div>
+        </div>
+        <div class="ability-box" id="ab-2" onclick="useAbility(2)">
+          <canvas id="ab-canvas-2" class="ability-canvas" width="29" height="29"></canvas>
+          <div class="ability-name">Might</div>
+        </div>
+        <div class="ability-box" id="ab-3" onclick="useAbility(3)">
+          <canvas id="ab-canvas-3" class="ability-canvas" width="29" height="29"></canvas>
+          <div class="ability-name">Flame</div>
+        </div>
+        <div class="ability-box" id="ab-4" onclick="useAbility(4)">
+          <canvas id="ab-canvas-4" class="ability-canvas" width="29" height="29"></canvas>
+          <div class="ability-name">Burst</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spirits -->
+    <div class="card">
+      <div class="card-title">🔮 Spirits</div>
+      <div class="spirit-grid">
+        <div class="spirit-box" id="sp-0" onclick="equipSpirit(0)">
+          <canvas id="sp-canvas-0" class="spirit-canvas" width="48" height="48"></canvas>
+          <div class="spirit-name">Phoenix</div>
+        </div>
+        <div class="spirit-box" id="sp-1" onclick="equipSpirit(1)">
+          <canvas id="sp-canvas-1" class="spirit-canvas" width="48" height="48"></canvas>
+          <div class="spirit-name">Dragon</div>
+        </div>
+        <div class="spirit-box" id="sp-2" onclick="equipSpirit(2)">
+          <canvas id="sp-canvas-2" class="spirit-canvas" width="48" height="48"></canvas>
+          <div class="spirit-name">Wolf</div>
+        </div>
+        <div class="spirit-box" id="sp-3" onclick="equipSpirit(3)">
+          <canvas id="sp-canvas-3" class="spirit-canvas" width="48" height="48"></canvas>
+          <div class="spirit-name">Turtle</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mid Row -->
+  <div class="mid-row">
+    <!-- Quests -->
+    <div class="card">
+      <div class="card-title">📜 Quests</div>
+      <ul class="quest-list" id="quest-list"></ul>
+      <button class="btn btn-sm" style="width:100%; margin-top:6px;" onclick="startQuest()">Start Quest</button>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bottom-row">
+    <!-- Inventory -->
+    <div class="card">
+      <div class="card-title">🎒 Inventory</div>
+      <div class="inv-grid" id="inv-grid"></div>
+      <button class="btn btn-sm" style="width:100%; margin-top:6px;" onclick="addItem()">Add Item</button>
+    </div>
+
+    <!-- Settings / Game Config -->
+    <div class="card">
+      <div class="card-title">⚙️ Config</div>
+      <div class="setting-row">
+        <span>💰 Max Gold</span>
+        <span style="color:#FFD700; font-weight:700; font-size:9px;">999,999</span>
+      </div>
+      <div class="setting-row">
+        <span>⭐ Max Level</span>
+        <span style="color:#4ECDC4; font-weight:700; font-size:9px;">100</span>
+      </div>
+      <div class="setting-row">
+        <span>🎒 Max Items</span>
+        <span style="color:#FF6B9D; font-weight:700; font-size:9px;">50</span>
+      </div>
+      <div class="setting-row">
+        <span>📜 Max Quests</span>
+        <span style="color:#B4A7D6; font-weight:700; font-size:9px;">20</span>
+      </div>
+      <div class="setting-row">
+        <span>🔊 Volume</span>
+        <span style="color:#51CF66; font-weight:700; font-size:9px;" id="vol-text">70%</span>
+      </div>
+      <button class="btn btn-sm" style="width:100%; margin-top:4px;" onclick="toggleSettings()">⚙️ Toggle</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="card">
+      <div class="card-title">📊 Stats</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-value" id="gold-val">5000</div>
+          <div class="stat-label">Gold</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="lvl-val">1</div>
+          <div class="stat-label">Level</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="quest-val">0</div>
+          <div class="stat-label">Quests</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="item-val">0</div>
+          <div class="stat-label">Items</div>
+        </div>
+      </div>
+      <button class="btn" style="width:100%; margin-top:8px;" onclick="runDemo()">🚀 Run Demo</button>
+    </div>
+
+    <!-- Console -->
+    <div class="card">
+      <div class="card-title">📝 Log</div>
+      <div class="console" id="console">
+        <div class="log">✓ All systems ready</div>
+        <div class="log">✓ Vector sprites loaded</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === GAME STATE ===
+const state = {
+  gold: 5000,
+  level: 1,
+  quests: [],
+  items: [],
+  equipped: null,
+  palette: 0,
+  volume: 0.7,
+  cds: [0,0,0,0,0]
+};
+
+// Game Configuration / QA Data
+const gameConfig = {
+  maxGold: 999999,
+  maxLevel: 100,
+  maxItems: 50,
+  maxQuests: 20,
+  maxAbilities: 5,
+  maxSpirits: 4,
+  startGold: 5000,
+  version: '1.0.0'
+};
+
+const palettes = [
+  {name:'fire', primary:'#FF6B9D', secondary:'#C44569', accent:'#FFB3CD', glow:'rgba(255,107,157,0.5)'},
+  {name:'ice', primary:'#44CCFF', secondary:'#2A9FDD', accent:'#AAEEFF', glow:'rgba(68,204,255,0.5)'},
+  {name:'shadow', primary:'#9B59B6', secondary:'#7B3F94', accent:'#D5C9E8', glow:'rgba(155,89,182,0.5)'},
+  {name:'light', primary:'#FFD700', secondary:'#FFA500', accent:'#FFFFE0', glow:'rgba(255,215,0,0.5)'},
+  {name:'nature', primary:'#51CF66', secondary:'#2E8B57', accent:'#90EE90', glow:'rgba(81,207,102,0.5)'}
+];
+
+// === VECTOR CEL RENDERER (Extracted from hero-sprites) ===
+function drawChibiCharacter(ctx, char, frame) {
+  const pal = palettes[state.palette];
+  ctx.clearRect(0, 0, 48, 48);
+  const cx = 24, cy = 24;
+  const bob = Math.sin(frame * 0.15) * 1;
+  
+  // Character-specific full-body sprites
+  if (char === 'a1') {
+    drawA1Operative(ctx, cx, cy, bob, pal);
+  } else if (char === 'unique') {
+    drawUniqueRogue(ctx, cx, cy, bob, pal);
+  } else if (char === 'missy') {
+    drawMissyMage(ctx, cx, cy, bob, pal);
+  }
+}
+
+function drawChibiLeg(ctx, x, y, pal) {
+  const grad = ctx.createLinearGradient(x, y, x, y+20);
+  grad.addColorStop(0, pal.secondary);
+  grad.addColorStop(1, pal.primary);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(x, y, 8, 20, 4);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function drawChibiSword(ctx, x, y, pal) {
+  ctx.shadowColor = pal.primary;
+  ctx.shadowBlur = 8;
+  const grad = ctx.createLinearGradient(x, y, x, y+20);
+  grad.addColorStop(0, '#FFF');
+  grad.addColorStop(1, '#C0C0C0');
+  ctx.fillStyle = grad;
+  ctx.fillRect(x, y, 4, 20);
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x, y, 4, 20);
+}
+
+function drawChibiStaff(ctx, x, y, pal) {
+  ctx.strokeStyle = '#8B4513';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, y+25);
+  ctx.stroke();
+  
+  ctx.fillStyle = pal.accent;
+  ctx.shadowColor = pal.accent;
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.arc(x, y-3, 5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+// Full-body chibi character sprites
+function drawA1Operative(ctx, cx, cy, bob, pal) {
+  // Legs
+  ctx.fillStyle = pal.secondary;
+  ctx.fillRect(cx-5, cy+10+bob, 4, 8);
+  ctx.fillRect(cx+1, cy+10+bob, 4, 8);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-5, cy+10+bob, 4, 8);
+  ctx.strokeRect(cx+1, cy+10+bob, 4, 8);
+  
+  // Body (armor)
+  const bodyGrad = ctx.createLinearGradient(cx, cy-2+bob, cx, cy+12+bob);
+  bodyGrad.addColorStop(0, pal.primary);
+  bodyGrad.addColorStop(1, pal.secondary);
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath();
+  ctx.roundRect(cx-7, cy-2+bob, 14, 14, 3);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Armor details
+  ctx.strokeStyle = pal.accent;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx-4, cy+2+bob);
+  ctx.lineTo(cx+4, cy+2+bob);
+  ctx.moveTo(cx, cy+bob);
+  ctx.lineTo(cx, cy+6+bob);
+  ctx.stroke();
+  
+  // Head (large chibi head)
+  const headGrad = ctx.createRadialGradient(cx, cy-8+bob, 2, cx, cy-8+bob, 8);
+  headGrad.addColorStop(0, '#FFE4C4');
+  headGrad.addColorStop(1, '#DEB887');
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy-8+bob, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Helmet/visor
+  ctx.fillStyle = pal.primary;
+  ctx.beginPath();
+  ctx.arc(cx, cy-10+bob, 7, Math.PI, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  // Visor glow
+  ctx.fillStyle = '#00FFFF';
+  ctx.fillRect(cx-5, cy-10+bob, 10, 2);
+  
+  // Arms
+  ctx.fillStyle = pal.secondary;
+  ctx.fillRect(cx-9, cy+2+bob, 3, 8);
+  ctx.fillRect(cx+6, cy+2+bob, 3, 8);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-9, cy+2+bob, 3, 8);
+  ctx.strokeRect(cx+6, cy+2+bob, 3, 8);
+  
+  // Weapon (gun)
+  ctx.fillStyle = '#666';
+  ctx.fillRect(cx+6, cy+7+bob, 5, 3);
+  ctx.strokeStyle = '#000';
+  ctx.strokeRect(cx+6, cy+7+bob, 5, 3);
+}
+
+function drawUniqueRogue(ctx, cx, cy, bob, pal) {
+  // Legs
+  ctx.fillStyle = '#2C2C2C';
+  ctx.fillRect(cx-5, cy+10+bob, 4, 8);
+  ctx.fillRect(cx+1, cy+10+bob, 4, 8);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-5, cy+10+bob, 4, 8);
+  ctx.strokeRect(cx+1, cy+10+bob, 4, 8);
+  
+  // Body (cloak/coat)
+  const bodyGrad = ctx.createLinearGradient(cx, cy-2+bob, cx, cy+12+bob);
+  bodyGrad.addColorStop(0, pal.primary);
+  bodyGrad.addColorStop(1, '#1a1a1a');
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath();
+  ctx.moveTo(cx-8, cy-2+bob);
+  ctx.lineTo(cx+8, cy-2+bob);
+  ctx.lineTo(cx+10, cy+12+bob);
+  ctx.lineTo(cx-10, cy+12+bob);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Belt
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(cx-7, cy+4+bob, 14, 2);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-7, cy+4+bob, 14, 2);
+  
+  // Head
+  const headGrad = ctx.createRadialGradient(cx, cy-8+bob, 2, cx, cy-8+bob, 8);
+  headGrad.addColorStop(0, '#FFE4C4');
+  headGrad.addColorStop(1, '#DEB887');
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy-8+bob, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Hood
+  ctx.fillStyle = pal.secondary;
+  ctx.beginPath();
+  ctx.moveTo(cx-8, cy-14+bob);
+  ctx.lineTo(cx, cy-16+bob);
+  ctx.lineTo(cx+8, cy-14+bob);
+  ctx.lineTo(cx+6, cy-6+bob);
+  ctx.lineTo(cx-6, cy-6+bob);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  // Eyes (visible under hood)
+  ctx.fillStyle = pal.accent;
+  ctx.beginPath();
+  ctx.arc(cx-3, cy-8+bob, 2, 0, Math.PI*2);
+  ctx.arc(cx+3, cy-8+bob, 2, 0, Math.PI*2);
+  ctx.fill();
+  
+  // Arms
+  ctx.fillStyle = pal.secondary;
+  ctx.fillRect(cx-10, cy+2+bob, 3, 8);
+  ctx.fillRect(cx+7, cy+2+bob, 3, 8);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-10, cy+2+bob, 3, 8);
+  ctx.strokeRect(cx+7, cy+2+bob, 3, 8);
+  
+  // Daggers
+  ctx.fillStyle = '#C0C0C0';
+  ctx.fillRect(cx-11, cy+8+bob, 2, 6);
+  ctx.fillRect(cx+9, cy+8+bob, 2, 6);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-11, cy+8+bob, 2, 6);
+  ctx.strokeRect(cx+9, cy+8+bob, 2, 6);
+}
+
+function drawMissyMage(ctx, cx, cy, bob, pal) {
+  // Legs
+  ctx.fillStyle = pal.secondary;
+  ctx.fillRect(cx-5, cy+10+bob, 4, 8);
+  ctx.fillRect(cx+1, cy+10+bob, 4, 8);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-5, cy+10+bob, 4, 8);
+  ctx.strokeRect(cx+1, cy+10+bob, 4, 8);
+  
+  // Body (robe)
+  const bodyGrad = ctx.createLinearGradient(cx, cy-2+bob, cx, cy+12+bob);
+  bodyGrad.addColorStop(0, pal.primary);
+  bodyGrad.addColorStop(0.5, pal.secondary);
+  bodyGrad.addColorStop(1, pal.accent);
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath();
+  ctx.moveTo(cx-7, cy-2+bob);
+  ctx.lineTo(cx+7, cy-2+bob);
+  ctx.lineTo(cx+9, cy+12+bob);
+  ctx.lineTo(cx-9, cy+12+bob);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Magical runes
+  ctx.strokeStyle = pal.accent;
+  ctx.lineWidth = 1;
+  ctx.shadowColor = pal.accent;
+  ctx.shadowBlur = 4;
+  ctx.beginPath();
+  ctx.arc(cx, cy+3+bob, 3, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  
+  // Head
+  const headGrad = ctx.createRadialGradient(cx, cy-8+bob, 2, cx, cy-8+bob, 8);
+  headGrad.addColorStop(0, '#FFE4C4');
+  headGrad.addColorStop(1, '#DEB887');
+  ctx.fillStyle = headGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy-8+bob, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  // Hair
+  ctx.fillStyle = pal.primary;
+  ctx.beginPath();
+  ctx.arc(cx-4, cy-12+bob, 4, 0, Math.PI*2);
+  ctx.arc(cx+4, cy-12+bob, 4, 0, Math.PI*2);
+  ctx.arc(cx, cy-14+bob, 5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  // Eyes
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(cx-3, cy-8+bob, 1.5, 0, Math.PI*2);
+  ctx.arc(cx+3, cy-8+bob, 1.5, 0, Math.PI*2);
+  ctx.fill();
+  
+  // Smile
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy-5+bob, 3, 0, Math.PI);
+  ctx.stroke();
+  
+  // Arms
+  ctx.fillStyle = pal.primary;
+  ctx.fillRect(cx-10, cy+2+bob, 3, 8);
+  ctx.fillRect(cx+7, cy+2+bob, 3, 8);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx-10, cy+2+bob, 3, 8);
+  ctx.strokeRect(cx+7, cy+2+bob, 3, 8);
+  
+  // Staff
+  drawChibiStaff(ctx, cx-10, cy+10+bob, pal);
+}
+
+// Draw ability icons - Enhanced Chibi Candy Style
+function drawAbilityIcon(ctx, type) {
+  ctx.clearRect(0, 0, 29, 29);
+  const cx = 14.5, cy = 14.5;
+  const pulse = Math.sin(Date.now() * 0.004) * 0.5 + 0.5;
+  
+  if (type === 0) { // Divine Barrier - Golden Shield
+    // Glow effect
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 8;
+    
+    // Shield body
+    const grad = ctx.createRadialGradient(cx, cy, 3, cx, cy, 11);
+    grad.addColorStop(0, '#FFF');
+    grad.addColorStop(0.4, '#FFD700');
+    grad.addColorStop(0.8, '#FFA500');
+    grad.addColorStop(1, '#FF8C00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-11);
+    ctx.quadraticCurveTo(cx+9, cy-6, cx+9, cy+2);
+    ctx.quadraticCurveTo(cx+7, cy+8, cx, cy+12);
+    ctx.quadraticCurveTo(cx-7, cy+8, cx-9, cy+2);
+    ctx.quadraticCurveTo(cx-9, cy-6, cx, cy-11);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.shadowBlur = 0;
+    
+    // Shield outline
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    
+    // Cross detail
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-6);
+    ctx.lineTo(cx, cy+6);
+    ctx.moveTo(cx-5, cy);
+    ctx.lineTo(cx+5, cy);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    
+    // Sparkles
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(cx-6, cy-6, 1, 0, Math.PI*2);
+    ctx.arc(cx+6, cy-4, 1.5, 0, Math.PI*2);
+    ctx.arc(cx+4, cy+5, 1, 0, Math.PI*2);
+    ctx.fill();
+    
+  } else if (type === 1) { // Dash Nova - Lightning Bolt
+    // Electric glow
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 10;
+    
+    // Lightning body
+    const grad = ctx.createLinearGradient(cx, cy-12, cx, cy+12);
+    grad.addColorStop(0, '#FFF');
+    grad.addColorStop(0.3, '#00FFFF');
+    grad.addColorStop(0.7, '#0080FF');
+    grad.addColorStop(1, '#4169E1');
+    ctx.fillStyle = grad;
+    
+    ctx.beginPath();
+    ctx.moveTo(cx+3, cy-11);
+    ctx.lineTo(cx-2, cy-1);
+    ctx.lineTo(cx+2, cy-1);
+    ctx.lineTo(cx-4, cy+11);
+    ctx.lineTo(cx+1, cy+2);
+    ctx.lineTo(cx-2, cy+2);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.shadowBlur = 0;
+    
+    // Lightning outline
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    
+    // Electric sparks
+    ctx.strokeStyle = '#FFF';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.7 + pulse * 0.3;
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2;
+      const r = 10;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+      ctx.lineTo(cx + Math.cos(angle) * (r+2), cy + Math.sin(angle) * (r+2));
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    
+  } else if (type === 2) { // Angelic Might - Angel Wings
+    // Holy glow
+    ctx.shadowColor = '#FFE6F0';
+    ctx.shadowBlur = 12;
+    
+    // Wings gradient
+    const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 12);
+    grad.addColorStop(0, '#FFF');
+    grad.addColorStop(0.5, '#FFE6F0');
+    grad.addColorStop(0.8, '#FFB6D9');
+    grad.addColorStop(1, '#FF69B4');
+    
+    // Left wing
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(cx-2, cy);
+    ctx.bezierCurveTo(cx-11, cy-8, cx-10, cy-1, cx-6, cy+4);
+    ctx.bezierCurveTo(cx-8, cy+2, cx-9, cy+5, cx-11, cy+7);
+    ctx.bezierCurveTo(cx-8, cy+4, cx-5, cy+2, cx-2, cy+2);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Right wing
+    ctx.beginPath();
+    ctx.moveTo(cx+2, cy);
+    ctx.bezierCurveTo(cx+11, cy-8, cx+10, cy-1, cx+6, cy+4);
+    ctx.bezierCurveTo(cx+8, cy+2, cx+9, cy+5, cx+11, cy+7);
+    ctx.bezierCurveTo(cx+8, cy+4, cx+5, cy+2, cx+2, cy+2);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.shadowBlur = 0;
+    
+    // Wing outlines
+    ctx.strokeStyle = '#FF1493';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Halo
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.arc(cx, cy-8, 4, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    
+    // Sparkles
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(cx-7, cy-3, 1, 0, Math.PI*2);
+    ctx.arc(cx+7, cy-3, 1, 0, Math.PI*2);
+    ctx.arc(cx, cy+6, 1.5, 0, Math.PI*2);
+    ctx.fill();
+    
+  } else if (type === 3) { // Flame Dash - Fire Wave
+    // Fire glow
+    ctx.shadowColor = '#FF4500';
+    ctx.shadowBlur = 10;
+    
+    // Multiple flames
+    for (let i = 0; i < 3; i++) {
+      const xOff = (i - 1) * 7;
+      const yOff = Math.abs(i - 1) * 2;
+      
+      // Flame gradient
+      const grad = ctx.createLinearGradient(cx+xOff, cy+yOff-8, cx+xOff, cy+yOff+8);
+      grad.addColorStop(0, '#FFFF00');
+      grad.addColorStop(0.3, '#FFA500');
+      grad.addColorStop(0.6, '#FF4500');
+      grad.addColorStop(1, '#8B0000');
+      
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(cx+xOff, cy+yOff+6);
+      ctx.quadraticCurveTo(cx+xOff-4, cy+yOff+2, cx+xOff-3, cy+yOff-4);
+      ctx.quadraticCurveTo(cx+xOff-2, cy+yOff-8, cx+xOff, cy+yOff-10);
+      ctx.quadraticCurveTo(cx+xOff+2, cy+yOff-8, cx+xOff+3, cy+yOff-4);
+      ctx.quadraticCurveTo(cx+xOff+4, cy+yOff+2, cx+xOff, cy+yOff+6);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Flame outline
+      ctx.strokeStyle = '#8B0000';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    
+    ctx.shadowBlur = 0;
+    
+    // Embers
+    ctx.fillStyle = '#FFA500';
+    ctx.globalAlpha = 0.6 + pulse * 0.4;
+    for (let i = 0; i < 5; i++) {
+      const x = cx - 8 + Math.random() * 16;
+      const y = cy - 8 + Math.random() * 16;
+      ctx.fillRect(x, y, 1, 1);
+    }
+    ctx.globalAlpha = 1;
+    
+  } else if (type === 4) { // Radiant Burst - Starburst
+    // Radiant glow
+    ctx.shadowColor = '#FFFF00';
+    ctx.shadowBlur = 15;
+    
+    // Center star
+    const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 10);
+    grad.addColorStop(0, '#FFF');
+    grad.addColorStop(0.4, '#FFFF00');
+    grad.addColorStop(0.8, '#FFD700');
+    grad.addColorStop(1, '#FFA500');
+    
+    // Draw 8-pointed star
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      const angle2 = ((i + 0.5) / 8) * Math.PI * 2 - Math.PI / 2;
+      
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(
+        cx + Math.cos(angle) * 11,
+        cy + Math.sin(angle) * 11
+      );
+      ctx.lineTo(
+        cx + Math.cos(angle2) * 5,
+        cy + Math.sin(angle2) * 5
+      );
+      ctx.closePath();
+      ctx.fill();
+      
+      // Outline
+      ctx.strokeStyle = '#FF8C00';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    
+    ctx.shadowBlur = 0;
+    
+    // Center circle
+    ctx.fillStyle = '#FFF';
+    ctx.beginPath();
+    ctx.arc(cx, cy, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    
+    // Rotating sparkles
+    const rotation = Date.now() * 0.002;
+    ctx.fillStyle = '#FFF';
+    ctx.globalAlpha = 0.7 + pulse * 0.3;
+    for (let i = 0; i < 4; i++) {
+      const angle = rotation + (i / 4) * Math.PI * 2;
+      const x = cx + Math.cos(angle) * 8;
+      const y = cy + Math.sin(angle) * 8;
+      ctx.beginPath();
+      ctx.arc(x, y, 1.5, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+// Draw spirit icons as cute chibi ghosts with faces!
+function drawSpiritIcon(ctx, type) {
+  ctx.clearRect(0, 0, 48, 48);
+  const cx = 24, cy = 24;
+  const bob = Math.sin(Date.now() * 0.003) * 2;
+  
+  const colors = [
+    ['#FF4500', '#FFA500', '#FFFF00'], // Phoenix - Fire ghost
+    ['#8B0000', '#FF0000', '#FFA500'], // Dragon - Dark fire ghost
+    ['#4169E1', '#00BFFF', '#FFFFFF'], // Wolf - Ice ghost
+    ['#008B8B', '#20B2AA', '#E0FFFF']  // Turtle - Water ghost
+  ];
+  
+  const col = colors[type];
+  
+  // Ethereal glow aura
+  ctx.shadowColor = col[1];
+  ctx.shadowBlur = 15;
+  
+  // Ghost body (rounded bottom with wavy edge)
+  const bodyGrad = ctx.createRadialGradient(cx, cy-2+bob, 3, cx, cy-2+bob, 16);
+  bodyGrad.addColorStop(0, col[2]);
+  bodyGrad.addColorStop(0.6, col[1]);
+  bodyGrad.addColorStop(1, col[0]);
+  
+  ctx.fillStyle = bodyGrad;
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.arc(cx, cy-2+bob, 14, 0, Math.PI*2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  
+  // Wavy bottom edge (ghost tail)
+  ctx.fillStyle = col[1];
+  ctx.globalAlpha = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(cx-10, cy+10+bob);
+  ctx.quadraticCurveTo(cx-5, cy+14+bob, cx, cy+12+bob);
+  ctx.quadraticCurveTo(cx+5, cy+10+bob, cx+10, cy+14+bob);
+  ctx.lineTo(cx+10, cy+8+bob);
+  ctx.lineTo(cx-10, cy+8+bob);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  
+  ctx.shadowBlur = 0;
+  
+  // Bold outline for body
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy-2+bob, 14, 0, Math.PI);
+  ctx.stroke();
+  
+  // Cute face - Big expressive eyes
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(cx-5, cy-5+bob, 3, 0, Math.PI*2); // Left eye
+  ctx.arc(cx+5, cy-5+bob, 3, 0, Math.PI*2); // Right eye
+  ctx.fill();
+  
+  // Eye sparkle (white dots)
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.arc(cx-4, cy-6+bob, 1, 0, Math.PI*2);
+  ctx.arc(cx+6, cy-6+bob, 1, 0, Math.PI*2);
+  ctx.fill();
+  
+  // Cute mouth (small smile or expression)
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  if (type === 0) { // Phoenix - happy smile
+    ctx.arc(cx, cy+2+bob, 4, 0, Math.PI);
+  } else if (type === 1) { // Dragon - fierce grin
+    ctx.moveTo(cx-4, cy+2+bob);
+    ctx.lineTo(cx, cy+4+bob);
+    ctx.lineTo(cx+4, cy+2+bob);
+  } else if (type === 2) { // Wolf - playful
+    ctx.arc(cx, cy+2+bob, 3, 0, Math.PI);
+  } else { // Turtle - calm
+    ctx.moveTo(cx-3, cy+3+bob);
+    ctx.lineTo(cx+3, cy+3+bob);
+  }
+  ctx.stroke();
+  
+  // Cute little arms
+  ctx.strokeStyle = col[1];
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  
+  // Left arm
+  ctx.beginPath();
+  ctx.moveTo(cx-12, cy+2+bob);
+  ctx.lineTo(cx-16, cy+6+bob);
+  ctx.stroke();
+  
+  // Right arm  
+  ctx.beginPath();
+  ctx.moveTo(cx+12, cy+2+bob);
+  ctx.lineTo(cx+16, cy+6+bob);
+  ctx.stroke();
+  
+  // Arm outlines
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx-12, cy+2+bob);
+  ctx.lineTo(cx-16, cy+6+bob);
+  ctx.moveTo(cx+12, cy+2+bob);
+  ctx.lineTo(cx+16, cy+6+bob);
+  ctx.stroke();
+  
+  // Special features per spirit type
+  if (type === 0) { // Phoenix - flame wings
+    ctx.strokeStyle = col[0];
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx-14, cy-6+bob);
+    ctx.quadraticCurveTo(cx-18, cy-2+bob, cx-16, cy+4+bob);
+    ctx.moveTo(cx+14, cy-6+bob);
+    ctx.quadraticCurveTo(cx+18, cy-2+bob, cx+16, cy+4+bob);
+    ctx.stroke();
+  } else if (type === 1) { // Dragon - horns
+    ctx.fillStyle = col[0];
+    ctx.beginPath();
+    ctx.moveTo(cx-8, cy-10+bob);
+    ctx.lineTo(cx-10, cy-16+bob);
+    ctx.lineTo(cx-6, cy-12+bob);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx+8, cy-10+bob);
+    ctx.lineTo(cx+10, cy-16+bob);
+    ctx.lineTo(cx+6, cy-12+bob);
+    ctx.fill();
+  } else if (type === 2) { // Wolf - ears
+    ctx.fillStyle = col[1];
+    ctx.beginPath();
+    ctx.moveTo(cx-10, cy-12+bob);
+    ctx.lineTo(cx-12, cy-18+bob);
+    ctx.lineTo(cx-8, cy-14+bob);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx+10, cy-12+bob);
+    ctx.lineTo(cx+12, cy-18+bob);
+    ctx.lineTo(cx+8, cy-14+bob);
+    ctx.fill();
+  } else if (type === 3) { // Turtle - shell pattern
+    ctx.strokeStyle = col[0];
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy-2+bob, 10, 0, Math.PI);
+    ctx.stroke();
+  }
+}
+
+// === SYSTEM FUNCTIONS ===
+let frame = 0;
+function animate() {
+  frame++;
+  
+  // Animate characters
+  ['a1', 'unique', 'missy'].forEach(char => {
+    const canvas = document.getElementById(`char-${char}`);
+    if (canvas) drawChibiCharacter(canvas.getContext('2d'), char, frame);
+  });
+  
+  // Animate ability icons (with effects)
+  for (let i = 0; i < 5; i++) {
+    const canvas = document.getElementById(`ab-canvas-${i}`);
+    if (canvas) drawAbilityIcon(canvas.getContext('2d'), i);
+  }
+  
+  // Animate spirit ghosts
+  for (let i = 0; i < 4; i++) {
+    const canvas = document.getElementById(`sp-canvas-${i}`);
+    if (canvas) drawSpiritIcon(canvas.getContext('2d'), i);
+  }
+  
+  requestAnimationFrame(animate);
+}
+
+function selectChar(char) {
+  log(`✓ Selected ${char.toUpperCase()}`);
+}
+
+function cyclePalette() {
+  state.palette = (state.palette + 1) % palettes.length;
+  log(`✓ Palette: ${palettes[state.palette].name}`);
+}
+
+function useAbility(idx) {
+  if (state.cds[idx] > 0) {
+    log(`⚠ Ability on cooldown: ${state.cds[idx]}s`);
+    return;
+  }
+  const abilities = ['Divine Barrier', 'Dash Nova', 'Angelic Might', 'Flame Dash', 'Radiant Burst'];
+  const cds = [12, 8, 15, 6, 10];
+  
+  state.cds[idx] = cds[idx];
+  log(`✨ Used ${abilities[idx]}!`);
+  state.gold = Math.min(state.gold + 200, gameConfig.maxGold);
+  updateStats();
+  
+  const box = document.getElementById(`ab-${idx}`);
+  box.classList.add('cd');
+  const timer = document.createElement('div');
+  timer.className = 'cd-timer';
+  timer.textContent = cds[idx] + 's';
+  box.appendChild(timer);
+  
+  const interval = setInterval(() => {
+    state.cds[idx]--;
+    if (state.cds[idx] <= 0) {
+      box.classList.remove('cd');
+      timer.remove();
+      clearInterval(interval);
+    } else {
+      timer.textContent = state.cds[idx] + 's';
+    }
+  }, 1000);
+}
+
+function equipSpirit(idx) {
+  document.querySelectorAll('.spirit-box').forEach(b => b.classList.remove('equipped'));
+  document.getElementById(`sp-${idx}`).classList.add('equipped');
+  const spirits = ['Phoenix', 'Dragon', 'Wolf', 'Turtle'];
+  state.equipped = idx;
+  log(`✓ Equipped ${spirits[idx]} Spirit`);
+}
+
+function startQuest() {
+  if (state.quests.length >= gameConfig.maxQuests) {
+    log(`⚠ Quest log full! Max: ${gameConfig.maxQuests}`);
+    return;
+  }
+  const quests = ['Defeat 10 Slimes', 'Collect 5 Herbs', 'Clear Dungeon', 'Find 3 Treasures', 'Rescue Village'];
+  const quest = quests[state.quests.length % quests.length];
+  state.quests.push({name: quest, progress: 0});
+  updateQuests();
+  log(`✓ Started: ${quest}`);
+}
+
+function updateQuests() {
+  const list = document.getElementById('quest-list');
+  list.innerHTML = state.quests.slice(-3).map((q, i) => `
+    <li class="quest-item">
+      <div class="quest-title">${q.name}</div>
+      <div class="quest-progress">
+        <div class="quest-fill" style="width:${q.progress}%">${q.progress}%</div>
+      </div>
+    </li>
+  `).join('');
+  document.getElementById('quest-val').textContent = state.quests.length;
+}
+
+function addItem() {
+  if (state.items.length >= gameConfig.maxItems) {
+    log(`⚠ Inventory full! Max: ${gameConfig.maxItems}`);
+    return;
+  }
+  const items = [
+    {icon:'⚔️', rarity:'rare'},
+    {icon:'🛡️', rarity:'epic'},
+    {icon:'🧪', rarity:'common'},
+    {icon:'💎', rarity:'legendary'}
+  ];
+  const item = items[Math.floor(Math.random()*items.length)];
+  state.items.push(item);
+  updateInventory();
+  log(`✓ Got ${item.icon} (${item.rarity})`);
+  state.gold = Math.min(state.gold + 100, gameConfig.maxGold);
+  updateStats();
+}
+
+function updateInventory() {
+  const grid = document.getElementById('inv-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'inv-slot';
+    if (i < state.items.length) {
+      const item = state.items[i];
+      slot.classList.add(item.rarity);
+      slot.innerHTML = `${item.icon}<span class="inv-qty">1</span>`;
+    }
+    grid.appendChild(slot);
+  }
+  document.getElementById('item-val').textContent = state.items.length;
+}
+
+function toggleSettings() {
+  log(`⚙️ Config: Max Gold=${gameConfig.maxGold}, Lvl=${gameConfig.maxLevel}, Items=${gameConfig.maxItems}`);
+  log(`📦 Current: Gold=${state.gold}, Lvl=${state.level}, Items=${state.items.length}`);
+}
+
+function updateStats() {
+  document.getElementById('gold-val').textContent = state.gold.toLocaleString();
+  document.getElementById('lvl-val').textContent = state.level;
+}
+
+function log(msg) {
+  const c = document.getElementById('console');
+  const line = document.createElement('div');
+  line.className = 'log';
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  c.appendChild(line);
+  if (c.children.length > 8) c.removeChild(c.firstChild);
+  c.scrollTop = c.scrollHeight;
+}
+
+function runDemo() {
+  log('🚀 Running full demo...');
+  setTimeout(() => startQuest(), 400);
+  setTimeout(() => addItem(), 800);
+  setTimeout(() => useAbility(1), 1200);
+  setTimeout(() => equipSpirit(0), 1600);
+  setTimeout(() => addItem(), 2000);
+  setTimeout(() => log('✅ Demo complete!'), 2400);
+}
+
+// === INIT ===
+window.addEventListener('DOMContentLoaded', () => {
+  updateQuests();
+  updateInventory();
+  animate(); // Starts continuous animation for all sprites
+  
+  log('✅ All 5 systems loaded!');
+  log('✨ Supernatural abilities animated!');
+  log('💡 Click buttons to test');
+});
+</script>
+</body>
+</html>
+

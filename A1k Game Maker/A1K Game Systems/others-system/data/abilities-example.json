@@ -1,0 +1,150 @@
+{
+  "abilities": [
+    {
+      "id": "divine_barrier",
+      "name": "Divine Barrier",
+      "type": "active",
+      "description": "Creates a protective barrier that reduces incoming damage",
+      "icon": "🛡️",
+      "cooldown": 12000,
+      "duration": 5000,
+      "bonuses": {
+        "defense": 50,
+        "damageReduction": 0.3
+      },
+      "visualEffect": "barrier"
+    },
+    {
+      "id": "dash_nova",
+      "name": "Dash Nova",
+      "type": "active",
+      "description": "Quick dash forward with explosive damage",
+      "icon": "⚡",
+      "cooldown": 8000,
+      "duration": 500,
+      "bonuses": {
+        "speed": 2,
+        "attack": 30
+      },
+      "visualEffect": "dash"
+    },
+    {
+      "id": "angelic_might",
+      "name": "Angelic Might",
+      "type": "active",
+      "description": "Channel divine power to increase attack",
+      "icon": "✨",
+      "cooldown": 15000,
+      "duration": 8000,
+      "bonuses": {
+        "attack": 100,
+        "critRate": 0.2
+      },
+      "visualEffect": "beam"
+    },
+    {
+      "id": "radiant_burst",
+      "name": "Radiant Burst",
+      "type": "active",
+      "description": "Emit a burst of radiant energy damaging nearby enemies",
+      "icon": "🌟",
+      "cooldown": 10000,
+      "duration": 3000,
+      "bonuses": {
+        "attack": 50,
+        "aoe": 150
+      },
+      "visualEffect": "burst"
+    },
+    {
+      "id": "flame_dash",
+      "name": "Flame Dash",
+      "type": "active",
+      "description": "Dash forward leaving a trail of flames",
+      "icon": "🔥",
+      "cooldown": 6000,
+      "duration": 1000,
+      "bonuses": {
+        "speed": 1.5,
+        "attack": 40
+      },
+      "visualEffect": "flame_trail"
+    },
+    {
+      "id": "eternal_wisdom",
+      "name": "Eternal Wisdom",
+      "type": "passive",
+      "description": "Permanent increase to experience gain",
+      "icon": "📚",
+      "bonuses": {
+        "xpGain": 0.15
+      }
+    },
+    {
+      "id": "warriors_heart",
+      "name": "Warrior's Heart",
+      "type": "passive",
+      "description": "Permanent increase to maximum health",
+      "icon": "❤️",
+      "bonuses": {
+        "maxHp": 100,
+        "hpRegen": 2
+      }
+    }
+  ],
+  "spirits": [
+    {
+      "id": "spirit_phoenix",
+      "name": "Phoenix Spirit",
+      "type": "fire",
+      "icon": "🔥",
+      "power": 85,
+      "description": "Ancient spirit of rebirth and flames",
+      "bonuses": {
+        "attack": 20,
+        "fireDamage": 0.25,
+        "revive": 1
+      }
+    },
+    {
+      "id": "spirit_dragon",
+      "name": "Dragon Spirit",
+      "type": "arcane",
+      "icon": "🐉",
+      "power": 95,
+      "description": "Mighty dragon spirit with immense power",
+      "bonuses": {
+        "attack": 35,
+        "defense": 20,
+        "allDamage": 0.15
+      }
+    },
+    {
+      "id": "spirit_wolf",
+      "name": "Wolf Spirit",
+      "type": "nature",
+      "icon": "🐺",
+      "power": 75,
+      "description": "Swift wolf spirit enhancing speed and agility",
+      "bonuses": {
+        "speed": 0.3,
+        "attack": 15,
+        "critRate": 0.1
+      }
+    },
+    {
+      "id": "spirit_turtle",
+      "name": "Turtle Spirit",
+      "type": "water",
+      "icon": "🐢",
+      "power": 70,
+      "description": "Protective turtle spirit bolstering defenses",
+      "bonuses": {
+        "defense": 40,
+        "maxHp": 150,
+        "damageReduction": 0.15
+      }
+    }
+  ]
+}
+

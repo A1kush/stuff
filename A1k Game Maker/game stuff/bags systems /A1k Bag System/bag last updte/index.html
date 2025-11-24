@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>A1K Bag System – Standalone Demo</title>
+  <link id="a1k-bag-system-styles" rel="stylesheet" href="main-styles.css" />
+  <!-- Inline Core Styles (Bag + Arcade) -->
+  <style>
+    :root {
+      --candy-pink: #ff9a9e;
+      --candy-lilac: #fecfef;
+      --candy-sky: #a8edea;
+      --candy-sun: #ffecd2;
+      --candy-mint: #b9fbc0;
+      --candy-midnight: #0a0a0f;
+      --candy-text-primary: #fef7ff;
+      --candy-text-muted: rgba(245, 249, 255, 0.72);
+      --candy-border-soft: rgba(255, 255, 255, 0.35);
+      --candy-border-strong: rgba(255, 255, 255, 0.55);
+      --candy-window-shadow: 0 16px 32px rgba(12, 16, 35, 0.55), 0 32px 80px rgba(255, 154, 158, 0.35);
+      --candy-surface-glass: rgba(15, 24, 38, 0.94);
+      --candy-surface-gradient: linear-gradient(135deg, rgba(255, 154, 158, 0.18) 0%, rgba(254, 207, 239, 0.18) 50%, rgba(255, 236, 210, 0.18) 100%);
+      --candy-titlebar-gradient: linear-gradient(135deg, rgba(255, 154, 158, 0.22) 0%, rgba(168, 237, 234, 0.12) 100%);
+      --candy-tab-muted: rgba(255, 255, 255, 0.06);
+      --candy-tab-active: rgba(79, 195, 247, 0.28);
+      --candy-tab-border: rgba(79, 195, 247, 0.62);
+      --candy-button-gradient: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.32), rgba(255, 182, 255, 0.16), rgba(167, 139, 250, 0.18));
+      --candy-button-outline: rgba(255, 255, 255, 0.45);
+      --candy-button-text: #ffffff;
+      --candy-card-surface: rgba(12, 20, 34, 0.65);
+      --candy-card-border: rgba(255, 255, 255, 0.4);
+      --candy-hud-grid-gap: 10px;
+      --candy-hud-padding: 10px;
+    }
+
+    body[data-candy-theme='sunset'] {
+      --candy-surface-gradient: linear-gradient(135deg, rgba(255, 154, 158, 0.25) 0%, rgba(255, 236, 210, 0.18) 50%, rgba(255, 200, 150, 0.18) 100%);
+      --candy-button-gradient: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.34), rgba(255, 205, 178, 0.22), rgba(255, 154, 158, 0.24));
+    }
+
+    body[data-candy-theme='sugar-mint'] {
+      --candy-surface-gradient: linear-gradient(135deg, rgba(168, 237, 234, 0.2) 0%, rgba(255, 236, 210, 0.18) 100%);
+      --candy-button-gradient: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.34), rgba(185, 251, 192, 0.2), rgba(168, 237, 234, 0.2));
+      --candy-tab-active: rgba(168, 255, 224, 0.28);
+      --candy-tab-border: rgba(122, 248, 200, 0.7);
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at top, rgba(255, 154, 158, 0.08), transparent 55%), var(--candy-midnight);
+      color: var(--candy-text-primary);
+      overflow: hidden;
+      transition: background 0.6s ease, color 0.4s ease;
+    }
+
+    body.mission-grade-active:not(.raid-active) {
+      background:
+        radial-gradient(circle at 48% 18%, rgba(var(--mission-grade-color-rgb, 147, 51, 234), 0.22), transparent 62%),
+        radial-gradient(circle at 50% 120%, rgba(var(--mission-grade-color-rgb, 147, 51, 234), 0.26), rgba(10, 10, 15, 0.92));
+      filter: saturate(1.06) contrast(1.05);
+    }
+
+    body.mission-grade-active:not(.raid-active)::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 45% 15%, rgba(var(--mission-grade-color-rgb, 147, 51, 234), 0.18), transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.85;
+      animation: gradePulse 6s ease-in-out infinite;
+    }
+
+    body.mission-grade-active:not(.raid-active)::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(circle at 58% 24%, rgba(255, 255, 255, 0.08), transparent 70%);
+      mix-blend-mode: screen;
+    }
+
+    body.raid-active {
+      background: radial-gradient(
+          circle at var(--parallax-x, 50%) var(--parallax-y, 50%),
+          rgba(var(--raid-rank-color-rgb, 255, 154, 158), 0.22),
+          transparent 60%
+        ),
+        var(--candy-midnight);
+    }
+
+    body.raid-active::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 120% 80% at var(--bloom-x, 50%) var(--bloom-y, 50%),
+          rgba(var(--raid-rank-color-rgb, 255, 154, 158), 0.32),
+          transparent 72%);
+      animation: bloomSweep 2.2s ease-out;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.85;
+    }
+
+    body.raid-active::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at var(--parallax-x, 50%) var(--parallax-y, 50%),
+          rgba(255, 255, 255, 0.12),
+          transparent 70%);
+      mix-blend-mode: screen;
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.6s ease;
+    }
+
+    @keyframes bloomSweep {
+      0% {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      30% {
+        opacity: 0.7;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.25);
+      }
+    }
+
+    @keyframes overlayFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes headerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes gradePulse {
+      0%, 100% { opacity: 0.75; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    @keyframes subtitlePulse {
+      0% {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      30% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      60% {
+        transform: translateY(-3px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dungeon-flythrough {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(10, 14, 28, 0.82), rgba(5, 7, 16, 0.95));
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      z-index: 12000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      pointer-events: auto;
+      animation: flythroughFade 1.3s ease forwards;
+    }
+
+    .dungeon-flythrough.is-skip-ready {
+      cursor: pointer;
+    }
+
+    .dungeon-flythrough .flythrough-layer {
+      position: absolute;
+      inset: -20%;
+      background: radial-gradient(circle at center, rgba(79, 195, 247, 0.15), transparent 70%);
+      animation: flythroughParallax 1.8s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .dungeon-flythrough .flythrough-layer.layer-stars {
+      background: repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 6px);
+      mix-blend-mode: screen;
+      animation-duration: 2.4s;
+      opacity: 0.18;
+    }
+
+    .dungeon-flythrough .flythrough-layer.layer-grid {
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 70%);
+      -webkit-mask-image: radial-gradient(circle at 50% 35%, rgba(0,0,0,0.8), transparent 70%);
+      mask-image: radial-gradient(circle at 50% 35%, rgba(0,0,0,0.8), transparent 70%);
+      animation-duration: 1.6s;
+    }
+
+    .dungeon-flythrough .flythrough-title {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      color: #f8fbff;
+      text-shadow: 0 10px 40px rgba(0,0,0,0.45);
+      animation: flythroughTitle 1s ease-out forwards;
+      padding: 0 24px;
+    }
+
+    .dungeon-flythrough .flythrough-rank {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 32px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .dungeon-flythrough .flythrough-name {
+      font-size: 22px;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
+    .dungeon-flythrough .flythrough-hint {
+      margin-top: 22px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.7);
+      animation: flythroughHint 1.2s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    @keyframes flythroughFade {
+      0% { opacity: 0; transform: scale(1.08); }
+      12% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1); }
+    }
+
+    @keyframes flythroughParallax {
+      0% { transform: translateY(12%) scale(1.1); opacity: 0.3; }
+      40% { opacity: 0.6; }
+      100% { transform: translateY(-8%) scale(1); opacity: 0; }
+    }
+
+    @keyframes flythroughTitle {
+      0% { opacity: 0; transform: translateY(30px) scale(0.96); }
+      60% { opacity: 1; transform: translateY(0) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes flythroughHint {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .raid-reactive-shader {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9990;
+      background:
+        radial-gradient(circle at 50% 20%, var(--shader-primary, rgba(79, 195, 247, 0.28)), transparent 60%),
+        radial-gradient(circle at 15% 80%, var(--shader-secondary, rgba(147, 51, 234, 0.24)), transparent 70%),
+        radial-gradient(circle at 80% 85%, var(--shader-tertiary, rgba(255, 214, 153, 0.16)), transparent 75%);
+      opacity: var(--shader-opacity, 0);
+      mix-blend-mode: screen;
+      transition: background 0.6s ease, opacity 0.45s ease;
+    }
+
+    .raid-recap-card {
+      position: fixed;
+      bottom: 28px;
+      right: 32px;
+      width: 320px;
+      background: linear-gradient(135deg, rgba(15,24,38,0.94), rgba(25,34,48,0.96));
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 18px;
+      box-shadow: 0 28px 58px rgba(10,16,35,0.42);
+      z-index: 11000;
+      color: rgba(237,242,255,0.9);
+      overflow: hidden;
+    }
+
+    .raid-recap-card .recap-surface {
+      padding: 18px 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .raid-recap-card .recap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .raid-recap-card .recap-rank {
+      font-size: 14px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .raid-recap-card .recap-runtime {
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+    }
+
+    .raid-recap-card .recap-close {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 10px;
+      width: 28px;
+      height: 28px;
+      color: rgba(255,255,255,0.85);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .raid-recap-card .recap-close:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .raid-recap-card .recap-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px;
+    }
+
+    .raid-recap-card .recap-metric {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .raid-recap-card .recap-metric-label {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .raid-recap-card .recap-metric-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .raid-recap-card .recap-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .raid-recap-card .recap-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .raid-recap-card .recap-badge.alert {
+      background: rgba(255,110,170,0.28);
+      border-color: rgba(255,110,170,0.42);
+      color: #ffd6ec;
+    }
+
+    .raid-recap-card .recap-branches ul {
+      list-style: none;
+      margin: 8px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .raid-recap-card .recap-branches li {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.72);
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .raid-recap-card .recap-branch-label {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .raid-recap-card .recap-section-title {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .raid-recap-card .recap-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .raid-recap-card .recap-share {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: linear-gradient(135deg, rgba(79,195,247,0.25), rgba(147,51,234,0.25));
+      color: rgba(255,255,255,0.88);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .raid-recap-card .recap-share:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(79,195,247,0.32);
+    }
+
+    .bag-window {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 98vw;
+      height: 98vh;
+      background: var(--candy-surface-gradient), var(--candy-surface-glass);
+      border: 3px solid var(--candy-border-strong);
+      border-radius: 20px;
+      box-shadow: var(--candy-window-shadow);
+      display: none;
+      flex-direction: column;
+      z-index: 999;
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      transition: box-shadow 0.4s ease, border-color 0.3s ease;
+    }
+
+    .bag-window.open { display: flex; }
+
+    .bag-titlebar {
+      display: flex;
+      align-items: center;
+      padding: 8px 14px;
+      background: var(--candy-titlebar-gradient), rgba(0, 0, 0, 0.28);
+      border-bottom: 2px solid var(--candy-border-soft);
+      border-radius: 20px 20px 0 0;
+      cursor: move;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    }
+
+    .bag-titlebar-icon { font-size: 18px; margin-right: 10px; }
+    .bag-titlebar-title { flex: 1; font-size: 14px; font-weight: 600; color: var(--candy-sky); letter-spacing: 0.5px; }
+
+    .bag-tabs-strip { display: flex; gap: 1px; overflow: hidden; padding: 2px 0; }
+    .bag-tab {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 2px 4px;
+      border-radius: 4px 4px 0 0;
+      background: var(--candy-tab-muted);
+      color: var(--candy-text-muted);
+      font-size: 7px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .bag-tab.active {
+      background: var(--candy-tab-active);
+      border: 1px solid var(--candy-tab-border);
+      color: var(--candy-sky);
+    }
+
+    #hud-wrap {
+      position: fixed;
+      inset: auto 0 0 0;
+      padding: var(--candy-hud-padding);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      pointer-events: none;
+      z-index: 55;
+      gap: var(--candy-hud-grid-gap);
+    }
+
+    #hud-left {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-left: 40px;
+    }
+
+    #hud-right {
+      pointer-events: auto;
+      justify-self: end;
+      display: grid;
+      grid-template-rows: auto auto;
+      gap: 10px;
+      align-content: end;
+      margin-right: 147px;
+      margin-bottom: 40px;
+    }
+
+    .utility-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; align-items: center; }
+    .utility-row { display: flex; gap: 10px; }
+
+    .utility-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 2px solid var(--candy-button-outline);
+      background: var(--candy-button-gradient);
+      color: var(--candy-button-text);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .utility-btn:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 10px 22px rgba(255, 154, 158, 0.28); }
+    .utility-row.top .utility-btn { background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(168,237,234,0.2), rgba(168,230,255,0.18)); border-color: rgba(168, 237, 234, 0.5); }
+    .utility-row.bot .utility-btn[data-btn=bag] { background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.3), rgba(255,214,102,0.22), rgba(255,235,153,0.18)); border-color: rgba(255,214,102,0.6); }
+    .utility-btn[data-btn=ai] { background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.16), rgba(186,85,211,0.2), rgba(233,215,255,0.12)); border: 2px dashed rgba(186,85,211,0.75); }
+
+    .skill-row { display: flex; gap: 10px; margin-bottom: 12px; justify-content: flex-end; }
+    .skill-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 3px solid rgba(255, 255, 255, 0.32);
+      background: radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.18));
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      font-size: 13px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .skill-pill:hover { transform: translateY(-1px); }
+    .skill-pill.s1 { border-color: rgba(255,122,217,0.78); background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(255,122,217,0.26), rgba(255,181,232,0.18)); }
+    .skill-pill.s2 { border-color: rgba(122,248,200,0.82); background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(122,248,200,0.25), rgba(168,255,224,0.18)); }
+    .skill-pill.s3 { border-color: rgba(122,213,255,0.82); background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.32), rgba(122,213,255,0.25), rgba(168,230,255,0.18)); }
+
+    .bag-content-pane { flex: 1; padding: 10px; overflow-y: auto; overflow-x: hidden; }
+
+    .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; }
+    .item-card {
+      background: var(--candy-card-surface);
+      border: 2px solid var(--candy-card-border);
+      border-radius: 14px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 12px 28px rgba(10, 16, 30, 0.35);
+    }
+    .item-icon { font-size: 28px; }
+    .item-name { font-size: 11px; font-weight: 700; color: rgba(207, 227, 255, 0.92); text-align: center; }
+
+    body[data-viewport-mode='tablet'] .bag-window {
+      width: 92vw;
+      height: 92vh;
+      border-radius: 18px;
+    }
+
+    body[data-viewport-mode='mobile'] .bag-window {
+      width: 96vw;
+      height: 96vh;
+      top: 52%;
+      border-radius: 16px;
+    }
+
+    body[data-viewport-mode='tablet'] #hud-right {
+      margin-right: 40px;
+      margin-bottom: 24px;
+      grid-template-rows: auto;
+    }
+
+    body[data-viewport-mode='tablet'] #hud-left {
+      margin-left: 20px;
+    }
+
+    body[data-viewport-mode='mobile'] #hud-wrap {
+      grid-template-columns: 1fr;
+      padding: 8px;
+      gap: 8px;
+    }
+
+    body[data-viewport-mode='mobile'] #hud-left,
+    body[data-viewport-mode='mobile'] #hud-right {
+      margin: 0;
+      justify-self: center;
+      width: 100%;
+    }
+
+    body[data-viewport-mode='mobile'] .utility-row {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    body[data-viewport-mode='mobile'] .bag-tabs-strip {
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    body[data-viewport-mode='mobile'] .bag-tab {
+      font-size: 8px;
+      padding: 4px 6px;
+    }
+
+    @media (max-width: 480px) {
+      .bag-titlebar-title { font-size: 13px; }
+      .utility-btn { font-size: 12px; padding: 9px 12px; }
+      .skill-pill { font-size: 12px; padding: 8px 12px; }
+    }
+
+    .candy-pane {
+      color: var(--candy-text-primary);
+    }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(245, 249, 255, 0.72);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease, border-color 0.22s ease;
+    }
+
+    .filter-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(10, 16, 35, 0.35);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .filter-chip.active {
+      background: linear-gradient(135deg, rgba(79, 195, 247, 0.55), rgba(168, 237, 234, 0.45));
+      border-color: rgba(79, 195, 247, 0.9);
+      color: var(--candy-text-primary);
+      box-shadow: 0 16px 34px rgba(79, 195, 247, 0.45);
+    }
+
+    .tab-empty {
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      background: rgba(15, 24, 38, 0.62);
+      padding: 24px;
+      text-align: center;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      color: var(--candy-text-muted);
+      box-shadow: 0 18px 38px rgba(10, 16, 35, 0.35);
+      transition: transform 0.18s ease, box-shadow 0.2s ease;
+    }
+
+    .tab-empty:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 42px rgba(10, 16, 35, 0.42);
+    }
+
+    .tab-empty .empty-icon {
+      font-size: 36px;
+      margin-bottom: 6px;
+      color: rgba(255, 214, 252, 0.9);
+    }
+
+    .tab-empty p {
+      margin: 4px 0;
+      font-size: 12px;
+      letter-spacing: 0.03em;
+    }
+
+    .tab-empty .empty-hint {
+      font-size: 11px;
+      color: rgba(245, 249, 255, 0.55);
+    }
+
+    .candy-button {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: linear-gradient(135deg, rgba(255, 154, 158, 0.4), rgba(198, 228, 255, 0.35));
+      color: var(--candy-text-primary);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 14px 28px rgba(10, 16, 35, 0.35);
+      transition: transform 0.18s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    .candy-button:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 36px rgba(10, 16, 35, 0.42);
+      filter: brightness(1.08);
+    }
+
+    .candy-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      filter: grayscale(0.3);
+      box-shadow: none;
+    }
+
+    #bagWindow select {
+      border-radius: 12px;
+      background: rgba(10, 16, 30, 0.65);
+      border: 1px solid rgba(79, 195, 247, 0.35);
+      color: var(--candy-text-primary);
+      padding: 6px 12px;
+      font-size: 11px;
+      box-shadow: 0 12px 24px rgba(10, 16, 35, 0.35);
+      transition: border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    #bagWindow select:focus {
+      outline: none;
+      border-color: rgba(168, 237, 234, 0.7);
+      box-shadow: 0 16px 32px rgba(79, 195, 247, 0.35);
+    }
+
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(255, 255, 255, 0.12);
+      color: rgba(245, 249, 255, 0.82);
+      box-shadow: 0 10px 20px rgba(10, 16, 35, 0.28);
+    }
+    .mission-board-container .dungeon-card:hover {
+      box-shadow: 0 28px 60px rgba(255, 111, 199, 0.35);
+      transform: translateY(-6px);
+    }
+
+    .mission-board-container .dungeon-card {
+      cursor: pointer;
+      min-height: 100%;
+    }
+
+    .mission-board-container .dungeon-card .dungeon-card-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .mission-board-container .dungeon-card .dungeon-footer {
+      margin-top: auto;
+    }
+
+    .mission-board-container .btn-enter-dungeon {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mission-board-container .btn-enter-dungeon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.35) 45%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.35) 55%, transparent 100%);
+      transform: translateX(-120%);
+      animation: candyShimmer 2.6s linear infinite;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mission-board-container .btn-enter-dungeon:hover::after {
+      opacity: 1;
+    }
+
+    @keyframes candyShimmer {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
+    }
+
+    .overlay-entering .overlay-header {
+      animation: headerPulse 1s ease-in-out;
+    }
+
+    .overlay-metrics {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .timer-widget {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .timer-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .timer-label {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(13,18,38,0.65);
+      font-weight: 700;
+    }
+
+    .timer-countdown {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #0d1226;
+      transition: color 0.3s ease;
+    }
+
+    .timer-countdown.timer-expired {
+      color: #ff4d78;
+    }
+
+    .timer-progress {
+      position: relative;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(13,18,38,0.18);
+      overflow: hidden;
+    }
+
+    .timer-progress-bar {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(168,237,234,0.9), rgba(255,154,158,0.9));
+      transform-origin: left center;
+      transform: scaleX(1);
+      transition: transform 0.2s ease;
+    }
+
+    .audio-toggle {
+      border: 1px solid rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.22);
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #0d1226;
+      font-size: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .audio-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(10,16,35,0.25);
+    }
+
+    .audio-toggle.is-muted {
+      background: rgba(13,18,38,0.6);
+      color: rgba(255,255,255,0.8);
+    }
+
+    .audio-toggle .audio-icon {
+      pointer-events: none;
+    }
+
+    .reward-ticker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.32);
+      color: rgba(13,18,38,0.82);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .ticker-item.alert {
+      background: rgba(255,110,140,0.24);
+      border-color: rgba(255,110,140,0.6);
+      color: #8f1037;
+    }
+
+    .ticker-icon {
+      font-size: 13px;
+    }
+
+    .ticker-empty {
+      font-size: 11px;
+      color: rgba(13,18,38,0.6);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .story-beats {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(15, 24, 38, 0.82);
+      border: 1px solid rgba(255,255,255,0.24);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+      display: grid;
+      gap: 12px;
+    }
+
+    .story-beats-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+    }
+
+    .story-beats-title {
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(13,18,38,0.68);
+    }
+
+    .story-beats-subtitle {
+      font-size: 11px;
+      color: rgba(13,18,38,0.5);
+    }
+
+    .story-beats-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 140px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .story-beat {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .story-beat.completed {
+      border-color: rgba(122, 248, 200, 0.35);
+      background: rgba(122, 248, 200, 0.16);
+    }
+
+    .story-beat.current {
+      border-color: rgba(79, 195, 247, 0.5);
+      background: rgba(79, 195, 247, 0.2);
+      transform: translateX(2px);
+    }
+
+    .story-beat.preset {
+      border-style: dashed;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .story-beat-index {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(13,18,38,0.6);
+    }
+
+    .story-beat-body {
+      display: grid;
+      gap: 4px;
+    }
+
+    .story-beat-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(13,18,38,0.82);
+    }
+
+    .story-beat-subtitle {
+      font-size: 11px;
+      color: rgba(13,18,38,0.6);
+    }
+
+    .story-beat-branch {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(13,18,38,0.55);
+    }
+
+    .story-empty {
+      font-size: 11px;
+      color: rgba(13,18,38,0.55);
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle-pulsing .overlay-subtitle {
+      animation: subtitlePulse 2.8s ease-out;
+    }
+
+    .overlay-footer {
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.18);
+      border-top: 1px solid rgba(255,255,255,0.28);
+      font-size: 10px;
+      color: rgba(13,18,38,0.78);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+    }
+
+    .overlay-footer .contextual-tip {
+      margin: 0;
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1.4;
+    }
+
+    .floor-track {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .floor-track .floor-node {
+      display: flex;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.65);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .floor-track .floor-node.current {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(13,16,35,0.25);
+      border-color: rgba(79,195,247,0.9);
+    }
+
+    .floor-track .floor-node.cleared {
+      opacity: 0.85;
+      border-style: dashed;
+    }
+
+    .floor-track .node-icon {
+      font-size: 22px;
+    }
+
+    .floor-track .node-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0d1226;
+    }
+
+    .floor-track .node-desc {
+      font-size: 11px;
+      color: rgba(13,18,38,0.75);
+      margin-top: 2px;
+    }
+
+    .floor-track .node-branch {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: rgba(13,18,38,0.7);
+      margin-top: 4px;
+      letter-spacing: 0.4px;
+    }
+
+    .branch-area {
+      background: rgba(255,255,255,0.45);
+      border-radius: 12px;
+      padding: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .branch-area .branch-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0d1226;
+    }
+
+    .branch-area .branch-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .branch-area .branch-btn {
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(13,18,38,0.2);
+      background: rgba(255,255,255,0.75);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .branch-area .branch-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .branch-area .branch-btn.selected {
+      border-color: rgba(79,195,247,0.85);
+      box-shadow: 0 8px 18px rgba(13,16,35,0.25);
+    }
+
+    .branch-area .branch-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0d1226;
+    }
+
+    .branch-area .branch-mod {
+      font-size: 11px;
+      color: rgba(13,18,38,0.7);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .branch-area.branch-required {
+      animation: branchPulse 0.6s ease;
+    }
+
+    @keyframes branchPulse {
+      0% { box-shadow: 0 0 0 rgba(255,0,0,0.45); }
+      50% { box-shadow: 0 0 18px rgba(255,0,0,0.65); }
+      100% { box-shadow: 0 0 0 rgba(255,0,0,0.0); }
+    }
+
+    .overlay-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .overlay-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(13,18,38,0.85);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .overlay-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(13,16,35,0.35);
+    }
+
+    .timeline-panel {
+      background: rgba(13,16,35,0.74);
+      border-radius: 12px;
+      padding: 12px;
+      color: #fef7ff;
+      max-height: 220px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .timeline-panel.hidden {
+      display: none;
+    }
+
+    .timeline-panel .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .timeline-items {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 170px;
+    }
+
+    .timeline-item {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .timeline-item.active {
+      border-color: rgba(79,195,247,0.85);
+      box-shadow: 0 10px 24px rgba(79,195,247,0.35);
+    }
+
+    .timeline-head {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .timeline-body {
+      color: rgba(237,242,255,0.8);
+    }
+
+    .timeline-empty {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // --- PRODUCTION NOTES ---
+    // This standalone file is designed to work offline from a folder.
+    // To integrate into your game:
+    // 1. Copy the necessary .js and .css files into your project.
+    // 2. Ensure the paths in the <link> and <script> tags below are correct.
+    // 3. Replace the `window.gameState` object with your game's actual state data.
+    // 4. Call `window.BagSystem.init()` once your game has loaded.
+    window.A1K_ALL_MANIFESTS_PATH='all-manifests.json';
+    window.A1K_ASSET_MANIFEST_PATH='all-manifests.json';
+    window.A1K_ARCADE_MANIFEST_PATH='all-manifests.json';
+  </script>
+  <script>
+    // Inline Manifests (asset + arcade) for offline usage
+    window.__ASSET_MANIFEST = {
+      "assets": [
+        {"id":"pet_firecub","type":"pet","icon":"🐕","rarity":"common"},
+        {"id":"veh_hoverbike","type":"vehicle","icon":"🏍️","rarity":"uncommon"},
+        {"id":"veh_cybercar","type":"vehicle","icon":"🚗","rarity":"rare"}
+      ]
+    };
+    window.__ARCADE_MANIFEST = {
+      name:"A1K Arcade System",version:"1.0.0",games:[
+        {id:"slots",name:"Slot Machine",icon:"🎰"},
+        {id:"rps",name:"Rock Paper Scissors",icon:"✊✋✌️"},
+        {id:"dice",name:"Dice Duel",icon:"🎲"},
+        {id:"wheel",name:"Color Wheel",icon:"🎡"},
+        {id:"highlow",name:"High-Low Card",icon:"🃏"}
+      ]
+    };
+
+    // Fetch shim to intercept manifest requests (handles file://) 
+    const ORIG_FETCH = window.fetch;
+    window.fetch = async function(resource, init){
+      if(typeof resource === 'string'){
+        if(resource.includes('all-manifests.json')){
+          // Try to load the actual file first, fall back to inline data
+          try {
+            const response = await ORIG_FETCH('all-manifests.json', { cache: 'no-store' });
+            if(response.ok){
+              const data = await response.json();
+              window.__ALL_MANIFESTS = data;
+              return new Response(JSON.stringify(data), {status:200, headers:{'Content-Type':'application/json'}});
+            }
+          } catch(e) {
+            console.warn('[Fetch Shim] Could not load all-manifests.json, using inline data');
+          }
+          // Fallback: Return the merged manifest with all data nested under keys
+          const allManifests = {
+            assetManifest: window.__ASSET_MANIFEST || { version: 1, assets: [] },
+            bagManifest: window.__BAG_MANIFEST || {},
+            unifiedManifests: window.__UNIFIED_MANIFESTS || {},
+            arcadeManifest: window.__ARCADE_MANIFEST || { name: "A1K Arcade System", version: "1.0.0", games: [] }
+          };
+          window.__ALL_MANIFESTS = allManifests;
+          return new Response(JSON.stringify(allManifests), {status:200, headers:{'Content-Type':'application/json'}});
+        }
+        if(resource.includes('asset_manifest.json')){
+          // Try to load from all-manifests.json first
+          if(!window.__ALL_MANIFESTS){
+            try {
+              const response = await ORIG_FETCH('all-manifests.json', { cache: 'no-store' });
+              if(response.ok){
+                window.__ALL_MANIFESTS = await response.json();
+              }
+            } catch(e) {}
+          }
+          // Extract assetManifest from all-manifests if available
+          if(window.__ALL_MANIFESTS && window.__ALL_MANIFESTS.assetManifest){
+            return new Response(JSON.stringify(window.__ALL_MANIFESTS.assetManifest), {status:200, headers:{'Content-Type':'application/json'}});
+          }
+          // Fallback to inline data
+          return new Response(JSON.stringify(window.__ASSET_MANIFEST), {status:200, headers:{'Content-Type':'application/json'}});
+        }
+        if(resource.includes('arcade-manifest.json')){
+          // Try to load from all-manifests.json first
+          if(!window.__ALL_MANIFESTS){
+            try {
+              const response = await ORIG_FETCH('all-manifests.json', { cache: 'no-store' });
+              if(response.ok){
+                window.__ALL_MANIFESTS = await response.json();
+              }
+            } catch(e) {}
+          }
+          // Extract arcadeManifest from all-manifests if available
+          if(window.__ALL_MANIFESTS && window.__ALL_MANIFESTS.arcadeManifest){
+            return new Response(JSON.stringify(window.__ALL_MANIFESTS.arcadeManifest), {status:200, headers:{'Content-Type':'application/json'}});
+          }
+          // Fallback to inline data
+          return new Response(JSON.stringify(window.__ARCADE_MANIFEST), {status:200, headers:{'Content-Type':'application/json'}});
+        }
+      }
+      return ORIG_FETCH(resource, init);
+    };
+
+    const CANDY_THEME_MAP = {
+      classic: {
+        '--candy-surface-gradient': 'linear-gradient(135deg, rgba(255, 154, 158, 0.18) 0%, rgba(254, 207, 239, 0.18) 50%, rgba(255, 236, 210, 0.18) 100%)',
+        '--candy-button-gradient': 'radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.32), rgba(255, 182, 255, 0.16), rgba(167, 139, 250, 0.18))',
+        '--candy-tab-active': 'rgba(79, 195, 247, 0.28)',
+        '--candy-tab-border': 'rgba(79, 195, 247, 0.62)'
+      },
+      sunset: {
+        '--candy-surface-gradient': 'linear-gradient(135deg, rgba(255,154,158,0.25) 0%, rgba(255,236,210,0.18) 50%, rgba(255,200,150,0.18) 100%)',
+        '--candy-button-gradient': 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.34), rgba(255,205,178,0.22), rgba(255,154,158,0.24))',
+        '--candy-tab-active': 'rgba(255, 154, 158, 0.25)',
+        '--candy-tab-border': 'rgba(255, 178, 158, 0.65)'
+      },
+      'sugar-mint': {
+        '--candy-surface-gradient': 'linear-gradient(135deg, rgba(168,237,234,0.22) 0%, rgba(255,236,210,0.18) 100%)',
+        '--candy-button-gradient': 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.34), rgba(185,251,192,0.2), rgba(168,237,234,0.2))',
+        '--candy-tab-active': 'rgba(168,255,224,0.28)',
+        '--candy-tab-border': 'rgba(122,248,200,0.7)'
+      }
+    };
+
+    window.applyCandyTheme = function(themeName = 'classic') {
+      const palette = CANDY_THEME_MAP[themeName] || CANDY_THEME_MAP.classic;
+      const root = document.documentElement;
+      Object.entries(CANDY_THEME_MAP.classic).forEach(([token, value]) => {
+        root.style.setProperty(token, value);
+      });
+      Object.entries(palette).forEach(([token, value]) => {
+        root.style.setProperty(token, value);
+      });
+      document.body.dataset.candyTheme = themeName === 'classic' ? '' : themeName;
+      try {
+        localStorage.setItem('A1K_CANDY_THEME', themeName);
+      } catch (error) {
+        console.warn('[Candy Theme] Failed to persist theme selection', error);
+      }
+    };
+
+    window.restoreCandyTheme = function() {
+      try {
+        const stored = localStorage.getItem('A1K_CANDY_THEME');
+        if (stored) {
+          window.applyCandyTheme(stored);
+          return;
+        }
+      } catch (error) {
+        console.warn('[Candy Theme] Failed to read theme selection', error);
+      }
+      window.applyCandyTheme('classic');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => window.restoreCandyTheme());
+
+    let viewportUpdateTimer = null;
+    window.updateCandyViewportMode = function() {
+      const w = window.innerWidth;
+      const mode = w < 640 ? 'mobile' : w < 992 ? 'tablet' : 'desktop';
+      const current = document.body.dataset.viewportMode;
+      if (current !== mode) {
+        document.body.dataset.viewportMode = mode;
+      }
+    };
+
+    const scheduleViewportUpdate = () => {
+      if (viewportUpdateTimer) return;
+      viewportUpdateTimer = requestAnimationFrame(() => {
+        viewportUpdateTimer = null;
+        window.updateCandyViewportMode();
+      });
+    };
+
+    window.addEventListener('resize', scheduleViewportUpdate);
+    document.addEventListener('DOMContentLoaded', () => window.updateCandyViewportMode());
+
+    // Minimal supernatural powers database sample
+    window.SUPERNATURAL_POWERS_DATABASE = {
+      power_flame_touch:{id:"power_flame_touch",name:"Flame Touch",icon:"🔥",category:"elemental",rarity:"common",cooldown:8000,description:"Small burst of fire damage."},
+      power_frost_shield:{id:"power_frost_shield",name:"Frost Shield",icon:"🧊",category:"elemental",rarity:"common",cooldown:10000,description:"Temporary ice barrier."},
+      power_wind_step:{id:"power_wind_step",name:"Wind Step",icon:"🌪️",category:"elemental",rarity:"uncommon",cooldown:6000,description:"Quick dash using air."},
+      power_earth_blessing:{id:"power_earth_blessing",name:"Earth Blessing",icon:"🪨",category:"elemental",rarity:"uncommon",cooldown:12000,description:"Defense boost from earth."}
+    };
+
+  </script>
+
+  <script src="game-data.js"></script>
+  <!-- Mission Board System -->
+  <script>
+    const demoItems = [
+      { id:'item_chest_001', name:'Bronze Chest', icon:'📦', category:'container', quantity:3, rarity:'common' },
+      { id:'item_potion_001', name:'Health Potion', icon:'🧪', category:'consumable', quantity:10, rarity:'common' },
+      { id:'item_potion_002', name:'Mana Potion', icon:'💙', category:'consumable', quantity:6, rarity:'common' }
+    ];
+
+    const advancedGear = [
+      window.GearData.createInstance('gear_vanguard_blade', { upgradeLevel: 3 }),
+      window.GearData.createInstance('gear_vanguard_shield', { upgradeLevel: 2 }),
+      window.GearData.createInstance('gear_vanguard_mail', { upgradeLevel: 2 }),
+      window.GearData.createInstance('gear_vanguard_pants', { upgradeLevel: 2 }),
+      window.GearData.createInstance('gear_vanguard_ring', { upgradeLevel: 1 }),
+      window.GearData.createInstance('gear_mythic_blade', { upgradeLevel: 2 }),
+      window.GearData.createInstance('gear_mythic_amulet', { upgradeLevel: 1 })
+    ];
+
+    const starterEquipped = {
+      head: window.GearData.createInstance('gear_recruit_helm'),
+      chest: window.GearData.createInstance('gear_recruit_mail'),
+      gloves: window.GearData.createInstance('gear_recruit_gloves'),
+      pants: window.GearData.createInstance('gear_recruit_pants'),
+      boots: window.GearData.createInstance('gear_recruit_boots'),
+      weapon: window.GearData.createInstance('gear_recruit_blade'),
+      offhand: window.GearData.createInstance('gear_recruit_shield'),
+      ring1: window.GearData.createInstance('gear_recruit_ring'),
+      ring2: null,
+      necklace: window.GearData.createInstance('gear_recruit_amulet'),
+      vehicle: null,
+      pet: null,
+      spirit: null,
+      robot: null
+    };
+    
+    // Verify pants are created correctly
+    if (starterEquipped.pants) {
+      console.log('✅ Starter pants created:', starterEquipped.pants.name, 'Slot:', starterEquipped.pants.slot);
+    } else {
+      console.error('❌ Starter pants failed to create!');
+    }
+
+    const inventoryGear = [
+      window.GearData.createInstance('gear_recruit_ring'),
+      window.GearData.createInstance('gear_recruit_boots'),
+      window.GearData.createInstance('gear_recruit_pants'), // Extra pair for auto-equip testing
+      window.GearData.createInstance('gear_recruit_amulet'),
+      ...advancedGear
+    ];
+    
+    // Verify pants are in inventory
+    const inventoryPants = inventoryGear.filter(g => g && g.slot === 'pants');
+    console.log('✅ Inventory pants count:', inventoryPants.length, inventoryPants.map(p => p.name));
+
+    const demoPets = [ { id:'pet_fire_pup', name:'Fire Pup', icon:'🐕', rarity:'common' } ];
+    const demoVehicles = [ { id:'vehicle_basic_bike', name:'Basic Bike', icon:'🚲', rarity:'common' } ];
+    const demoSpirits = [ { id:'spirit_fire_spark', name:'Fire Spark', icon:'🔥', rarity:'common' } ];
+    const demoRobots = [ { id:'robot_trainee_bot', name:'Trainee Bot', icon:'🤖', rarity:'common' } ];
+
+    const demoPowers = [ 'power_flame_touch','power_frost_shield','power_wind_step','power_earth_blessing' ].map(pid => ({...window.SUPERNATURAL_POWERS_DATABASE[pid], level:1, equipped:false, active:false}));
+
+    const demoSkins = [ { id:'skin_default_a1', name:'Default Suit', icon:'🧍', rarity:'common', unlocked:true } ];
+    const demoTalents = [ { id:'talent_quick_reflexes', name:'Quick Reflexes', tier:1, icon:'⚡', unlocked:true } ];
+    const demoQuests = [ { id:'quest_intro_001', name:'First Steps', status:'active', description:'Open the bag and inspect your gear.' } ];
+    const demoShop = [
+      { id:'shop_hp_potion', name:'Health Potion', cost:150, price:150, icon:'🧪', currency:'gold', category:'consumable' },
+      // XP Boxes - Low/Mid/High Tier
+      { id:'shop_xp_box_low', name:'Small XP Box', cost:200, price:200, icon:'📦', currency:'gold', category:'consumable', xpAmount:50, rarity:'common' },
+      { id:'shop_xp_box_mid', name:'Medium XP Box', cost:500, price:500, icon:'📦', currency:'gold', category:'consumable', xpAmount:150, rarity:'uncommon' },
+      { id:'shop_xp_box_high', name:'Large XP Box', cost:1200, price:1200, icon:'📦', currency:'gold', category:'consumable', xpAmount:400, rarity:'rare' },
+      // Gear Items
+      { id:'gear_recruit_pants', name:'Recruit Greaves', icon:'🦿', category:'armor', slot:'pants', cost:260, currency:'gold', rarity:'common' },
+      { id:'gear_vanguard_pants', name:'Vanguard Greaves', icon:'🦿', category:'armor', slot:'pants', cost:820, currency:'gold', rarity:'rare' },
+      { id:'gear_mythic_pants', name:'Mythic Legplates', icon:'🦿', category:'armor', slot:'pants', cost:2460, currency:'gold', rarity:'legendary' }
+    ];
+
+    window.gameState = {
+      gold: 100000,
+      gems: 120,
+      keys: 6,
+      tickets: 4,
+      essence: 25,
+      currentCharacter: 'A1',
+      equipped: { ...starterEquipped },
+      inventory: {
+        items: demoItems,
+        gear: inventoryGear,
+        pets: demoPets,
+        vehicles: demoVehicles,
+        spirits: demoSpirits,
+        robots: demoRobots,
+        powers: demoPowers,
+        abilities: demoPowers,
+        skins: demoSkins,
+        talents: demoTalents,
+        quests: demoQuests,
+        shop: demoShop,
+        skills: []
+      },
+      missions: {
+        available: [],
+        active: null,
+        completed: [],
+        progress: {}
+      },
+      level: 20,
+      playerLevel: 20,
+      rank: 5,
+      settings: {
+        autoAI: false
+      },
+      bagOpen: false
+    };
+    
+    // Set shop inventory for shop tab
+    window.gameState.shop = {
+      inventory: demoShop
+    };
+    
+    // Initialize Talent Points System (for talent tree)
+    // Note: BagSystem.init() will also call initializeAbilityPointsSystem() which handles this,
+    // but we initialize here as a defensive fallback
+    if (!window.gameState.talents || typeof window.gameState.talents !== 'object') {
+      window.gameState.talents = {
+        points: 0,
+        tree: [],
+        allocated: [],
+        synergies: []
+      };
+    } else {
+      // Ensure required properties exist
+      if (typeof window.gameState.talents.points !== 'number') window.gameState.talents.points = 0;
+      if (!Array.isArray(window.gameState.talents.tree)) window.gameState.talents.tree = [];
+      if (!Array.isArray(window.gameState.talents.allocated)) window.gameState.talents.allocated = [];
+      if (!Array.isArray(window.gameState.talents.synergies)) window.gameState.talents.synergies = [];
+    }
+    
+    // Initialize Ability Points System (for stat allocation - Solo Leveling style)
+    // Note: BagSystem.init() will also call initializeAbilityPointsSystem() which handles this,
+    // but we initialize here as a defensive fallback
+    if (typeof window.gameState.abilityPoints !== 'number') window.gameState.abilityPoints = 0;
+    if (typeof window.gameState.pointsInStrength !== 'number') window.gameState.pointsInStrength = 0;
+    if (typeof window.gameState.pointsInVitality !== 'number') window.gameState.pointsInVitality = 0;
+    if (typeof window.gameState.pointsInAgility !== 'number') window.gameState.pointsInAgility = 0;
+    if (typeof window.gameState.pointsInIntelligence !== 'number') window.gameState.pointsInIntelligence = 0;
+    
+    // Initialize XP/Level tracking for Ability Points System
+    if (typeof window.gameState.xp !== 'number') window.gameState.xp = 0;
+    if (typeof window.gameState.xpToNext !== 'number') {
+      // Will be recalculated by BagSystem.init() using calculateXPForLevel()
+      window.gameState.xpToNext = 100;
+    }
+    
+    console.log('✅ Offline gameState seeded', Object.keys(window.gameState.inventory));
+  </script>
+
+  <!-- Load unified skills manifest FIRST to ensure skills are synced -->
+  <script>
+      // Use skills from manifest (ensures perfect sync with bag system)
+      const UNIFIED_SKILLS_DB = window.UNIFIED_SKILLS_DB || [
+        // === A1 (WARRIOR) ===
+        { id: 'A1_S1', name: 'Crimson Slash', characterId: 'A1', slot: 1, baseDamage: 150, damage: 150, cooldown: 2.5, unlockLevel: 1, unlock: 1, icon: '⚔️', tier: 'common', element: 'PHYSICAL', description: '3-hit crimson X-wave slash', projectileCount: 3, shape: 'xwave', color: '#ff0000' },
+        { id: 'A1_S2', name: 'Summon Clone', characterId: 'A1', slot: 2, baseDamage: 0, damage: 0, cooldown: 15, unlockLevel: 20, unlock: 20, icon: '👥', tier: 'uncommon', element: 'SUMMON', description: 'Summon combat clone ally', projectileCount: 0, shape: 'summon', color: '#ff0000' },
+        { id: 'A1_S3', name: 'Power Wave', characterId: 'A1', slot: 3, baseDamage: 250, damage: 250, cooldown: 4, unlockLevel: 1, unlock: 1, icon: '⚔️', tier: 'rare', element: 'PHYSICAL', description: '4-hit power wave combo', projectileCount: 4, shape: 'xwave', enhanced: true, color: '#ff0000' },
+        { id: 'A1_S4', name: 'Phantom Step: Backstab Waltz', characterId: 'A1', slot: 4, baseDamage: 110, damage: 110, cooldown: 20, unlockLevel: 30, unlock: 30, icon: '⏰', tier: 'epic', element: 'SHADOW', description: 'Teleport backstab combo with time manipulation', setupSwings: 6, swingInterval: 0.12, finalPower: 320, executeThreshold: 0.30, arcRadius: 120, crescentRadius: 180, teleport: true, vacuumRadius: 80, shape: 'backstab_waltz', enhanced: true, color: '#00E5FF' },
+        { id: 'A1_S5', name: 'Crimson Cyclone: Blink Chain', characterId: 'A1', slot: 5, baseDamage: 150, damage: 150, cooldown: 24, unlockLevel: 40, unlock: 40, icon: '🌪️', tier: 'epic', element: 'PHYSICAL', description: '3-blink aerial spin attack', blinkCount: 3, spinTicks: 6, spinTickDamage: 50, slamDamage: 300, stunDuration: 0.4, vortexRadius: 200, shape: 'blink_chain', enhanced: true, color: '#FF0000' },
+        { id: 'A1_X1', name: 'World Splitter', characterId: 'A1', slot: 'X', baseDamage: 260, damage: 260, cooldown: 28, unlockLevel: 50, unlock: 50, icon: '🌌', tier: 'legendary', element: 'ARCANE', description: 'Twin dimension rifts (chargeable)', charge: { t1: 0.50, t2: 0.80 }, riftCount: 2, riftWidth: 60, riftSeparation: 36, pierceUnlimited: true, bossTailBonus: 0.25, bleedDps: 20, bleedDuration: 2.0, shape: 'world_splitter', color: '#00E5FF' },
+        
+        // === UNIQUE (CYBORG) ===
+        { id: 'UNIQUE_S1', name: 'Plasma Blast', characterId: 'UNIQUE', slot: 1, baseDamage: 120, damage: 120, cooldown: 2, unlockLevel: 1, unlock: 1, icon: '🔫', tier: 'common', element: 'PLASMA', description: 'Fire 3 plasma projectiles', projectileCount: 3, shape: 'plasma', color: '#00ffff' },
+        { id: 'UNIQUE_S2', name: 'Summon Drone', characterId: 'UNIQUE', slot: 2, baseDamage: 0, damage: 0, cooldown: 15, unlockLevel: 20, unlock: 20, icon: '🤖', tier: 'uncommon', element: 'SUMMON', description: 'Deploy a combat drone', projectileCount: 0, shape: 'summon', color: '#00ffff' },
+  { id: 'UNIQUE_S3', name: 'Aether Wave Beam', characterId: 'UNIQUE', slot: 3, baseDamage: 400, damage: 400, cooldown: 8, unlockLevel: 1, unlock: 1, icon: '💠', tier: 'rare', element: 'ENERGY', description: 'Channel a Kamehameha-style energy beam', projectileCount: 0, shape: 'beam', enhanced: true, color: '#00ffff' },
+        { id: 'UNIQUE_S4', name: 'Absolute Zero Rail + Cryo Barrage', characterId: 'UNIQUE', slot: 4, baseDamage: 45, damage: 45, cooldown: 20, unlockLevel: 30, unlock: 30, icon: '❄️', tier: 'epic', element: 'ICE', description: 'Freeze enemies with rail beam and cryo barrage', railDuration: 0.45, railTicksPerSec: 12, cryoCount: 4, cryoDamage: 180, cryoPierce: 2, cryoChain: 1, chainFalloff: 0.6, shape: 'cryo_rail', enhanced: true, color: '#87CEEB' },
+        { id: 'UNIQUE_S5', name: 'Ion Helix Drill', characterId: 'UNIQUE', slot: 5, baseDamage: 38, damage: 38, cooldown: 24, unlockLevel: 40, unlock: 40, icon: '🔩', tier: 'epic', element: 'PLASMA', description: 'Drill through enemies with rotating helix beam', drillDuration: 0.9, drillTicksPerSec: 15, pullStrength: 120, steerDegrees: 8, endBurst: 220, shape: 'helix_drill', enhanced: true, color: '#00FFFF' },
+  { id: 'UNIQUE_X1', name: 'Hyper Ion Wave', characterId: 'UNIQUE', slot: 'X', baseDamage: 34, damage: 34, cooldown: 28, unlockLevel: 50, unlock: 50, icon: '⚡', tier: 'legendary', element: 'ENERGY', description: 'Massive Goku-style beam wave (Chargeable Ultimate)', charge: { t1: 0.60, t2: 1.00 }, beamDuration: 1.6, beamTicksPerSec: 16, beamWidth: 80, steerDegrees: 10, endCone: 200, deepChillStacks: 3, shape: 'ion_beam', color: '#00FFFF' },
+        
+        // === MISSY (CAT ANGEL) ===
+        { id: 'MISSY_S1', name: 'Blade Dance', characterId: 'MISSY', slot: 1, baseDamage: 130, damage: 130, cooldown: 2.5, unlockLevel: 1, unlock: 1, icon: '🗡️', tier: 'common', element: 'PHYSICAL', description: 'Elegant blade dance launching 3 slashes', projectileCount: 3, shape: 'slash', color: '#ff69b4' },
+        { id: 'MISSY_S2', name: 'Summon Pet', characterId: 'MISSY', slot: 2, baseDamage: 0, damage: 0, cooldown: 15, unlockLevel: 20, unlock: 20, icon: '🐱', tier: 'uncommon', element: 'SUMMON', description: 'Summon a magical pet companion', projectileCount: 0, shape: 'summon', color: '#ff69b4' },
+        { id: 'MISSY_S3', name: 'Gun Barrage', characterId: 'MISSY', slot: 3, baseDamage: 200, damage: 200, cooldown: 4, unlockLevel: 1, unlock: 1, icon: '💰', tier: 'rare', element: 'LIGHT', description: 'Rapid-fire bullet barrage with golden effects', projectileCount: 4, shape: 'bullet', enhanced: true, color: '#ff69b4' },
+        { id: 'MISSY_S4', name: 'Golden Rail & Comets', characterId: 'MISSY', slot: 4, baseDamage: 560, damage: 560, cooldown: 6, unlockLevel: 30, unlock: 30, icon: '✨', tier: 'epic', element: 'ARCANE', description: 'Golden rail beam with orbiting magnetic comets', railDuration: 0.6, railTicksPerSec: 10, cometCount: 8, cometDamage: 180, cometPierce: 4, magnetRadius: 200, magnetTime: 2.0, boomerangDegrees: 45, shape: 'gold_rail', enhanced: true, color: '#ffd700' },
+        { id: 'MISSY_S5', name: 'Royal Typhoon', characterId: 'MISSY', slot: 5, baseDamage: 720, damage: 720, cooldown: 8, unlockLevel: 40, unlock: 40, icon: '🌀', tier: 'epic', element: 'LIGHT', description: 'Create a royal cyclone with gunfire volleys', cycloneDuration: 1.8, cycloneTicks: 18, cycloneTickDamage: 40, cycloneMagnet: 140, coneVolleys: 3, conePellets: 8, coneSpread: 35, conePower: 110, shape: 'royal_typhoon', enhanced: true, typhoonRadius: 150, color: '#ffd700' },
+  { id: 'MISSY_X1', name: 'Royal Coin Cannon', characterId: 'MISSY', slot: 'X', baseDamage: 1400, damage: 1400, cooldown: 20, unlockLevel: 50, unlock: 50, icon: '💎', tier: 'legendary', element: 'ARCANE', description: 'Royal coin beam cannon (Chargeable Ultimate)', charge: { t1: 0.5, t2: 0.9 }, beamDuration: 1.4, beamWidth: 70, beamMagnet: 180, beamTickDamage: 90, beamTicksPerSec: 12, finalNova: 1200, shape: 'royal_cannon', color: '#ffd700' },
+
+        // ═══════════════════════════════════════════════════════════════════
+        // UPGRADED SKILLS - Advanced Abilities (from unified-skills-manifest.js)
+        // ═══════════════════════════════════════════════════════════════════
+
+        // A1 UPGRADED SKILLS
+        { id: 'A1_S7', name: 'Phantom Edge Combo', characterId: 'A1', slot: 7, baseDamage: 180, damage: 180, cooldown: 8, unlockLevel: 35, unlock: 35, icon: '⚔️', tier: 'epic', element: 'SHADOW', description: '3-hit phantom blade combo with void slashes', precastBullets: 3, precastInterval: 0.25, shape: 'phantom_combo', color: '#9966ff' },
+        { id: 'A1_S8', name: 'Phantom Void', characterId: 'A1', slot: 8, baseDamage: 220, damage: 220, cooldown: 10, unlockLevel: 40, unlock: 40, icon: '🌀', tier: 'rare', element: 'SHADOW', description: 'Void energy slash with dimensional rift', precastBullets: 2, precastInterval: 0.3, shape: 'phantom_void', color: '#6600cc' },
+        { id: 'A1_S9', name: 'Phantom Radiant', characterId: 'A1', slot: 9, baseDamage: 280, damage: 280, cooldown: 12, unlockLevel: 45, unlock: 45, icon: '✨', tier: 'epic', element: 'LIGHT', description: 'Radiant phantom slash with light burst', precastBullets: 4, precastInterval: 0.2, shape: 'phantom_radiant', color: '#ffdd00' },
+        { id: 'A1_X2', name: 'Phantom ULTIMATE', characterId: 'A1', slot: 'X2', baseDamage: 500, damage: 500, cooldown: 30, unlockLevel: 50, unlock: 50, icon: '💥', tier: 'legendary', element: 'SHADOW', description: 'Ultimate phantom barrage - massive combo attack', precastBullets: 6, precastInterval: 0.15, shape: 'phantom_ultimate', color: '#ff00ff' },
+
+        // UNIQUE UPGRADED SKILLS
+        { id: 'UNIQUE_S7', name: 'Voidlight Cannon', characterId: 'UNIQUE', slot: 7, baseDamage: 300, damage: 300, cooldown: 8, unlockLevel: 35, unlock: 35, icon: '🌌', tier: 'rare', element: 'ARCANE', description: 'Void energy cannon beam', precastBullets: 4, precastInterval: 0.2, shape: 'voidlight_cannon', color: '#00ffff' },
+        { id: 'UNIQUE_S8', name: 'Kinetic Sentry', characterId: 'UNIQUE', slot: 8, baseDamage: 150, damage: 150, cooldown: 15, unlockLevel: 30, unlock: 30, icon: '🤖', tier: 'uncommon', element: 'PLASMA', description: 'Deploy auto-firing kinetic turret', precastBullets: 2, precastInterval: 0.4, shape: 'sentry', color: '#00aaff' },
+        { id: 'UNIQUE_S9', name: 'Gauss Driver', characterId: 'UNIQUE', slot: 9, baseDamage: 400, damage: 400, cooldown: 10, unlockLevel: 40, unlock: 40, icon: '⚡', tier: 'rare', element: 'LIGHTNING', description: 'Heavy electromagnetic rail cannon shot', precastBullets: 2, precastInterval: 0.5, shape: 'gauss_driver', color: '#ffaa00' },
+        { id: 'UNIQUE_S10', name: 'Gauss Rail', characterId: 'UNIQUE', slot: 10, baseDamage: 350, damage: 350, cooldown: 9, unlockLevel: 42, unlock: 42, icon: '⚡', tier: 'epic', element: 'LIGHTNING', description: 'Piercing rail cannon with chain lightning', precastBullets: 3, precastInterval: 0.25, shape: 'gauss_rail', color: '#ff8800' },
+        { id: 'UNIQUE_S11', name: 'Gauss Pierce', characterId: 'UNIQUE', slot: 11, baseDamage: 380, damage: 380, cooldown: 11, unlockLevel: 44, unlock: 44, icon: '💫', tier: 'epic', element: 'LIGHTNING', description: 'Armor-piercing gauss shot', precastBullets: 4, precastInterval: 0.2, shape: 'gauss_pierce', color: '#ffcc00' },
+        { id: 'UNIQUE_S12', name: 'Sentry Plasma', characterId: 'UNIQUE', slot: 12, baseDamage: 180, damage: 180, cooldown: 14, unlockLevel: 38, unlock: 38, icon: '🔫', tier: 'rare', element: 'PLASMA', description: 'Deploy plasma-firing auto-turret', precastBullets: 3, precastInterval: 0.3, shape: 'sentry_plasma', color: '#00ffaa' },
+        { id: 'UNIQUE_S13', name: 'Voidlight Soul', characterId: 'UNIQUE', slot: 13, baseDamage: 320, damage: 320, cooldown: 13, unlockLevel: 43, unlock: 43, icon: '👻', tier: 'epic', element: 'SHADOW', description: 'Soul-draining void beam', precastBullets: 5, precastInterval: 0.18, shape: 'voidlight_soul', color: '#aa00ff' },
+        { id: 'UNIQUE_S14', name: 'Voidlight Radiant', characterId: 'UNIQUE', slot: 14, baseDamage: 340, damage: 340, cooldown: 12, unlockLevel: 46, unlock: 46, icon: '☀️', tier: 'epic', element: 'LIGHT', description: 'Radiant void-light fusion beam', precastBullets: 4, precastInterval: 0.22, shape: 'voidlight_radiant', color: '#ffff00' },
+        { id: 'UNIQUE_X2', name: 'Voidlight ULTIMATE', characterId: 'UNIQUE', slot: 'X2', baseDamage: 600, damage: 600, cooldown: 30, unlockLevel: 50, unlock: 50, icon: '💥', tier: 'legendary', element: 'ARCANE', description: 'Ultimate void-light convergence', precastBullets: 6, precastInterval: 0.12, shape: 'voidlight_ultimate', color: '#cc00ff' },
+
+        // MISSY UPGRADED SKILLS
+        { id: 'MISSY_S7', name: 'Divine Burst', characterId: 'MISSY', slot: 7, baseDamage: 260, damage: 260, cooldown: 7, unlockLevel: 35, unlock: 35, icon: '✨', tier: 'rare', element: 'LIGHT', description: 'Radiant burst of divine energy', precastBullets: 4, precastInterval: 0.2, shape: 'divine_burst', color: '#ffccff' },
+        { id: 'MISSY_S8', name: 'Angel Wings', characterId: 'MISSY', slot: 8, baseDamage: 180, damage: 180, cooldown: 10, unlockLevel: 30, unlock: 30, icon: '🪽', tier: 'uncommon', element: 'LIGHT', description: 'Feather projectiles with homing', precastBullets: 6, precastInterval: 0.15, shape: 'angel_wings', color: '#ffffff' },
+        { id: 'MISSY_S9', name: 'Celestial Strike', characterId: 'MISSY', slot: 9, baseDamage: 320, damage: 320, cooldown: 9, unlockLevel: 40, unlock: 40, icon: '⭐', tier: 'epic', element: 'LIGHT', description: 'Heavenly strike from above', precastBullets: 3, precastInterval: 0.25, shape: 'celestial_strike', color: '#ffd700' },
+        { id: 'MISSY_X2', name: 'Angel ULTIMATE', characterId: 'MISSY', slot: 'X2', baseDamage: 550, damage: 550, cooldown: 28, unlockLevel: 50, unlock: 50, icon: '👼', tier: 'legendary', element: 'LIGHT', description: 'Divine judgment from the heavens', precastBullets: 8, precastInterval: 0.1, shape: 'angel_ultimate', color: '#ffdd99' }
+      ];
+
+      // Seed all skills for equipping
+      // Populate all expected skill collections for BagSystem renderers
+      window.gameState.inventory.skills = UNIFIED_SKILLS_DB.map(skill => ({ ...skill, unlocked: true }));
+      window.gameState.skills = [...window.gameState.inventory.skills];
+      window.gameState.supernatural = [...window.gameState.inventory.skills];
+
+      // Build equippedSkills in object form per character (BagSystem expects {CHAR:{S1,S2,S3}})
+      const find = id => UNIFIED_SKILLS_DB.find(s => s.id === id) || null;
+      const defaultA1 = {
+        S1: find('A1_S1'), S2: find('A1_S2'), S3: find('A1_S3')
+      };
+      const defaultUnique = {
+        S1: find('UNIQUE_S1'), S2: find('UNIQUE_S2'), S3: find('UNIQUE_S3')
+      };
+      const defaultMissy = {
+        S1: find('MISSY_S1'), S2: find('MISSY_S2'), S3: find('MISSY_S3')
+      };
+
+      window.gameState.equippedSkills = {
+        // Global quick slots default to A1's primary kit
+        slot1: defaultA1.S1,
+        slot2: defaultA1.S2,
+        slot3: defaultA1.S3,
+        // Character-specific loadouts
+        A1: defaultA1,
+        UNIQUE: defaultUnique,
+        MISSY: defaultMissy
+      };
+
+      // Default active character to A1 so global slots align
+      window.gameState.currentCharacter = window.gameState.currentCharacter || 'A1';
+
+      console.log('✅ Skills seeded. inventory.skills:', window.gameState.inventory.skills.length);
+      console.log('Equipped skills object:', window.gameState.equippedSkills);
+  </script>
+
+  <!-- Load full runtime after state so it picks up inventories -->
+  <script src="A1KBagSystem.js"></script>
+  <script src="arcade-bundle.js"></script>
+  <script>
+    (function waitForInit(){
+      if(window.BagSystem && typeof window.BagSystem.init === 'function'){
+        window.BagSystem.init().then(()=>{
+          console.log('✅ BagSystem initialized (offline)');
+          
+          // Ability Points System is now automatically initialized by BagSystem.init()
+          // You can test it with: window.BagSystem.gainXP(150) or window.BagSystem.handleLevelUp(21)
+          
+          // Verify pants are equipped after initialization
+          setTimeout(() => {
+          if(window.gameState.equipped && window.gameState.equipped.pants){
+            console.log('✅ Pants equipped:', window.gameState.equipped.pants.name, 'Slot:', window.gameState.equipped.pants.slot);
+            } else if(window.GearData && typeof window.GearData.createInstance === 'function'){
+              window.gameState.equipped = window.gameState.equipped || {};
+              window.gameState.equipped.pants = window.GearData.createInstance('gear_recruit_pants');
+              console.log('✅ Auto-re-equipped starter pants after init.');
+            }
+          }, 150);
+          
+          // Merge pants items into shop inventory (BagSystem overwrites shop, so we need to add pants back)
+          if(window.gameState.shop && window.gameState.shop.inventory){
+            const pantsItems = [
+              { id:'gear_recruit_pants', name:'Recruit Greaves', icon:'🦿', category:'armor', slot:'pants', cost:260, currency:'gold', rarity:'common' },
+              { id:'gear_vanguard_pants', name:'Vanguard Greaves', icon:'🦿', category:'armor', slot:'pants', cost:820, currency:'gold', rarity:'rare' },
+              { id:'gear_mythic_pants', name:'Mythic Legplates', icon:'🦿', category:'armor', slot:'pants', cost:2460, currency:'gold', rarity:'legendary' }
+            ];
+            pantsItems.forEach(pantsItem => {
+              // Check if item already exists
+              const exists = window.gameState.shop.inventory.find(i => i.id === pantsItem.id);
+              if(!exists){
+                window.gameState.shop.inventory.push(pantsItem);
+                console.log('✅ Added pants to shop:', pantsItem.name);
+              }
+            });
+          }
+          
+          if(window.ArcadeSystem && typeof window.ArcadeSystem.init==='function'){
+            window.ArcadeSystem.init(window.BagSystem);
+          }
+          // Auto-open the bag on load so controls are visible immediately
+          if(window.BagSystem?.open){
+            window.BagSystem.open();
+          }
+
+          window.dispatchEvent(new CustomEvent('bag-system:ready'));
+        });
+        window.addEventListener('keydown', (e)=>{ if((e.key==='b'||e.key==='B') && !e.ctrlKey && !e.metaKey){ window.BagSystem?.toggle(); }});
+      } else { setTimeout(waitForInit,100); }
+    })();
+  </script>
+  <script>
+    window.startCRankDemo = function startCRankDemo() {
+      try {
+        window.gameState = window.gameState || {};
+        window.gameState.gold = Math.max(window.gameState.gold || 0, 5000000);
+        window.gameState.raidKeys = Math.max(window.gameState.raidKeys || 0, 5);
+        window.gameState.playerLevel = Math.max(window.gameState.playerLevel || 1, 60);
+
+        if (window.BagSystem) {
+          if (!window.BagSystem.isOpen) {
+            window.BagSystem.open();
+          }
+          if (window.BagSystem.state?.activeTab !== 'missions') {
+            window.BagSystem.state.activeTab = 'missions';
+            window.BagSystem.renderTabs();
+          }
+          window.BagSystem.renderTab('missions');
+          if (typeof window.BagSystem.showToast === 'function') {
+            window.BagSystem.showToast('Demo mode primed: jump into Dungeon Raids!', '#8df5ff');
+          }
+        } else {
+          console.warn('[startCRankDemo] BagSystem not ready yet.');
+          return;
+        }
+
+        setTimeout(() => {
+          if (window.MissionBoardRenderer) {
+            window.MissionBoardRenderer.currentSubsection = 'dungeons';
+            window.MissionBoardRenderer.renderMissionBoardTab();
+          }
+        }, 180);
+      } catch (error) {
+        console.error('[startCRankDemo] Failed to configure demo', error);
+      }
+    };
+  </script>
+
+  <!-- Ability Points System Initialization -->
+  <script>
+// Production-ready initialization snippet for Ability Points System
+(function initializeAbilityPointsSystem() {
+  'use strict';
+  
+  // Wait for BagSystem to be available
+  function initWhenReady() {
+    if (window.BagSystem && typeof window.BagSystem.initializeAbilityPointsSystem === 'function') {
+      // Initialize the system
+      try {
+        window.BagSystem.initializeAbilityPointsSystem();
+        console.log('[AbilityPointsInit] System initialized successfully');
+      } catch (error) {
+        console.error('[AbilityPointsInit] Failed to initialize:', error);
+      }
+      
+      // Optional: Set up XP gain hook if your game has XP system
+      if (window.Game && typeof window.Game.gainXP === 'function') {
+        const originalGainXP = window.Game.gainXP;
+        window.Game.gainXP = function(amount) {
+          const result = originalGainXP.call(this, amount);
+          // Also call BagSystem's XP gain handler
+          if (window.BagSystem && typeof window.BagSystem.gainXP === 'function') {
+            try {
+              window.BagSystem.gainXP(amount);
+            } catch (error) {
+              console.error('[AbilityPointsInit] Error in gainXP hook:', error);
+            }
+          }
+          return result;
+        };
+        console.log('[AbilityPointsInit] XP gain hook installed');
+      }
+      
+      // Optional: Listen for level-up events from other systems
+      if (window.EventBus || (window.addEventListener && typeof window.addEventListener === 'function')) {
+        const eventTarget = window.EventBus || window;
+        const handler = function(event) {
+          if (event.detail && event.detail.newLevel && window.BagSystem && typeof window.BagSystem.handleLevelUp === 'function') {
+            try {
+              window.BagSystem.handleLevelUp(event.detail.newLevel, {
+                showAnimation: event.detail.showAnimation !== false,
+                abilityPoints: event.detail.abilityPoints || 3
+              });
+            } catch (error) {
+              console.error('[AbilityPointsInit] Error handling level-up event:', error);
+            }
+          }
+        };
+        
+        if (eventTarget.addEventListener) {
+          eventTarget.addEventListener('level-up', handler);
+          console.log('[AbilityPointsInit] Level-up event listener installed');
+        }
+      }
+    } else {
+      // Retry after 100ms if BagSystem not ready yet
+      setTimeout(initWhenReady, 100);
+    }
+  }
+  
+  // Start initialization when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWhenReady);
+  } else {
+    // DOM already loaded, start immediately
+    initWhenReady();
+  }
+})();
+  </script>
+
+  <!-- Minimal in-game controls using existing Candy HUD styles -->
+  <div id="hud-wrap">
+    <div id="hud-right">
+      <div class="utility-stack">
+        <div class="utility-row top">
+          <button class="utility-btn" data-btn="switch" onclick="console.log('Switch pressed');">🔁 Switch (1)</button>
+          <button class="utility-btn" data-btn="act" onclick="console.log('Act pressed');">⚔️ ACT (2)</button>
+          <button class="utility-btn" data-btn="act2" onclick="console.log('Act2 pressed');">🛠 ACT2 (3)</button>
+        </div>
+        <div class="utility-row bot">
+          <button class="utility-btn" data-btn="bag" onclick="window.BagSystem?.toggle()">🎒 Bag (B)</button>
+          <button class="utility-btn" data-btn="missions" onclick="(function(){try{ if(!window.BagSystem.isOpen){window.BagSystem.open();} if(window.BagSystem.state?.activeTab!=='missions'){window.BagSystem.state.activeTab='missions';window.BagSystem.renderTabs();} window.BagSystem.renderTab('missions'); }catch(e){ console.warn(e);} })()">📜 Missions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

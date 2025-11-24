@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Systems - Demo Hub</title>
+  <link rel="stylesheet" href="../styles/systems-base.css">
+  <link rel="stylesheet" href="../styles/demo-styles.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: 60px 20px;
+      background: linear-gradient(135deg, #4c6ef5 0%, #9b59b6 100%);
+      border-radius: var(--radius-xl);
+      margin-bottom: var(--spacing-xl);
+    }
+    .hero-title {
+      font-size: 56px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: var(--spacing-md);
+    }
+    .hero-subtitle {
+      font-size: 24px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: var(--spacing-lg);
+    }
+    .system-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    .demo-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      text-align: center;
+      transition: all var(--transition-normal);
+      cursor: pointer;
+      border: 2px solid var(--border-primary);
+    }
+    .demo-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-color);
+    }
+    .demo-icon {
+      font-size: 64px;
+      margin-bottom: var(--spacing-md);
+    }
+    .demo-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-sm);
+    }
+    .demo-description {
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-md);
+      line-height: 1.6;
+    }
+    .features-list {
+      list-style: none;
+      text-align: left;
+      margin-bottom: var(--spacing-md);
+    }
+    .feature-item {
+      padding: var(--spacing-xs) 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .feature-item:before {
+      content: "✓ ";
+      color: var(--success-color);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-page">
+    <div class="hero">
+      <h1 class="hero-title">🎮 Game Systems Library</h1>
+      <p class="hero-subtitle">Production-ready, standalone game systems for any project</p>
+      <div class="action-buttons" style="justify-content: center;">
+        <button class="btn btn-lg" onclick="window.location.href='full-demo.html'">View All Systems</button>
+        <button class="btn btn-secondary btn-lg" onclick="window.location.href='../README.md'">Documentation</button>
+      </div>
+    </div>
+
+    <div class="system-container">
+      <h2 class="heading-lg text-center">Choose a System to Explore</h2>
+      
+      <div class="system-card-grid">
+        <!-- Quest System -->
+        <div class="demo-card" onclick="window.location.href='quest-showcase.html'">
+          <div class="demo-icon">📜</div>
+          <h3 class="demo-title">Quest System</h3>
+          <p class="demo-description">Complete quest and mission tracking with progression and rewards</p>
+          <ul class="features-list">
+            <li class="feature-item">Story quests with unlock chains</li>
+            <li class="feature-item">Mission board (kill quests)</li>
+            <li class="feature-item">Daily/weekly quests</li>
+            <li class="feature-item">Reward system</li>
+            <li class="feature-item">Progress tracking</li>
+          </ul>
+          <button class="btn">View Demo →</button>
+        </div>
+
+        <!-- Supernatural System -->
+        <div class="demo-card" onclick="window.location.href='supernatural-showcase.html'">
+          <div class="demo-icon">✨</div>
+          <h3 class="demo-title">Supernatural System</h3>
+          <p class="demo-description">Supernatural abilities, spirits, and elemental powers</p>
+          <ul class="features-list">
+            <li class="feature-item">Active & passive abilities</li>
+            <li class="feature-item">Spirit equipping</li>
+            <li class="feature-item">Mastery ranking</li>
+            <li class="feature-item">Cooldown management</li>
+            <li class="feature-item">Visual effects</li>
+          </ul>
+          <button class="btn">View Demo →</button>
+        </div>
+
+        <!-- Skin System -->
+        <div class="demo-card" onclick="window.location.href='skin-showcase.html'">
+          <div class="demo-icon">👤</div>
+          <h3 class="demo-title">Skin System</h3>
+          <p class="demo-description">Character skin management with unlocking and previewing</p>
+          <ul class="features-list">
+            <li class="feature-item">Multiple characters</li>
+            <li class="feature-item">Unlock system</li>
+            <li class="feature-item">Rarity tiers</li>
+            <li class="feature-item">Preview rendering</li>
+            <li class="feature-item">Save/load support</li>
+          </ul>
+          <button class="btn">View Demo →</button>
+        </div>
+
+        <!-- Inventory System -->
+        <div class="demo-card" onclick="window.location.href='inventory-showcase.html'">
+          <div class="demo-icon">🎒</div>
+          <h3 class="demo-title">Inventory System</h3>
+          <p class="demo-description">Complete inventory and equipment management</p>
+          <ul class="features-list">
+            <li class="feature-item">Item stacking</li>
+            <li class="feature-item">Equipment slots</li>
+            <li class="feature-item">Categories & rarities</li>
+            <li class="feature-item">Sorting & filtering</li>
+            <li class="feature-item">Consumables</li>
+          </ul>
+          <button class="btn">View Demo →</button>
+        </div>
+
+        <!-- Settings System -->
+        <div class="demo-card" onclick="window.location.href='settings-showcase.html'">
+          <div class="demo-icon">⚙️</div>
+          <h3 class="demo-title">Settings System</h3>
+          <p class="demo-description">Comprehensive game settings management</p>
+          <ul class="features-list">
+            <li class="feature-item">Audio settings</li>
+            <li class="feature-item">Graphics presets</li>
+            <li class="feature-item">Key bindings</li>
+            <li class="feature-item">UI customization</li>
+            <li class="feature-item">Import/export</li>
+          </ul>
+          <button class="btn">View Demo →</button>
+        </div>
+      </div>
+
+      <div class="system-card" style="text-align: center; margin-top: var(--spacing-xl);">
+        <h2 class="heading-md">🚀 Quick Start</h2>
+        <p class="text-secondary mb-md">Get started in seconds with any system:</p>
+        <div class="code-block" style="text-align: left; max-width: 600px; margin: 0 auto;">
+          <code>&lt;!-- Include the system --&gt;
+&lt;script src="systems/quests/quest-system.js"&gt;&lt;/script&gt;
+
+&lt;script&gt;
+  // Initialize
+  const quests = new QuestSystem();
+  await quests.initialize({ questTemplates: [...] });
+  
+  // Start a quest
+  quests.startQuest('quest_001');
+&lt;/script&gt;</code>
+        </div>
+        <div class="action-buttons" style="justify-content: center; margin-top: var(--spacing-lg);">
+          <button class="btn btn-secondary" onclick="window.location.href='../INTEGRATION_GUIDE.md'">Integration Guide</button>
+          <button class="btn btn-secondary" onclick="window.location.href='../unified/API_REFERENCE.md'">API Reference</button>
+        </div>
+      </div>
+
+      <footer style="text-align: center; padding: var(--spacing-xl) 0; margin-top: var(--spacing-xl); border-top: 2px solid var(--border-primary);">
+        <p class="text-muted">Built with ❤️ for game developers everywhere</p>
+        <p class="text-muted" style="font-size: 12px;">MIT License • Version 1.0.0</p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
+

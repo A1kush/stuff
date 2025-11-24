@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1K Gear System - Standalone Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2a 100%);
+      color: #cfe3ff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4fc3f7;
+      margin-bottom: 10px;
+      font-size: 36px;
+      text-shadow: 0 0 20px rgba(79, 195, 247, 0.6);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: rgba(207, 227, 255, 0.7);
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* Equipment Slots */
+    .equipment-panel {
+      background: rgba(10, 10, 26, 0.8);
+      border: 3px solid #4fc3f7;
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .panel-title {
+      color: #4fc3f7;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .equipment-slot {
+      background: rgba(26, 26, 42, 0.6);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .equipment-slot:hover {
+      border-color: #fbbf24;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+    }
+
+    .equipment-slot.empty {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .slot-label {
+      font-size: 12px;
+      color: #4fc3f7;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .item-display {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-icon {
+      font-size: 32px;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(79, 195, 247, 0.1);
+      border: 2px solid #4fc3f7;
+      border-radius: 8px;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #cfe3ff;
+      margin-bottom: 5px;
+    }
+
+    .item-stats {
+      font-size: 11px;
+      color: rgba(207, 227, 255, 0.7);
+    }
+
+    .rarity-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .rarity-common { background: #9ca3af; color: #000; }
+    .rarity-uncommon { background: #60a5fa; color: #fff; }
+    .rarity-rare { background: #34d399; color: #000; }
+    .rarity-epic { background: #fbbf24; color: #000; }
+    .rarity-legendary { background: #ef4444; color: #fff; }
+
+    /* Inventory */
+    .inventory-panel {
+      background: rgba(10, 10, 26, 0.8);
+      border: 3px solid #4fc3f7;
+      border-radius: 15px;
+      padding: 20px;
+      max-height: 800px;
+      overflow-y: auto;
+    }
+
+    .inventory-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: rgba(79, 195, 247, 0.2);
+      border: 2px solid #4fc3f7;
+      border-radius: 6px;
+      padding: 8px 16px;
+      color: #cfe3ff;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(79, 195, 247, 0.4);
+      border-color: #fbbf24;
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .inventory-item {
+      background: rgba(26, 26, 42, 0.6);
+      border: 2px solid #4fc3f7;
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .inventory-item:hover {
+      border-color: #fbbf24;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+    }
+
+    .inventory-item.equipped {
+      border-color: #fbbf24;
+      background: rgba(251, 191, 36, 0.1);
+    }
+
+    /* Stats Panel */
+    .stats-panel {
+      background: rgba(10, 10, 26, 0.8);
+      border: 3px solid #4fc3f7;
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      color: #4fc3f7;
+      font-size: 14px;
+    }
+
+    .stat-value {
+      color: #fbbf24;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .stat-change {
+      font-size: 12px;
+      margin-left: 5px;
+    }
+
+    .stat-change.positive {
+      color: #34d399;
+    }
+
+    .stat-change.negative {
+      color: #ef4444;
+    }
+
+    .total-stats {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #4fc3f7;
+    }
+
+    .total-stats .stat-row {
+      font-size: 16px;
+      padding: 12px 0;
+    }
+
+    /* Scrollbar */
+    .inventory-panel::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .inventory-panel::-webkit-scrollbar-track {
+      background: rgba(26, 26, 42, 0.5);
+      border-radius: 5px;
+    }
+
+    .inventory-panel::-webkit-scrollbar-thumb {
+      background: #4fc3f7;
+      border-radius: 5px;
+    }
+
+    .inventory-panel::-webkit-scrollbar-thumb:hover {
+      background: #fbbf24;
+    }
+
+    /* Empty Slot */
+    .empty-slot {
+      text-align: center;
+      color: rgba(207, 227, 255, 0.4);
+      font-size: 12px;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚔️ A1K Gear System</h1>
+    <p class="subtitle">Equipment Management & Stats System - Standalone Demo</p>
+
+    <div class="main-content">
+      <!-- Equipment Slots -->
+      <div class="equipment-panel">
+        <div class="panel-title">⚔️ Equipment</div>
+        
+        <div class="equipment-slot" data-slot="weapon" onclick="unequip('weapon')">
+          <div class="slot-label">Weapon</div>
+          <div class="item-display" id="slot-weapon">
+            <div class="empty-slot">Empty</div>
+          </div>
+        </div>
+
+        <div class="equipment-slot" data-slot="helmet" onclick="unequip('helmet')">
+          <div class="slot-label">Helmet</div>
+          <div class="item-display" id="slot-helmet">
+            <div class="empty-slot">Empty</div>
+          </div>
+        </div>
+
+        <div class="equipment-slot" data-slot="armor" onclick="unequip('armor')">
+          <div class="slot-label">Armor</div>
+          <div class="item-display" id="slot-armor">
+            <div class="empty-slot">Empty</div>
+          </div>
+        </div>
+
+        <div class="equipment-slot" data-slot="boots" onclick="unequip('boots')">
+          <div class="slot-label">Boots</div>
+          <div class="item-display" id="slot-boots">
+            <div class="empty-slot">Empty</div>
+          </div>
+        </div>
+
+        <div class="equipment-slot" data-slot="accessory1" onclick="unequip('accessory1')">
+          <div class="slot-label">Accessory 1</div>
+          <div class="item-display" id="slot-accessory1">
+            <div class="empty-slot">Empty</div>
+          </div>
+        </div>
+
+        <div class="equipment-slot" data-slot="accessory2" onclick="unequip('accessory2')">
+          <div class="slot-label">Accessory 2</div>
+          <div class="item-display" id="slot-accessory2">
+            <div class="empty-slot">Empty</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory -->
+      <div class="inventory-panel">
+        <div class="panel-title">🎒 Inventory</div>
+        
+        <div class="inventory-filters">
+          <button class="filter-btn active" onclick="filterItems('all')">All</button>
+          <button class="filter-btn" onclick="filterItems('weapon')">Weapons</button>
+          <button class="filter-btn" onclick="filterItems('helmet')">Helmets</button>
+          <button class="filter-btn" onclick="filterItems('armor')">Armor</button>
+          <button class="filter-btn" onclick="filterItems('boots')">Boots</button>
+          <button class="filter-btn" onclick="filterItems('accessory')">Accessories</button>
+        </div>
+
+        <div class="inventory-grid" id="inventory-grid"></div>
+      </div>
+
+      <!-- Stats Panel -->
+      <div class="stats-panel">
+        <div class="panel-title">📊 Stats</div>
+        
+        <div id="stats-display">
+          <div class="stat-row">
+            <span class="stat-label">Attack</span>
+            <span class="stat-value" id="stat-attack">10</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Defense</span>
+            <span class="stat-value" id="stat-defense">5</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">HP</span>
+            <span class="stat-value" id="stat-hp">100</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Speed</span>
+            <span class="stat-value" id="stat-speed">5</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Critical</span>
+            <span class="stat-value" id="stat-critical">5%</span>
+          </div>
+        </div>
+
+        <div class="total-stats">
+          <div class="stat-row">
+            <span class="stat-label">Total Power</span>
+            <span class="stat-value" id="total-power">120</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // GEAR DATA - Item Database
+    // ═══════════════════════════════════════════════════════════════
+    
+    const GEAR_DATABASE = {
+      // Weapons
+      'weapon_iron_sword': { id: 'weapon_iron_sword', name: 'Iron Sword', type: 'weapon', icon: '⚔️', rarity: 'common', stats: { attack: 15, defense: 0, hp: 0, speed: 0, critical: 2 } },
+      'weapon_steel_sword': { id: 'weapon_steel_sword', name: 'Steel Sword', type: 'weapon', icon: '🗡️', rarity: 'uncommon', stats: { attack: 25, defense: 2, hp: 0, speed: 1, critical: 3 } },
+      'weapon_magic_blade': { id: 'weapon_magic_blade', name: 'Magic Blade', type: 'weapon', icon: '✨', rarity: 'rare', stats: { attack: 40, defense: 5, hp: 20, speed: 2, critical: 5 } },
+      'weapon_dragon_slayer': { id: 'weapon_dragon_slayer', name: 'Dragon Slayer', type: 'weapon', icon: '🐉', rarity: 'epic', stats: { attack: 60, defense: 8, hp: 40, speed: 3, critical: 8 } },
+      'weapon_excalibur': { id: 'weapon_excalibur', name: 'Excalibur', type: 'weapon', icon: '👑', rarity: 'legendary', stats: { attack: 100, defense: 15, hp: 80, speed: 5, critical: 15 } },
+      'weapon_bow': { id: 'weapon_bow', name: 'Hunter Bow', type: 'weapon', icon: '🏹', rarity: 'common', stats: { attack: 12, defense: 0, hp: 0, speed: 3, critical: 5 } },
+      'weapon_staff': { id: 'weapon_staff', name: 'Wizard Staff', type: 'weapon', icon: '🪄', rarity: 'uncommon', stats: { attack: 20, defense: 0, hp: 30, speed: 1, critical: 4 } },
+      'weapon_axe': { id: 'weapon_axe', name: 'Battle Axe', type: 'weapon', icon: '🪓', rarity: 'rare', stats: { attack: 45, defense: 3, hp: 10, speed: -1, critical: 7 } },
+
+      // Helmets
+      'helmet_leather': { id: 'helmet_leather', name: 'Leather Helmet', type: 'helmet', icon: '🪖', rarity: 'common', stats: { attack: 0, defense: 5, hp: 10, speed: 0, critical: 0 } },
+      'helmet_iron': { id: 'helmet_iron', name: 'Iron Helmet', type: 'helmet', icon: '⛑️', rarity: 'uncommon', stats: { attack: 0, defense: 12, hp: 20, speed: -1, critical: 0 } },
+      'helmet_steel': { id: 'helmet_steel', name: 'Steel Helmet', type: 'helmet', icon: '🛡️', rarity: 'rare', stats: { attack: 2, defense: 20, hp: 40, speed: 0, critical: 2 } },
+      'helmet_magic': { id: 'helmet_magic', name: 'Magic Crown', type: 'helmet', icon: '👑', rarity: 'epic', stats: { attack: 5, defense: 15, hp: 60, speed: 3, critical: 5 } },
+      'helmet_divine': { id: 'helmet_divine', name: 'Divine Helm', type: 'helmet', icon: '✨', rarity: 'legendary', stats: { attack: 10, defense: 30, hp: 100, speed: 5, critical: 10 } },
+
+      // Armor
+      'armor_leather': { id: 'armor_leather', name: 'Leather Armor', type: 'armor', icon: '🦺', rarity: 'common', stats: { attack: 0, defense: 8, hp: 20, speed: 1, critical: 0 } },
+      'armor_iron': { id: 'armor_iron', name: 'Iron Armor', type: 'armor', icon: '🛡️', rarity: 'uncommon', stats: { attack: 0, defense: 18, hp: 40, speed: -1, critical: 0 } },
+      'armor_steel': { id: 'armor_steel', name: 'Steel Armor', type: 'armor', icon: '⚔️', rarity: 'rare', stats: { attack: 3, defense: 30, hp: 60, speed: -2, critical: 2 } },
+      'armor_dragon': { id: 'armor_dragon', name: 'Dragon Scale', type: 'armor', icon: '🐉', rarity: 'epic', stats: { attack: 8, defense: 45, hp: 100, speed: 0, critical: 5 } },
+      'armor_divine': { id: 'armor_divine', name: 'Divine Plate', type: 'armor', icon: '✨', rarity: 'legendary', stats: { attack: 15, defense: 70, hp: 150, speed: 3, critical: 10 } },
+
+      // Boots
+      'boots_leather': { id: 'boots_leather', name: 'Leather Boots', type: 'boots', icon: '👢', rarity: 'common', stats: { attack: 0, defense: 3, hp: 5, speed: 2, critical: 0 } },
+      'boots_iron': { id: 'boots_iron', name: 'Iron Boots', type: 'boots', icon: '🦶', rarity: 'uncommon', stats: { attack: 0, defense: 6, hp: 10, speed: 4, critical: 1 } },
+      'boots_steel': { id: 'boots_steel', name: 'Steel Boots', type: 'boots', icon: '⚡', rarity: 'rare', stats: { attack: 2, defense: 10, hp: 20, speed: 6, critical: 2 } },
+      'boots_wind': { id: 'boots_wind', name: 'Wind Walkers', type: 'boots', icon: '💨', rarity: 'epic', stats: { attack: 3, defense: 8, hp: 30, speed: 10, critical: 5 } },
+      'boots_divine': { id: 'boots_divine', name: 'Divine Steps', type: 'boots', icon: '✨', rarity: 'legendary', stats: { attack: 5, defense: 15, hp: 50, speed: 15, critical: 8 } },
+
+      // Accessories
+      'accessory_ring_power': { id: 'accessory_ring_power', name: 'Power Ring', type: 'accessory', icon: '💍', rarity: 'common', stats: { attack: 5, defense: 0, hp: 0, speed: 0, critical: 1 } },
+      'accessory_ring_defense': { id: 'accessory_ring_defense', name: 'Defense Ring', type: 'accessory', icon: '💎', rarity: 'common', stats: { attack: 0, defense: 5, hp: 10, speed: 0, critical: 0 } },
+      'accessory_amulet_health': { id: 'accessory_amulet_health', name: 'Health Amulet', type: 'accessory', icon: '🔮', rarity: 'uncommon', stats: { attack: 0, defense: 3, hp: 50, speed: 1, critical: 0 } },
+      'accessory_amulet_critical': { id: 'accessory_amulet_critical', name: 'Critical Amulet', type: 'accessory', icon: '⚡', rarity: 'uncommon', stats: { attack: 3, defense: 0, hp: 0, speed: 2, critical: 10 } },
+      'accessory_cape_hero': { id: 'accessory_cape_hero', name: 'Hero Cape', type: 'accessory', icon: '🧥', rarity: 'rare', stats: { attack: 10, defense: 10, hp: 30, speed: 3, critical: 5 } },
+      'accessory_crown_king': { id: 'accessory_crown_king', name: 'King Crown', type: 'accessory', icon: '👑', rarity: 'epic', stats: { attack: 15, defense: 15, hp: 50, speed: 5, critical: 8 } },
+      'accessory_divine_artifact': { id: 'accessory_divine_artifact', name: 'Divine Artifact', type: 'accessory', icon: '✨', rarity: 'legendary', stats: { attack: 25, defense: 25, hp: 100, speed: 8, critical: 15 } }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // GEAR SYSTEM - Core Logic
+    // ═══════════════════════════════════════════════════════════════
+    
+    const GearSystem = {
+      // Player base stats
+      baseStats: { attack: 10, defense: 5, hp: 100, speed: 5, critical: 5 },
+      
+      // Equipped items
+      equipped: {
+        weapon: null,
+        helmet: null,
+        armor: null,
+        boots: null,
+        accessory1: null,
+        accessory2: null
+      },
+      
+      // Inventory
+      inventory: [],
+      
+      // Initialize system
+      init() {
+        // Add all items to inventory for demo
+        this.inventory = Object.values(GEAR_DATABASE);
+        this.renderInventory();
+        this.updateStats();
+        this.renderEquipped();
+      },
+      
+      // Equip an item
+      equip(itemId) {
+        const item = GEAR_DATABASE[itemId];
+        if (!item) return false;
+        
+        // Check if item is in inventory
+        if (!this.inventory.find(i => i.id === itemId)) return false;
+        
+        // Determine slot
+        let slot = item.type;
+        if (slot === 'accessory') {
+          slot = this.equipped.accessory1 ? 'accessory2' : 'accessory1';
+        }
+        
+        // Unequip current item in slot if any
+        if (this.equipped[slot]) {
+          this.unequip(slot);
+        }
+        
+        // Equip new item
+        this.equipped[slot] = item;
+        this.updateStats();
+        this.renderEquipped();
+        this.renderInventory();
+        return true;
+      },
+      
+      // Unequip an item
+      unequip(slot) {
+        if (!this.equipped[slot]) return false;
+        
+        const item = this.equipped[slot];
+        this.equipped[slot] = null;
+        this.updateStats();
+        this.renderEquipped();
+        this.renderInventory();
+        return true;
+      },
+      
+      // Calculate total stats
+      getTotalStats() {
+        const stats = { ...this.baseStats };
+        
+        // Add stats from all equipped items
+        Object.values(this.equipped).forEach(item => {
+          if (item && item.stats) {
+            stats.attack += item.stats.attack || 0;
+            stats.defense += item.stats.defense || 0;
+            stats.hp += item.stats.hp || 0;
+            stats.speed += item.stats.speed || 0;
+            stats.critical += item.stats.critical || 0;
+          }
+        });
+        
+        return stats;
+      },
+      
+      // Calculate total power
+      getTotalPower() {
+        const stats = this.getTotalStats();
+        return stats.attack + stats.defense + (stats.hp / 10) + stats.speed + stats.critical;
+      },
+      
+      // Update stats display
+      updateStats() {
+        const stats = this.getTotalStats();
+        const power = this.getTotalPower();
+        
+        document.getElementById('stat-attack').textContent = stats.attack;
+        document.getElementById('stat-defense').textContent = stats.defense;
+        document.getElementById('stat-hp').textContent = stats.hp;
+        document.getElementById('stat-speed').textContent = stats.speed;
+        document.getElementById('stat-critical').textContent = stats.critical + '%';
+        document.getElementById('total-power').textContent = Math.floor(power);
+      },
+      
+      // Render equipped items
+      renderEquipped() {
+        Object.keys(this.equipped).forEach(slot => {
+          const item = this.equipped[slot];
+          const slotEl = document.getElementById(`slot-${slot}`);
+          
+          if (item) {
+            slotEl.innerHTML = `
+              <div class="item-icon">${item.icon}</div>
+              <div class="item-info">
+                <div class="item-name">
+                  ${item.name}
+                  <span class="rarity-badge rarity-${item.rarity}">${item.rarity}</span>
+                </div>
+                <div class="item-stats">
+                  ${item.stats.attack ? `ATK: +${item.stats.attack} ` : ''}
+                  ${item.stats.defense ? `DEF: +${item.stats.defense} ` : ''}
+                  ${item.stats.hp ? `HP: +${item.stats.hp} ` : ''}
+                  ${item.stats.speed ? `SPD: +${item.stats.speed} ` : ''}
+                  ${item.stats.critical ? `CRIT: +${item.stats.critical}%` : ''}
+                </div>
+              </div>
+            `;
+            slotEl.closest('.equipment-slot').classList.remove('empty');
+          } else {
+            slotEl.innerHTML = '<div class="empty-slot">Empty</div>';
+            slotEl.closest('.equipment-slot').classList.add('empty');
+          }
+        });
+      },
+      
+      // Render inventory
+      renderInventory(filter = 'all') {
+        const grid = document.getElementById('inventory-grid');
+        let items = this.inventory;
+        
+        // Filter items
+        if (filter !== 'all') {
+          items = items.filter(item => item.type === filter || (filter === 'accessory' && item.type === 'accessory'));
+        }
+        
+        // Sort by rarity (legendary first)
+        const rarityOrder = { legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 };
+        items.sort((a, b) => (rarityOrder[a.rarity] || 5) - (rarityOrder[b.rarity] || 5));
+        
+        grid.innerHTML = items.map(item => {
+          const isEquipped = Object.values(this.equipped).some(eq => eq && eq.id === item.id);
+          
+          return `
+            <div class="inventory-item ${isEquipped ? 'equipped' : ''}" onclick="equipItem('${item.id}')">
+              <div style="font-size: 32px; margin-bottom: 10px;">${item.icon}</div>
+              <div style="font-weight: bold; margin-bottom: 5px;">${item.name}</div>
+              <div class="rarity-badge rarity-${item.rarity}" style="margin-bottom: 5px;">${item.rarity}</div>
+              <div style="font-size: 11px; color: rgba(207,227,255,0.7);">
+                ${item.stats.attack ? `ATK: +${item.stats.attack} ` : ''}
+                ${item.stats.defense ? `DEF: +${item.stats.defense} ` : ''}
+                ${item.stats.hp ? `HP: +${item.stats.hp} ` : ''}
+                ${item.stats.speed ? `SPD: +${item.stats.speed} ` : ''}
+                ${item.stats.critical ? `CRIT: +${item.stats.critical}%` : ''}
+              </div>
+              ${isEquipped ? '<div style="color: #fbbf24; font-size: 10px; margin-top: 5px;">EQUIPPED</div>' : ''}
+            </div>
+          `;
+        }).join('');
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // UI FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+    
+    function equipItem(itemId) {
+      if (GearSystem.equip(itemId)) {
+        console.log(`Equipped: ${GEAR_DATABASE[itemId].name}`);
+      }
+    }
+
+    function unequip(slot) {
+      if (GearSystem.unequip(slot)) {
+        console.log(`Unequipped slot: ${slot}`);
+      }
+    }
+
+    function filterItems(filter) {
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Render filtered inventory
+      GearSystem.renderInventory(filter);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // INITIALIZE
+    // ═══════════════════════════════════════════════════════════════
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      GearSystem.init();
+      console.log('✅ A1K Gear System - Standalone Demo Loaded');
+      console.log(`   • ${Object.keys(GEAR_DATABASE).length} items in database`);
+      console.log(`   • ${GearSystem.inventory.length} items in inventory`);
+    });
+  </script>
+</body>
+</html>
+

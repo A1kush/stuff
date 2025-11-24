@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V2 Vehicle System - Multi-Style Demo</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Gallery Mode -->
+    <div id="gallery-mode" class="mode active">
+      <header>
+        <h1>🚗 V2 Enhanced Vehicle System</h1>
+        <p class="subtitle">17 Vehicles × 3 Art Styles × 3 Characters = Infinite Combinations</p>
+      </header>
+
+      <div class="controls-panel">
+        <div class="control-group">
+          <label for="style-selector">Art Style:</label>
+          <select id="style-selector">
+            <option value="pixel" selected>HD Pixel Art</option>
+            <option value="vector">Vector Cel-Shaded</option>
+            <option value="3d">3D Pre-rendered</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="character-selector">Character:</label>
+          <select id="character-selector">
+            <option value="warrior" selected>⚔️ Warrior (Dual Swords)</option>
+            <option value="cat_angel">😇 Cat Angel Gunner</option>
+            <option value="cyborg">🤖 Cyborg Rifle Operative</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="vehicle-grid" class="vehicle-grid"></div>
+    </div>
+
+    <!-- Test Drive Mode -->
+    <div id="testdrive-mode" class="mode">
+      <div class="hud">
+        <div class="hud-top">
+          <div class="vehicle-info">
+            <h2 id="vehicle-name">Vehicle Name</h2>
+            <div class="stats">
+              <span id="vehicle-speed">Speed: 0</span>
+              <span id="vehicle-category">Category: ground</span>
+              <span id="vehicle-seats">Seats: 1</span>
+            </div>
+          </div>
+          <div class="fps-counter">FPS: <span id="fps-display">60</span></div>
+        </div>
+
+        <div class="controls-help">
+          <h3>Controls:</h3>
+          <p><kbd>←</kbd><kbd>→</kbd> Move &nbsp; <kbd>↑</kbd> Jump &nbsp; <kbd>E</kbd> Board/Unboard &nbsp; <kbd>ESC</kbd> Exit</p>
+        </div>
+
+        <div id="interaction-prompt" class="interaction-prompt hidden">
+          Press <kbd>E</kbd> to Board
+        </div>
+      </div>
+
+      <canvas id="game-canvas"></canvas>
+    </div>
+  </div>
+
+  <script type="module">
+    import { VEHICLE_REGISTRY, getAllVehicles } from './js/VehicleRegistry.js';
+    import { HDPixelArtVehicles } from './js/sprites/HDPixelArtVehicles.js';
+    import { VectorCelShadedVehicles } from './js/sprites/VectorCelShadedVehicles.js';
+    import { ThreeDPrerenderedVehicles } from './js/sprites/3DPrerenderedVehicles.js';
+    import { CharacterSprites } from './js/sprites/CharacterSprites.js';
+    import { VehicleController } from './js/VehicleController.js';
+    import { EffectsSystem } from './js/EffectsSystem.js';
+    import { GameState } from './js/GameState.js';
+    import { InputController } from './js/InputController.js';
+
+    // Initialize systems
+    const gameState = new GameState();
+    const inputController = new InputController();
+    const vehicleController = new VehicleController();
+    const effectsSystem = new EffectsSystem();
+    const characterSprites = new CharacterSprites();
+    
+    // Sprite renderers
+    const pixelRenderer = new HDPixelArtVehicles();
+    const vectorRenderer = new VectorCelShadedVehicles();
+    const threeDRenderer = new ThreeDPrerenderedVehicles();
+
+    function getCurrentVehicleRenderer() {
+      switch (gameState.currentStyle) {
+        case 'pixel': return pixelRenderer;
+        case 'vector': return vectorRenderer;
+        case '3d': return threeDRenderer;
+        default: return pixelRenderer;
+      }
+    }
+
+    // ===== GALLERY MODE =====
+    function initGallery() {
+      const grid = document.getElementById('vehicle-grid');
+      const vehicles = getAllVehicles();
+
+      vehicles.forEach(vehicle => {
+        const card = document.createElement('div');
+        card.className = 'vehicle-card';
+        card.innerHTML = `
+          <canvas width="200" height="150"></canvas>
+          <div class="card-content">
+            <h3>${vehicle.name}</h3>
+            <p class="card-desc">${vehicle.description}</p>
+            <div class="card-stats">
+              <span>Speed: ${vehicle.maxSpeed}</span>
+              <span>Seats: ${vehicle.seats}</span>
+              <span>${vehicle.category.toUpperCase()}</span>
+            </div>
+          </div>
+        `;
+
+        // Render vehicle preview
+        const canvas = card.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        renderVehiclePreview(ctx, vehicle);
+
+        // Click to test drive
+        card.addEventListener('click', () => {
+          startTestDrive(vehicle);
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderVehiclePreview(ctx, vehicle) {
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, 200, 150);
+
+      const renderer = getCurrentVehicleRenderer();
+      const state = {
+        animTime: Date.now(),
+        facingLeft: false
+      };
+
+      renderer.renderVehicle(ctx, vehicle.id, 100, 100, state);
+    }
+
+    function updateGalleryPreviews() {
+      const cards = document.querySelectorAll('.vehicle-card');
+      const vehicles = getAllVehicles();
+
+      cards.forEach((card, index) => {
+        const canvas = card.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        renderVehiclePreview(ctx, vehicles[index]);
+      });
+    }
+
+    // ===== TEST DRIVE MODE =====
+    let lastTime = 0;
+    let animationFrameId = null;
+
+    function startTestDrive(vehicleData) {
+      gameState.enterTestDrive(vehicleData);
+      
+      document.getElementById('gallery-mode').classList.remove('active');
+      document.getElementById('testdrive-mode').classList.add('active');
+      
+      // Update HUD
+      document.getElementById('vehicle-name').textContent = vehicleData.name;
+      updateHUD();
+
+      // Setup canvas
+      const canvas = document.getElementById('game-canvas');
+      canvas.width = 1400;
+      canvas.height = 800;
+
+      // Start game loop
+      lastTime = performance.now();
+      gameLoop(lastTime);
+    }
+
+    function exitTestDrive() {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      gameState.exitTestDrive();
+      effectsSystem.clear();
+      
+      document.getElementById('testdrive-mode').classList.remove('active');
+      document.getElementById('gallery-mode').classList.add('active');
+    }
+
+    function gameLoop(timestamp) {
+      const dt = Math.min((timestamp - lastTime) / 1000, 0.1); // Cap at 100ms
+      lastTime = timestamp;
+      gameState.animTime = timestamp;
+
+      // Update FPS
+      gameState.updateFPS(timestamp);
+      document.getElementById('fps-display').textContent = gameState.fps;
+
+      // Check for exit
+      if (inputController.wasJustPressed('Escape')) {
+        exitTestDrive();
+        return;
+      }
+
+      // Update game
+      updateGame(dt);
+      
+      // Render game
+      renderGame();
+
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    function updateGame(dt) {
+      const { player, currentVehicle } = gameState;
+
+      // Update boarding/unboarding animations
+      if (player.boardingVehicle) {
+        vehicleController.updateBoarding(player, gameState.animTime, dt);
+      }
+      if (player.unboardingVehicle) {
+        vehicleController.updateUnboarding(player, gameState.animTime, dt);
+      }
+
+      // Check for vehicle interaction
+      if (currentVehicle && vehicleController.canInteract(player, currentVehicle)) {
+        const prompt = document.getElementById('interaction-prompt');
+        prompt.classList.remove('hidden');
+        
+        if (player.isRiding) {
+          prompt.innerHTML = 'Press <kbd>E</kbd> to Unboard';
+        } else {
+          prompt.innerHTML = 'Press <kbd>E</kbd> to Board';
+        }
+
+        // Handle E key
+        if (inputController.wasJustPressed('KeyE')) {
+          if (player.isRiding) {
+            vehicleController.unboardVehicle(player, currentVehicle, gameState.animTime);
+          } else {
+            vehicleController.boardVehicle(player, currentVehicle, gameState.animTime);
+          }
+        }
+      } else {
+        document.getElementById('interaction-prompt').classList.add('hidden');
+      }
+
+      // Update vehicle
+      if (currentVehicle) {
+        vehicleController.updateVehicle(currentVehicle, inputController.keys, dt, gameState.groundY);
+        effectsSystem.updateVehicleEffects(currentVehicle, dt);
+      }
+
+      // Update player (if not riding)
+      if (!player.isRiding && !player.boardingVehicle && !player.unboardingVehicle) {
+        updatePlayerPhysics(player, dt);
+      }
+
+      // Update camera
+      gameState.updateCamera(1400);
+
+      // Update effects
+      effectsSystem.update(dt);
+
+      // Update HUD
+      updateHUD();
+    }
+
+    function updatePlayerPhysics(player, dt) {
+      // Horizontal movement
+      const targetVx = (inputController.isPressed('ArrowRight') ? 1 : 0) - 
+                       (inputController.isPressed('ArrowLeft') ? 1 : 0);
+
+      player.vx += targetVx * player.acceleration * dt;
+
+      // Apply friction
+      if (targetVx === 0) {
+        player.vx *= Math.pow(1 - player.friction, dt * 60);
+      }
+
+      // Clamp speed
+      player.vx = Math.max(-player.maxSpeed, Math.min(player.maxSpeed, player.vx));
+      player.x += player.vx * dt;
+
+      // Update facing
+      if (targetVx !== 0) {
+        player.facingLeft = targetVx < 0;
+      }
+
+      // Vertical movement (jumping & gravity)
+      player.vy += player.gravity * dt;
+      player.y += player.vy * dt;
+
+      // Ground collision
+      if (player.y >= gameState.groundY) {
+        player.y = gameState.groundY;
+        player.vy = 0;
+        player.grounded = true;
+        player.jumpCount = 0;
+      } else {
+        player.grounded = false;
+      }
+
+      // Jumping
+      if (inputController.wasJustPressed('ArrowUp') && player.jumpCount < 2) {
+        player.vy = -player.jumpForce;
+        player.grounded = false;
+        player.jumpCount++;
+      }
+
+      // Keep in bounds
+      player.x = Math.max(50, Math.min(gameState.worldWidth - 50, player.x));
+    }
+
+    function renderGame() {
+      const canvas = document.getElementById('game-canvas');
+      const ctx = canvas.getContext('2d');
+      const { player, currentVehicle, cameraX, groundY } = gameState;
+
+      // Clear
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Apply camera
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+
+      // Draw ground
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, groundY, gameState.worldWidth, 300);
+      
+      // Grid pattern
+      ctx.strokeStyle = '#2a2a3e';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < gameState.worldWidth; x += 50) {
+        ctx.beginPath();
+        ctx.moveTo(x, groundY);
+        ctx.lineTo(x, groundY + 300);
+        ctx.stroke();
+      }
+
+      // Get current renderer
+      const renderer = getCurrentVehicleRenderer();
+      const renderState = {
+        animTime: gameState.animTime,
+        facingLeft: false
+      };
+
+      // Render vehicle
+      if (currentVehicle) {
+        renderState.facingLeft = currentVehicle.facingLeft;
+        
+        // Vehicle effects (shadows, glows)
+        effectsSystem.renderVehicleEffects(ctx, currentVehicle);
+        
+        // Vehicle sprite
+        renderer.renderVehicle(ctx, currentVehicle.id, currentVehicle.x, currentVehicle.y, renderState);
+        
+        // Character on vehicle (if riding)
+        if (player.isRiding && currentVehicle.rider) {
+          characterSprites.setStyle(gameState.currentStyle);
+          characterSprites.renderCharacterOnVehicle(
+            ctx,
+            gameState.currentCharacter,
+            currentVehicle.id,
+            currentVehicle.x,
+            currentVehicle.y,
+            renderState
+          );
+        }
+      }
+
+      // Render character walking (if not riding)
+      if (!player.isRiding && !player.boardingVehicle) {
+        renderState.facingLeft = player.facingLeft;
+        characterSprites.setStyle(gameState.currentStyle);
+        characterSprites.renderCharacterWalking(
+          ctx,
+          gameState.currentCharacter,
+          player.x,
+          player.y,
+          renderState
+        );
+      }
+
+      // Render particles
+      effectsSystem.render(ctx);
+
+      ctx.restore();
+    }
+
+    function updateHUD() {
+      const { currentVehicle } = gameState;
+      if (!currentVehicle) return;
+
+      document.getElementById('vehicle-speed').textContent = 
+        `Speed: ${Math.abs(currentVehicle.vx).toFixed(0)}`;
+      document.getElementById('vehicle-category').textContent = 
+        `Category: ${currentVehicle.data.category.toUpperCase()}`;
+      document.getElementById('vehicle-seats').textContent = 
+        `Seats: ${currentVehicle.data.seats}`;
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.getElementById('style-selector').addEventListener('change', (e) => {
+      gameState.setStyle(e.target.value);
+      updateGalleryPreviews();
+    });
+
+    document.getElementById('character-selector').addEventListener('change', (e) => {
+      gameState.setCharacter(e.target.value);
+    });
+
+    // ===== INITIALIZE =====
+    initGallery();
+    
+    console.log('✅ V2 Vehicle System loaded!');
+    console.log('📊 17 vehicles × 3 styles × 3 characters = 153 combinations!');
+  </script>
+</body>
+</html>
+

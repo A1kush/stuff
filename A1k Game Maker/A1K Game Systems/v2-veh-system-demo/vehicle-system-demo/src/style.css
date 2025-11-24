@@ -1,0 +1,123 @@
+/**
+ * Vehicle + Pet System Demo - Styles
+ * Modern dark theme with centered canvas
+ */
+
+:root {
+  /* Color palette */
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f2e;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --accent-cyan: #00E5FF;
+  --accent-purple: #9A6BFF;
+  
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+  padding: 20px;
+}
+
+#app {
+  text-align: center;
+  max-width: 100%;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#game-container {
+  position: relative;
+  display: inline-block;
+  background: var(--bg-secondary);
+  border: 2px solid rgba(154, 107, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.controls {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(154, 107, 255, 0.2);
+  border-radius: 8px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.controls h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  color: var(--accent-cyan);
+}
+
+.controls p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.controls kbd {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--accent-cyan);
+  margin: 0 0.2rem;
+}
+
+.info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(0, 229, 255, 0.05);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: 4px;
+  text-align: left;
+}
+
+.info p {
+  margin: 0.5rem 0;
+}
+

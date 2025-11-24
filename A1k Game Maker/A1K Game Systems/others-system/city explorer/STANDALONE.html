@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>City Explorer - OFFLINE READY</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0f17;color:#e5e7eb;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+#app{width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+canvas{display:block;margin:70px auto 0;border:1px solid #222235;background:#0f1018;max-width:100%;width:960px;height:540px;image-rendering:pixelated}
+#topBar{position:fixed;top:10px;left:10px;right:10px;display:flex;gap:12px;align-items:center;background:rgba(11,20,33,0.85);border:1px solid #2a2a3a;border-radius:10px;padding:10px 14px;z-index:10}
+.btn{background:#171723;color:#e5e7eb;border:1px solid#34344a;border-radius:8px;padding:6px 10px;font-weight:600;cursor:pointer}
+.btn:hover{border-color:#00E5FF}
+#legend{position:fixed;right:12px;bottom:12px;background:rgba(0,0,0,0.6);border:1px solid#2a2a3a;border-radius:10px;padding:10px 14px;font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="topBar">
+<button class="btn" onclick="game.player.x=200">Reset Position</button>
+<span>Arrow Keys: Move | E: Enter/Exit Buildings</span>
+</div>
+<canvas id="gameCanvas" width="960" height="540"></canvas>
+<div id="legend">Purple strips = Platforms | Explore 11 zones & 14 buildings</div>
+</div>
+
+<script>
+const WORLD={width:6400,height:540};
+const ZONES=[
+{id:'ENTRY',name:'Entry',x:0,end:600,color:'#1f2937',safe:true},
+{id:'TRAIN',name:'Training Grounds',x:600,end:1200,color:'#334155'},
+{id:'PLAZA',name:'Plaza',x:1200,end:1800,color:'#2b2c40',safe:true},
+{id:'HOME_ROW',name:'Home Row',x:1800,end:2400,color:'#1f2937'},
+{id:'MARKET',name:'Market',x:2400,end:3000,color:'#2b2c40'},
+{id:'ARCADE',name:'Arcade',x:3000,end:3600,color:'#221a2e'},
+{id:'TOWER_GATE',name:'Tower Gate',x:3600,end:4200,color:'#312e2e'},
+{id:'PET_YARD',name:'Pet Yard',x:4200,end:4800,color:'#173a2e'},
+{id:'SKY_RAIL',name:'Sky Rail',x:4800,end:5400,color:'#1e293b'},
+{id:'GARDEN',name:'Garden',x:5400,end:6000,color:'#0f3e2e',safe:true},
+{id:'BOSS_TOWER',name:'Boss Tower',x:6000,end:6400,color:'#3b1f1f'}
+];
+const BUILDINGS=[
+{id:'photo',name:'Photo Booth',type:'photo',zone:'ENTRY',x:260,y:460,width:80,height:60,color:'#9A6BFF',roof:'#7e5bef'},
+{id:'arena',name:'Arena',type:'arena',zone:'TRAIN',x:1180,y:460,width:140,height:80,color:'#ef4444',roof:'#b91c1c'},
+{id:'quest',name:'Quest Board',type:'quest',zone:'PLAZA',x:1500,y:460,width:100,height:60,color:'#22d3ee',roof:'#06b6d4'},
+{id:'archives',name:'Archives',type:'archives',zone:'PLAZA',x:1650,y:460,width:140,height:80,color:'#94a3b8',roof:'#64748b'},
+{id:'home',name:'Home',type:'house',zone:'HOME_ROW',x:1880,y:460,width:120,height:70,color:'#ff93d3',roof:'#d15aa8'},
+{id:'mail',name:'Mail',type:'mail',zone:'HOME_ROW',x:2100,y:460,width:100,height:60,color:'#60a5fa',roof:'#2563eb'},
+{id:'shop',name:'Shop',type:'shop',zone:'MARKET',x:2460,y:460,width:130,height:70,color:'#9fd7ff',roof:'#60a5fa'},
+{id:'forge',name:'Forge',type:'forge',zone:'MARKET',x:2580,y:460,width:120,height:70,color:'#f97316',roof:'#c2410c'},
+{id:'apothecary',name:'Apothecary',type:'apothecary',zone:'MARKET',x:2720,y:460,width:140,height:70,color:'#84cc16',roof:'#4d7c0f'},
+{id:'black_market',name:'Black Market',type:'black_market',zone:'ARCADE',x:3380,y:460,width:140,height:70,color:'#0ea5e9',roof:'#0369a1'},
+{id:'workshop',name:'Workshop',type:'workshop',zone:'SKY_RAIL',x:5020,y:460,width:140,height:70,color:'#eab308',roof:'#a16207'},
+{id:'shrine',name:'Shrine',type:'shrine',zone:'GARDEN',x:5600,y:460,width:140,height:70,color:'#22c55e',roof:'#15803d'},
+{id:'tower_gate',name:'Tower Gate',type:'gate',zone:'TOWER_GATE',x:3900,y:460,width:160,height:110,color:'#9ca3af',roof:'#6b7280'},
+{id:'boss_tower',name:'Boss Tower',type:'boss',zone:'BOSS_TOWER',x:6200,y:460,width:180,height:140,color:'#ef4444',roof:'#7f1d1d'}
+];
+
+const game={
+canvas:null,ctx:null,
+player:{x:200,y:420,vx:0,speed:280},
+interior:{active:false,building:null,px:0,py:0},
+camera:{x:0},
+input:{left:false,right:false,up:false,down:false,e:false},
+near:null,last:0
+};
+
+function getZone(x){return ZONES.find(z=>x>=z.x&&x<z.end)||ZONES[0]}
+function tint(hex,amt){const c=hex.replace('#',''),n=parseInt(c,16),r=Math.max(0,Math.min(255,((n>>16)&0xff)+Math.floor(amt*255))),g=Math.max(0,Math.min(255,((n>>8)&0xff)+Math.floor(amt*255))),b=Math.max(0,Math.min(255,(n&0xff)+Math.floor(amt*255)));return `rgb(${r},${g},${b})`}
+
+function drawWorld(){
+const c=game.ctx,vw=game.canvas.width;
+c.fillStyle='#0b0f17';c.fillRect(0,0,vw,540);
+const z=getZone(game.camera.x+vw*0.5),g=c.createLinearGradient(0,0,0,540);
+g.addColorStop(0,tint(z.color||'#1f2937',0.5));g.addColorStop(1,'#0a0a12');
+c.fillStyle=g;c.fillRect(0,0,vw,540);
+c.save();c.font='bold 26px Segoe UI, system-ui';c.textAlign='center';c.textBaseline='top';
+for(const zn of ZONES){
+const zx=zn.x-game.camera.x+120;if(zn.x>game.camera.x+vw||zn.end<game.camera.x)continue;
+c.fillStyle='rgba(0,0,0,0.4)';c.fillRect(zx-160,8,320,34);
+c.fillStyle='#e5e7eb';c.fillText(zn.name,zx,12);
+}
+c.restore();
+// Platforms
+for(const zn of ZONES){
+if(zn.x>game.camera.x+vw||zn.end<game.camera.x)continue;
+const x=Math.max(zn.x,game.camera.x)-game.camera.x,w=Math.min(zn.end,game.camera.x+vw)-Math.max(zn.x,game.camera.x);
+c.fillStyle='#3b2e58';c.fillRect(x,480,w,14);
+c.fillStyle='#9A6BFF';c.fillRect(x,492,w,4);
+}
+// Buildings
+for(const b of BUILDINGS){
+const bx=b.x-game.camera.x;if(b.x+b.width<game.camera.x-80||b.x>game.camera.x+vw+80)continue;
+c.save();c.translate(bx,b.y);
+c.fillStyle='rgba(0,0,0,0.25)';c.fillRect(-10,b.height,b.width+20,10);
+c.fillStyle=b.color;c.fillRect(0,0,b.width,b.height);
+c.fillStyle=b.roof;c.beginPath();c.moveTo(-8,0);c.lineTo(b.width+8,0);c.lineTo(b.width*0.5,-18);c.closePath();c.fill();
+c.fillStyle='#1f2937';const dw=Math.max(14,b.width*0.18);c.fillRect(b.width*0.5-dw*0.5,b.height-26,dw,26);
+c.fillStyle='#e5e7eb';c.font='bold 12px Segoe UI, system-ui';c.textAlign='center';c.fillText(b.name,b.width*0.5,-28);
+c.restore();
+}
+// Minimap
+const mw=220,mh=80,mx=vw-mw-12,my=12;
+c.fillStyle='rgba(0,0,0,0.5)';c.fillRect(mx,my,mw,mh);
+c.strokeStyle='#9A6BFF';c.strokeRect(mx,my,mw,mh);
+for(const zn of ZONES){const zx=(zn.x/WORLD.width)*mw,zw=((zn.end-zn.x)/WORLD.width)*mw;c.fillStyle='rgba(154,107,255,0.15)';c.fillRect(mx+zx,my+mh-20,zw,20)}
+for(const b of BUILDINGS){const bx=(b.x/WORLD.width)*mw;c.fillStyle='#e5e7eb';c.fillRect(mx+bx-1,my+mh-16,2,12)}
+const px=(game.player.x/WORLD.width)*mw;c.fillStyle='#FFD56A';c.fillRect(mx+px-2,my+mh-18,4,16);
+const vmw=(vw/WORLD.width)*mw,vmx=(game.camera.x/WORLD.width)*mw;c.strokeStyle='#00E5FF';c.strokeRect(mx+vmx,my+2,vmw,mh-24);
+}
+
+function drawInterior(){
+const c=game.ctx,bld=game.interior.building;
+c.fillStyle='#111827';c.fillRect(0,0,960,540);
+c.fillStyle='#0b1020';c.fillRect(0,80,960,12);
+c.fillStyle='#374151';c.fillRect(400,180,160,20);
+c.fillStyle='#9A6BFF';c.beginPath();c.arc(680,220,12,0,Math.PI*2);c.fill();
+c.fillStyle='#e5e7eb';c.font='12px Segoe UI, system-ui';c.fillText('NPC',668,240);
+c.fillStyle='#b45309';c.fillRect(80,220,26,18);
+c.fillStyle='#111827';c.fillRect(456,500,48,40);
+c.fillStyle='#FFD56A';c.beginPath();c.arc(game.interior.px,game.interior.py-18,10,0,Math.PI*2);c.fill();
+c.fillStyle='#ffffff';c.fillRect(game.interior.px-10,game.interior.py-8,20,26);
+c.fillStyle='rgba(0,0,0,0.6)';c.fillRect(10,10,360,24);
+c.fillStyle='#e5e7eb';c.fillText(`Inside: ${bld?bld.name:'Interior'} - Press E at door to exit`,16,18);
+}
+
+function update(dt){
+if(game.interior.active){
+const sp=220,inp=game.input;
+if(inp.left)game.interior.px-=sp*dt;
+if(inp.right)game.interior.px+=sp*dt;
+if(inp.up)game.interior.py-=sp*dt*0.8;
+if(inp.down)game.interior.py+=sp*dt*0.8;
+game.interior.px=Math.max(40,Math.min(920,game.interior.px));
+game.interior.py=Math.max(120,Math.min(500,game.interior.py));
+if(inp.e&&game.interior.py>460){game.interior.active=false;inp.e=false}
+return;
+}
+let ax=0;
+if(game.input.left)ax-=1;
+if(game.input.right)ax+=1;
+game.player.vx=ax*game.player.speed;
+game.player.x+=game.player.vx*dt;
+game.player.x=Math.max(0,Math.min(WORLD.width,game.player.x));
+game.camera.x=Math.max(0,Math.min(WORLD.width-960,game.player.x-480));
+game.near=null;
+let bd=1e9;
+for(const b of BUILDINGS){
+const dx=b.x+(b.width||120)*0.5;
+const d=Math.abs(game.player.x-dx);
+if(d<80&&d<bd){game.near=b;bd=d}
+}
+if(game.input.e&&game.near){
+game.interior.active=true;
+game.interior.building=game.near;
+game.interior.px=480;
+game.interior.py=480;
+game.input.e=false;
+}
+}
+
+function render(){
+const c=game.ctx;
+if(game.interior.active){drawInterior();return}
+drawWorld();
+const px=game.player.x-game.camera.x,py=420;
+c.fillStyle='#FFD56A';c.beginPath();c.arc(px,py-20,10,0,Math.PI*2);c.fill();
+c.fillStyle='#ffffff';c.fillRect(px-10,py-10,20,26);
+if(game.near){
+c.fillStyle='rgba(0,0,0,0.6)';c.fillRect(px-80,py-70,160,24);
+c.fillStyle='#e5e7eb';c.font='12px Segoe UI, system-ui';c.textAlign='center';
+c.fillText(`Press E to enter ${game.near.name}`,px,py-66);
+}
+c.fillStyle='rgba(0,0,0,0.6)';c.fillRect(10,10,320,44);
+c.fillStyle='#e5e7eb';c.font='12px Segoe UI, system-ui';c.textAlign='left';
+c.fillText('Arrow Keys: Move | E: Enter/Exit',20,26);
+c.fillText('Explore all 11 zones and enter buildings',20,42);
+}
+
+function loop(now){
+const dt=Math.min(0.033,(now-game.last)/1000);game.last=now;
+update(dt);render();
+requestAnimationFrame(loop);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+game.canvas=document.getElementById('gameCanvas');
+game.ctx=game.canvas.getContext('2d');
+game.last=performance.now();
+window.addEventListener('keydown',e=>{
+const k=e.key.toLowerCase();
+if(k==='arrowleft')game.input.left=true;
+if(k==='arrowright')game.input.right=true;
+if(k==='arrowup')game.input.up=true;
+if(k==='arrowdown')game.input.down=true;
+if(k==='e')game.input.e=true;
+});
+window.addEventListener('keyup',e=>{
+const k=e.key.toLowerCase();
+if(k==='arrowleft')game.input.left=false;
+if(k==='arrowright')game.input.right=false;
+if(k==='arrowup')game.input.up=false;
+if(k==='arrowdown')game.input.down=false;
+if(k==='e')game.input.e=false;
+});
+window.game=game;
+requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>
+

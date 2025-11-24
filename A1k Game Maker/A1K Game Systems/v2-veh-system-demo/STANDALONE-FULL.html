@@ -1,0 +1,4940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V2 Vehicle System - Complete Standalone</title>
+  <style>
+/* V2 Vehicle System - Modern Dark Theme */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  color: #e0e0e0;
+  overflow-x: hidden;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* ===== MODE SWITCHING ===== */
+.mode {
+  display: none;
+}
+
+.mode.active {
+  display: block;
+}
+
+/* ===== GALLERY MODE ===== */
+#gallery-mode {
+  padding: 40px 20px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+h1 {
+  font-size: 48px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #999;
+  font-weight: 300;
+}
+
+/* ===== CONTROLS PANEL ===== */
+.controls-panel {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-group label {
+  font-size: 14px;
+  color: #aaa;
+  font-weight: 500;
+}
+
+select {
+  padding: 10px 16px;
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+select:hover {
+  border-color: #667eea;
+  background: #222;
+}
+
+select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== VEHICLE GRID ===== */
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.vehicle-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(102, 126, 234, 0.4);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.vehicle-card canvas {
+  width: 100%;
+  height: 150px;
+  display: block;
+  background: #0a0e1a;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.card-content {
+  padding: 20px;
+}
+
+.card-content h3 {
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: #aaa;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  min-height: 48px;
+}
+
+.card-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.card-stats span {
+  padding: 6px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #a0b0ff;
+  font-weight: 500;
+}
+
+/* ===== TEST DRIVE MODE ===== */
+#testdrive-mode {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game-canvas {
+  display: block;
+  border: 3px solid #00E5FF;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+  background: #0a0e1a;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ===== HUD ===== */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(10, 14, 26, 0.9) 0%, rgba(10, 14, 26, 0) 100%);
+}
+
+.vehicle-info {
+  background: rgba(26, 27, 46, 0.8);
+  border: 2px solid #9A6BFF;
+  border-radius: 10px;
+  padding: 16px 24px;
+  min-width: 300px;
+}
+
+.vehicle-info h2 {
+  font-size: 24px;
+  color: #00E5FF;
+  margin-bottom: 8px;
+  text-shadow: 0 0 10px #00E5FF;
+}
+
+.stats {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.stats span {
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+}
+
+.fps-counter {
+  background: rgba(26, 27, 46, 0.8);
+  border: 2px solid #00E5FF;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #00E5FF;
+  text-shadow: 0 0 10px #00E5FF;
+}
+
+/* ===== CONTROLS HELP ===== */
+.controls-help {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(26, 27, 46, 0.9);
+  border: 2px solid #9A6BFF;
+  border-radius: 10px;
+  padding: 16px 24px;
+}
+
+.controls-help h3 {
+  font-size: 16px;
+  color: #9A6BFF;
+  margin-bottom: 8px;
+}
+
+.controls-help p {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+kbd {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #333;
+  border: 2px solid #555;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 2px 0 #222, inset 0 1px 0 #444;
+  margin: 0 2px;
+  font-family: 'Courier New', monospace;
+}
+
+/* ===== INTERACTION PROMPT ===== */
+.interaction-prompt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(26, 27, 46, 0.95);
+  border: 3px solid #00E5FF;
+  border-radius: 12px;
+  padding: 20px 32px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #00E5FF;
+  text-shadow: 0 0 15px #00E5FF;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+  animation: pulse 1.5s ease-in-out infinite;
+  pointer-events: auto;
+}
+
+.interaction-prompt.hidden {
+  display: none;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1440px) {
+  #game-canvas {
+    width: 100%;
+    height: auto;
+    max-width: 1400px;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 32px;
+  }
+
+  .controls-panel {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .vehicle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hud-top {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .vehicle-info {
+    min-width: auto;
+  }
+
+  .controls-help {
+    font-size: 12px;
+  }
+
+  kbd {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7788ff;
+}
+
+/* ===== LOADING ANIMATION ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vehicle-card {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.vehicle-card:nth-child(1) { animation-delay: 0.05s; }
+.vehicle-card:nth-child(2) { animation-delay: 0.1s; }
+.vehicle-card:nth-child(3) { animation-delay: 0.15s; }
+.vehicle-card:nth-child(4) { animation-delay: 0.2s; }
+.vehicle-card:nth-child(5) { animation-delay: 0.25s; }
+.vehicle-card:nth-child(6) { animation-delay: 0.3s; }
+.vehicle-card:nth-child(7) { animation-delay: 0.35s; }
+.vehicle-card:nth-child(8) { animation-delay: 0.4s; }
+.vehicle-card:nth-child(9) { animation-delay: 0.45s; }
+.vehicle-card:nth-child(10) { animation-delay: 0.5s; }
+.vehicle-card:nth-child(11) { animation-delay: 0.55s; }
+.vehicle-card:nth-child(12) { animation-delay: 0.6s; }
+.vehicle-card:nth-child(13) { animation-delay: 0.65s; }
+.vehicle-card:nth-child(14) { animation-delay: 0.7s; }
+.vehicle-card:nth-child(15) { animation-delay: 0.75s; }
+.vehicle-card:nth-child(16) { animation-delay: 0.8s; }
+.vehicle-card:nth-child(17) { animation-delay: 0.85s; }
+
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="gallery-mode" class="mode active">
+      <header>
+        <h1>🚗 V2 Enhanced Vehicle System</h1>
+        <p class="subtitle">17 Vehicles × 3 Art Styles × 3 Characters = Infinite Combinations</p>
+        <div style="background: #00E5FF; color: #000; padding: 8px 16px; border-radius: 20px; display: inline-block; margin-top: 12px; font-weight: 600;">
+          ✅ 100% OFFLINE - Works with Double-Click!
+        </div>
+      </header>
+
+      <div class="controls-panel">
+        <div class="control-group">
+          <label for="style-selector">Art Style:</label>
+          <select id="style-selector">
+            <option value="pixel" selected>HD Pixel Art</option>
+            <option value="vector">Vector Cel-Shaded</option>
+            <option value="3d">3D Pre-rendered</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="character-selector">Character:</label>
+          <select id="character-selector">
+            <option value="warrior" selected>⚔️ Warrior</option>
+            <option value="cat_angel">😇 Cat Angel</option>
+            <option value="cyborg">🤖 Cyborg</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="vehicle-grid" class="vehicle-grid"></div>
+    </div>
+
+    <div id="testdrive-mode" class="mode">
+      <div class="hud">
+        <div class="hud-top">
+          <div class="vehicle-info">
+            <h2 id="vehicle-name">Vehicle Name</h2>
+            <div class="stats">
+              <span id="vehicle-speed">Speed: 0</span>
+              <span id="vehicle-category">Category: ground</span>
+              <span id="vehicle-seats">Seats: 1</span>
+            </div>
+          </div>
+          <div class="fps-counter">FPS: <span id="fps-display">60</span></div>
+        </div>
+
+        <div class="controls-help">
+          <h3>Controls:</h3>
+          <p><kbd>←</kbd><kbd>→</kbd> Move &nbsp; <kbd>↑</kbd> Jump &nbsp; <kbd>E</kbd> Board/Unboard &nbsp; <kbd>ESC</kbd> Exit</p>
+        </div>
+
+        <div id="interaction-prompt" class="interaction-prompt hidden">
+          Press <kbd>E</kbd> to Board
+        </div>
+      </div>
+
+      <canvas id="game-canvas"></canvas>
+    </div>
+  </div>
+
+  <script>
+
+// === js/VehicleRegistry.js ===
+// VehicleRegistry.js - All 17 vehicles data
+
+const VEHICLE_REGISTRY = {
+  bike: {
+    id: 'bike',
+    name: 'Bike',
+    maxSpeed: 2.6,
+    friction: 0.90,
+    seats: 2,
+    category: 'ground',
+    purpose: 'speed',
+    width: 56,
+    height: 32,
+    color: '#00E5FF',
+    secondaryColor: '#0099CC',
+    description: 'Lightweight, fast, agile—used by default in mid-speed chase segments.',
+    acceleration: 1200,
+    jumpForce: 600,
+    gravity: 2000
+  },
+  chopper: {
+    id: 'chopper',
+    name: 'Chopper',
+    maxSpeed: 2.0,
+    friction: 0.88,
+    seats: 3,
+    category: 'ground',
+    purpose: 'cruiser',
+    width: 80,
+    height: 36,
+    color: '#FF6B35',
+    secondaryColor: '#CC5529',
+    description: 'Heavy cruiser bike with multiple seats; strong stability, slower turns.',
+    acceleration: 900,
+    jumpForce: 550,
+    gravity: 2000
+  },
+  jetpack: {
+    id: 'jetpack',
+    name: 'Jetpack',
+    maxSpeed: 2.4,
+    friction: 0.92,
+    seats: 1,
+    category: 'air',
+    purpose: 'aerial',
+    width: 40,
+    height: 48,
+    color: '#9A6BFF',
+    secondaryColor: '#7A55CC',
+    description: 'Personal flight pack; allows vertical freedom and evasion from hazards.',
+    acceleration: 1000,
+    jumpForce: 800,
+    gravity: 1500
+  },
+  car: {
+    id: 'car',
+    name: 'Car (Default)',
+    maxSpeed: 2.2,
+    friction: 0.85,
+    seats: 3,
+    category: 'ground',
+    purpose: 'default',
+    width: 72,
+    height: 40,
+    color: '#FFD700',
+    secondaryColor: '#CCAA00',
+    description: 'Balanced baseline vehicle; used when no other type is specified.',
+    acceleration: 1000,
+    jumpForce: 500,
+    gravity: 2000
+  },
+  personal_bike: {
+    id: 'personal_bike',
+    name: 'Personal Bike',
+    maxSpeed: 2.8,
+    friction: 0.91,
+    seats: 1,
+    category: 'ground',
+    purpose: 'personal',
+    width: 52,
+    height: 28,
+    color: '#00FF88',
+    secondaryColor: '#00CC6A',
+    description: 'Single-rider speed bike; highest acceleration among bikes.',
+    acceleration: 1400,
+    jumpForce: 650,
+    gravity: 2000
+  },
+  personal_chopper: {
+    id: 'personal_chopper',
+    name: 'Personal Chopper',
+    maxSpeed: 2.1,
+    friction: 0.87,
+    seats: 1,
+    category: 'ground',
+    purpose: 'personal',
+    width: 76,
+    height: 32,
+    color: '#FF4444',
+    secondaryColor: '#CC3333',
+    description: 'Solo heavy bike; excellent stability for rough terrain.',
+    acceleration: 950,
+    jumpForce: 580,
+    gravity: 2000
+  },
+  personal_jetpack: {
+    id: 'personal_jetpack',
+    name: 'Personal Jetpack',
+    maxSpeed: 2.5,
+    friction: 0.93,
+    seats: 1,
+    category: 'air',
+    purpose: 'personal',
+    width: 36,
+    height: 44,
+    color: '#AA88FF',
+    secondaryColor: '#8866CC',
+    description: 'Enhanced jetpack model; faster vertical movement.',
+    acceleration: 1100,
+    jumpForce: 850,
+    gravity: 1400
+  },
+  personal_car: {
+    id: 'personal_car',
+    name: 'Personal Car',
+    maxSpeed: 2.3,
+    friction: 0.86,
+    seats: 1,
+    category: 'ground',
+    purpose: 'personal',
+    width: 64,
+    height: 36,
+    color: '#FFAA00',
+    secondaryColor: '#CC8800',
+    description: 'Compact sports car; nimble handling, solo driver.',
+    acceleration: 1150,
+    jumpForce: 520,
+    gravity: 2000
+  },
+  hovercraft: {
+    id: 'hovercraft',
+    name: 'Hovercraft',
+    maxSpeed: 2.7,
+    friction: 0.75,
+    seats: 2,
+    category: 'hover',
+    purpose: 'hover',
+    width: 84,
+    height: 40,
+    color: '#00FFFF',
+    secondaryColor: '#00CCCC',
+    description: 'Hovers above ground; ignores terrain, smooth gliding.',
+    acceleration: 1100,
+    jumpForce: 0,
+    gravity: 1000
+  },
+  heavy_transport: {
+    id: 'heavy_transport',
+    name: 'Heavy Transport',
+    maxSpeed: 1.5,
+    friction: 0.80,
+    seats: 6,
+    category: 'ground',
+    purpose: 'transport',
+    width: 120,
+    height: 56,
+    color: '#888888',
+    secondaryColor: '#666666',
+    description: 'Large cargo vehicle; slow but seats 6, high HP.',
+    acceleration: 600,
+    jumpForce: 400,
+    gravity: 2200
+  },
+  buggy: {
+    id: 'buggy',
+    name: 'Buggy',
+    maxSpeed: 2.4,
+    friction: 0.88,
+    seats: 2,
+    category: 'ground',
+    purpose: 'offroad',
+    width: 68,
+    height: 36,
+    color: '#FFFF00',
+    secondaryColor: '#CCCC00',
+    description: 'Off-road vehicle; handles rough terrain well.',
+    acceleration: 1050,
+    jumpForce: 700,
+    gravity: 2000
+  },
+  mech_proto: {
+    id: 'mech_proto',
+    name: 'Mech Proto',
+    maxSpeed: 2.0,
+    friction: 0.85,
+    seats: 1,
+    category: 'ground',
+    purpose: 'mech',
+    width: 64,
+    height: 80,
+    color: '#555577',
+    secondaryColor: '#444466',
+    description: 'Early-stage battle mech; high HP, heavy knockback immunity.',
+    acceleration: 800,
+    jumpForce: 550,
+    gravity: 2200
+  },
+  mech_apex: {
+    id: 'mech_apex',
+    name: 'Mech Apex',
+    maxSpeed: 2.3,
+    friction: 0.83,
+    seats: 1,
+    category: 'ground',
+    purpose: 'mech',
+    width: 72,
+    height: 96,
+    color: '#667799',
+    secondaryColor: '#556688',
+    description: 'Advanced version with shoulder cannons; V1 = Boost, V2 = Missile Barrage.',
+    acceleration: 850,
+    jumpForce: 600,
+    gravity: 2200
+  },
+  skateboard_street: {
+    id: 'skateboard_street',
+    name: 'Skateboard Street',
+    maxSpeed: 2.5,
+    friction: 0.90,
+    seats: 1,
+    category: 'ground',
+    purpose: 'skateboard',
+    width: 40,
+    height: 16,
+    color: '#FF88AA',
+    secondaryColor: '#CC6688',
+    description: 'Street-style board; strong acceleration, low control in air.',
+    acceleration: 1300,
+    jumpForce: 750,
+    gravity: 2000
+  },
+  tank: {
+    id: 'tank',
+    name: 'Tank',
+    maxSpeed: 1.2,
+    friction: 0.70,
+    seats: 4,
+    category: 'ground',
+    purpose: 'combat',
+    width: 112,
+    height: 64,
+    color: '#3D5A3D',
+    secondaryColor: '#2A4A2A',
+    description: 'Armored combat vehicle; slowest but tankiest, 4 seats.',
+    acceleration: 500,
+    jumpForce: 300,
+    gravity: 2500
+  },
+  helicopter: {
+    id: 'helicopter',
+    name: 'Helicopter',
+    maxSpeed: 2.8,
+    friction: 0.95,
+    seats: 4,
+    category: 'air',
+    purpose: 'aerial',
+    width: 96,
+    height: 48,
+    color: '#44AA44',
+    secondaryColor: '#338833',
+    description: 'Rotary aircraft; full air mobility, 4 passenger capacity.',
+    acceleration: 900,
+    jumpForce: 700,
+    gravity: 1600
+  },
+  speedboat: {
+    id: 'speedboat',
+    name: 'Speedboat',
+    maxSpeed: 3.0,
+    friction: 0.82,
+    seats: 3,
+    category: 'water',
+    purpose: 'water',
+    width: 76,
+    height: 32,
+    color: '#3399FF',
+    secondaryColor: '#2277CC',
+    description: 'Water vehicle; fastest top speed, only works on water.',
+    acceleration: 1200,
+    jumpForce: 0,
+    gravity: 2000
+  }
+};
+
+function getAllVehicles() {
+  return Object.values(VEHICLE_REGISTRY);
+}
+
+function getVehicle(id) {
+  return VEHICLE_REGISTRY[id];
+}
+
+
+
+// === js/sprites/HDPixelArtVehicles.js ===
+// HDPixelArtVehicles.js - HD Pixel Art style (128x128) for all 17 vehicles
+
+class HDPixelArtVehicles {
+  constructor() {
+    this.pixelSize = 1; // 1:1 pixel ratio for HD
+  }
+
+  // Helper to draw pixel-perfect rectangles
+  drawPixelRect(ctx, x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.floor(x), Math.floor(y), w, h);
+  }
+
+  // Helper for pixel glow effect
+  drawGlow(ctx, x, y, radius, color) {
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = radius;
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.floor(x), Math.floor(y), 2, 2);
+    ctx.restore();
+  }
+
+  renderBike(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.015) * 1;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    this.drawPixelRect(ctx, -20, -8, 40, 12, '#00AACC');
+    this.drawPixelRect(ctx, -18, -10, 36, 2, '#00E5FF'); // Top highlight
+    
+    // Seat
+    this.drawPixelRect(ctx, -8, -12, 16, 4, '#0099BB');
+    
+    // Wheels (animated rotation)
+    const wheelAngle = (animTime * 0.01) % (Math.PI * 2);
+    this.drawWheel(ctx, -14, 6, 6, wheelAngle);
+    this.drawWheel(ctx, 14, 6, 6, wheelAngle);
+    
+    // Engine glow
+    this.drawGlow(ctx, -22, -4, 8, '#00E5FF');
+    
+    // Handlebars
+    this.drawPixelRect(ctx, -16, -14, 2, 6, '#0088AA');
+    this.drawPixelRect(ctx, -16, -14, 8, 2, '#0088AA');
+
+    ctx.restore();
+  }
+
+  renderChopper(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.012) * 0.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Extended body
+    this.drawPixelRect(ctx, -30, -10, 60, 16, '#CC5529');
+    this.drawPixelRect(ctx, -28, -12, 56, 3, '#FF6B35'); // Top highlight
+    
+    // Seat sections (3 seats)
+    this.drawPixelRect(ctx, -24, -14, 12, 4, '#AA4422');
+    this.drawPixelRect(ctx, -8, -14, 12, 4, '#AA4422');
+    this.drawPixelRect(ctx, 8, -14, 12, 4, '#AA4422');
+    
+    // Wheels
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    this.drawWheel(ctx, -22, 8, 8, wheelAngle);
+    this.drawWheel(ctx, 22, 8, 8, wheelAngle);
+    
+    // Chrome pipes
+    this.drawPixelRect(ctx, -12, -4, 3, 12, '#DDDDDD');
+    this.drawPixelRect(ctx, -6, -4, 3, 12, '#DDDDDD');
+    this.drawPixelRect(ctx, 6, -4, 3, 12, '#DDDDDD');
+
+    ctx.restore();
+  }
+
+  renderJetpack(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.02) * 2;
+    const flame = Math.sin(animTime * 0.05) * 4 + 8;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Main jetpack body
+    this.drawPixelRect(ctx, -12, -20, 24, 32, '#7A55CC');
+    this.drawPixelRect(ctx, -10, -18, 20, 2, '#AA88FF'); // Top highlight
+    
+    // Straps
+    this.drawPixelRect(ctx, -14, -12, 2, 16, '#555555');
+    this.drawPixelRect(ctx, 12, -12, 2, 16, '#555555');
+    
+    // Thruster nozzles
+    this.drawPixelRect(ctx, -10, 10, 6, 6, '#333333');
+    this.drawPixelRect(ctx, 4, 10, 6, 6, '#333333');
+    
+    // Flames
+    ctx.globalAlpha = 0.8;
+    this.drawPixelRect(ctx, -8, 16, 4, flame, '#FF6600');
+    this.drawPixelRect(ctx, -7, 16 + flame * 0.3, 2, flame * 0.5, '#FFAA00');
+    this.drawPixelRect(ctx, 6, 16, 4, flame, '#FF6600');
+    this.drawPixelRect(ctx, 7, 16 + flame * 0.3, 2, flame * 0.5, '#FFAA00');
+    ctx.globalAlpha = 1;
+    
+    // Control panel
+    this.drawPixelRect(ctx, -4, -14, 8, 4, '#00E5FF');
+    this.drawGlow(ctx, 0, -12, 6, '#00E5FF');
+
+    ctx.restore();
+  }
+
+  renderCar(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    this.drawPixelRect(ctx, -28, -12, 56, 20, '#CCAA00');
+    this.drawPixelRect(ctx, -26, -14, 52, 3, '#FFD700'); // Top highlight
+    
+    // Roof
+    this.drawPixelRect(ctx, -16, -18, 32, 6, '#AA8800');
+    
+    // Windows
+    this.drawPixelRect(ctx, -14, -16, 12, 4, '#6699CC');
+    this.drawPixelRect(ctx, 2, -16, 12, 4, '#6699CC');
+    
+    // Wheels
+    const wheelAngle = (animTime * 0.01) % (Math.PI * 2);
+    this.drawWheel(ctx, -20, 10, 7, wheelAngle);
+    this.drawWheel(ctx, 20, 10, 7, wheelAngle);
+    
+    // Headlights
+    this.drawGlow(ctx, 26, -4, 10, '#FFFF88');
+    this.drawPixelRect(ctx, 26, -4, 3, 6, '#FFFF88');
+    
+    // Details
+    this.drawPixelRect(ctx, -28, 0, 56, 2, '#998800'); // Body line
+
+    ctx.restore();
+  }
+
+  renderPersonalBike(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.018) * 1.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Sleek body
+    this.drawPixelRect(ctx, -18, -6, 36, 10, '#00CC6A');
+    this.drawPixelRect(ctx, -16, -8, 32, 2, '#00FF88'); // Top shine
+    
+    // Single seat
+    this.drawPixelRect(ctx, -6, -10, 12, 4, '#00AA55');
+    
+    // Wheels (smaller, faster looking)
+    const wheelAngle = (animTime * 0.015) % (Math.PI * 2);
+    this.drawWheel(ctx, -12, 6, 5, wheelAngle);
+    this.drawWheel(ctx, 12, 6, 5, wheelAngle);
+    
+    // Speed lines
+    ctx.globalAlpha = 0.6;
+    this.drawPixelRect(ctx, -22, -2, 4, 1, '#00FF88');
+    this.drawPixelRect(ctx, -24, 0, 6, 1, '#00FF88');
+    ctx.globalAlpha = 1;
+    
+    // Engine glow
+    this.drawGlow(ctx, -20, -2, 10, '#00FF88');
+
+    ctx.restore();
+  }
+
+  renderPersonalChopper(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.01) * 0.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    this.drawPixelRect(ctx, -28, -8, 56, 14, '#CC3333');
+    this.drawPixelRect(ctx, -26, -10, 52, 2, '#FF4444');
+    
+    // Single seat
+    this.drawPixelRect(ctx, -8, -12, 16, 4, '#AA2222');
+    
+    // Wheels
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    this.drawWheel(ctx, -20, 8, 7, wheelAngle);
+    this.drawWheel(ctx, 20, 8, 7, wheelAngle);
+    
+    // Exhaust pipes
+    this.drawPixelRect(ctx, -10, -2, 3, 10, '#CCCCCC');
+    this.drawPixelRect(ctx, 8, -2, 3, 10, '#CCCCCC');
+
+    ctx.restore();
+  }
+
+  renderPersonalJetpack(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.025) * 2.5;
+    const flame = Math.sin(animTime * 0.06) * 5 + 10;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Compact jetpack body
+    this.drawPixelRect(ctx, -10, -18, 20, 28, '#8866CC');
+    this.drawPixelRect(ctx, -8, -16, 16, 2, '#AA88FF');
+    
+    // Thrusters
+    this.drawPixelRect(ctx, -8, 8, 5, 5, '#333333');
+    this.drawPixelRect(ctx, 3, 8, 5, 5, '#333333');
+    
+    // Enhanced flames
+    ctx.globalAlpha = 0.9;
+    this.drawPixelRect(ctx, -6, 13, 3, flame, '#FF3300');
+    this.drawPixelRect(ctx, -5, 13 + flame * 0.3, 1, flame * 0.6, '#FFCC00');
+    this.drawPixelRect(ctx, 5, 13, 3, flame, '#FF3300');
+    this.drawPixelRect(ctx, 6, 13 + flame * 0.3, 1, flame * 0.6, '#FFCC00');
+    ctx.globalAlpha = 1;
+    
+    // Glow effect
+    this.drawGlow(ctx, 0, -10, 8, '#AA88FF');
+
+    ctx.restore();
+  }
+
+  renderPersonalCar(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Sporty body
+    this.drawPixelRect(ctx, -24, -10, 48, 18, '#CC8800');
+    this.drawPixelRect(ctx, -22, -12, 44, 2, '#FFAA00');
+    
+    // Low profile roof
+    this.drawPixelRect(ctx, -12, -16, 24, 6, '#AA7700');
+    
+    // Window
+    this.drawPixelRect(ctx, -10, -14, 20, 3, '#6699CC');
+    
+    // Wheels
+    const wheelAngle = (animTime * 0.012) % (Math.PI * 2);
+    this.drawWheel(ctx, -16, 10, 6, wheelAngle);
+    this.drawWheel(ctx, 16, 10, 6, wheelAngle);
+    
+    // Spoiler
+    this.drawPixelRect(ctx, -26, -14, 4, 2, '#CC8800');
+    this.drawPixelRect(ctx, -28, -16, 6, 2, '#CC8800');
+    
+    // Headlight glow
+    this.drawGlow(ctx, 22, -4, 12, '#FFFFFF');
+
+    ctx.restore();
+  }
+
+  renderHovercraft(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Main body
+    this.drawPixelRect(ctx, -32, -12, 64, 20, '#00CCCC');
+    this.drawPixelRect(ctx, -30, -14, 60, 3, '#00FFFF');
+    
+    // Canopy
+    this.drawPixelRect(ctx, -16, -18, 32, 8, '#009999');
+    this.drawPixelRect(ctx, -14, -17, 28, 2, '#66DDDD');
+    
+    // Hover pads
+    this.drawPixelRect(ctx, -28, 10, 20, 4, '#008888');
+    this.drawPixelRect(ctx, 8, 10, 20, 4, '#008888');
+    
+    // Hover glow effect
+    ctx.globalAlpha = 0.6;
+    this.drawPixelRect(ctx, -30, 14, 24, 8, '#00FFFF');
+    this.drawPixelRect(ctx, 6, 14, 24, 8, '#00FFFF');
+    ctx.globalAlpha = 1;
+    
+    this.drawGlow(ctx, -18, 16, 15, '#00FFFF');
+    this.drawGlow(ctx, 18, 16, 15, '#00FFFF');
+
+    ctx.restore();
+  }
+
+  renderHeavyTransport(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Large cargo body
+    this.drawPixelRect(ctx, -44, -20, 88, 32, '#666666');
+    this.drawPixelRect(ctx, -42, -22, 84, 3, '#888888');
+    
+    // Cargo container
+    this.drawPixelRect(ctx, -38, -18, 76, 24, '#555555');
+    this.drawPixelRect(ctx, -36, -16, 72, 2, '#777777');
+    
+    // Cabin
+    this.drawPixelRect(ctx, 24, -24, 18, 10, '#777777');
+    this.drawPixelRect(ctx, 26, -22, 14, 3, '#999999');
+    
+    // Windows
+    this.drawPixelRect(ctx, 28, -21, 10, 4, '#4488AA');
+    
+    // Multiple wheels
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    this.drawWheel(ctx, -32, 14, 8, wheelAngle);
+    this.drawWheel(ctx, -16, 14, 8, wheelAngle);
+    this.drawWheel(ctx, 0, 14, 8, wheelAngle);
+    this.drawWheel(ctx, 32, 14, 8, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderBuggy(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.02) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Roll cage
+    this.drawPixelRect(ctx, -26, -20, 3, 26, '#CCCC00');
+    this.drawPixelRect(ctx, 23, -20, 3, 26, '#CCCC00');
+    this.drawPixelRect(ctx, -26, -20, 52, 3, '#CCCC00');
+    this.drawPixelRect(ctx, -26, -10, 52, 3, '#CCCC00');
+    
+    // Body
+    this.drawPixelRect(ctx, -22, 0, 44, 8, '#FFFF00');
+    this.drawPixelRect(ctx, -20, -2, 40, 2, '#FFFF88');
+    
+    // Seats
+    this.drawPixelRect(ctx, -16, -8, 12, 8, '#AAAA00');
+    this.drawPixelRect(ctx, 4, -8, 12, 8, '#AAAA00');
+    
+    // Large off-road wheels
+    const wheelAngle = (animTime * 0.012) % (Math.PI * 2);
+    this.drawWheel(ctx, -18, 10, 9, wheelAngle);
+    this.drawWheel(ctx, 18, 10, 9, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderMechProto(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.01) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Legs
+    this.drawPixelRect(ctx, -16, 10 + walk, 10, 20, '#444466');
+    this.drawPixelRect(ctx, 6, 10 - walk, 10, 20, '#444466');
+    
+    // Feet
+    this.drawPixelRect(ctx, -18, 30, 14, 6, '#333344');
+    this.drawPixelRect(ctx, 4, 30, 14, 6, '#333344');
+    
+    // Main body/torso
+    this.drawPixelRect(ctx, -20, -16, 40, 28, '#555577');
+    this.drawPixelRect(ctx, -18, -18, 36, 3, '#666688');
+    
+    // Cockpit
+    this.drawPixelRect(ctx, -12, -12, 24, 16, '#444455');
+    this.drawPixelRect(ctx, -10, -10, 20, 2, '#6677AA');
+    
+    // Arms
+    this.drawPixelRect(ctx, -24, -8, 6, 20, '#444466');
+    this.drawPixelRect(ctx, 18, -8, 6, 20, '#444466');
+    
+    // Head/sensor
+    this.drawPixelRect(ctx, -8, -24, 16, 8, '#555577');
+    this.drawGlow(ctx, 0, -20, 8, '#FF0000');
+
+    ctx.restore();
+  }
+
+  renderMechApex(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.01) * 2.5;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Legs (more articulated)
+    this.drawPixelRect(ctx, -18, 12 + walk, 12, 24, '#556688');
+    this.drawPixelRect(ctx, 6, 12 - walk, 12, 24, '#556688');
+    
+    // Joint details
+    this.drawPixelRect(ctx, -16, 22, 8, 3, '#667799');
+    this.drawPixelRect(ctx, 8, 22, 8, 3, '#667799');
+    
+    // Feet
+    this.drawPixelRect(ctx, -20, 36, 16, 8, '#445566');
+    this.drawPixelRect(ctx, 4, 36, 16, 8, '#445566');
+    
+    // Main body
+    this.drawPixelRect(ctx, -24, -20, 48, 34, '#667799');
+    this.drawPixelRect(ctx, -22, -22, 44, 3, '#7788AA');
+    
+    // Cockpit
+    this.drawPixelRect(ctx, -14, -16, 28, 20, '#555577');
+    this.drawPixelRect(ctx, -12, -14, 24, 2, '#8899BB');
+    
+    // Shoulder cannons
+    this.drawPixelRect(ctx, -28, -18, 6, 12, '#556688');
+    this.drawPixelRect(ctx, -32, -14, 6, 4, '#333344');
+    this.drawPixelRect(ctx, 22, -18, 6, 12, '#556688');
+    this.drawPixelRect(ctx, 26, -14, 6, 4, '#333344');
+    
+    // Cannon glow
+    this.drawGlow(ctx, -30, -12, 8, '#FF6600');
+    this.drawGlow(ctx, 28, -12, 8, '#FF6600');
+    
+    // Head
+    this.drawPixelRect(ctx, -10, -30, 20, 10, '#667799');
+    this.drawGlow(ctx, 0, -26, 10, '#00FF00');
+
+    ctx.restore();
+  }
+
+  renderStreetSkateboard(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const tilt = Math.sin(animTime * 0.02) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt * Math.PI / 180);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Deck
+    this.drawPixelRect(ctx, -16, -3, 32, 6, '#CC6688');
+    this.drawPixelRect(ctx, -18, -2, 4, 4, '#CC6688'); // Nose curve
+    this.drawPixelRect(ctx, 14, -2, 4, 4, '#CC6688'); // Tail curve
+    
+    // Grip tape
+    this.drawPixelRect(ctx, -14, -1, 28, 2, '#333333');
+    
+    // Graphics
+    this.drawPixelRect(ctx, -8, -2, 16, 1, '#FF88AA');
+    this.drawPixelRect(ctx, -6, 1, 12, 1, '#FF88AA');
+    
+    // Trucks
+    this.drawPixelRect(ctx, -12, 4, 6, 2, '#AAAAAA');
+    this.drawPixelRect(ctx, 6, 4, 6, 2, '#AAAAAA');
+    
+    // Wheels (fast spin)
+    const wheelAngle = (animTime * 0.02) % (Math.PI * 2);
+    this.drawWheel(ctx, -14, 7, 3, wheelAngle);
+    this.drawWheel(ctx, -8, 7, 3, wheelAngle);
+    this.drawWheel(ctx, 8, 7, 3, wheelAngle);
+    this.drawWheel(ctx, 14, 7, 3, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderTank(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Main body/hull
+    this.drawPixelRect(ctx, -42, -12, 84, 24, '#2A4A2A');
+    this.drawPixelRect(ctx, -40, -14, 80, 3, '#3D5A3D');
+    
+    // Turret
+    this.drawPixelRect(ctx, -24, -24, 48, 14, '#3D5A3D');
+    this.drawPixelRect(ctx, -22, -26, 44, 2, '#4A664A');
+    
+    // Cannon
+    this.drawPixelRect(ctx, 20, -20, 24, 6, '#2A4A2A');
+    this.drawPixelRect(ctx, 44, -19, 4, 4, '#1A3A1A');
+    
+    // Armor plating details
+    this.drawPixelRect(ctx, -38, -10, 76, 2, '#1A3A1A');
+    this.drawPixelRect(ctx, -36, 0, 72, 2, '#1A3A1A');
+    
+    // Tracks
+    this.drawPixelRect(ctx, -44, 14, 88, 10, '#1A2A1A');
+    
+    // Track wheels
+    const wheelAngle = (animTime * 0.005) % (Math.PI * 2);
+    for (let i = -32; i <= 32; i += 16) {
+      this.drawWheel(ctx, i, 18, 5, wheelAngle);
+    }
+
+    ctx.restore();
+  }
+
+  renderHelicopter(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.015) * 2;
+    const rotorAngle = (animTime * 0.03) % (Math.PI * 2);
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Main body
+    this.drawPixelRect(ctx, -32, -8, 64, 20, '#338833');
+    this.drawPixelRect(ctx, -30, -10, 60, 2, '#44AA44');
+    
+    // Cockpit bubble
+    this.drawPixelRect(ctx, 12, -16, 24, 10, '#228822');
+    ctx.globalAlpha = 0.4;
+    this.drawPixelRect(ctx, 14, -14, 20, 6, '#66CCFF');
+    ctx.globalAlpha = 1;
+    
+    // Tail boom
+    this.drawPixelRect(ctx, -44, -4, 14, 8, '#2A772A');
+    
+    // Landing skids
+    this.drawPixelRect(ctx, -24, 14, 48, 3, '#555555');
+    this.drawPixelRect(ctx, -26, 18, 4, 6, '#555555');
+    this.drawPixelRect(ctx, 22, 18, 4, 6, '#555555');
+    
+    // Main rotor (spinning)
+    ctx.save();
+    ctx.translate(0, -18);
+    ctx.rotate(rotorAngle);
+    ctx.globalAlpha = 0.5;
+    this.drawPixelRect(ctx, -36, -2, 72, 4, '#666666');
+    this.drawPixelRect(ctx, -2, -36, 4, 72, '#666666');
+    ctx.globalAlpha = 1;
+    ctx.restore();
+    
+    // Rotor mast
+    this.drawPixelRect(ctx, -2, -18, 4, 10, '#444444');
+    
+    // Tail rotor
+    ctx.save();
+    ctx.translate(-48, 0);
+    ctx.rotate(rotorAngle * 2);
+    ctx.globalAlpha = 0.5;
+    this.drawPixelRect(ctx, -8, -1, 16, 2, '#555555');
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  renderSpeedboat(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bob = Math.sin(animTime * 0.02) * 1.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bob);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Hull (wedge shape)
+    this.drawPixelRect(ctx, -28, -6, 56, 16, '#2277CC');
+    this.drawPixelRect(ctx, -26, -8, 52, 2, '#3399FF');
+    
+    // Bow (pointed)
+    this.drawPixelRect(ctx, 26, -4, 6, 12, '#2277CC');
+    this.drawPixelRect(ctx, 32, -2, 4, 8, '#1A66AA');
+    
+    // Windshield
+    this.drawPixelRect(ctx, 4, -12, 16, 6, '#1A66AA');
+    ctx.globalAlpha = 0.4;
+    this.drawPixelRect(ctx, 6, -10, 12, 4, '#66CCFF');
+    ctx.globalAlpha = 1;
+    
+    // Seats
+    this.drawPixelRect(ctx, -12, -4, 10, 8, '#1A55AA');
+    this.drawPixelRect(ctx, 0, -4, 10, 8, '#1A55AA');
+    
+    // Engine cover
+    this.drawPixelRect(ctx, -22, -2, 12, 6, '#1A66AA');
+    
+    // Wake/splash effect
+    ctx.globalAlpha = 0.6;
+    this.drawPixelRect(ctx, -32, 8, 8, 4, '#FFFFFF');
+    this.drawPixelRect(ctx, -34, 10, 4, 2, '#AADDFF');
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+  }
+
+  // Helper method to draw animated wheels
+  drawWheel(ctx, x, y, radius, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+    
+    // Tire
+    ctx.fillStyle = '#222222';
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Rim
+    ctx.fillStyle = '#666666';
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Spokes
+    ctx.strokeStyle = '#888888';
+    ctx.lineWidth = 1;
+    ctx.rotate(angle);
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(radius * 0.5, 0);
+      ctx.stroke();
+      ctx.rotate(Math.PI / 2);
+    }
+    
+    ctx.restore();
+  }
+
+  // Main render dispatcher
+  renderVehicle(ctx, vehicleId, x, y, state) {
+    const renderMap = {
+      bike: this.renderBike,
+      chopper: this.renderChopper,
+      jetpack: this.renderJetpack,
+      car: this.renderCar,
+      personal_bike: this.renderPersonalBike,
+      personal_chopper: this.renderPersonalChopper,
+      personal_jetpack: this.renderPersonalJetpack,
+      personal_car: this.renderPersonalCar,
+      hovercraft: this.renderHovercraft,
+      heavy_transport: this.renderHeavyTransport,
+      buggy: this.renderBuggy,
+      mech_proto: this.renderMechProto,
+      mech_apex: this.renderMechApex,
+      skateboard_street: this.renderStreetSkateboard,
+      tank: this.renderTank,
+      helicopter: this.renderHelicopter,
+      speedboat: this.renderSpeedboat
+    };
+
+    const renderFn = renderMap[vehicleId];
+    if (renderFn) {
+      renderFn.call(this, ctx, x, y, state);
+    }
+  }
+}
+
+
+
+// === js/sprites/VectorCelShadedVehicles.js ===
+// VectorCelShadedVehicles.js - Vector Cel-Shaded style for all 17 vehicles
+
+class VectorCelShadedVehicles {
+  constructor() {
+    this.outlineWidth = 3;
+  }
+
+  // Helper for drawing with bold outline
+  drawShape(ctx, drawFn, fillColor, outlineColor = '#000000') {
+    ctx.save();
+    
+    // Draw outline
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = this.outlineWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    drawFn(ctx);
+    ctx.stroke();
+    
+    // Draw fill
+    ctx.fillStyle = fillColor;
+    drawFn(ctx);
+    ctx.fill();
+    
+    ctx.restore();
+  }
+
+  // Helper for gradient fills
+  createGradient(ctx, x1, y1, x2, y2, color1, color2) {
+    const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+    return gradient;
+  }
+
+  renderBike(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.015) * 1;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, -10, 0, 8, '#00E5FF', '#0099CC');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 20, 8, 0, 0, Math.PI * 2);
+    }, bodyGradient);
+
+    // Wheels
+    const wheelAngle = (animTime * 0.01) % (Math.PI * 2);
+    this.drawWheel(ctx, -14, 8, 6, wheelAngle);
+    this.drawWheel(ctx, 14, 8, 6, wheelAngle);
+
+    // Seat
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, -10, 8, 4, 0, 0, Math.PI * 2);
+    }, '#00AACC');
+
+    // Handlebars
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-12, -12);
+      c.lineTo(-12, -6);
+      c.lineTo(-18, -6);
+    }, '#0088AA');
+
+    // Engine glow
+    ctx.shadowColor = '#00E5FF';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = '#00E5FF';
+    ctx.beginPath();
+    ctx.arc(-18, 0, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  renderChopper(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.012) * 0.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Extended body
+    const bodyGradient = this.createGradient(ctx, 0, -12, 0, 6, '#FF6B35', '#CC5529');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-30, 0);
+      c.bezierCurveTo(-30, -6, -28, -10, -20, -10);
+      c.lineTo(20, -10);
+      c.bezierCurveTo(28, -10, 30, -6, 30, 0);
+      c.lineTo(30, 6);
+      c.lineTo(-30, 6);
+      c.closePath();
+    }, bodyGradient);
+
+    // Seats (3)
+    for (let i = -18; i <= 18; i += 18) {
+      this.drawShape(ctx, (c) => {
+        c.beginPath();
+        c.ellipse(i, -12, 6, 3, 0, 0, Math.PI * 2);
+      }, '#AA4422');
+    }
+
+    // Wheels
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    this.drawWheel(ctx, -22, 8, 8, wheelAngle);
+    this.drawWheel(ctx, 22, 8, 8, wheelAngle);
+
+    // Chrome pipes
+    const chromeGradient = this.createGradient(ctx, 0, 0, 0, 8, '#EEEEEE', '#AAAAAA');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(-8, 4, 2, 6, 0, 0, Math.PI * 2);
+    }, chromeGradient);
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(8, 4, 2, 6, 0, 0, Math.PI * 2);
+    }, chromeGradient);
+
+    ctx.restore();
+  }
+
+  renderJetpack(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.02) * 2;
+    const flame = Math.sin(animTime * 0.05) * 4 + 8;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Main body
+    const bodyGradient = this.createGradient(ctx, -10, -20, 10, 10, '#AA88FF', '#7A55CC');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(0, -22);
+      c.bezierCurveTo(-12, -22, -14, -18, -14, -10);
+      c.lineTo(-14, 10);
+      c.bezierCurveTo(-14, 14, -10, 16, -8, 16);
+      c.lineTo(8, 16);
+      c.bezierCurveTo(10, 16, 14, 14, 14, 10);
+      c.lineTo(14, -10);
+      c.bezierCurveTo(14, -18, 12, -22, 0, -22);
+    }, bodyGradient);
+
+    // Flames (gradient)
+    ctx.globalAlpha = 0.8;
+    const flameGradient = this.createGradient(ctx, 0, 16, 0, 16 + flame, '#FF6600', '#FFAA0000');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-8, 16);
+      c.lineTo(-5, 16 + flame);
+      c.lineTo(-8, 16 + flame);
+      c.closePath();
+    }, flameGradient);
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(8, 16);
+      c.lineTo(5, 16 + flame);
+      c.lineTo(8, 16 + flame);
+      c.closePath();
+    }, flameGradient);
+    ctx.globalAlpha = 1;
+
+    // Control panel
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.rect(-4, -16, 8, 4);
+    }, '#00E5FF');
+
+    ctx.restore();
+  }
+
+  renderCar(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body with gradient
+    const bodyGradient = this.createGradient(ctx, 0, -14, 0, 8, '#FFD700', '#CCAA00');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-26, 8);
+      c.lineTo(-28, 0);
+      c.lineTo(-28, -6);
+      c.bezierCurveTo(-28, -10, -24, -12, -20, -12);
+      c.lineTo(20, -12);
+      c.bezierCurveTo(24, -12, 28, -10, 28, -6);
+      c.lineTo(28, 0);
+      c.lineTo(26, 8);
+      c.closePath();
+    }, bodyGradient);
+
+    // Roof
+    const roofGradient = this.createGradient(ctx, 0, -20, 0, -12, '#CCAA00', '#AA8800');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-16, -12);
+      c.bezierCurveTo(-16, -18, -12, -20, -8, -20);
+      c.lineTo(8, -20);
+      c.bezierCurveTo(12, -20, 16, -18, 16, -12);
+      c.closePath();
+    }, roofGradient);
+
+    // Windows
+    ctx.globalAlpha = 0.5;
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-14, -12);
+      c.bezierCurveTo(-14, -16, -11, -18, -8, -18);
+      c.lineTo(-2, -18);
+      c.lineTo(-2, -12);
+      c.closePath();
+    }, '#6699CC');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(14, -12);
+      c.bezierCurveTo(14, -16, 11, -18, 8, -18);
+      c.lineTo(2, -18);
+      c.lineTo(2, -12);
+      c.closePath();
+    }, '#6699CC');
+    ctx.globalAlpha = 1;
+
+    // Wheels
+    const wheelAngle = (animTime * 0.01) % (Math.PI * 2);
+    this.drawWheel(ctx, -20, 10, 7, wheelAngle);
+    this.drawWheel(ctx, 20, 10, 7, wheelAngle);
+
+    // Headlight glow
+    ctx.shadowColor = '#FFFF88';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = '#FFFF88';
+    ctx.beginPath();
+    ctx.arc(28, -2, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderPersonalBike(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.018) * 1.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Sleek body
+    const bodyGradient = this.createGradient(ctx, -18, 0, 18, 0, '#00FF88', '#00CC6A');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-18, 0);
+      c.bezierCurveTo(-18, -6, -12, -8, 0, -8);
+      c.bezierCurveTo(12, -8, 18, -6, 18, 0);
+      c.bezierCurveTo(18, 4, 14, 6, 0, 6);
+      c.bezierCurveTo(-14, 6, -18, 4, -18, 0);
+    }, bodyGradient);
+
+    // Wheels
+    const wheelAngle = (animTime * 0.015) % (Math.PI * 2);
+    this.drawWheel(ctx, -12, 8, 5, wheelAngle);
+    this.drawWheel(ctx, 12, 8, 5, wheelAngle);
+
+    // Engine glow
+    ctx.shadowColor = '#00FF88';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = '#00FF88';
+    ctx.beginPath();
+    ctx.arc(-16, 0, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderPersonalChopper(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.01) * 0.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, -10, 0, 6, '#FF4444', '#CC3333');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 28, 8, 0, 0, Math.PI * 2);
+    }, bodyGradient);
+
+    // Seat
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, -10, 8, 4, 0, 0, Math.PI * 2);
+    }, '#AA2222');
+
+    // Wheels
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    this.drawWheel(ctx, -20, 8, 7, wheelAngle);
+    this.drawWheel(ctx, 20, 8, 7, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderPersonalJetpack(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.025) * 2.5;
+    const flame = Math.sin(animTime * 0.06) * 5 + 10;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, -18, 0, 10, '#AA88FF', '#8866CC');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-10, -18, 20, 28, 4);
+    }, bodyGradient);
+
+    // Flames
+    ctx.globalAlpha = 0.9;
+    const flameGradient = this.createGradient(ctx, 0, 13, 0, 13 + flame, '#FF3300', '#FFCC0000');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-8, 13);
+      c.lineTo(-6, 13 + flame);
+      c.lineTo(-4, 13);
+      c.closePath();
+    }, flameGradient);
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(4, 13);
+      c.lineTo(6, 13 + flame);
+      c.lineTo(8, 13);
+      c.closePath();
+    }, flameGradient);
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+  }
+
+  renderPersonalCar(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Sporty body
+    const bodyGradient = this.createGradient(ctx, 0, -12, 0, 8, '#FFAA00', '#CC8800');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-24, 8);
+      c.lineTo(-26, -2);
+      c.bezierCurveTo(-26, -8, -22, -10, -16, -10);
+      c.lineTo(16, -10);
+      c.bezierCurveTo(22, -10, 26, -8, 26, -2);
+      c.lineTo(24, 8);
+      c.closePath();
+    }, bodyGradient);
+
+    // Roof
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, -12, 12, 4, 0, 0, Math.PI * 2);
+    }, '#AA7700');
+
+    // Wheels
+    const wheelAngle = (animTime * 0.012) % (Math.PI * 2);
+    this.drawWheel(ctx, -16, 10, 6, wheelAngle);
+    this.drawWheel(ctx, 16, 10, 6, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderHovercraft(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, -14, 0, 8, '#00FFFF', '#00CCCC');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 32, 12, 0, 0, Math.PI * 2);
+    }, bodyGradient);
+
+    // Canopy
+    ctx.globalAlpha = 0.5;
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, -8, 16, 6, 0, Math.PI, 0, true);
+    }, '#66DDDD');
+    ctx.globalAlpha = 1;
+
+    // Hover glow
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = 'rgba(0,255,255,0.4)';
+    ctx.beginPath();
+    ctx.ellipse(0, 14, 30, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderHeavyTransport(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Cargo body
+    const cargoGradient = this.createGradient(ctx, 0, -22, 0, 12, '#888888', '#666666');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-38, -18, 76, 30, 4);
+    }, cargoGradient);
+
+    // Cabin
+    const cabinGradient = this.createGradient(ctx, 0, -24, 0, -14, '#999999', '#777777');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(24, -24, 16, 10, 2);
+    }, cabinGradient);
+
+    // Window
+    ctx.globalAlpha = 0.5;
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.rect(26, -22, 12, 6);
+    }, '#4488AA');
+    ctx.globalAlpha = 1;
+
+    // Wheels
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    for (let i = -32; i <= 32; i += 21) {
+      this.drawWheel(ctx, i, 14, 8, wheelAngle);
+    }
+
+    ctx.restore();
+  }
+
+  renderBuggy(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.02) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Roll cage
+    ctx.strokeStyle = '#CCCC00';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-26, 6);
+    ctx.lineTo(-26, -20);
+    ctx.lineTo(26, -20);
+    ctx.lineTo(26, 6);
+    ctx.stroke();
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, 0, 0, 8, '#FFFF00', '#CCCC00');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-22, 0, 44, 8, 4);
+    }, bodyGradient);
+
+    // Wheels
+    const wheelAngle = (animTime * 0.012) % (Math.PI * 2);
+    this.drawWheel(ctx, -18, 10, 9, wheelAngle);
+    this.drawWheel(ctx, 18, 10, 9, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderMechProto(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.01) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Legs
+    const legGradient = this.createGradient(ctx, 0, 10, 0, 30, '#555577', '#444466');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-16, 10 + walk, 10, 20, 2);
+    }, legGradient);
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(6, 10 - walk, 10, 20, 2);
+    }, legGradient);
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, -18, 0, 12, '#666688', '#555577');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-20, -16, 40, 28, 4);
+    }, bodyGradient);
+
+    // Cockpit
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-12, -12, 24, 16, 2);
+    }, '#444455');
+
+    // Head
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-8, -24, 16, 8, 2);
+    }, '#555577');
+
+    // Eye glow
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#FF0000';
+    ctx.beginPath();
+    ctx.arc(0, -20, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderMechApex(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.01) * 2.5;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Legs
+    const legGradient = this.createGradient(ctx, 0, 12, 0, 36, '#667799', '#556688');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-18, 12 + walk, 12, 24, 2);
+    }, legGradient);
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(6, 12 - walk, 12, 24, 2);
+    }, legGradient);
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, -22, 0, 14, '#7788AA', '#667799');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-24, -20, 48, 34, 6);
+    }, bodyGradient);
+
+    // Shoulder cannons
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-28, -18, 6, 12, 2);
+    }, '#556688');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(22, -18, 6, 12, 2);
+    }, '#556688');
+
+    // Cannon glow
+    ctx.shadowColor = '#FF6600';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = '#FF6600';
+    ctx.beginPath();
+    ctx.arc(-25, -12, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(25, -12, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderStreetSkateboard(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const tilt = Math.sin(animTime * 0.02) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt * Math.PI / 180);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Deck
+    const deckGradient = this.createGradient(ctx, 0, -3, 0, 3, '#FF88AA', '#CC6688');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-16, 0);
+      c.bezierCurveTo(-18, 0, -18, -3, -16, -3);
+      c.lineTo(16, -3);
+      c.bezierCurveTo(18, -3, 18, 0, 16, 0);
+      c.lineTo(16, 3);
+      c.bezierCurveTo(18, 3, 18, 0, 16, 0);
+      c.lineTo(-16, 0);
+      c.bezierCurveTo(-18, 0, -18, 3, -16, 3);
+      c.closePath();
+    }, deckGradient);
+
+    // Trucks
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.rect(-12, 4, 6, 2);
+    }, '#AAAAAA');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.rect(6, 4, 6, 2);
+    }, '#AAAAAA');
+
+    // Wheels
+    const wheelAngle = (animTime * 0.02) % (Math.PI * 2);
+    this.drawWheel(ctx, -14, 7, 3, wheelAngle);
+    this.drawWheel(ctx, -8, 7, 3, wheelAngle);
+    this.drawWheel(ctx, 8, 7, 3, wheelAngle);
+    this.drawWheel(ctx, 14, 7, 3, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderTank(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Hull
+    const hullGradient = this.createGradient(ctx, 0, -14, 0, 12, '#3D5A3D', '#2A4A2A');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-42, -12, 84, 24, 4);
+    }, hullGradient);
+
+    // Turret
+    const turretGradient = this.createGradient(ctx, 0, -26, 0, -10, '#4A664A', '#3D5A3D');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, -18, 24, 8, 0, 0, Math.PI * 2);
+    }, turretGradient);
+
+    // Cannon
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(20, -21, 24, 6, 2);
+    }, '#2A4A2A');
+
+    // Tracks
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-44, 14, 88, 10, 5);
+    }, '#1A2A1A');
+
+    // Track wheels
+    const wheelAngle = (animTime * 0.005) % (Math.PI * 2);
+    for (let i = -32; i <= 32; i += 16) {
+      ctx.fillStyle = '#333333';
+      ctx.beginPath();
+      ctx.arc(i, 18, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  renderHelicopter(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.015) * 2;
+    const rotorAngle = (animTime * 0.03) % (Math.PI * 2);
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body
+    const bodyGradient = this.createGradient(ctx, 0, -10, 0, 8, '#44AA44', '#338833');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 32, 10, 0, 0, Math.PI * 2);
+    }, bodyGradient);
+
+    // Cockpit
+    ctx.globalAlpha = 0.4;
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(12, -6, 12, 5, 0, Math.PI, 0, true);
+    }, '#66CCFF');
+    ctx.globalAlpha = 1;
+
+    // Tail boom
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(-38, 0, 8, 4, 0, 0, Math.PI * 2);
+    }, '#2A772A');
+
+    // Main rotor
+    ctx.save();
+    ctx.translate(0, -12);
+    ctx.rotate(rotorAngle);
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = '#555555';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-32, 0);
+    ctx.lineTo(32, 0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, -32);
+    ctx.lineTo(0, 32);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    // Landing skids
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.rect(-24, 14, 48, 2);
+    }, '#555555');
+
+    ctx.restore();
+  }
+
+  renderSpeedboat(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bob = Math.sin(animTime * 0.02) * 1.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bob);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Hull
+    const hullGradient = this.createGradient(ctx, 0, -8, 0, 8, '#3399FF', '#2277CC');
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-26, 8);
+      c.lineTo(-28, 2);
+      c.bezierCurveTo(-28, -4, -24, -6, -18, -6);
+      c.lineTo(28, -4);
+      c.bezierCurveTo(32, -4, 34, 0, 34, 4);
+      c.lineTo(32, 8);
+      c.closePath();
+    }, hullGradient);
+
+    // Windshield
+    ctx.globalAlpha = 0.4;
+    this.drawShape(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(4, -10);
+      c.lineTo(18, -10);
+      c.lineTo(16, -4);
+      c.lineTo(6, -4);
+      c.closePath();
+    }, '#66CCFF');
+    ctx.globalAlpha = 1;
+
+    // Wake
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.ellipse(-32, 8, 6, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+  }
+
+  // Helper to draw wheels with vector style
+  drawWheel(ctx, x, y, radius, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Tire
+    this.drawShape((c) => {
+      c.beginPath();
+      c.arc(0, 0, radius, 0, Math.PI * 2);
+    }, '#222222');
+
+    // Rim with gradient
+    const rimGradient = this.createGradient(ctx, 0, -radius * 0.6, 0, radius * 0.6, '#888888', '#555555');
+    ctx.fillStyle = rimGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Spokes
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.strokeStyle = '#AAAAAA';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(radius * 0.5, 0);
+      ctx.stroke();
+      ctx.rotate(Math.PI / 2);
+    }
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  // Main render dispatcher
+  renderVehicle(ctx, vehicleId, x, y, state) {
+    const renderMap = {
+      bike: this.renderBike,
+      chopper: this.renderChopper,
+      jetpack: this.renderJetpack,
+      car: this.renderCar,
+      personal_bike: this.renderPersonalBike,
+      personal_chopper: this.renderPersonalChopper,
+      personal_jetpack: this.renderPersonalJetpack,
+      personal_car: this.renderPersonalCar,
+      hovercraft: this.renderHovercraft,
+      heavy_transport: this.renderHeavyTransport,
+      buggy: this.renderBuggy,
+      mech_proto: this.renderMechProto,
+      mech_apex: this.renderMechApex,
+      skateboard_street: this.renderStreetSkateboard,
+      tank: this.renderTank,
+      helicopter: this.renderHelicopter,
+      speedboat: this.renderSpeedboat
+    };
+
+    const renderFn = renderMap[vehicleId];
+    if (renderFn) {
+      renderFn.call(this, ctx, x, y, state);
+    }
+  }
+}
+
+
+
+// === js/sprites/3DPrerenderedVehicles.js ===
+// 3DPrerenderedVehicles.js - 3D Pre-rendered style with simulated lighting for all 17 vehicles
+
+class ThreeDPrerenderedVehicles {
+  constructor() {
+    this.lightDirection = { x: 0.5, y: -0.8, z: 0.3 }; // Directional light
+    this.ambientLight = 0.3;
+  }
+
+  // Helper to calculate shading based on normal and light direction
+  calculateShading(normal, intensity = 1) {
+    const dot = normal.x * this.lightDirection.x +
+                normal.y * this.lightDirection.y +
+                normal.z * this.lightDirection.z;
+    const diffuse = Math.max(0, -dot) * intensity;
+    return this.ambientLight + diffuse * (1 - this.ambientLight);
+  }
+
+  // Helper to create 3D gradient with lighting
+  create3DGradient(ctx, x1, y1, x2, y2, baseColor, shading) {
+    const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+    const lightColor = this.adjustBrightness(baseColor, 1 + shading * 0.5);
+    const shadowColor = this.adjustBrightness(baseColor, 0.5 + shading * 0.5);
+    gradient.addColorStop(0, lightColor);
+    gradient.addColorStop(0.5, baseColor);
+    gradient.addColorStop(1, shadowColor);
+    return gradient;
+  }
+
+  // Adjust color brightness
+  adjustBrightness(color, factor) {
+    const hex = color.replace('#', '');
+    const r = Math.min(255, Math.floor(parseInt(hex.substr(0, 2), 16) * factor));
+    const g = Math.min(255, Math.floor(parseInt(hex.substr(2, 2), 16) * factor));
+    const b = Math.min(255, Math.floor(parseInt(hex.substr(4, 2), 16) * factor));
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // Draw with ambient occlusion
+  drawWithAO(ctx, drawFn, baseColor, aoStrength = 0.3) {
+    ctx.save();
+    
+    // Draw shadow/AO layer
+    ctx.globalAlpha = aoStrength;
+    ctx.fillStyle = '#000000';
+    ctx.translate(2, 2);
+    drawFn(ctx);
+    ctx.fill();
+    ctx.translate(-2, -2);
+    ctx.globalAlpha = 1;
+    
+    // Draw main shape
+    ctx.fillStyle = baseColor;
+    drawFn(ctx);
+    ctx.fill();
+    
+    ctx.restore();
+  }
+
+  // Add specular highlight
+  addSpecular(ctx, x, y, size, intensity = 0.8) {
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+    gradient.addColorStop(0, `rgba(255, 255, 255, ${intensity})`);
+    gradient.addColorStop(0.5, `rgba(255, 255, 255, ${intensity * 0.3})`);
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Render methods for all 17 vehicles
+  
+  renderBike(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.015) * 1;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body with 3D shading
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 });
+    const bodyGradient = this.create3DGradient(ctx, 0, -10, 0, 8, '#00AACC', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 20, 8, 0, 0, Math.PI * 2);
+    }, bodyGradient);
+
+    // Metallic specular on body
+    this.addSpecular(ctx, -5, -6, 8, 0.6);
+
+    // Wheels with rim lighting
+    const wheelAngle = (animTime * 0.01) % (Math.PI * 2);
+    this.draw3DWheel(ctx, -14, 8, 6, wheelAngle);
+    this.draw3DWheel(ctx, 14, 8, 6, wheelAngle);
+
+    // Engine glow with volumetric effect
+    ctx.shadowColor = '#00E5FF';
+    ctx.shadowBlur = 20;
+    const engineGradient = ctx.createRadialGradient(-20, 0, 0, -20, 0, 10);
+    engineGradient.addColorStop(0, '#00FFFF');
+    engineGradient.addColorStop(0.5, '#00E5FF');
+    engineGradient.addColorStop(1, 'rgba(0, 229, 255, 0)');
+    ctx.fillStyle = engineGradient;
+    ctx.beginPath();
+    ctx.arc(-20, 0, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Seat with lighting
+    const seatGradient = this.create3DGradient(ctx, 0, -12, 0, -8, '#0099BB', bodyShading);
+    ctx.fillStyle = seatGradient;
+    ctx.fillRect(-8, -12, 16, 4);
+
+    ctx.restore();
+  }
+
+  renderChopper(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.012) * 0.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Extended body with metallic shading
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1.2);
+    const bodyGradient = this.create3DGradient(ctx, 0, -12, 0, 6, '#CC5529', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-30, -10, 60, 16, 4);
+    }, bodyGradient, 0.4);
+
+    // Chrome pipe speculars
+    for (let i = -10; i <= 10; i += 10) {
+      const pipeGradient = this.create3DGradient(ctx, i - 2, 0, i + 2, 8, '#DDDDDD', 1);
+      ctx.fillStyle = pipeGradient;
+      ctx.fillRect(i - 1.5, 0, 3, 10);
+      this.addSpecular(ctx, i, 2, 4, 1);
+    }
+
+    // Seats with depth
+    for (let i = -18; i <= 18; i += 18) {
+      const seatGradient = this.create3DGradient(ctx, i, -14, i, -10, '#AA4422', bodyShading);
+      ctx.fillStyle = seatGradient;
+      ctx.fillRect(i - 6, -14, 12, 4);
+    }
+
+    // Wheels
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    this.draw3DWheel(ctx, -22, 8, 8, wheelAngle);
+    this.draw3DWheel(ctx, 22, 8, 8, wheelAngle);
+
+    // Top highlight
+    this.addSpecular(ctx, 0, -10, 20, 0.4);
+
+    ctx.restore();
+  }
+
+  renderJetpack(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.02) * 2;
+    const flame = Math.sin(animTime * 0.05) * 4 + 8;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Main body with metallic shading
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0.2 }, 1);
+    const bodyGradient = this.create3DGradient(ctx, -10, -20, 10, 10, '#7A55CC', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-12, -20, 24, 32, 4);
+    }, bodyGradient, 0.5);
+
+    // Specular highlights
+    this.addSpecular(ctx, -4, -16, 8, 0.5);
+    this.addSpecular(ctx, 4, -8, 6, 0.4);
+
+    // Volumetric flame jets
+    ctx.globalCompositeOperation = 'screen';
+    for (let i = 0; i < 2; i++) {
+      const flameX = i === 0 ? -8 : 6;
+      const flameGradient = ctx.createLinearGradient(flameX, 16, flameX, 16 + flame);
+      flameGradient.addColorStop(0, 'rgba(255, 200, 100, 1)');
+      flameGradient.addColorStop(0.3, 'rgba(255, 100, 0, 0.9)');
+      flameGradient.addColorStop(0.7, 'rgba(255, 50, 0, 0.6)');
+      flameGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+      
+      ctx.fillStyle = flameGradient;
+      ctx.beginPath();
+      ctx.ellipse(flameX, 16 + flame / 2, 3, flame / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    // Thruster nozzles with inner glow
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(-10, 10, 6, 6);
+    ctx.fillRect(4, 10, 6, 6);
+    
+    ctx.shadowColor = '#FF6600';
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = '#FF6600';
+    ctx.fillRect(-8, 12, 2, 2);
+    ctx.fillRect(6, 12, 2, 2);
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  renderCar(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Body with automotive paint shading
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1.3);
+    const bodyGradient = this.create3DGradient(ctx, 0, -14, 0, 8, '#CCAA00', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-28, -12, 56, 20, 6);
+    }, bodyGradient, 0.4);
+
+    // Roof
+    const roofGradient = this.create3DGradient(ctx, 0, -18, 0, -14, '#AA8800', bodyShading);
+    ctx.fillStyle = roofGradient;
+    ctx.fillRect(-16, -18, 32, 6);
+    
+    // Roof specular
+    this.addSpecular(ctx, 0, -16, 16, 0.3);
+
+    // Windows with reflection
+    ctx.globalAlpha = 0.7;
+    const windowGradient = this.create3DGradient(ctx, 0, -16, 0, -12, '#6699CC', 0.5);
+    ctx.fillStyle = windowGradient;
+    ctx.fillRect(-14, -16, 12, 4);
+    ctx.fillRect(2, -16, 12, 4);
+    ctx.globalAlpha = 1;
+
+    // Headlight with light beam
+    ctx.shadowColor = '#FFFF88';
+    ctx.shadowBlur = 25;
+    const headlightGradient = ctx.createRadialGradient(26, -4, 0, 26, -4, 30);
+    headlightGradient.addColorStop(0, 'rgba(255, 255, 200, 0.9)');
+    headlightGradient.addColorStop(0.3, 'rgba(255, 255, 150, 0.4)');
+    headlightGradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+    ctx.fillStyle = headlightGradient;
+    ctx.fillRect(26, -10, 30, 12);
+    ctx.shadowBlur = 0;
+
+    // Wheels
+    const wheelAngle = (animTime * 0.01) % (Math.PI * 2);
+    this.draw3DWheel(ctx, -20, 10, 7, wheelAngle);
+    this.draw3DWheel(ctx, 20, 10, 7, wheelAngle);
+
+    // Body highlight
+    this.addSpecular(ctx, -10, -10, 15, 0.4);
+
+    ctx.restore();
+  }
+
+  renderPersonalBike(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.018) * 1.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Sleek body
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1.2);
+    const bodyGradient = this.create3DGradient(ctx, 0, -8, 0, 6, '#00CC6A', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 18, 7, 0, 0, Math.PI * 2);
+    }, bodyGradient);
+
+    this.addSpecular(ctx, -6, -5, 10, 0.6);
+
+    // Wheels
+    const wheelAngle = (animTime * 0.015) % (Math.PI * 2);
+    this.draw3DWheel(ctx, -12, 6, 5, wheelAngle);
+    this.draw3DWheel(ctx, 12, 6, 5, wheelAngle);
+
+    // Engine glow
+    ctx.shadowColor = '#00FF88';
+    ctx.shadowBlur = 18;
+    const engineGradient = ctx.createRadialGradient(-18, 0, 0, -18, 0, 12);
+    engineGradient.addColorStop(0, '#00FF88');
+    engineGradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+    ctx.fillStyle = engineGradient;
+    ctx.beginPath();
+    ctx.arc(-18, 0, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  renderPersonalChopper(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.01) * 0.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1.1);
+    const bodyGradient = this.create3DGradient(ctx, 0, -10, 0, 6, '#CC3333', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 28, 8, 0, 0, Math.PI * 2);
+    }, bodyGradient);
+
+    this.addSpecular(ctx, -8, -6, 12, 0.5);
+
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    this.draw3DWheel(ctx, -20, 8, 7, wheelAngle);
+    this.draw3DWheel(ctx, 20, 8, 7, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderPersonalJetpack(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.025) * 2.5;
+    const flame = Math.sin(animTime * 0.06) * 5 + 10;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1);
+    const bodyGradient = this.create3DGradient(ctx, 0, -18, 0, 10, '#8866CC', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-10, -18, 20, 28, 4);
+    }, bodyGradient, 0.5);
+
+    this.addSpecular(ctx, -2, -14, 8, 0.5);
+
+    // Enhanced volumetric flames
+    ctx.globalCompositeOperation = 'screen';
+    for (let i = 0; i < 2; i++) {
+      const flameX = i === 0 ? -6 : 5;
+      const flameGradient = ctx.createLinearGradient(flameX, 13, flameX, 13 + flame);
+      flameGradient.addColorStop(0, 'rgba(255, 150, 50, 1)');
+      flameGradient.addColorStop(0.4, 'rgba(255, 80, 0, 0.8)');
+      flameGradient.addColorStop(1, 'rgba(200, 0, 0, 0)');
+      ctx.fillStyle = flameGradient;
+      ctx.beginPath();
+      ctx.ellipse(flameX, 13 + flame / 2, 2.5, flame / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    ctx.restore();
+  }
+
+  renderPersonalCar(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1.2);
+    const bodyGradient = this.create3DGradient(ctx, 0, -12, 0, 8, '#CC8800', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-24, -10, 48, 18, 5);
+    }, bodyGradient);
+
+    this.addSpecular(ctx, -8, -10, 14, 0.4);
+
+    const wheelAngle = (animTime * 0.012) % (Math.PI * 2);
+    this.draw3DWheel(ctx, -16, 10, 6, wheelAngle);
+    this.draw3DWheel(ctx, 16, 10, 6, wheelAngle);
+
+    // Headlight glow
+    ctx.shadowColor = '#FFFFFF';
+    ctx.shadowBlur = 20;
+    const headlightGradient = ctx.createRadialGradient(22, -4, 0, 22, -4, 25);
+    headlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+    headlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = headlightGradient;
+    ctx.fillRect(22, -10, 25, 12);
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  renderHovercraft(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1.1);
+    const bodyGradient = this.create3DGradient(ctx, 0, -14, 0, 8, '#00CCCC', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 32, 12, 0, 0, Math.PI * 2);
+    }, bodyGradient, 0.3);
+
+    this.addSpecular(ctx, -10, -8, 15, 0.5);
+
+    // Hover glow with volumetric effect
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 30;
+    const hoverGradient = ctx.createRadialGradient(0, 14, 0, 0, 14, 35);
+    hoverGradient.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
+    hoverGradient.addColorStop(0.5, 'rgba(0, 255, 255, 0.4)');
+    hoverGradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+    ctx.fillStyle = hoverGradient;
+    ctx.beginPath();
+    ctx.ellipse(0, 14, 35, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  renderHeavyTransport(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 0.9);
+    const bodyGradient = this.create3DGradient(ctx, 0, -22, 0, 12, '#666666', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-44, -20, 88, 32, 6);
+    }, bodyGradient, 0.5);
+
+    // Cabin
+    const cabinGradient = this.create3DGradient(ctx, 0, -24, 0, -14, '#777777', bodyShading);
+    ctx.fillStyle = cabinGradient;
+    ctx.fillRect(24, -24, 18, 10);
+
+    const wheelAngle = (animTime * 0.008) % (Math.PI * 2);
+    for (let i = -32; i <= 32; i += 21) {
+      this.draw3DWheel(ctx, i, 14, 8, wheelAngle);
+    }
+
+    ctx.restore();
+  }
+
+  renderBuggy(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bounce = Math.sin(animTime * 0.02) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y + bounce);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Roll cage with metallic shading
+    const cageGradient = this.create3DGradient(ctx, -2, -20, 2, 6, '#CCCC00', 1.1);
+    ctx.strokeStyle = cageGradient;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(-26, -20, 52, 26, 4);
+    ctx.stroke();
+
+    // Body
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1);
+    const bodyGradient = this.create3DGradient(ctx, 0, -2, 0, 8, '#FFFF00', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-22, 0, 44, 8, 3);
+    }, bodyGradient);
+
+    const wheelAngle = (animTime * 0.012) % (Math.PI * 2);
+    this.draw3DWheel(ctx, -18, 10, 9, wheelAngle);
+    this.draw3DWheel(ctx, 18, 10, 9, wheelAngle);
+
+    ctx.restore();
+  }
+
+  renderMechProto(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.01) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const mechShading = this.calculateShading({ x: 0, y: -1, z: 0.2 }, 1);
+    
+    // Legs
+    const legGradient = this.create3DGradient(ctx, 0, 10, 0, 30, '#444466', mechShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-16, 10 + walk, 10, 20, 2);
+    }, legGradient, 0.6);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(6, 10 - walk, 10, 20, 2);
+    }, legGradient, 0.6);
+
+    // Body
+    const bodyGradient = this.create3DGradient(ctx, 0, -18, 0, 12, '#555577', mechShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-20, -16, 40, 28, 4);
+    }, bodyGradient, 0.5);
+
+    // Metallic speculars
+    this.addSpecular(ctx, -8, -12, 10, 0.6);
+    this.addSpecular(ctx, 6, -6, 8, 0.5);
+
+    // Head sensor with glow
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 15;
+    const sensorGradient = ctx.createRadialGradient(0, -20, 0, 0, -20, 8);
+    sensorGradient.addColorStop(0, '#FF0000');
+    sensorGradient.addColorStop(0.5, '#CC0000');
+    sensorGradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
+    ctx.fillStyle = sensorGradient;
+    ctx.beginPath();
+    ctx.arc(0, -20, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  renderMechApex(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.01) * 2.5;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const mechShading = this.calculateShading({ x: 0, y: -1, z: 0.3 }, 1.2);
+    
+    // Legs
+    const legGradient = this.create3DGradient(ctx, 0, 12, 0, 36, '#556688', mechShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-18, 12 + walk, 12, 24, 3);
+    }, legGradient, 0.6);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(6, 12 - walk, 12, 24, 3);
+    }, legGradient, 0.6);
+
+    // Body
+    const bodyGradient = this.create3DGradient(ctx, 0, -22, 0, 14, '#667799', mechShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-24, -20, 48, 34, 6);
+    }, bodyGradient, 0.5);
+
+    // Shoulder cannons with glow
+    const cannonGradient = this.create3DGradient(ctx, -2, -18, 2, -6, '#556688', mechShading);
+    ctx.fillStyle = cannonGradient;
+    ctx.fillRect(-28, -18, 6, 12);
+    ctx.fillRect(22, -18, 6, 12);
+
+    // Cannon muzzle glow
+    ctx.shadowColor = '#FF6600';
+    ctx.shadowBlur = 18;
+    const muzzleGradient = ctx.createRadialGradient(-25, -12, 0, -25, -12, 10);
+    muzzleGradient.addColorStop(0, '#FF6600');
+    muzzleGradient.addColorStop(1, 'rgba(255, 102, 0, 0)');
+    ctx.fillStyle = muzzleGradient;
+    ctx.beginPath();
+    ctx.arc(-25, -12, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(25, -12, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Metallic highlights
+    this.addSpecular(ctx, -10, -16, 12, 0.7);
+    this.addSpecular(ctx, 8, -10, 10, 0.6);
+
+    ctx.restore();
+  }
+
+  renderStreetSkateboard(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const tilt = Math.sin(animTime * 0.02) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(tilt * Math.PI / 180);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const deckShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1);
+    const deckGradient = this.create3DGradient(ctx, 0, -3, 0, 3, '#CC6688', deckShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-16, -3, 32, 6, 3);
+    }, deckGradient, 0.2);
+
+    this.addSpecular(ctx, -4, -1, 6, 0.3);
+
+    const wheelAngle = (animTime * 0.02) % (Math.PI * 2);
+    for (let i = -14; i <= 14; i += 6) {
+      if (Math.abs(i) > 6) {
+        this.draw3DWheel(ctx, i, 7, 3, wheelAngle);
+      }
+    }
+
+    ctx.restore();
+  }
+
+  renderTank(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const tankShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 0.8);
+    
+    // Hull with armor plates
+    const hullGradient = this.create3DGradient(ctx, 0, -14, 0, 12, '#2A4A2A', tankShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.roundRect(-42, -12, 84, 24, 4);
+    }, hullGradient, 0.6);
+
+    // Turret
+    const turretGradient = this.create3DGradient(ctx, 0, -26, 0, -10, '#3D5A3D', tankShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, -18, 24, 8, 0, 0, Math.PI * 2);
+    }, turretGradient, 0.5);
+
+    // Cannon with metallic shading
+    const cannonGradient = this.create3DGradient(ctx, 0, -21, 0, -17, '#1A3A1A', tankShading);
+    ctx.fillStyle = cannonGradient;
+    ctx.fillRect(20, -21, 24, 6);
+    this.addSpecular(ctx, 32, -19, 8, 0.4);
+
+    // Tracks
+    ctx.fillStyle = '#1A2A1A';
+    ctx.fillRect(-44, 14, 88, 10);
+
+    const wheelAngle = (animTime * 0.005) % (Math.PI * 2);
+    for (let i = -32; i <= 32; i += 16) {
+      ctx.fillStyle = '#333333';
+      ctx.beginPath();
+      ctx.arc(i, 18, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  renderHelicopter(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const hover = Math.sin(animTime * 0.015) * 2;
+    const rotorAngle = (animTime * 0.03) % (Math.PI * 2);
+    
+    ctx.save();
+    ctx.translate(x, y + hover);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const bodyShading = this.calculateShading({ x: 0, y: -1, z: 0 }, 1.1);
+    const bodyGradient = this.create3DGradient(ctx, 0, -10, 0, 8, '#338833', bodyShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.ellipse(0, 0, 32, 10, 0, 0, Math.PI * 2);
+    }, bodyGradient, 0.4);
+
+    this.addSpecular(ctx, -8, -6, 14, 0.5);
+
+    // Rotor motion blur with 3D effect
+    ctx.save();
+    ctx.translate(0, -18);
+    ctx.rotate(rotorAngle);
+    ctx.globalAlpha = 0.3;
+    const rotorGradient = ctx.createLinearGradient(-36, 0, 36, 0);
+    rotorGradient.addColorStop(0, 'rgba(100, 100, 100, 0)');
+    rotorGradient.addColorStop(0.5, 'rgba(100, 100, 100, 0.5)');
+    rotorGradient.addColorStop(1, 'rgba(100, 100, 100, 0)');
+    ctx.fillStyle = rotorGradient;
+    ctx.fillRect(-36, -2, 72, 4);
+    ctx.fillRect(-2, -36, 4, 72);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  renderSpeedboat(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const bob = Math.sin(animTime * 0.02) * 1.5;
+    
+    ctx.save();
+    ctx.translate(x, y + bob);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    const boatShading = this.calculateShading({ x: 0, y: -1, z: 0.3 }, 1.1);
+    const hullGradient = this.create3DGradient(ctx, 0, -8, 0, 8, '#2277CC', boatShading);
+    this.drawWithAO(ctx, (c) => {
+      c.beginPath();
+      c.moveTo(-26, 8);
+      c.lineTo(-28, 2);
+      c.lineTo(-24, -6);
+      c.lineTo(32, -4);
+      c.lineTo(34, 4);
+      c.lineTo(32, 8);
+      c.closePath();
+    }, hullGradient, 0.4);
+
+    // Glossy finish specular
+    this.addSpecular(ctx, -4, -4, 16, 0.6);
+    this.addSpecular(ctx, 12, 0, 12, 0.5);
+
+    // Wake splash with foam
+    ctx.globalAlpha = 0.7;
+    const wakeGradient = ctx.createRadialGradient(-32, 8, 0, -32, 8, 10);
+    wakeGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+    wakeGradient.addColorStop(0.5, 'rgba(200, 230, 255, 0.6)');
+    wakeGradient.addColorStop(1, 'rgba(170, 210, 255, 0)');
+    ctx.fillStyle = wakeGradient;
+    ctx.beginPath();
+    ctx.ellipse(-32, 8, 10, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.restore();
+  }
+
+  // Helper to draw 3D wheels
+  draw3DWheel(ctx, x, y, radius, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Tire with AO
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = '#222222';
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Rim with metallic gradient
+    const rimGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius * 0.6);
+    rimGradient.addColorStop(0, '#AAAAAA');
+    rimGradient.addColorStop(0.5, '#666666');
+    rimGradient.addColorStop(1, '#444444');
+    ctx.fillStyle = rimGradient;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rim specular highlight
+    this.addSpecular(ctx, -radius * 0.2, -radius * 0.3, radius * 0.4, 0.7);
+
+    // Spokes with rotation
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.strokeStyle = '#888888';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(radius * 0.5, 0);
+      ctx.stroke();
+      ctx.rotate(Math.PI / 2);
+    }
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  // Main render dispatcher
+  renderVehicle(ctx, vehicleId, x, y, state) {
+    const renderMap = {
+      bike: this.renderBike,
+      chopper: this.renderChopper,
+      jetpack: this.renderJetpack,
+      car: this.renderCar,
+      personal_bike: this.renderPersonalBike,
+      personal_chopper: this.renderPersonalChopper,
+      personal_jetpack: this.renderPersonalJetpack,
+      personal_car: this.renderPersonalCar,
+      hovercraft: this.renderHovercraft,
+      heavy_transport: this.renderHeavyTransport,
+      buggy: this.renderBuggy,
+      mech_proto: this.renderMechProto,
+      mech_apex: this.renderMechApex,
+      skateboard_street: this.renderStreetSkateboard,
+      tank: this.renderTank,
+      helicopter: this.renderHelicopter,
+      speedboat: this.renderSpeedboat
+    };
+
+    const renderFn = renderMap[vehicleId];
+    if (renderFn) {
+      renderFn.call(this, ctx, x, y, state);
+    }
+  }
+}
+
+
+
+// === js/sprites/CharacterSprites.js ===
+// CharacterSprites.js - 3 characters in 3 styles for vehicle riding
+
+class CharacterSprites {
+  constructor() {
+    this.currentStyle = 'pixel'; // pixel, vector, 3d
+  }
+
+  setStyle(style) {
+    this.currentStyle = style;
+  }
+
+  // Render character on vehicle based on vehicle type
+  renderCharacterOnVehicle(ctx, character, vehicleId, x, y, state) {
+    const characterMap = {
+      warrior: {
+        pixel: this.renderWarriorPixel.bind(this),
+        vector: this.renderWarriorVector.bind(this),
+        '3d': this.renderWarrior3D.bind(this)
+      },
+      cat_angel: {
+        pixel: this.renderCatAngelPixel.bind(this),
+        vector: this.renderCatAngelVector.bind(this),
+        '3d': this.renderCatAngel3D.bind(this)
+      },
+      cyborg: {
+        pixel: this.renderCyborgPixel.bind(this),
+        vector: this.renderCyborgVector.bind(this),
+        '3d': this.renderCyborg3D.bind(this)
+      }
+    };
+
+    // Position adjustments based on vehicle type
+    const vehicleOffsets = {
+      bike: { x: 0, y: -12 },
+      chopper: { x: 0, y: -14 },
+      jetpack: { x: 0, y: -8 }, // Wearing it
+      car: { x: 0, y: -18 },
+      personal_bike: { x: 0, y: -10 },
+      personal_chopper: { x: 0, y: -12 },
+      personal_jetpack: { x: 0, y: -8 },
+      personal_car: { x: 0, y: -16 },
+      hovercraft: { x: 0, y: -16 },
+      heavy_transport: { x: 10, y: -24 },
+      buggy: { x: 0, y: -14 },
+      mech_proto: { x: 0, y: -18 }, // Inside cockpit
+      mech_apex: { x: 0, y: -22 }, // Inside cockpit
+      skateboard_street: { x: 0, y: -20 }, // Standing on it
+      tank: { x: 0, y: -28 },
+      helicopter: { x: 6, y: -12 },
+      speedboat: { x: 2, y: -14 }
+    };
+
+    const offset = vehicleOffsets[vehicleId] || { x: 0, y: -12 };
+    const charX = x + offset.x;
+    const charY = y + offset.y;
+
+    const renderFn = characterMap[character]?.[this.currentStyle];
+    if (renderFn) {
+      renderFn(ctx, charX, charY, state);
+    }
+  }
+
+  // Walking character (not on vehicle)
+  renderCharacterWalking(ctx, character, x, y, state) {
+    const characterMap = {
+      warrior: {
+        pixel: this.renderWarriorWalkPixel.bind(this),
+        vector: this.renderWarriorWalkVector.bind(this),
+        '3d': this.renderWarriorWalk3D.bind(this)
+      },
+      cat_angel: {
+        pixel: this.renderCatAngelWalkPixel.bind(this),
+        vector: this.renderCatAngelWalkVector.bind(this),
+        '3d': this.renderCatAngelWalk3D.bind(this)
+      },
+      cyborg: {
+        pixel: this.renderCyborgWalkPixel.bind(this),
+        vector: this.renderCyborgWalkVector.bind(this),
+        '3d': this.renderCyborgWalk3D.bind(this)
+      }
+    };
+
+    const renderFn = characterMap[character]?.[this.currentStyle];
+    if (renderFn) {
+      renderFn(ctx, x, y, state);
+    }
+  }
+
+  // ===== WARRIOR - PIXEL ART =====
+  renderWarriorPixel(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head with baseball cap
+    ctx.fillStyle = '#8B6F47'; // Skin
+    ctx.fillRect(-4, -16, 8, 8);
+    ctx.fillStyle = '#FF4444'; // Cap
+    ctx.fillRect(-5, -18, 10, 4);
+    ctx.fillRect(-6, -18, 2, 2); // Brim
+
+    // Eyes (red glow)
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(-2, -14, 2, 2);
+    ctx.fillRect(1, -14, 2, 2);
+
+    // Torso
+    ctx.fillStyle = '#333333'; // Dark shirt
+    ctx.fillRect(-5, -8, 10, 12);
+
+    // Arms on controls
+    ctx.fillStyle = '#8B6F47';
+    ctx.fillRect(-8, -4, 3, 6); // Left arm
+    ctx.fillRect(5, -4, 3, 6); // Right arm
+
+    ctx.restore();
+  }
+
+  renderWarriorWalkPixel(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head with cap
+    ctx.fillStyle = '#8B6F47';
+    ctx.fillRect(-4, -28, 8, 8);
+    ctx.fillStyle = '#FF4444';
+    ctx.fillRect(-5, -30, 10, 4);
+
+    // Eyes
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(-2, -26, 2, 2);
+    ctx.fillRect(1, -26, 2, 2);
+
+    // Body
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(-5, -20, 10, 14);
+
+    // Legs (walking)
+    ctx.fillStyle = '#222222';
+    ctx.fillRect(-4, -6 + walk, 4, 10);
+    ctx.fillRect(1, -6 - walk, 4, 10);
+
+    // Arms swinging
+    ctx.fillStyle = '#8B6F47';
+    ctx.fillRect(-7, -16 + walk, 3, 8);
+    ctx.fillRect(5, -16 - walk, 3, 8);
+
+    ctx.restore();
+  }
+
+  // ===== WARRIOR - VECTOR =====
+  renderWarriorVector(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#8B6F47';
+    ctx.beginPath();
+    ctx.arc(0, -12, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cap
+    ctx.fillStyle = '#FF4444';
+    ctx.beginPath();
+    ctx.ellipse(0, -15, 6, 3, 0, Math.PI, 0, true);
+    ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = '#FF0000';
+    ctx.beginPath();
+    ctx.arc(-2, -12, 1.5, 0, Math.PI * 2);
+    ctx.arc(2, -12, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Body
+    ctx.fillStyle = '#333333';
+    ctx.beginPath();
+    ctx.roundRect(-5, -7, 10, 12, 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderWarriorWalkVector(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#8B6F47';
+    ctx.beginPath();
+    ctx.arc(0, -22, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cap
+    ctx.fillStyle = '#FF4444';
+    ctx.beginPath();
+    ctx.ellipse(0, -26, 7, 4, 0, Math.PI, 0, true);
+    ctx.fill();
+
+    // Body
+    ctx.fillStyle = '#333333';
+    ctx.beginPath();
+    ctx.roundRect(-6, -16, 12, 16, 3);
+    ctx.fill();
+
+    // Legs
+    ctx.fillStyle = '#222222';
+    ctx.beginPath();
+    ctx.roundRect(-5, -4 + walk, 4, 10, 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(1, -4 - walk, 4, 10, 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // ===== WARRIOR - 3D =====
+  renderWarrior3D(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head with gradient shading
+    const headGradient = ctx.createRadialGradient(-2, -14, 0, 0, -12, 6);
+    headGradient.addColorStop(0, '#A08050');
+    headGradient.addColorStop(1, '#6B5037');
+    ctx.fillStyle = headGradient;
+    ctx.beginPath();
+    ctx.arc(0, -12, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cap with specular
+    ctx.fillStyle = '#FF4444';
+    ctx.beginPath();
+    ctx.ellipse(0, -15, 6, 3, 0, Math.PI, 0, true);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(-2, -16, 2, 1, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eyes with glow
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(-2, -13, 2, 2);
+    ctx.fillRect(1, -13, 2, 2);
+    ctx.shadowBlur = 0;
+
+    // Body with cloth shading
+    const bodyGradient = ctx.createLinearGradient(-5, -7, 5, 5);
+    bodyGradient.addColorStop(0, '#444444');
+    bodyGradient.addColorStop(0.5, '#333333');
+    bodyGradient.addColorStop(1, '#222222');
+    ctx.fillStyle = bodyGradient;
+    ctx.fillRect(-5, -7, 10, 12);
+
+    ctx.restore();
+  }
+
+  renderWarriorWalk3D(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    const bob = Math.abs(Math.sin(animTime * 0.015)) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y - bob);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    const headGradient = ctx.createRadialGradient(-2, -24, 0, 0, -22, 7);
+    headGradient.addColorStop(0, '#A08050');
+    headGradient.addColorStop(1, '#6B5037');
+    ctx.fillStyle = headGradient;
+    ctx.beginPath();
+    ctx.arc(0, -22, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cap
+    ctx.fillStyle = '#FF4444';
+    ctx.beginPath();
+    ctx.ellipse(0, -26, 7, 4, 0, Math.PI, 0, true);
+    ctx.fill();
+
+    // Eyes
+    ctx.shadowColor = '#FF0000';
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(-3, -23, 2, 2);
+    ctx.fillRect(1, -23, 2, 2);
+    ctx.shadowBlur = 0;
+
+    // Body
+    const bodyGradient = ctx.createLinearGradient(0, -16, 0, 0);
+    bodyGradient.addColorStop(0, '#444444');
+    bodyGradient.addColorStop(1, '#222222');
+    ctx.fillStyle = bodyGradient;
+    ctx.fillRect(-6, -16, 12, 16);
+
+    // Legs with shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetY = 1;
+    ctx.fillStyle = '#222222';
+    ctx.fillRect(-5, -4 + walk, 4, 10);
+    ctx.fillRect(1, -4 - walk, 4, 10);
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  // ===== CAT ANGEL - PIXEL ART =====
+  renderCatAngelPixel(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head (black cat)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(-4, -16, 8, 8);
+    
+    // Ears
+    ctx.fillRect(-5, -20, 2, 4);
+    ctx.fillRect(3, -20, 2, 4);
+
+    // Eye (green)
+    ctx.fillStyle = '#00FF00';
+    ctx.fillRect(1, -14, 2, 2);
+
+    // Tail (animated)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(-8, -6, 3, 8);
+
+    // Wing (pink)
+    ctx.fillStyle = '#FF88AA';
+    ctx.fillRect(-10, -12, 4, 8);
+
+    ctx.restore();
+  }
+
+  renderCatAngelWalkPixel(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    const tailWag = Math.sin(animTime * 0.02) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(-5, -28, 10, 10);
+    ctx.fillRect(-6, -32, 3, 4); // Ears
+    ctx.fillRect(3, -32, 3, 4);
+
+    // Eye
+    ctx.fillStyle = '#00FF00';
+    ctx.fillRect(1, -26, 2, 3);
+
+    // Body
+    ctx.fillStyle = '#FF88AA'; // Suit
+    ctx.fillRect(-5, -18, 10, 12);
+
+    // Legs
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(-4, -6 + walk, 3, 8);
+    ctx.fillRect(1, -6 - walk, 3, 8);
+
+    // Tail
+    ctx.fillRect(-8 + tailWag, -14, 3, 10);
+
+    // Wing
+    ctx.fillStyle = '#FF88AA';
+    ctx.fillRect(-10, -20, 4, 12);
+
+    ctx.restore();
+  }
+
+  // ===== CAT ANGEL - VECTOR =====
+  renderCatAngelVector(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(0, -12, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ears
+    ctx.beginPath();
+    ctx.moveTo(-4, -16);
+    ctx.lineTo(-6, -20);
+    ctx.lineTo(-2, -18);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(4, -16);
+    ctx.lineTo(6, -20);
+    ctx.lineTo(2, -18);
+    ctx.fill();
+
+    // Eye
+    ctx.fillStyle = '#00FF00';
+    ctx.beginPath();
+    ctx.ellipse(2, -12, 1.5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wing
+    ctx.fillStyle = '#FF88AA';
+    ctx.beginPath();
+    ctx.ellipse(-8, -8, 3, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderCatAngelWalkVector(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(0, -22, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ears
+    ctx.beginPath();
+    ctx.moveTo(-4, -26);
+    ctx.lineTo(-7, -32);
+    ctx.lineTo(-2, -28);
+    ctx.fill();
+
+    // Body
+    ctx.fillStyle = '#FF88AA';
+    ctx.beginPath();
+    ctx.roundRect(-5, -16, 10, 14, 2);
+    ctx.fill();
+
+    // Legs
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.roundRect(-4, -4 + walk, 3, 8, 1);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(1, -4 - walk, 3, 8, 1);
+    ctx.fill();
+
+    // Wing
+    ctx.fillStyle = '#FF88AA';
+    ctx.beginPath();
+    ctx.ellipse(-8, -12, 4, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // ===== CAT ANGEL - 3D =====
+  renderCatAngel3D(ctx, x, y, state) {
+    const { facingLeft, animTime } = state;
+    const haloFloat = Math.sin(animTime * 0.02) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Halo with glow
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 10;
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, -20 + haloFloat, 4, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Head
+    const headGradient = ctx.createRadialGradient(-1, -13, 0, 0, -12, 5);
+    headGradient.addColorStop(0, '#222222');
+    headGradient.addColorStop(1, '#000000');
+    ctx.fillStyle = headGradient;
+    ctx.beginPath();
+    ctx.arc(0, -12, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye glow
+    ctx.shadowColor = '#00FF00';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#00FF00';
+    ctx.beginPath();
+    ctx.ellipse(2, -12, 1.5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Wing with feather detail
+    const wingGradient = ctx.createRadialGradient(-8, -8, 0, -8, -8, 5);
+    wingGradient.addColorStop(0, '#FFAACC');
+    wingGradient.addColorStop(1, '#FF88AA');
+    ctx.fillStyle = wingGradient;
+    ctx.beginPath();
+    ctx.ellipse(-8, -8, 3, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderCatAngelWalk3D(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    const bob = Math.abs(Math.sin(animTime * 0.015)) * 2;
+    const haloFloat = Math.sin(animTime * 0.02) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y - bob);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Floating halo
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur = 12;
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, -34 + haloFloat, 5, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Head
+    const headGradient = ctx.createRadialGradient(-2, -23, 0, 0, -22, 6);
+    headGradient.addColorStop(0, '#222222');
+    headGradient.addColorStop(1, '#000000');
+    ctx.fillStyle = headGradient;
+    ctx.beginPath();
+    ctx.arc(0, -22, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Eye
+    ctx.shadowColor = '#00FF00';
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = '#00FF00';
+    ctx.beginPath();
+    ctx.ellipse(2, -22, 2, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Body
+    const bodyGradient = ctx.createLinearGradient(0, -16, 0, -2);
+    bodyGradient.addColorStop(0, '#FFAACC');
+    bodyGradient.addColorStop(1, '#FF88AA');
+    ctx.fillStyle = bodyGradient;
+    ctx.fillRect(-5, -16, 10, 14);
+
+    // Legs
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(-4, -4 + walk, 3, 8);
+    ctx.fillRect(1, -4 - walk, 3, 8);
+
+    // Wing
+    const wingGradient = ctx.createRadialGradient(-8, -12, 0, -8, -12, 6);
+    wingGradient.addColorStop(0, '#FFAACC');
+    wingGradient.addColorStop(1, '#FF88AA');
+    ctx.fillStyle = wingGradient;
+    ctx.beginPath();
+    ctx.ellipse(-8, -12, 4, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // ===== CYBORG - PIXEL ART =====
+  renderCyborgPixel(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#8B6F47';
+    ctx.fillRect(-4, -16, 8, 8);
+
+    // Pigtails (black)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(-7, -14, 2, 6);
+    ctx.fillRect(5, -14, 2, 6);
+
+    // Visor glow
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-3, -13, 6, 2);
+
+    // Body (armor)
+    ctx.fillStyle = '#556688';
+    ctx.fillRect(-5, -8, 10, 12);
+
+    // Energy conduits
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-4, -6, 2, 2);
+    ctx.fillRect(2, -6, 2, 2);
+
+    ctx.restore();
+  }
+
+  renderCyborgWalkPixel(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#8B6F47';
+    ctx.fillRect(-5, -28, 10, 10);
+
+    // Pigtails
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(-8, -26 + walk * 0.5, 2, 8);
+    ctx.fillRect(6, -26 - walk * 0.5, 2, 8);
+
+    // Visor
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-4, -25, 8, 2);
+
+    // Body
+    ctx.fillStyle = '#556688';
+    ctx.fillRect(-6, -18, 12, 14);
+
+    // Legs
+    ctx.fillStyle = '#444466';
+    ctx.fillRect(-5, -6 + walk, 4, 10);
+    ctx.fillRect(1, -6 - walk, 4, 10);
+
+    // Energy conduits
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-4, -14, 2, 2);
+    ctx.fillRect(2, -14, 2, 2);
+
+    ctx.restore();
+  }
+
+  // ===== CYBORG - VECTOR =====
+  renderCyborgVector(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#8B6F47';
+    ctx.beginPath();
+    ctx.arc(0, -12, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pigtails
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.ellipse(-6, -10, 1.5, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(6, -10, 1.5, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Visor
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-4, -13, 8, 2);
+
+    // Body
+    ctx.fillStyle = '#556688';
+    ctx.beginPath();
+    ctx.roundRect(-5, -7, 10, 12, 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  renderCyborgWalkVector(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    ctx.fillStyle = '#8B6F47';
+    ctx.beginPath();
+    ctx.arc(0, -22, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pigtails
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.ellipse(-7, -20 + walk * 0.3, 2, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(7, -20 - walk * 0.3, 2, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Visor
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-5, -23, 10, 2);
+
+    // Body
+    ctx.fillStyle = '#556688';
+    ctx.beginPath();
+    ctx.roundRect(-6, -16, 12, 14, 3);
+    ctx.fill();
+
+    // Legs
+    ctx.fillStyle = '#444466';
+    ctx.beginPath();
+    ctx.roundRect(-5, -4 + walk, 4, 10, 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(1, -4 - walk, 4, 10, 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // ===== CYBORG - 3D =====
+  renderCyborg3D(ctx, x, y, state) {
+    const { facingLeft } = state;
+    ctx.save();
+    ctx.translate(x, y);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head with skin gradient
+    const headGradient = ctx.createRadialGradient(-2, -13, 0, 0, -12, 5);
+    headGradient.addColorStop(0, '#A08050');
+    headGradient.addColorStop(1, '#6B5037');
+    ctx.fillStyle = headGradient;
+    ctx.beginPath();
+    ctx.arc(0, -12, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pigtails
+    const hairGradient = ctx.createRadialGradient(0, -10, 0, -6, -10, 3);
+    hairGradient.addColorStop(0, '#111111');
+    hairGradient.addColorStop(1, '#000000');
+    ctx.fillStyle = hairGradient;
+    ctx.beginPath();
+    ctx.ellipse(-6, -10, 2, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(6, -10, 2, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Visor with glow
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-4, -13, 8, 2);
+    ctx.shadowBlur = 0;
+
+    // Armor body
+    const armorGradient = ctx.createLinearGradient(-5, -7, 5, 5);
+    armorGradient.addColorStop(0, '#667799');
+    armorGradient.addColorStop(0.5, '#556688');
+    armorGradient.addColorStop(1, '#445577');
+    ctx.fillStyle = armorGradient;
+    ctx.fillRect(-5, -7, 10, 12);
+
+    // Energy conduits with glow
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-3, -5, 2, 2);
+    ctx.fillRect(1, -5, 2, 2);
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+
+  renderCyborgWalk3D(ctx, x, y, state) {
+    const { animTime, facingLeft } = state;
+    const walk = Math.sin(animTime * 0.015) * 3;
+    const bob = Math.abs(Math.sin(animTime * 0.015)) * 2;
+    
+    ctx.save();
+    ctx.translate(x, y - bob);
+    if (facingLeft) ctx.scale(-1, 1);
+
+    // Head
+    const headGradient = ctx.createRadialGradient(-2, -23, 0, 0, -22, 6);
+    headGradient.addColorStop(0, '#A08050');
+    headGradient.addColorStop(1, '#6B5037');
+    ctx.fillStyle = headGradient;
+    ctx.beginPath();
+    ctx.arc(0, -22, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pigtails (animated)
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.ellipse(-7, -20 + walk * 0.3, 2, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(7, -20 - walk * 0.3, 2, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Visor glow
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-5, -23, 10, 2);
+    ctx.shadowBlur = 0;
+
+    // Armor body
+    const armorGradient = ctx.createLinearGradient(0, -16, 0, -2);
+    armorGradient.addColorStop(0, '#667799');
+    armorGradient.addColorStop(1, '#445577');
+    ctx.fillStyle = armorGradient;
+    ctx.fillRect(-6, -16, 12, 14);
+
+    // Legs
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetY = 1;
+    ctx.fillStyle = '#444466';
+    ctx.fillRect(-5, -4 + walk, 4, 10);
+    ctx.fillRect(1, -4 - walk, 4, 10);
+    ctx.shadowBlur = 0;
+
+    // Energy conduits
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = '#00FFFF';
+    ctx.fillRect(-4, -12, 2, 2);
+    ctx.fillRect(2, -12, 2, 2);
+    ctx.shadowBlur = 0;
+
+    ctx.restore();
+  }
+}
+
+
+
+// === js/VehicleController.js ===
+// VehicleController.js - Board/unboard mechanics and vehicle physics
+
+class VehicleController {
+  constructor() {
+    this.boardingAnimDuration = 500; // ms
+  }
+
+  // Board a vehicle with animation
+  boardVehicle(player, vehicle, animTime) {
+    if (vehicle.rider || player.isRiding) return false;
+
+    // Start boarding animation
+    player.boardingVehicle = vehicle;
+    player.boardingStartTime = animTime;
+    player.boardingProgress = 0;
+    
+    // Store original position
+    player.boardingStartX = player.x;
+    player.boardingStartY = player.y;
+    
+    return true;
+  }
+
+  // Update boarding animation
+  updateBoarding(player, animTime, dt) {
+    if (!player.boardingVehicle) return;
+
+    const elapsed = animTime - player.boardingStartTime;
+    player.boardingProgress = Math.min(1, elapsed / this.boardingAnimDuration);
+
+    // Smooth easing function
+    const easeProgress = this.easeInOutCubic(player.boardingProgress);
+
+    // Interpolate position to vehicle
+    const targetX = player.boardingVehicle.x;
+    const targetY = player.boardingVehicle.y;
+    
+    player.x = player.boardingStartX + (targetX - player.boardingStartX) * easeProgress;
+    player.y = player.boardingStartY + (targetY - player.boardingStartY) * easeProgress;
+
+    // Complete boarding
+    if (player.boardingProgress >= 1) {
+      player.isRiding = true;
+      player.ridingVehicle = player.boardingVehicle;
+      player.boardingVehicle.rider = player;
+      
+      // Clean up boarding state
+      player.boardingVehicle = null;
+      player.boardingProgress = 0;
+      
+      // Transfer momentum
+      player.vx = 0;
+      player.vy = 0;
+    }
+  }
+
+  // Unboard a vehicle with animation
+  unboardVehicle(player, vehicle, animTime) {
+    if (!player.isRiding || !vehicle.rider) return false;
+
+    // Start unboarding animation
+    player.unboardingVehicle = vehicle;
+    player.unboardingStartTime = animTime;
+    player.unboardingProgress = 0;
+    
+    // Store positions
+    player.unboardingStartX = vehicle.x;
+    player.unboardingStartY = vehicle.y;
+    player.unboardingTargetX = vehicle.x + (player.facingLeft ? -40 : 40);
+    player.unboardingTargetY = vehicle.y;
+    
+    // Clear riding state immediately
+    player.isRiding = false;
+    vehicle.rider = null;
+    
+    return true;
+  }
+
+  // Update unboarding animation
+  updateUnboarding(player, animTime, dt) {
+    if (!player.unboardingVehicle) return;
+
+    const elapsed = animTime - player.unboardingStartTime;
+    player.unboardingProgress = Math.min(1, elapsed / this.boardingAnimDuration);
+
+    const easeProgress = this.easeInOutCubic(player.unboardingProgress);
+
+    // Jump off animation
+    const jumpArc = Math.sin(player.unboardingProgress * Math.PI) * 20;
+    
+    player.x = player.unboardingStartX + 
+               (player.unboardingTargetX - player.unboardingStartX) * easeProgress;
+    player.y = player.unboardingStartY + 
+               (player.unboardingTargetY - player.unboardingStartY) * easeProgress - 
+               jumpArc;
+
+    // Complete unboarding
+    if (player.unboardingProgress >= 1) {
+      player.ridingVehicle = null;
+      player.unboardingVehicle = null;
+      player.unboardingProgress = 0;
+      
+      // Reset to ground
+      player.vy = 0;
+    }
+  }
+
+  // Update vehicle physics
+  updateVehicle(vehicle, inputKeys, dt, groundY) {
+    if (!vehicle) return;
+
+    const vehicleData = vehicle.data;
+
+    if (vehicle.rider) {
+      // Player is controlling the vehicle
+      const targetVx = (inputKeys.ArrowRight ? 1 : 0) - (inputKeys.ArrowLeft ? 1 : 0);
+
+      vehicle.vx += targetVx * vehicleData.acceleration * dt;
+      
+      // Apply friction
+      if (targetVx === 0) {
+        vehicle.vx *= Math.pow(1 - vehicleData.friction, dt * 60);
+      }
+
+      // Clamp to max speed
+      const maxSpeed = vehicleData.maxSpeed * 100;
+      vehicle.vx = Math.max(-maxSpeed, Math.min(maxSpeed, vehicle.vx));
+
+      // Handle jumping (for ground vehicles)
+      if (inputKeys.ArrowUp && vehicle.grounded && vehicle.jumpCount < 2) {
+        if (vehicleData.jumpForce > 0) {
+          vehicle.vy = -vehicleData.jumpForce;
+          vehicle.grounded = false;
+          vehicle.jumpCount++;
+        }
+      }
+
+      // Update facing direction
+      if (targetVx !== 0) {
+        vehicle.facingLeft = targetVx < 0;
+      }
+    } else {
+      // Vehicle is idle - apply friction
+      vehicle.vx *= Math.pow(1 - vehicleData.friction, dt * 60);
+    }
+
+    // Apply physics
+    vehicle.x += vehicle.vx * dt;
+    
+    // Gravity for non-hover vehicles
+    if (vehicleData.category !== 'hover') {
+      vehicle.vy += vehicleData.gravity * dt;
+      vehicle.y += vehicle.vy * dt;
+
+      // Ground collision
+      if (vehicle.y >= groundY) {
+        vehicle.y = groundY;
+        vehicle.vy = 0;
+        vehicle.grounded = true;
+        vehicle.jumpCount = 0;
+      } else {
+        vehicle.grounded = false;
+      }
+    } else {
+      // Hover vehicles float
+      const hoverHeight = groundY - 20;
+      const diff = hoverHeight - vehicle.y;
+      vehicle.vy = diff * 0.1;
+      vehicle.y += vehicle.vy * dt;
+    }
+
+    // Update rider position
+    if (vehicle.rider) {
+      vehicle.rider.x = vehicle.x;
+      vehicle.rider.y = vehicle.y;
+      vehicle.rider.facingLeft = vehicle.facingLeft;
+    }
+
+    // Keep within bounds
+    vehicle.x = Math.max(50, Math.min(5950, vehicle.x));
+  }
+
+  // Easing function
+  easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  // Check if player can interact with vehicle
+  canInteract(player, vehicle) {
+    const distance = Math.abs(player.x - vehicle.x);
+    return distance < 60 && !player.boardingVehicle && !player.unboardingVehicle;
+  }
+}
+
+
+
+// === js/EffectsSystem.js ===
+// EffectsSystem.js - Particle effects, glows, shadows, dust trails
+
+class Particle {
+  constructor(x, y, vx, vy, life, color, size, type = 'circle') {
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+    this.life = life;
+    this.maxLife = life;
+    this.color = color;
+    this.size = size;
+    this.type = type;
+    this.alpha = 1;
+    this.gravity = 0.2;
+  }
+
+  update(dt) {
+    this.x += this.vx * dt * 60;
+    this.y += this.vy * dt * 60;
+    
+    // Apply gravity
+    this.vy += this.gravity * dt * 60;
+    
+    // Apply air resistance
+    this.vx *= 0.98;
+    this.vy *= 0.98;
+    
+    // Decrease life
+    this.life -= dt * 1000;
+    this.alpha = this.life / this.maxLife;
+    
+    return this.life > 0;
+  }
+
+  render(ctx) {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    
+    if (this.type === 'circle') {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (this.type === 'square') {
+      ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+    }
+    
+    ctx.restore();
+  }
+}
+
+class EffectsSystem {
+  constructor() {
+    this.particles = [];
+    this.shadows = new Map(); // vehicle id -> shadow data
+  }
+
+  update(dt) {
+    // Update all particles
+    this.particles = this.particles.filter(p => p.update(dt));
+  }
+
+  render(ctx) {
+    this.particles.forEach(p => p.render(ctx));
+  }
+
+  // Render shadow under vehicle
+  renderShadow(ctx, x, y, width, height, vehicleCategory) {
+    ctx.save();
+    
+    // Shadow size based on vehicle
+    const shadowWidth = width * 0.8;
+    const shadowHeight = height * 0.3;
+    const shadowY = y + height / 2 + 10;
+    
+    // Hover vehicles have smaller, more diffuse shadows
+    const alpha = vehicleCategory === 'hover' ? 0.15 : 0.3;
+    
+    // Create elliptical shadow
+    const gradient = ctx.createRadialGradient(x, shadowY, 0, x, shadowY, shadowWidth / 2);
+    gradient.addColorStop(0, `rgba(0, 0, 0, ${alpha})`);
+    gradient.addColorStop(0.7, `rgba(0, 0, 0, ${alpha * 0.5})`);
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.ellipse(x, shadowY, shadowWidth / 2, shadowHeight / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+  }
+
+  // Dust particles when moving on ground
+  emitDust(x, y, vx, count = 3) {
+    for (let i = 0; i < count; i++) {
+      const particle = new Particle(
+        x + (Math.random() - 0.5) * 20,
+        y + 10 + Math.random() * 5,
+        -vx * 0.3 + (Math.random() - 0.5) * 2,
+        -Math.random() * 1.5 - 0.5,
+        300 + Math.random() * 200, // 300-500ms life
+        `rgba(150, 130, 100, ${0.4 + Math.random() * 0.3})`,
+        3 + Math.random() * 3,
+        'circle'
+      );
+      particle.gravity = 0.05; // Light gravity
+      this.particles.push(particle);
+    }
+  }
+
+  // Exhaust trail for bikes/cars
+  emitExhaust(x, y, facingLeft, count = 2) {
+    const direction = facingLeft ? 1 : -1;
+    
+    for (let i = 0; i < count; i++) {
+      const particle = new Particle(
+        x + direction * 15,
+        y + 5 + Math.random() * 3,
+        direction * (1 + Math.random()) * 1.5,
+        (Math.random() - 0.5) * 0.5,
+        400 + Math.random() * 200,
+        i % 2 === 0 ? 'rgba(100, 100, 120, 0.6)' : 'rgba(80, 80, 100, 0.5)',
+        4 + Math.random() * 3,
+        'circle'
+      );
+      particle.gravity = -0.02; // Rises slightly
+      this.particles.push(particle);
+    }
+  }
+
+  // Jet flames for jetpacks/aircraft
+  emitJetFlame(x, y, intensity = 1) {
+    for (let i = 0; i < 3 * intensity; i++) {
+      const particle = new Particle(
+        x + (Math.random() - 0.5) * 6,
+        y,
+        (Math.random() - 0.5) * 1,
+        2 + Math.random() * 2,
+        200 + Math.random() * 150,
+        i % 3 === 0 ? 'rgba(255, 150, 50, 0.9)' :
+        i % 3 === 1 ? 'rgba(255, 100, 0, 0.8)' :
+        'rgba(255, 50, 0, 0.7)',
+        6 + Math.random() * 4,
+        'circle'
+      );
+      particle.gravity = -0.1; // Flames rise
+      this.particles.push(particle);
+    }
+  }
+
+  // Water splash for speedboat
+  emitWaterSplash(x, y, vx) {
+    for (let i = 0; i < 5; i++) {
+      const particle = new Particle(
+        x + (Math.random() - 0.5) * 15,
+        y + Math.random() * 5,
+        -vx * 0.5 + (Math.random() - 0.5) * 3,
+        -Math.random() * 3 - 1,
+        400 + Math.random() * 300,
+        'rgba(200, 230, 255, 0.7)',
+        3 + Math.random() * 4,
+        'circle'
+      );
+      this.particles.push(particle);
+    }
+  }
+
+  // Hover glow effect
+  emitHoverGlow(x, y, width) {
+    for (let i = 0; i < 2; i++) {
+      const particle = new Particle(
+        x + (Math.random() - 0.5) * width,
+        y + 15 + Math.random() * 5,
+        (Math.random() - 0.5) * 0.5,
+        Math.random() * 0.5 + 0.2,
+        300 + Math.random() * 200,
+        'rgba(0, 255, 255, 0.5)',
+        8 + Math.random() * 6,
+        'circle'
+      );
+      particle.gravity = 0; // No gravity
+      this.particles.push(particle);
+    }
+  }
+
+  // Mech footstep impact
+  emitMechImpact(x, y) {
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 / 8) * i;
+      const speed = 2 + Math.random() * 2;
+      const particle = new Particle(
+        x,
+        y,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed - 1,
+        300 + Math.random() * 200,
+        'rgba(255, 200, 100, 0.7)',
+        3 + Math.random() * 3,
+        'square'
+      );
+      this.particles.push(particle);
+    }
+  }
+
+  // Speed lines for fast movement
+  renderSpeedLines(ctx, x, y, vx, facing Left) {
+    if (Math.abs(vx) < 150) return; // Only show at high speed
+    
+    ctx.save();
+    ctx.globalAlpha = Math.min(0.6, Math.abs(vx) / 400);
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    
+    const direction = vx > 0 ? -1 : 1;
+    
+    for (let i = 0; i < 5; i++) {
+      const lineX = x + direction * (30 + i * 20);
+      const lineY = y + (Math.random() - 0.5) * 40;
+      const lineLength = 10 + Math.random() * 15;
+      
+      ctx.beginPath();
+      ctx.moveTo(lineX, lineY);
+      ctx.lineTo(lineX + direction * lineLength, lineY);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
+  }
+
+  // Engine glow pulse
+  renderEngineGlow(ctx, x, y, color, intensity, size) {
+    const pulseSize = size * (0.8 + Math.sin(Date.now() * 0.005) * 0.2);
+    
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, pulseSize);
+    gradient.addColorStop(0, color.replace(')', `, ${intensity})`).replace('rgb', 'rgba'));
+    gradient.addColorStop(0.5, color.replace(')', `, ${intensity * 0.5})`).replace('rgb', 'rgba'));
+    gradient.addColorStop(1, color.replace(')', ', 0)').replace('rgb', 'rgba'));
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, pulseSize, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Headlight beam
+  renderHeadlight(ctx, x, y, facingLeft, range = 100) {
+    ctx.save();
+    
+    const direction = facingLeft ? -1 : 1;
+    const beamX = x + direction * 20;
+    
+    const gradient = ctx.createLinearGradient(beamX, y, beamX + direction * range, y);
+    gradient.addColorStop(0, 'rgba(255, 255, 200, 0.4)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 150, 0.2)');
+    gradient.addColorStop(1, 'rgba(255, 255, 100, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(beamX, y - 10);
+    ctx.lineTo(beamX + direction * range, y - 25);
+    ctx.lineTo(beamX + direction * range, y + 25);
+    ctx.lineTo(beamX, y + 10);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.restore();
+  }
+
+  // Update effects for a vehicle
+  updateVehicleEffects(vehicle, dt) {
+    const { data, vx, vy, x, y, grounded, facingLeft } = vehicle;
+    const speed = Math.abs(vx);
+
+    // Ground dust
+    if (grounded && data.category === 'ground' && speed > 50) {
+      if (Math.random() < 0.3) {
+        this.emitDust(x, y, vx, 2);
+      }
+    }
+
+    // Exhaust for bikes/cars
+    if (data.category === 'ground' && speed > 30 && 
+        (data.id.includes('bike') || data.id.includes('car') || data.id === 'chopper')) {
+      if (Math.random() < 0.2) {
+        this.emitExhaust(x, y, facingLeft, 1);
+      }
+    }
+
+    // Jet flames for jetpacks
+    if (data.category === 'air' && data.id.includes('jetpack')) {
+      this.emitJetFlame(x, y + 12, 1);
+    }
+
+    // Hover glow
+    if (data.category === 'hover') {
+      if (Math.random() < 0.5) {
+        this.emitHoverGlow(x, y, data.width);
+      }
+    }
+
+    // Water splash
+    if (data.category === 'water' && speed > 50) {
+      if (Math.random() < 0.4) {
+        this.emitWaterSplash(x - (facingLeft ? 20 : -20), y, vx);
+      }
+    }
+
+    // Mech footsteps
+    if (data.purpose === 'mech' && grounded) {
+      const walkCycle = Math.floor((Date.now() / 300) % 2);
+      if (vehicle.lastWalkCycle !== walkCycle) {
+        this.emitMechImpact(x, y + 30);
+        vehicle.lastWalkCycle = walkCycle;
+      }
+    }
+  }
+
+  // Render all vehicle effects
+  renderVehicleEffects(ctx, vehicle) {
+    const { data, vx, x, y, facingLeft } = vehicle;
+
+    // Shadow
+    this.renderShadow(ctx, x, y, data.width, data.height, data.category);
+
+    // Speed lines
+    this.renderSpeedLines(ctx, x, y, vx, facingLeft);
+
+    // Engine glow for certain vehicles
+    if (data.id.includes('bike') || data.id.includes('car')) {
+      const glowX = x + (facingLeft ? 20 : -20);
+      this.renderEngineGlow(ctx, glowX, y, data.color, 0.4, 15);
+    }
+
+    // Headlights for cars/heavy transport at night or always
+    if (data.id === 'car' || data.id === 'personal_car' || data.id === 'heavy_transport') {
+      this.renderHeadlight(ctx, x, y, facingLeft, 80);
+    }
+  }
+
+  // Clear all particles
+  clear() {
+    this.particles = [];
+  }
+}
+
+
+
+// === js/GameState.js ===
+// GameState.js - Demo state management
+
+class GameState {
+  constructor() {
+    this.mode = 'gallery'; // 'gallery' or 'testdrive'
+    this.currentStyle = 'pixel'; // 'pixel', 'vector', '3d'
+    this.currentCharacter = 'warrior'; // 'warrior', 'cat_angel', 'cyborg'
+    this.selectedVehicleId = null;
+    
+    // Player state
+    this.player = {
+      x: 700,
+      y: 450,
+      vx: 0,
+      vy: 0,
+      facingLeft: false,
+      isRiding: false,
+      ridingVehicle: null,
+      boardingVehicle: null,
+      boardingProgress: 0,
+      unboardingVehicle: null,
+      unboardingProgress: 0,
+      acceleration: 1200,
+      friction: 0.9,
+      maxSpeed: 280,
+      gravity: 2000,
+      jumpForce: 600,
+      grounded: true,
+      jumpCount: 0
+    };
+    
+    // Current vehicle instance in test drive
+    this.currentVehicle = null;
+    
+    // World settings
+    this.groundY = 500;
+    this.cameraX = 0;
+    this.worldWidth = 6000;
+    
+    // Animation time
+    this.animTime = 0;
+    
+    // FPS tracking
+    this.fps = 60;
+    this.frameCount = 0;
+    this.lastFpsTime = 0;
+  }
+
+  enterTestDrive(vehicleData) {
+    this.mode = 'testdrive';
+    this.selectedVehicleId = vehicleData.id;
+    
+    // Create vehicle instance
+    this.currentVehicle = {
+      id: vehicleData.id,
+      data: vehicleData,
+      x: 1000,
+      y: this.groundY,
+      vx: 0,
+      vy: 0,
+      facingLeft: false,
+      grounded: true,
+      jumpCount: 0,
+      rider: null
+    };
+    
+    // Reset player
+    this.player.x = 700;
+    this.player.y = this.groundY;
+    this.player.vx = 0;
+    this.player.vy = 0;
+    this.player.isRiding = false;
+    this.player.ridingVehicle = null;
+    this.player.grounded = true;
+    this.player.facingLeft = false;
+  }
+
+  exitTestDrive() {
+    this.mode = 'gallery';
+    this.currentVehicle = null;
+    this.selectedVehicleId = null;
+  }
+
+  setStyle(style) {
+    this.currentStyle = style;
+  }
+
+  setCharacter(character) {
+    this.currentCharacter = character;
+  }
+
+  updateCamera(canvasWidth) {
+    if (this.mode !== 'testdrive') return;
+
+    const target = this.player.x;
+    const centerX = canvasWidth / 2;
+    
+    // Smooth camera follow
+    const targetCameraX = target - centerX;
+    const diff = targetCameraX - this.cameraX;
+    this.cameraX += diff * 0.1;
+    
+    // Clamp camera
+    this.cameraX = Math.max(0, Math.min(this.worldWidth - canvasWidth, this.cameraX));
+  }
+
+  updateFPS(timestamp) {
+    this.frameCount++;
+    if (timestamp - this.lastFpsTime >= 1000) {
+      this.fps = this.frameCount;
+      this.frameCount = 0;
+      this.lastFpsTime = timestamp;
+    }
+  }
+}
+
+
+
+// === js/InputController.js ===
+// InputController.js - Keyboard input handling
+
+class InputController {
+  constructor() {
+    this.keys = {
+      ArrowLeft: false,
+      ArrowRight: false,
+      ArrowUp: false,
+      ArrowDown: false,
+      KeyE: false,
+      Escape: false
+    };
+    
+    this.keyPressed = {}; // Track single press
+    
+    this.setupListeners();
+  }
+
+  setupListeners() {
+    window.addEventListener('keydown', (e) => {
+      const key = e.code;
+      
+      // Prevent default for game keys
+      if (key.startsWith('Arrow') || key === 'KeyE' || key === 'Escape' || key === 'Space') {
+        e.preventDefault();
+      }
+      
+      if (key in this.keys) {
+        // Track single press (only trigger once per key down)
+        if (!this.keys[key]) {
+          this.keyPressed[key] = true;
+        }
+        this.keys[key] = true;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const key = e.code;
+      
+      if (key in this.keys) {
+        this.keys[key] = false;
+        this.keyPressed[key] = false;
+      }
+    });
+  }
+
+  isPressed(key) {
+    return this.keys[key] || false;
+  }
+
+  wasJustPressed(key) {
+    if (this.keyPressed[key]) {
+      this.keyPressed[key] = false; // Consume the press
+      return true;
+    }
+    return false;
+  }
+
+  reset() {
+    Object.keys(this.keys).forEach(key => {
+      this.keys[key] = false;
+      this.keyPressed[key] = false;
+    });
+  }
+}
+
+
+
+// Main app code (from index.html)
+(function() {
+  // Initialize systems
+  const gameState = new GameState();
+  const inputController = new InputController();
+  const vehicleController = new VehicleController();
+  const effectsSystem = new EffectsSystem();
+  const characterSprites = new CharacterSprites();
+  
+  // Sprite renderers
+  const pixelRenderer = new HDPixelArtVehicles();
+  const vectorRenderer = new VectorCelShadedVehicles();
+  const threeDRenderer = new ThreeDPrerenderedVehicles();
+
+  function getCurrentVehicleRenderer() {
+    switch (gameState.currentStyle) {
+      case 'pixel': return pixelRenderer;
+      case 'vector': return vectorRenderer;
+      case '3d': return threeDRenderer;
+      default: return pixelRenderer;
+    }
+  }
+
+  function initGallery() {
+    const grid = document.getElementById('vehicle-grid');
+    const vehicles = getAllVehicles();
+
+    vehicles.forEach(vehicle => {
+      const card = document.createElement('div');
+      card.className = 'vehicle-card';
+      card.innerHTML = `
+        <canvas width="200" height="150"></canvas>
+        <div class="card-content">
+          <h3>${vehicle.name}</h3>
+          <p class="card-desc">${vehicle.description}</p>
+          <div class="card-stats">
+            <span>Speed: ${vehicle.maxSpeed}</span>
+            <span>Seats: ${vehicle.seats}</span>
+            <span>${vehicle.category.toUpperCase()}</span>
+          </div>
+        </div>
+      `;
+
+      const canvas = card.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      renderVehiclePreview(ctx, vehicle);
+
+      card.addEventListener('click', () => {
+        startTestDrive(vehicle);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function renderVehiclePreview(ctx, vehicle) {
+    ctx.fillStyle = '#0a0e1a';
+    ctx.fillRect(0, 0, 200, 150);
+    const renderer = getCurrentVehicleRenderer();
+    const state = { animTime: Date.now(), facingLeft: false };
+    renderer.renderVehicle(ctx, vehicle.id, 100, 100, state);
+  }
+
+  function updateGalleryPreviews() {
+    const cards = document.querySelectorAll('.vehicle-card');
+    const vehicles = getAllVehicles();
+    cards.forEach((card, index) => {
+      const canvas = card.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      renderVehiclePreview(ctx, vehicles[index]);
+    });
+  }
+
+  let lastTime = 0;
+  let animationFrameId = null;
+
+  function startTestDrive(vehicleData) {
+    gameState.enterTestDrive(vehicleData);
+    document.getElementById('gallery-mode').classList.remove('active');
+    document.getElementById('testdrive-mode').classList.add('active');
+    document.getElementById('vehicle-name').textContent = vehicleData.name;
+    updateHUD();
+    const canvas = document.getElementById('game-canvas');
+    canvas.width = 1400;
+    canvas.height = 800;
+    lastTime = performance.now();
+    gameLoop(lastTime);
+  }
+
+  function exitTestDrive() {
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    gameState.exitTestDrive();
+    effectsSystem.clear();
+    document.getElementById('testdrive-mode').classList.remove('active');
+    document.getElementById('gallery-mode').classList.add('active');
+  }
+
+  function gameLoop(timestamp) {
+    const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
+    lastTime = timestamp;
+    gameState.animTime = timestamp;
+    gameState.updateFPS(timestamp);
+    document.getElementById('fps-display').textContent = gameState.fps;
+    if (inputController.wasJustPressed('Escape')) {
+      exitTestDrive();
+      return;
+    }
+    updateGame(dt);
+    renderGame();
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function updateGame(dt) {
+    const { player, currentVehicle } = gameState;
+    if (player.boardingVehicle) vehicleController.updateBoarding(player, gameState.animTime, dt);
+    if (player.unboardingVehicle) vehicleController.updateUnboarding(player, gameState.animTime, dt);
+    if (currentVehicle && vehicleController.canInteract(player, currentVehicle)) {
+      const prompt = document.getElementById('interaction-prompt');
+      prompt.classList.remove('hidden');
+      prompt.innerHTML = player.isRiding ? 'Press <kbd>E</kbd> to Unboard' : 'Press <kbd>E</kbd> to Board';
+      if (inputController.wasJustPressed('KeyE')) {
+        if (player.isRiding) vehicleController.unboardVehicle(player, currentVehicle, gameState.animTime);
+        else vehicleController.boardVehicle(player, currentVehicle, gameState.animTime);
+      }
+    } else {
+      document.getElementById('interaction-prompt').classList.add('hidden');
+    }
+    if (currentVehicle) {
+      vehicleController.updateVehicle(currentVehicle, inputController.keys, dt, gameState.groundY);
+      effectsSystem.updateVehicleEffects(currentVehicle, dt);
+    }
+    if (!player.isRiding && !player.boardingVehicle && !player.unboardingVehicle) {
+      updatePlayerPhysics(player, dt);
+    }
+    gameState.updateCamera(1400);
+    effectsSystem.update(dt);
+    updateHUD();
+  }
+
+  function updatePlayerPhysics(player, dt) {
+    const targetVx = (inputController.isPressed('ArrowRight') ? 1 : 0) - (inputController.isPressed('ArrowLeft') ? 1 : 0);
+    player.vx += targetVx * player.acceleration * dt;
+    if (targetVx === 0) player.vx *= Math.pow(1 - player.friction, dt * 60);
+    player.vx = Math.max(-player.maxSpeed, Math.min(player.maxSpeed, player.vx));
+    player.x += player.vx * dt;
+    if (targetVx !== 0) player.facingLeft = targetVx < 0;
+    player.vy += player.gravity * dt;
+    player.y += player.vy * dt;
+    if (player.y >= gameState.groundY) {
+      player.y = gameState.groundY;
+      player.vy = 0;
+      player.grounded = true;
+      player.jumpCount = 0;
+    } else {
+      player.grounded = false;
+    }
+    if (inputController.wasJustPressed('ArrowUp') && player.jumpCount < 2) {
+      player.vy = -player.jumpForce;
+      player.grounded = false;
+      player.jumpCount++;
+    }
+    player.x = Math.max(50, Math.min(gameState.worldWidth - 50, player.x));
+  }
+
+  function renderGame() {
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const { player, currentVehicle, cameraX, groundY } = gameState;
+    ctx.fillStyle = '#0a0e1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, groundY, gameState.worldWidth, 300);
+    ctx.strokeStyle = '#2a2a3e';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < gameState.worldWidth; x += 50) {
+      ctx.beginPath();
+      ctx.moveTo(x, groundY);
+      ctx.lineTo(x, groundY + 300);
+      ctx.stroke();
+    }
+    const renderer = getCurrentVehicleRenderer();
+    const renderState = { animTime: gameState.animTime, facingLeft: false };
+    if (currentVehicle) {
+      renderState.facingLeft = currentVehicle.facingLeft;
+      effectsSystem.renderVehicleEffects(ctx, currentVehicle);
+      renderer.renderVehicle(ctx, currentVehicle.id, currentVehicle.x, currentVehicle.y, renderState);
+      if (player.isRiding && currentVehicle.rider) {
+        characterSprites.setStyle(gameState.currentStyle);
+        characterSprites.renderCharacterOnVehicle(ctx, gameState.currentCharacter, currentVehicle.id, currentVehicle.x, currentVehicle.y, renderState);
+      }
+    }
+    if (!player.isRiding && !player.boardingVehicle) {
+      renderState.facingLeft = player.facingLeft;
+      characterSprites.setStyle(gameState.currentStyle);
+      characterSprites.renderCharacterWalking(ctx, gameState.currentCharacter, player.x, player.y, renderState);
+    }
+    effectsSystem.render(ctx);
+    ctx.restore();
+  }
+
+  function updateHUD() {
+    const { currentVehicle } = gameState;
+    if (!currentVehicle) return;
+    document.getElementById('vehicle-speed').textContent = `Speed: ${Math.abs(currentVehicle.vx).toFixed(0)}`;
+    document.getElementById('vehicle-category').textContent = `Category: ${currentVehicle.data.category.toUpperCase()}`;
+    document.getElementById('vehicle-seats').textContent = `Seats: ${currentVehicle.data.seats}`;
+  }
+
+  document.getElementById('style-selector').addEventListener('change', (e) => {
+    gameState.setStyle(e.target.value);
+    updateGalleryPreviews();
+  });
+
+  document.getElementById('character-selector').addEventListener('change', (e) => {
+    gameState.setCharacter(e.target.value);
+  });
+
+  initGallery();
+  console.log('✅ V2 Vehicle System - Standalone Version Loaded!');
+})();
+  </script>
+</body>
+</html>

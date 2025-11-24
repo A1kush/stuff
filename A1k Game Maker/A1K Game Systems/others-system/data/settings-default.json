@@ -1,0 +1,84 @@
+{
+  "audio": {
+    "masterVolume": 0.7,
+    "sfxVolume": 0.8,
+    "musicVolume": 0.6,
+    "audioEnabled": true
+  },
+  "graphics": {
+    "quality": "high",
+    "shadows": true,
+    "particles": true,
+    "antialiasing": true,
+    "cameraShake": true,
+    "fpsLimit": 60
+  },
+  "gameplay": {
+    "difficulty": "normal",
+    "autoSave": true,
+    "showTutorial": true,
+    "showDamageNumbers": true,
+    "showItemDrops": true,
+    "cameraSpeed": 1.0,
+    "autoPickup": true
+  },
+  "controls": {
+    "invertY": false,
+    "mouseSensitivity": 1.0,
+    "keyBindings": {
+      "moveLeft": "ArrowLeft",
+      "moveRight": "ArrowRight",
+      "moveUp": "ArrowUp",
+      "moveDown": "ArrowDown",
+      "jump": "Space",
+      "attack": "KeyZ",
+      "skill1": "KeyX",
+      "skill2": "KeyC",
+      "skill3": "KeyV",
+      "inventory": "KeyI",
+      "map": "KeyM",
+      "pause": "Escape",
+      "interact": "KeyE"
+    }
+  },
+  "ui": {
+    "showFPS": false,
+    "showMinimap": true,
+    "hudScale": 1.0,
+    "uiTheme": "dark",
+    "language": "en",
+    "showTooltips": true,
+    "tooltipDelay": 500
+  },
+  "presets": {
+    "performance": {
+      "quality": "low",
+      "shadows": false,
+      "particles": false,
+      "antialiasing": false,
+      "fpsLimit": 30
+    },
+    "balanced": {
+      "quality": "medium",
+      "shadows": true,
+      "particles": false,
+      "antialiasing": false,
+      "fpsLimit": 60
+    },
+    "quality": {
+      "quality": "high",
+      "shadows": true,
+      "particles": true,
+      "antialiasing": true,
+      "fpsLimit": 60
+    },
+    "ultra": {
+      "quality": "ultra",
+      "shadows": true,
+      "particles": true,
+      "antialiasing": true,
+      "fpsLimit": 120
+    }
+  }
+}
+

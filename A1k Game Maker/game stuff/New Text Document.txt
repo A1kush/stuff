@@ -1,0 +1,45 @@
+Quick-loot notifications (2 min) — Flash alerts in the Loot tab when items are collected
+~150 lines, ~8k tokens
+Tooltips on hover (3 min) — Show item descriptions when hovering inventory items in the Loot tab
+~100 lines, ~5k tokens
+Character stats summary (4 min) — Add Attack/Defense/Speed to the Player tab below HP/RAGE
+~200 lines, ~10k tokens
+Auto-hide/show panel (5 min) — Auto-hide unified panel, show on mouse hover
+~100 lines, ~5k tokens
+Keyboard shortcut (1 min) — Add Tab/U key to toggle unified panel
+~50 lines, ~2k tokens
+Next 10 phases (longer-term)
+Phase 11: Enhanced loot system — Auto-sort, filters, item rarity colors
+Phase 12: Mini-map improvements — Zoom controls, markers, fast travel points
+Phase 13: Combat stats tracker — Damage dealt/taken, kills, combo counter
+Phase 14: Party management — Quick-switch characters, formation options
+Phase 15: Event log enhancements — Filters, search, export log
+Phase 16: Settings panel — Customize unified panel position, transparency
+Phase 17: Achievements display — Show recent achievements in unified panel
+Phase 18: Quest tracker — Active quests sidebar in Player tab
+Phase 19: Resource meters — Energy, stamina, mana if applicable
+Phase 20: UI animations — Smooth transitions, pulse effects for updates
+
+
+ext Steps / Follow-ups
+Portal Playtest: trigger the training portal to ensure boss spawn/death loop and cooldown UI behave in long sessions.
+Boss Balance Tuning: adjust TRAINING_BOSS_FALLBACKS stats/drops once real BossPool data sources finalized.
+Act Button Tooltips: add mini HUD instructions so new mappings (Act vs Act2) are obvious for players.
+UI polish: animate Act buttons when they switch modes or are disabled due to cooldowns.
+NPC Dialog Enhancements: auto-focus first dialogue option when opened via Act2 for faster hiring.
+5 Quick Implementations (1–5 min each)
+Add toast when Act2 is disabled explaining “Move closer to an NPC to talk/hire.”
+Display portal cooldown timer bar near Act button instead of text label.
+Add sound effect hook when training boss spawns (reuse existing AudioSystem.playSound).
+Expose pressAct() keyboard binding for accessibility (bind to Q).
+Log recent Act button actions to Logs tab for QA.
+Token / LOC Options
+Option 1: 1–2K tokens, ~120 LOC – simply finalize portal boss testing harness & logging.
+Option 2: 5–8K tokens, ~350 LOC – integrate full boss roster from /samp JSON with weighted table + UI overlays.
+Option 3: 20K+ tokens, 800–1.2K LOC – full portal raid loop (multi-wave, co-op AI allies, reward treasury UI). Max budget <5M tokens per earlier constraint.
+Next 5 Phase Suggestions
+Portal Raid leaderboard + timed challenges.
+Act button tutorial overlay with interactive steps.
+NPC hiring contracts (duration-based, upgrades).
+Multi-portal events rotating boss pools hourly.
+Offline reward mail system fed by training portal runs.

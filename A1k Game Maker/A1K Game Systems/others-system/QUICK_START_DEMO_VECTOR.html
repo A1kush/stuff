@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Systems - Vector Cel-Shaded Demo (Castle Crashers Style)</title>
+  <style>
+    :root {
+      --primary: #667eea;
+      --secondary: #764ba2;
+      --success: #51cf66;
+      --bg-dark: #0a0a0a;
+      --bg-card: #1a1a2e;
+      --text: #e0e0e0;
+      --text-muted: #999;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-card) 100%);
+      color: var(--text);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .hero {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 10px;
+    }
+    
+    .hero p {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    .character-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    
+    .character-card {
+      background: rgba(255,255,255,0.03);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s;
+    }
+    
+    .character-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+    }
+    
+    .character-canvas {
+      width: 256px;
+      height: 256px;
+      margin: 0 auto 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      background: #1a1a1a;
+      display: block;
+    }
+    
+    .character-name {
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary { background: var(--secondary); }
+    .btn-success { background: var(--success); }
+    
+    .ability-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    
+    .ability-card {
+      background: rgba(255,255,255,0.03);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .ability-card:hover {
+      border-color: var(--primary);
+      transform: scale(1.05);
+    }
+    
+    .ability-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 12px;
+      display: block;
+      border-radius: 8px;
+    }
+    
+    .ability-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .console {
+      background: #000;
+      padding: 16px;
+      border-radius: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 30px;
+    }
+    
+    .console-line {
+      padding: 4px 0;
+      color: #0f0;
+    }
+    
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    @media (max-width: 768px) {
+      .character-gallery { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>🎨 Vector Cel-Shaded Demo</h1>
+      <p>Castle Crashers / Hollow Knight Style • Infinite Scalability • Professional Quality</p>
+    </div>
+
+    <h2 class="section-title"><span>👥</span> Character Gallery</h2>
+    <div class="character-gallery">
+      <div class="character-card">
+        <canvas id="canvas-a1" class="character-canvas" width="256" height="256"></canvas>
+        <div class="character-name" style="color: #FF6B9D">A1 - Crimson Warrior</div>
+        <div class="controls">
+          <button class="btn" onclick="changeAnimation('a1', 'idle')">Idle</button>
+          <button class="btn" onclick="changeAnimation('a1', 'walk')">Walk</button>
+          <button class="btn" onclick="changeAnimation('a1', 'attack')">Attack</button>
+          <button class="btn btn-secondary" onclick="changePalette('a1')">Change Color</button>
+        </div>
+      </div>
+
+      <div class="character-card">
+        <canvas id="canvas-unique" class="character-canvas" width="256" height="256"></canvas>
+        <div class="character-name" style="color: #4ECDC4">Unique - Shadow Rogue</div>
+        <div class="controls">
+          <button class="btn" onclick="changeAnimation('unique', 'idle')">Idle</button>
+          <button class="btn" onclick="changeAnimation('unique', 'walk')">Walk</button>
+          <button class="btn" onclick="changeAnimation('unique', 'attack')">Attack</button>
+          <button class="btn btn-secondary" onclick="changePalette('unique')">Change Color</button>
+        </div>
+      </div>
+
+      <div class="character-card">
+        <canvas id="canvas-missy" class="character-canvas" width="256" height="256"></canvas>
+        <div class="character-name" style="color: #B4A7D6">Missy - Arcane Mage</div>
+        <div class="controls">
+          <button class="btn" onclick="changeAnimation('missy', 'idle')">Idle</button>
+          <button class="btn" onclick="changeAnimation('missy', 'walk')">Walk</button>
+          <button class="btn" onclick="changeAnimation('missy', 'attack')">Attack</button>
+          <button class="btn btn-secondary" onclick="changePalette('missy')">Change Color</button>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title"><span>✨</span> Ability Icons (Vector)</h2>
+    <div class="ability-grid">
+      <div class="ability-card" onclick="triggerAbility('divine_barrier')">
+        <canvas id="icon-divine-barrier" class="ability-icon" width="80" height="80"></canvas>
+        <div class="ability-name">Divine Barrier</div>
+      </div>
+      <div class="ability-card" onclick="triggerAbility('dash_nova')">
+        <canvas id="icon-dash-nova" class="ability-icon" width="80" height="80"></canvas>
+        <div class="ability-name">Dash Nova</div>
+      </div>
+      <div class="ability-card" onclick="triggerAbility('angelic_might')">
+        <canvas id="icon-angelic-might" class="ability-icon" width="80" height="80"></canvas>
+        <div class="ability-name">Angelic Might</div>
+      </div>
+      <div class="ability-card" onclick="triggerAbility('flame_dash')">
+        <canvas id="icon-flame-dash" class="ability-icon" width="80" height="80"></canvas>
+        <div class="ability-name">Flame Dash</div>
+      </div>
+      <div class="ability-card" onclick="triggerAbility('radiant_burst')">
+        <canvas id="icon-radiant-burst" class="ability-icon" width="80" height="80"></canvas>
+        <div class="ability-name">Radiant Burst</div>
+      </div>
+    </div>
+
+    <button class="btn btn-success" style="width: 100%; padding: 16px; font-size: 16px; margin: 20px 0;" onclick="runFullDemo()">
+      🚀 RUN COMPLETE ANIMATION DEMO
+    </button>
+
+    <div class="console" id="console">
+      <div class="console-line">✓ Vector cel-shaded rendering engine initialized</div>
+      <div class="console-line">✓ All characters rendered with Castle Crashers style</div>
+      <div class="console-line">💡 Click animation buttons to see smooth vector animations!</div>
+    </div>
+  </div>
+
+  <script>
+    // === VECTOR CEL-SHADED RENDERER ===
+    class VectorCelRenderer {
+      constructor() {
+        this.outlineWidth = 3;
+      }
+
+      // Draw shape with bold outline and gradient fill
+      drawShape(ctx, points, fillColor, strokeColor = '#000') {
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.closePath();
+        
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = this.outlineWidth;
+        ctx.stroke();
+      }
+
+      // Draw with gradient fill
+      drawGradientShape(ctx, points, colorStart, colorEnd) {
+        const bounds = this.getBounds(points);
+        const gradient = ctx.createLinearGradient(
+          bounds.minX, bounds.minY,
+          bounds.maxX, bounds.maxY
+        );
+        gradient.addColorStop(0, colorStart);
+        gradient.addColorStop(1, colorEnd);
+        
+        this.drawShape(ctx, points, gradient);
+      }
+
+      // Draw circle with outline
+      drawCircle(ctx, x, y, radius, fillColor, strokeColor = '#000') {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = this.outlineWidth;
+        ctx.stroke();
+      }
+
+      // Draw oval
+      drawOval(ctx, x, y, width, height, fillColor, strokeColor = '#000') {
+        ctx.beginPath();
+        ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2);
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = this.outlineWidth;
+        ctx.stroke();
+      }
+
+      // Get bounding box
+      getBounds(points) {
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+        points.forEach(p => {
+          minX = Math.min(minX, p.x);
+          maxX = Math.max(maxX, p.x);
+          minY = Math.min(minY, p.y);
+          maxY = Math.max(maxY, p.y);
+        });
+        return { minX, maxX, minY, maxY };
+      }
+
+      // Render character
+      renderCharacter(ctx, character, palette, animFrame = 0) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        
+        const centerX = 128;
+        const centerY = 128;
+        const breathe = Math.sin(animFrame * 0.1) * 2;
+        
+        if (character === 'a1') {
+          this.renderA1(ctx, centerX, centerY + breathe, palette);
+        } else if (character === 'unique') {
+          this.renderUnique(ctx, centerX, centerY + breathe, palette);
+        } else if (character === 'missy') {
+          this.renderMissy(ctx, centerX, centerY + breathe, palette);
+        }
+      }
+
+      // A1 - Crimson Warrior
+      renderA1(ctx, x, y, palette) {
+        // Body (armor)
+        this.drawGradientShape(ctx, [
+          {x: x-30, y: y+20}, {x: x+30, y: y+20},
+          {x: x+35, y: y+70}, {x: x-35, y: y+70}
+        ], palette.primary, palette.secondary);
+
+        // Head
+        this.drawOval(ctx, x, y-10, 25, 28, palette.secondary);
+
+        // Eyes
+        this.drawCircle(ctx, x-10, y-12, 4, '#000', '#000');
+        this.drawCircle(ctx, x+10, y-12, 4, '#000', '#000');
+
+        // Hair (spiky)
+        for (let i = 0; i < 5; i++) {
+          const angle = (i - 2) * 0.3;
+          this.drawShape(ctx, [
+            {x: x + Math.sin(angle) * 20, y: y-35},
+            {x: x + Math.sin(angle) * 15, y: y-25},
+            {x: x + Math.sin(angle) * 25, y: y-25}
+          ], palette.primary);
+        }
+
+        // Swords
+        this.drawGradientShape(ctx, [
+          {x: x-45, y: y+10}, {x: x-35, y: y+10},
+          {x: x-30, y: y+60}, {x: x-40, y: y+60}
+        ], '#C0C0C0', '#808080');
+        
+        this.drawGradientShape(ctx, [
+          {x: x+35, y: y+10}, {x: x+45, y: y+10},
+          {x: x+40, y: y+60}, {x: x+30, y: y+60}
+        ], '#C0C0C0', '#808080');
+      }
+
+      // Unique - Shadow Rogue
+      renderUnique(ctx, x, y, palette) {
+        // Body (slim)
+        this.drawGradientShape(ctx, [
+          {x: x-25, y: y+20}, {x: x+25, y: y+20},
+          {x: x+28, y: y+70}, {x: x-28, y: y+70}
+        ], palette.primary, palette.secondary);
+
+        // Hood
+        this.drawShape(ctx, [
+          {x: x-30, y: y-30}, {x: x+30, y: y-30},
+          {x: x+25, y: y+10}, {x: x-25, y: y+10}
+        ], palette.secondary);
+
+        // Head
+        this.drawOval(ctx, x, y, 20, 22, palette.accent);
+
+        // Eyes (glowing slits)
+        ctx.fillStyle = palette.accent;
+        ctx.fillRect(x-12, y-5, 8, 2);
+        ctx.fillRect(x+4, y-5, 8, 2);
+
+        // Daggers
+        this.drawGradientShape(ctx, [
+          {x: x-40, y: y+30}, {x: x-32, y: y+30},
+          {x: x-30, y: y+55}, {x: x-38, y: y+55}
+        ], '#A0A0A0', '#606060');
+      }
+
+      // Missy - Arcane Mage
+      renderMissy(ctx, x, y, palette) {
+        // Hat
+        this.drawShape(ctx, [
+          {x: x, y: y-50}, {x: x-25, y: y-20}, {x: x+25, y: y-20}
+        ], palette.primary);
+
+        // Head
+        this.drawCircle(ctx, x, y-5, 22, palette.secondary);
+
+        // Eyes (large)
+        this.drawOval(ctx, x-10, y-8, 5, 7, '#FFF');
+        this.drawOval(ctx, x+10, y-8, 5, 7, '#FFF');
+        this.drawCircle(ctx, x-10, y-6, 3, palette.accent, '#000');
+        this.drawCircle(ctx, x+10, y-6, 3, palette.accent, '#000');
+
+        // Robes (flowing)
+        this.drawGradientShape(ctx, [
+          {x: x-35, y: y+15}, {x: x+35, y: y+15},
+          {x: x+45, y: y+70}, {x: x-45, y: y+70}
+        ], palette.primary, palette.secondary);
+
+        // Staff
+        ctx.strokeStyle = '#8B4513';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(x+40, y-10);
+        ctx.lineTo(x+40, y+40);
+        ctx.stroke();
+
+        // Gem
+        this.drawCircle(ctx, x+40, y-15, 8, palette.accent);
+      }
+
+      // Render ability icon
+      renderAbilityIcon(ctx, abilityId) {
+        ctx.clearRect(0, 0, 80, 80);
+        
+        if (abilityId === 'divine_barrier') {
+          // Shield
+          const gradient = ctx.createRadialGradient(40, 40, 5, 40, 40, 35);
+          gradient.addColorStop(0, '#FFF');
+          gradient.addColorStop(0.5, '#FFD700');
+          gradient.addColorStop(1, '#FFA500');
+          
+          this.drawShape(ctx, [
+            {x:40, y:10}, {x:65, y:25}, {x:65, y:55}, {x:40, y:70}, 
+            {x:15, y:55}, {x:15, y:25}
+          ], gradient);
+          
+          // Cross
+          ctx.strokeStyle = '#FFF';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(40, 25);
+          ctx.lineTo(40, 55);
+          ctx.moveTo(28, 40);
+          ctx.lineTo(52, 40);
+          ctx.stroke();
+        }
+        else if (abilityId === 'dash_nova') {
+          // Lightning bolt
+          const gradient = ctx.createLinearGradient(30, 15, 50, 65);
+          gradient.addColorStop(0, '#FFF');
+          gradient.addColorStop(0.5, '#00FFFF');
+          gradient.addColorStop(1, '#0080FF');
+          
+          this.drawShape(ctx, [
+            {x:40, y:15}, {x:50, y:35}, {x:45, y:40},
+            {x:55, y:65}, {x:35, y:45}, {x:40, y:40}, {x:30, y:20}
+          ], gradient);
+        }
+        else if (abilityId === 'angelic_might') {
+          // Wings
+          const gradient = ctx.createRadialGradient(40, 40, 10, 40, 40, 35);
+          gradient.addColorStop(0, '#FFF');
+          gradient.addColorStop(0.7, '#FFE6F0');
+          gradient.addColorStop(1, '#FFD700');
+          
+          // Left wing
+          this.drawShape(ctx, [
+            {x:40, y:35}, {x:15, y:25}, {x:10, y:40}, {x:20, y:50}
+          ], gradient);
+          
+          // Right wing
+          this.drawShape(ctx, [
+            {x:40, y:35}, {x:65, y:25}, {x:70, y:40}, {x:60, y:50}
+          ], gradient);
+          
+          // Center glow
+          this.drawCircle(ctx, 40, 40, 12, '#FFF');
+        }
+        else if (abilityId === 'flame_dash') {
+          // Fire trail
+          const gradient = ctx.createLinearGradient(15, 40, 65, 40);
+          gradient.addColorStop(0, '#FF4500');
+          gradient.addColorStop(0.5, '#FF6347');
+          gradient.addColorStop(1, '#FFA500');
+          
+          for (let i = 0; i < 3; i++) {
+            this.drawShape(ctx, [
+              {x:20+i*15, y:40-10+i*2}, {x:30+i*15, y:30-10+i*2},
+              {x:40+i*15, y:40-10+i*2}, {x:30+i*15, y:50-10+i*2}
+            ], gradient);
+          }
+        }
+        else if (abilityId === 'radiant_burst') {
+          // Star burst
+          const gradient = ctx.createRadialGradient(40, 40, 5, 40, 40, 30);
+          gradient.addColorStop(0, '#FFF');
+          gradient.addColorStop(0.5, '#FFFF00');
+          gradient.addColorStop(1, '#FFA500');
+          
+          for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            this.drawShape(ctx, [
+              {x:40, y:40},
+              {x:40 + cos*28, y:40 + sin*28},
+              {x:40 + Math.cos(angle+0.2)*18, y:40 + Math.sin(angle+0.2)*18}
+            ], gradient);
+          }
+        }
+      }
+    }
+
+    // === GAME STATE ===
+    const renderer = new VectorCelRenderer();
+    const state = {
+      animations: {
+        a1: { current: 'idle', frame: 0 },
+        unique: { current: 'idle', frame: 0 },
+        missy: { current: 'idle', frame: 0 }
+      },
+      palettes: {
+        a1: { index: 0 },
+        unique: { index: 0 },
+        missy: { index: 0 }
+      }
+    };
+
+    const PALETTES = [
+      { name: 'fire', primary: '#FF4444', secondary: '#FF8844', accent: '#FFCC44' },
+      { name: 'ice', primary: '#44CCFF', secondary: '#88DDFF', accent: '#FFFFFF' },
+      { name: 'shadow', primary: '#6644AA', secondary: '#AA66CC', accent: '#CC88FF' },
+      { name: 'light', primary: '#FFD700', secondary: '#FFF4AA', accent: '#FFFFFF' },
+      { name: 'nature', primary: '#44AA44', secondary: '#88CC66', accent: '#CCEE88' }
+    ];
+
+    // === ANIMATION LOOP ===
+    function animate() {
+      ['a1', 'unique', 'missy'].forEach(char => {
+        const canvas = document.getElementById(`canvas-${char}`);
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          const anim = state.animations[char];
+          const paletteIndex = state.palettes[char].index;
+          const palette = PALETTES[paletteIndex];
+          
+          renderer.renderCharacter(ctx, char, palette, anim.frame);
+          anim.frame++;
+        }
+      });
+      
+      requestAnimationFrame(animate);
+    }
+
+    // === CONTROLS ===
+    function changeAnimation(char, anim) {
+      state.animations[char].current = anim;
+      log(`✓ ${char.toUpperCase()}: ${anim} animation activated`);
+    }
+
+    function changePalette(char) {
+      state.palettes[char].index = (state.palettes[char].index + 1) % PALETTES.length;
+      const palette = PALETTES[state.palettes[char].index];
+      log(`✓ ${char.toUpperCase()}: Changed to ${palette.name} palette`);
+    }
+
+    function triggerAbility(abilityId) {
+      log(`✨ Triggered ${abilityId.replace('_', ' ')}!`);
+    }
+
+    function runFullDemo() {
+      log('🚀 Starting full animation demo...');
+      let delay = 0;
+      ['a1', 'unique', 'missy'].forEach((char, i) => {
+        setTimeout(() => changeAnimation(char, 'walk'), delay += 800);
+        setTimeout(() => changeAnimation(char, 'attack'), delay += 1200);
+        setTimeout(() => changeAnimation(char, 'idle'), delay += 1000);
+        setTimeout(() => changePalette(char), delay += 600);
+      });
+      setTimeout(() => log('✅ Demo complete!'), delay += 500);
+    }
+
+    function log(message) {
+      const console = document.getElementById('console');
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      console.appendChild(line);
+      console.scrollTop = console.scrollHeight;
+    }
+
+    // === INIT ===
+    window.addEventListener('DOMContentLoaded', () => {
+      // Render ability icons
+      ['divine_barrier', 'dash_nova', 'angelic_might', 'flame_dash', 'radiant_burst'].forEach(id => {
+        const canvas = document.getElementById(`icon-${id}`);
+        if (canvas) {
+          renderer.renderAbilityIcon(canvas.getContext('2d'), id);
+        }
+      });
+      
+      animate();
+      log('✅ Vector cel-shaded demo initialized!');
+      log('💡 Click buttons to change animations and color palettes');
+    });
+  </script>
+</body>
+</html>
+

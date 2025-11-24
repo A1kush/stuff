@@ -1,0 +1,847 @@
+
+function gameLoop(timestamp) {
+    const dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
+    update(dt);
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+requestAnimationFrame(gameLoop);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>DCUO: Infinite Powers [A1K Prototype]</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a2a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #hud-wrap button {
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: all 0.1s ease-out;
+            cursor: pointer;
+        }
+        #hud-wrap button:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 rgba(0,0,0,0.2);
+        }
+        #command-menu {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 20, 0.9);
+            z-index: 200;
+            display: none; /* Initially hidden */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            border: 2px solid #00e5ff;
+            box-shadow: 0 0 30px #00e5ff;
+        }
+        #command-menu h1 {
+            color: #00e5ff;
+            text-shadow: 0 0 10px #00e5ff;
+        }
+        .menu-section {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px;
+            margin-top: 15px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .menu-section h2 {
+            margin-top: 0;
+            color: #ff69b4;
+        }
+        .menu-button {
+            padding: 10px 15px;
+            border: 1px solid #00e5ff;
+            background: linear-gradient(135deg, #00e5ff, #6c5ce7);
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        #game-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 50;
+        }
+        #lair-overlay {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-info">
+        <div>Controls: WASD (Move) | Mouse (Look) | Space (Attack) | C (Toggle Flight) | M (Menu)</div>
+        <div>Player: Unique (Cyan) | Followers: A1 (Red), Missy (Pink)</div>
+        <div id="xp-display">XP: 0</div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- MANDATORY A1K CORE: Candy UI Button System -->
+    <div id="hud-wrap" style="position:fixed;inset:0;pointer-events:none;z-index:100;display:flex;justify-content:space-between;padding:20px;align-items:flex-end;">
+        <!-- Left: Joystick -->
+        <div id="vj-root" style="width:120px;height:120px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.3);border-radius:50%;position:relative;pointer-events:auto;">
+            <div id="vj-knob" style="width:50px;height:50px;background:linear-gradient(135deg, #81ecec, #74b9ff);border-radius:50%;position:absolute;top:35px;left:35px;box-shadow:0 4px 10px rgba(0,0,0,0.3);transition:transform 0.1s;"></div>
+        </div>
+        <!-- Right: Skills & Action -->
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;pointer-events:auto;">
+            <div style="display:flex;gap:8px;">
+               <button id="btn-s1" style="width:50px;height:50px;border-radius:25px;border:2px solid #fff;background:linear-gradient(135deg, #ff7675, #d63031);color:white;font-weight:bold;">S1</button>
+               <button id="btn-s2" style="width:50px;height:50px;border-radius:25px;border:2px solid #fff;background:linear-gradient(135deg, #a29bfe, #6c5ce7);color:white;font-weight:bold;">S2</button>
+               <button id="btn-s3" style="width:50px;height:50px;border-radius:25px;border:2px solid #fff;background:linear-gradient(135deg, #74b9ff, #0984e3);color:white;font-weight:bold;">S3</button>
+            </div>
+            <button id="btn-attack" style="width:90px;height:90px;border-radius:50%;border:3px solid #fff;background:linear-gradient(135deg, #fd79a8, #e84393);color:white;font-weight:bold;font-size:18px;box-shadow:0 6px 0 #c0392b;cursor:pointer;">ATK</button>
+        </div>
+    </div>
+
+    <!-- Command Menu (Bag System Hub) -->
+    <div id="command-menu">
+        <h1>COMMAND MENU</h1>
+        <div class="menu-section">
+            <h2>Power Respec (Arcade System)</h2>
+            <p>Reset all skill points for a fee.</p>
+            <button class="menu-button" id="respec-btn">Respec (Cost: 100 Source Marks)</button>
+        </div>
+        <div class="menu-section">
+            <h2>Gadget Crafting (Alchemy System)</h2>
+            <p>Craft consumables from collected materials.</p>
+            <button class="menu-button" id="craft-btn">Craft Power Boost (5 Exobits)</button>
+        </div>
+        <div class="menu-section">
+            <h2>Costume Customization (Skin System)</h2>
+            <p>Change your appearance.</p>
+            <button class="menu-button" id="cape-toggle-btn">Toggle Cape</button>
+        </div>
+        <p style="margin-top: 20px;">Press 'M' to close.</p>
+    </div>
+
+    <!-- Lair Transition Overlay -->
+    <div id="lair-overlay"></div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- A1K CORE: PROCEDURAL ASSET GENERATION (3D) ---
+        function createA1Mesh() { // Red Warrior
+            const group = new THREE.Group();
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshStandardMaterial({ color: 0xff4d4f }));
+            head.position.y = 1.6;
+            const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.4, 1, 4, 8), new THREE.MeshStandardMaterial({ color: 0xcc0000 }));
+            body.position.y = 0.8;
+
+            const swordHilt = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.3), new THREE.MeshStandardMaterial({ color: 0x555555 }));
+            const swordBlade = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.2, 0.2), new THREE.MeshStandardMaterial({ color: 0xeeeeff, metalness: 0.8, roughness: 0.2 }));
+            swordBlade.position.y = 0.75;
+            swordHilt.add(swordBlade);
+            swordHilt.position.set(0.5, 1, 0);
+            swordHilt.rotation.z = -Math.PI / 4;
+            
+            const cape = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.5), new THREE.MeshStandardMaterial({ color: 0xaa0000, side: THREE.DoubleSide }));
+            cape.position.set(0, 1.2, -0.3);
+            cape.rotation.x = 0.2;
+            group.add(cape);
+            group.cape = cape; // For toggling
+
+            group.add(head, body, swordHilt);
+            group.sword = swordHilt;
+            return group;
+        }
+
+        function createMissyMesh() { // Pink Mage
+            const group = new THREE.Group();
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshStandardMaterial({ color: 0xff69b4 }));
+            head.position.y = 1.6;
+            const body = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.5, 8), new THREE.MeshStandardMaterial({ color: 0xff1493 }));
+            body.position.y = 0.75;
+
+            const staff = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.8), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
+            const gem = new THREE.Mesh(new THREE.IcosahedronGeometry(0.15, 0), new THREE.MeshStandardMaterial({ color: 0xffc0cb, emissive: 0xff69b4, emissiveIntensity: 1 }));
+            gem.position.y = 0.9;
+            staff.add(gem);
+            staff.position.set(0.5, 0.9, 0);
+            staff.rotation.z = -Math.PI / 8;
+            
+            group.add(head, body, staff);
+            group.staffGem = gem;
+            return group;
+        }
+
+        function createUniqueMesh() { // Cyan Tech Ranger
+            const group = new THREE.Group();
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: 0x00e5ff }));
+            head.position.y = 1.6;
+            const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 1, 4, 8), new THREE.MeshStandardMaterial({ color: 0x00aaff }));
+            body.position.y = 0.8;
+
+            const gun = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.15, 0.15), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+            gun.position.set(0.6, 1, 0);
+            
+            const jetpack = new THREE.Group();
+            const tank1 = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.6), new THREE.MeshStandardMaterial({ color: 0xcccccc }));
+            const tank2 = tank1.clone();
+            tank1.position.x = -0.15;
+            tank2.position.x = 0.15;
+            jetpack.add(tank1, tank2);
+            jetpack.position.set(0, 1, -0.3);
+            
+            group.add(head, body, gun, jetpack);
+            group.jetpack = jetpack;
+            return group;
+        }
+
+        function createEnemyMesh() {
+            const group = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.5, 1.2, 4, 8), new THREE.MeshStandardMaterial({ color: 0x666666 }));
+            body.position.y = 0.9;
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshStandardMaterial({ color: 0xff8c00 }));
+            head.position.y = 1.9;
+            group.add(body, head);
+            return group;
+        }
+
+        class CharacterController {
+            constructor(mesh, isPlayer = false) {
+                this.mesh = mesh;
+                this.isPlayer = isPlayer;
+                this.velocity = new THREE.Vector3();
+                this.speed = 5;
+                this.health = 100;
+                this.maxHealth = 100;
+                this.isDead = false;
+
+                // AI state
+                this.target = null;
+                this.state = 'idle'; // idle, follow, attack
+
+                // Player specific
+                this.flightMode = false;
+                this.onGround = true;
+                this.attackCooldown = 0;
+            }
+
+            update(dt, world) {
+                if (this.isDead) return;
+
+                if (this.isPlayer) {
+                    this.updatePlayer(dt, world);
+                } else {
+                    this.updateFollower(dt, world);
+                }
+
+                if (this.attackCooldown > 0) this.attackCooldown -= dt;
+
+                // Simple gravity
+                if (!this.flightMode) {
+                    this.velocity.y -= 9.8 * dt;
+                }
+                
+                this.mesh.position.add(this.velocity.clone().multiplyScalar(dt));
+
+                // Ground collision
+                if (this.mesh.position.y < 0) {
+                    this.mesh.position.y = 0;
+                    this.velocity.y = 0;
+                    this.onGround = true;
+                }
+            }
+
+            updatePlayer(dt, world) {
+                const moveDirection = new THREE.Vector3(world.input.x, 0, world.input.y).normalize();
+                
+                const cameraDirection = new THREE.Vector3();
+                world.camera.getWorldDirection(cameraDirection);
+                cameraDirection.y = 0;
+                cameraDirection.normalize();
+
+                const right = new THREE.Vector3().crossVectors(world.camera.up, cameraDirection).normalize();
+                
+                let finalMove = new THREE.Vector3();
+                finalMove.add(cameraDirection.multiplyScalar(moveDirection.z));
+                finalMove.add(right.multiplyScalar(moveDirection.x));
+                finalMove.normalize();
+
+                if (this.flightMode) {
+                    this.velocity.x = finalMove.x * this.speed * 1.5;
+                    this.velocity.z = finalMove.z * this.speed * 1.5;
+                    if (world.keys[' ']) { // Use space for upward thrust in flight
+                        this.velocity.y += 15 * dt;
+                    } else {
+                        // Gentle hover drift down
+                        this.velocity.y *= 0.95;
+                    }
+                    this.velocity.y = Math.min(this.velocity.y, 5); // Max upward speed
+                } else {
+                    this.velocity.x = finalMove.x * this.speed;
+                    this.velocity.z = finalMove.z * this.speed;
+                }
+
+                if (moveDirection.length() > 0.1) {
+                    const targetRotation = Math.atan2(finalMove.x, finalMove.z);
+                    this.mesh.rotation.y = THREE.MathUtils.lerp(this.mesh.rotation.y, targetRotation, 0.2);
+                }
+            }
+
+            updateFollower(dt, world) {
+                const leader = world.player;
+                const distance = this.mesh.position.distanceTo(leader.mesh.position);
+
+                if (distance > 6) { // Follow distance
+                    const direction = leader.mesh.position.clone().sub(this.mesh.position).normalize();
+                    this.velocity.x = direction.x * this.speed * 0.8;
+                    this.velocity.z = direction.z * this.speed * 0.8;
+                    this.mesh.lookAt(leader.mesh.position);
+                } else if (distance < 5) { // Stop distance
+                    this.velocity.x *= 0.9;
+                    this.velocity.z *= 0.9;
+                } else {
+                    this.velocity.x = 0;
+                    this.velocity.z = 0;
+                }
+            }
+
+            takeDamage(amount, world) {
+                if (this.isDead) return;
+                this.health -= amount;
+                if (this.health <= 0) {
+                    this.health = 0;
+                    this.isDead = true;
+                    this.mesh.rotation.z = Math.PI / 2;
+                    this.mesh.position.y = 0.5;
+                    if (this.isPlayer) {
+                        console.log("Player defeated!");
+                    } else {
+                        world.onEnemyDefeated(this);
+                    }
+                }
+            }
+        }
+
+        class EnemyController extends CharacterController {
+            constructor(mesh) {
+                super(mesh, false);
+                this.speed = 3;
+                this.aggroRange = 20;
+                this.attackRange = 2;
+                this.attackDamage = 5;
+            }
+
+            update(dt, world) {
+                if (this.isDead) return;
+                
+                const player = world.player;
+                const distance = this.mesh.position.distanceTo(player.mesh.position);
+
+                if (distance < this.aggroRange) {
+                    const direction = player.mesh.position.clone().sub(this.mesh.position).normalize();
+                    this.mesh.lookAt(player.mesh.position);
+
+                    if (distance > this.attackRange) {
+                        this.velocity.x = direction.x * this.speed;
+                        this.velocity.z = direction.z * this.speed;
+                    } else {
+                        this.velocity.x = 0;
+                        this.velocity.z = 0;
+                        if (this.attackCooldown <= 0) {
+                            // Attack
+                            console.log("Enemy attacks!");
+                            player.takeDamage(this.attackDamage, world);
+                            this.attackCooldown = 2;
+                        }
+                    }
+                } else {
+                    this.velocity.x = 0;
+                    this.velocity.z = 0;
+                }
+
+                if (this.attackCooldown > 0) this.attackCooldown -= dt;
+
+                // Gravity and ground collision
+                this.velocity.y -= 9.8 * dt;
+                this.mesh.position.add(this.velocity.clone().multiplyScalar(dt));
+                if (this.mesh.position.y < 0) {
+                    this.mesh.position.y = 0;
+                    this.velocity.y = 0;
+                }
+            }
+        }
+
+        class Projectile {
+            constructor(startPos, direction, color, scene) {
+                this.geometry = new THREE.SphereGeometry(0.15, 8, 8);
+                this.material = new THREE.MeshBasicMaterial({ color: color });
+                this.mesh = new THREE.Mesh(this.geometry, this.material);
+                this.mesh.position.copy(startPos);
+                this.velocity = direction.clone().multiplyScalar(30);
+                this.lifetime = 3; // seconds
+                scene.add(this.mesh);
+            }
+
+            update(dt) {
+                this.mesh.position.add(this.velocity.clone().multiplyScalar(dt));
+                this.lifetime -= dt;
+            }
+        }
+
+        class Game {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.renderer.shadowMap.enabled = true;
+
+                this.clock = new THREE.Clock();
+                this.keys = {};
+                this.input = { x: 0, y: 0 }; // For joystick
+                this.keyboardUsedLastFrame = false;
+                
+                this.gameState = {
+                    xp: 0,
+                    sourceMarks: 0,
+                    exobits: 0,
+                    activePowerTree: 'Fire', // From Supernatural System
+                    inLair: false,
+                };
+
+                this.projectiles = [];
+                this.party = [];
+                this.enemies = [];
+
+                this.init();
+            }
+
+            init() {
+                this.setupScene();
+                this.initCharacters();
+                this.initEnvironment();
+                this.initEnemies();
+                this.initControls();
+                this.initHUD();
+                this.gameLoop();
+            }
+
+            setupScene() {
+                this.scene.background = new THREE.Color(0x87ceeb);
+                this.scene.fog = new THREE.Fog(0x87ceeb, 50, 200);
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                this.scene.add(ambientLight);
+
+                const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+                dirLight.position.set(20, 50, 20);
+                dirLight.castShadow = true;
+                dirLight.shadow.camera.top = 50;
+                dirLight.shadow.camera.bottom = -50;
+                dirLight.shadow.camera.left = -50;
+                dirLight.shadow.camera.right = 50;
+                dirLight.shadow.mapSize.width = 2048;
+                dirLight.shadow.mapSize.height = 2048;
+                this.scene.add(dirLight);
+
+                // Camera rig for 3rd person view
+                this.cameraPivot = new THREE.Object3D();
+                this.camera.position.set(0, 4, 8);
+                this.camera.lookAt(this.cameraPivot.position);
+                this.cameraPivot.add(this.camera);
+                this.scene.add(this.cameraPivot);
+            }
+
+            initCharacters() {
+                // Player is Unique
+                const uniqueMesh = createUniqueMesh();
+                this.player = new CharacterController(uniqueMesh, true);
+                this.scene.add(this.player.mesh);
+                this.cameraPivot.position.copy(this.player.mesh.position);
+
+                // Followers are A1 and Missy
+                const a1Mesh = createA1Mesh();
+                a1Mesh.position.set(-2, 0, -2);
+                this.a1 = new CharacterController(a1Mesh);
+                this.scene.add(this.a1.mesh);
+                
+                const missyMesh = createMissyMesh();
+                missyMesh.position.set(2, 0, -2);
+                this.missy = new CharacterController(missyMesh);
+                this.scene.add(this.missy.mesh);
+                
+                this.party = [this.player, this.a1, this.missy];
+            }
+
+            initEnvironment() {
+                // Ground
+                const groundGeo = new THREE.PlaneGeometry(500, 500);
+                const groundMat = new THREE.MeshStandardMaterial({ color: 0x556b2f });
+                const ground = new THREE.Mesh(groundGeo, groundMat);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                this.scene.add(ground);
+
+                // City Buildings
+                this.cityBuildings = new THREE.Group();
+                const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+                for (let i = 0; i < 100; i++) {
+                    const mat = new THREE.MeshStandardMaterial({ color: 0x888899 });
+                    const building = new THREE.Mesh(boxGeo, mat);
+                    building.position.set(
+                        (Math.random() - 0.5) * 400,
+                        0,
+                        (Math.random() - 0.5) * 400
+                    );
+                    building.scale.x = Math.random() * 10 + 5;
+                    building.scale.z = Math.random() * 10 + 5;
+                    building.scale.y = Math.random() * 50 + 20;
+                    building.position.y = building.scale.y / 2;
+                    building.castShadow = true;
+                    building.receiveShadow = true;
+                    this.cityBuildings.add(building);
+                }
+                this.scene.add(this.cityBuildings);
+
+                // Villain Lair Trigger
+                const triggerGeo = new THREE.BoxGeometry(10, 20, 10);
+                const triggerMat = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true, opacity: 0.5 });
+                this.lairTrigger = new THREE.Mesh(triggerGeo, triggerMat);
+                this.lairTrigger.position.set(30, 10, 30);
+                this.scene.add(this.lairTrigger);
+                
+                // Lair environment (initially hidden)
+                this.lairEnvironment = new THREE.Group();
+                const wallGeo = new THREE.BoxGeometry(30, 10, 1);
+                const wallMat = new THREE.MeshStandardMaterial({color: 0x444444});
+                const wall1 = new THREE.Mesh(wallGeo, wallMat); wall1.position.z = -15;
+                const wall2 = new THREE.Mesh(wallGeo, wallMat); wall2.position.z = 15;
+                const wall3 = new THREE.Mesh(wallGeo, wallMat); wall3.position.x = -15; wall3.rotation.y = Math.PI/2;
+                const wall4 = new THREE.Mesh(wallGeo, wallMat); wall4.position.x = 15; wall4.rotation.y = Math.PI/2;
+                this.lairEnvironment.add(wall1, wall2, wall3, wall4);
+                this.lairEnvironment.position.copy(this.lairTrigger.position);
+                this.lairEnvironment.position.y = 5;
+                this.lairEnvironment.visible = false;
+                this.scene.add(this.lairEnvironment);
+            }
+            
+            initEnemies() {
+                for (let i = 0; i < 5; i++) {
+                    const enemyMesh = createEnemyMesh();
+                    const enemy = new EnemyController(enemyMesh);
+                    enemy.mesh.position.set(
+                        (Math.random() - 0.5) * 40 + 20,
+                        0,
+                        (Math.random() - 0.5) * 40 + 20
+                    );
+                    this.enemies.push(enemy);
+                    this.scene.add(enemy.mesh);
+                }
+            }
+
+            initControls() {
+                document.addEventListener('keydown', (e) => this.keys[e.key.toLowerCase()] = true);
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.key.toLowerCase()] = false;
+                    if (e.key.toLowerCase() === 'c') this.toggleFlight();
+                    if (e.key.toLowerCase() === 'm') this.toggleCommandMenu();
+                    if (e.key.toLowerCase() === ' ') this.partyAttack();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (document.pointerLockElement === this.renderer.domElement) {
+                        this.cameraPivot.rotation.y -= e.movementX * 0.002;
+                        this.camera.rotation.x -= e.movementY * 0.002;
+                        this.camera.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, this.camera.rotation.x));
+                    }
+                });
+
+                this.renderer.domElement.addEventListener('click', () => {
+                    this.renderer.domElement.requestPointerLock();
+                });
+            }
+            
+            initHUD() {
+                const attackBtn = document.getElementById('btn-attack');
+                attackBtn.addEventListener('pointerdown', () => this.partyAttack());
+                
+                // Placeholder skill buttons
+                document.getElementById('btn-s1').addEventListener('pointerdown', () => console.log("A1 Skill Activated!"));
+                document.getElementById('btn-s2').addEventListener('pointerdown', () => console.log("Missy Skill Activated!"));
+                document.getElementById('btn-s3').addEventListener('pointerdown', () => console.log("Unique Skill Activated!"));
+
+                // Command Menu buttons
+                document.getElementById('respec-btn').addEventListener('click', () => {
+                    console.log("SYSTEM: Arcade System -> Power Respec triggered. Cost: 100 Source Marks.");
+                    this.gameState.sourceMarks -= 100;
+                });
+                document.getElementById('craft-btn').addEventListener('click', () => {
+                    console.log("SYSTEM: Alchemy System -> Crafted Power Boost. Cost: 5 Exobits.");
+                    this.gameState.exobits -= 5;
+                });
+                document.getElementById('cape-toggle-btn').addEventListener('click', () => {
+                    console.log("SYSTEM: Skin System -> Toggling cape visibility.");
+                    this.a1.mesh.cape.visible = !this.a1.mesh.cape.visible;
+                });
+                
+                // Virtual Joystick
+                const vjRoot = document.getElementById('vj-root');
+                const vjKnob = document.getElementById('vj-knob');
+                let vjActive = false;
+                let vjStart = { x: 0, y: 0 };
+                const vjRadius = vjRoot.clientWidth / 2;
+
+                vjRoot.addEventListener('pointerdown', (e) => {
+                    vjActive = true;
+                    vjStart.x = e.clientX;
+                    vjStart.y = e.clientY;
+                });
+                document.addEventListener('pointermove', (e) => {
+                    if (!vjActive) return;
+                    let dx = e.clientX - vjStart.x;
+                    let dy = e.clientY - vjStart.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist > vjRadius) {
+                        dx = (dx / dist) * vjRadius;
+                        dy = (dy / dist) * vjRadius;
+                    }
+                    
+                    vjKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+                    this.input.x = dx / vjRadius;
+                    this.input.y = -dy / vjRadius; // Invert Y for forward
+                });
+                document.addEventListener('pointerup', () => {
+                    vjActive = false;
+                    vjKnob.style.transform = `translate(0px, 0px)`;
+                    this.input.x = 0;
+                    this.input.y = 0;
+                });
+            }
+
+            toggleFlight() {
+                this.player.flightMode = !this.player.flightMode;
+                console.log(`Traversal Power: Flight Mode ${this.player.flightMode ? 'ON' : 'OFF'}`);
+                if (!this.player.flightMode) {
+                    // Prevent infinite upward velocity after disabling flight
+                    this.player.velocity.y = Math.min(0, this.player.velocity.y);
+                }
+            }
+            
+            toggleCommandMenu() {
+                const menu = document.getElementById('command-menu');
+                const isVisible = menu.style.display === 'flex';
+                menu.style.display = isVisible ? 'none' : 'flex';
+                if (!isVisible) {
+                    document.exitPointerLock();
+                } else {
+                    this.renderer.domElement.requestPointerLock();
+                }
+            }
+
+            partyAttack() {
+                if (this.player.attackCooldown > 0) return;
+                this.player.attackCooldown = 0.5; // Shared cooldown
+
+                const nearestEnemy = this.findNearestEnemy(this.player.mesh.position);
+
+                // A1: Melee swing (visual placeholder)
+                this.a1.mesh.sword.rotation.z = -Math.PI / 2;
+                setTimeout(() => this.a1.mesh.sword.rotation.z = -Math.PI / 4, 200);
+                if (nearestEnemy && this.a1.mesh.position.distanceTo(nearestEnemy.mesh.position) < 4) {
+                    nearestEnemy.takeDamage(15, this);
+                    console.log("A1 hits!");
+                }
+                
+                // Missy: Ranged magic
+                if (nearestEnemy) {
+                    const startPos = this.missy.mesh.position.clone().add(new THREE.Vector3(0, 1.5, 0));
+                    const direction = nearestEnemy.mesh.position.clone().sub(startPos).normalize();
+                    this.projectiles.push(new Projectile(startPos, direction, 0xff69b4, this.scene));
+                }
+
+                // Unique: Ranged gun
+                const startPos = this.player.mesh.position.clone().add(new THREE.Vector3(0, 1.5, 0));
+                const direction = new THREE.Vector3();
+                this.camera.getWorldDirection(direction);
+                this.projectiles.push(new Projectile(startPos, direction, 0x00e5ff, this.scene));
+            }
+
+            findNearestEnemy(position) {
+                let nearest = null;
+                let minDist = Infinity;
+                this.enemies.forEach(enemy => {
+                    if (!enemy.isDead) {
+                        const dist = position.distanceTo(enemy.mesh.position);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            nearest = enemy;
+                        }
+                    }
+                });
+                return nearest;
+            }
+
+            onEnemyDefeated(enemy) {
+                console.log("SYSTEM: Drop System -> Enemy defeated!");
+                this.gameState.xp += 10;
+                this.gameState.sourceMarks += 5;
+                this.gameState.exobits += 2;
+                console.log(`Gained 10 XP, 5 Source Marks, 2 Exobits.`);
+                document.getElementById('xp-display').innerText = `XP: ${this.gameState.xp}`;
+                
+                // Check for lair completion
+                if (this.gameState.inLair) {
+                    const allDead = this.enemies.every(e => e.isDead);
+                    if (allDead) {
+                        console.log("SYSTEM: Dungeon System -> Lair cleared! Exiting...");
+                        this.toggleLair(false);
+                    }
+                }
+            }
+            
+            toggleLair(enter) {
+                const overlay = document.getElementById('lair-overlay');
+                overlay.style.opacity = 1;
+                
+                setTimeout(() => {
+                    this.gameState.inLair = enter;
+                    this.cityBuildings.visible = !enter;
+                    this.lairEnvironment.visible = enter;
+                    
+                    if (enter) {
+                        this.player.mesh.position.copy(this.lairEnvironment.position);
+                        // Respawn enemies inside lair
+                        this.enemies.forEach(e => this.scene.remove(e.mesh));
+                        this.enemies = [];
+                        for (let i = 0; i < 3; i++) {
+                            const enemyMesh = createEnemyMesh();
+                            const enemy = new EnemyController(enemyMesh);
+                            enemy.mesh.position.copy(this.lairEnvironment.position);
+                            enemy.mesh.position.x += (Math.random() - 0.5) * 20;
+                            enemy.mesh.position.z += (Math.random() - 0.5) * 20;
+                            this.enemies.push(enemy);
+                            this.scene.add(enemy.mesh);
+                        }
+                    } else {
+                        // Return to trigger point
+                        this.player.mesh.position.copy(this.lairTrigger.position);
+                        this.player.mesh.position.x += 10; // Emerge outside
+                        // Clear lair enemies
+                        this.enemies.forEach(e => this.scene.remove(e.mesh));
+                        this.enemies = [];
+                    }
+                    
+                    overlay.style.opacity = 0;
+                }, 500);
+            }
+
+            update(dt) {
+                // --- Input Handling ---
+                // We check for keyboard input first. If any movement key is pressed,
+                // it overrides the joystick input for this frame.
+                const keyUp = this.keys['w'] || this.keys['arrowup'];
+                const keyDown = this.keys['s'] || this.keys['arrowdown'];
+                const keyLeft = this.keys['a'] || this.keys['arrowleft'];
+                const keyRight = this.keys['d'] || this.keys['arrowright'];
+
+                const isKeyboardActive = keyUp || keyDown || keyLeft || keyRight;
+
+                if (isKeyboardActive) {
+                    // Reset and apply keyboard input
+                    this.input.x = 0;
+                    this.input.y = 0;
+                    if (keyUp) this.input.y = 1;
+                    else if (keyDown) this.input.y = -1;
+                    
+                    if (keyLeft) this.input.x = -1;
+                    else if (keyRight) this.input.x = 1;
+                    
+                    this.keyboardUsedLastFrame = true;
+                } else if (this.keyboardUsedLastFrame) {
+                    // If keyboard was used last frame but not this one, reset input.
+                    this.input.x = 0;
+                    this.input.y = 0;
+                    this.keyboardUsedLastFrame = false;
+                }
+                // If neither case is met, we let the joystick value persist.
+
+                // --- Character & World Updates ---
+                this.player.update(dt, this);
+                this.a1.update(dt, this);
+                this.missy.update(dt, this);
+                
+                this.enemies.forEach(e => e.update(dt, this));
+
+                this.cameraPivot.position.lerp(this.player.mesh.position, 0.1);
+
+                // Update projectiles and check collisions
+                for (let i = this.projectiles.length - 1; i >= 0; i--) {
+                    const p = this.projectiles[i];
+                    p.update(dt);
+                    if (p.lifetime <= 0) {
+                        this.scene.remove(p.mesh);
+                        this.projectiles.splice(i, 1);
+                        continue;
+                    }
+                    
+                    for (const enemy of this.enemies) {
+                        if (!enemy.isDead && p.mesh.position.distanceTo(enemy.mesh.position) < 1.5) {
+                            enemy.takeDamage(10, this);
+                            this.scene.remove(p.mesh);
+                            this.projectiles.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                
+                // Check for lair entry
+                if (!this.gameState.inLair && this.player.mesh.position.distanceTo(this.lairTrigger.position) < 5) {
+                    console.log("SYSTEM: Dungeon System -> Entering Villain Lair...");
+                    this.toggleLair(true);
+                }
+            }
+
+            render() {
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            gameLoop() {
+                const dt = this.clock.getDelta();
+                this.update(dt);
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+
+        window.game = new Game();
+    </script>
+</body>
+</html>

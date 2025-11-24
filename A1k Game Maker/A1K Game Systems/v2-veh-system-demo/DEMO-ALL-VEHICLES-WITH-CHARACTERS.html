@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>V2 Vehicle System - Complete Test Demo</title>
+  <style>
+    body { margin: 0; padding: 20px; background: #0a0a0a; color: #fff; font-family: sans-serif; overflow-x: hidden; }
+    h1 { text-align: center; color: #00E5FF; margin-bottom: 10px; }
+    .info { text-align: center; margin: 20px; background: rgba(0,229,255,0.1); padding: 20px; border-radius: 10px; }
+    .controls { background: rgba(154,107,255,0.1); padding: 15px; border-radius: 10px; margin: 20px auto; max-width: 800px; }
+    .controls h3 { color: #9A6BFF; margin-top: 0; }
+    kbd { background: #333; padding: 4px 8px; border-radius: 4px; border: 1px solid #555; font-family: monospace; }
+    #game-canvas { border: 3px solid #00E5FF; display: block; margin: 20px auto; background: #0a0e1a; }
+    .status { color: #00FF88; font-size: 18px; margin: 10px 0; }
+    .vehicle-name { color: #FFD700; font-size: 24px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🚗 V2 Vehicle System - Complete Character Boarding Demo</h1>
+  
+  <div class="info">
+    <p class="vehicle-name" id="current-vehicle">Bike</p>
+    <p class="status" id="status">Walk to vehicle and press E to board! Character will appear ON/IN the vehicle!</p>
+  </div>
+  
+  <div class="controls">
+    <h3>🎮 Controls:</h3>
+    <p><kbd>←</kbd> <kbd>→</kbd> Walk &nbsp; <kbd>↑</kbd> Jump &nbsp; <kbd>E</kbd> Board/Unboard &nbsp; <kbd>N</kbd> Next Vehicle &nbsp; <kbd>C</kbd> Change Character</p>
+    <p style="color: #aaa; margin-top: 10px;">Test all 27 vehicles × 3 characters = 81 combinations!</p>
+  </div>
+  
+  <canvas id="game-canvas" width="1400" height="800"></canvas>
+  
+  <div style="text-align: center; color: #666; margin-top: 20px;">
+    <p>Press <kbd>N</kbd> to cycle through vehicles and see different boarding positions!</p>
+    <p>✅ Works 100% Offline - All code bundled inline</p>
+  </div>
+  
+  <script>
+    console.log('🚗 V2 Vehicle System - Complete Demo Loading...');
+    
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('status');
+    const vehicleNameEl = document.getElementById('current-vehicle');
+    
+    // All 27 vehicles with their properties (17 original + 10 new)
+    const vehicles = [
+      { id: 'bike', name: 'Bike', width: 56, height: 32, color: '#00E5FF', charY: -24 },
+      { id: 'chopper', name: 'Chopper', width: 80, height: 36, color: '#FF6B35', charY: -26 },
+      { id: 'jetpack', name: 'Jetpack', width: 40, height: 48, color: '#AA88FF', charY: -16 },
+      { id: 'car', name: 'Car', width: 72, height: 40, color: '#FFD700', charY: -30 },
+      { id: 'personal_bike', name: 'Personal Bike', width: 52, height: 28, color: '#00FF88', charY: -22 },
+      { id: 'personal_chopper', name: 'Personal Chopper', width: 76, height: 32, color: '#FF4444', charY: -24 },
+      { id: 'personal_jetpack', name: 'Personal Jetpack', width: 36, height: 44, color: '#AA88FF', charY: -14 },
+      { id: 'personal_car', name: 'Personal Car', width: 64, height: 36, color: '#FFAA00', charY: -28 },
+      { id: 'hovercraft', name: 'Hovercraft', width: 84, height: 40, color: '#00FFFF', charY: -28 },
+      { id: 'heavy_transport', name: 'Heavy Transport', width: 120, height: 56, color: '#888888', charY: -42, charX: 10 },
+      { id: 'buggy', name: 'Buggy', width: 68, height: 36, color: '#FFFF00', charY: -28 },
+      { id: 'mech_proto', name: 'Mech Proto', width: 64, height: 80, color: '#555577', charY: -32 },
+      { id: 'mech_apex', name: 'Mech Apex', width: 72, height: 96, color: '#667799', charY: -38 },
+      { id: 'skateboard', name: 'Skateboard Street', width: 40, height: 16, color: '#FF88AA', charY: -32 },
+      { id: 'tank', name: 'Tank', width: 112, height: 64, color: '#3D5A3D', charY: -44 },
+      { id: 'helicopter', name: 'Helicopter', width: 96, height: 48, color: '#44AA44', charY: -24, charX: 8 },
+      { id: 'speedboat', name: 'Speedboat', width: 76, height: 32, color: '#3399FF', charY: -26, charX: 4 },
+      // NEW VEHICLES FROM BAG SYSTEM
+      { id: 'scooter', name: 'Scooter', width: 28, height: 48, color: '#FF6B9D', charY: -28 },
+      { id: 'shopping_cart', name: 'Shopping Cart', width: 48, height: 52, color: '#C0C0C0', charY: -26, charX: -12 },
+      { id: 'roller_skates', name: 'Roller Skates', width: 32, height: 24, color: '#FFD700', charY: -24 },
+      { id: 'hover_disc', name: 'Hover Disc', width: 44, height: 12, color: '#00FFFF', charY: -30 },
+      { id: 'glider', name: 'Glider', width: 80, height: 24, color: '#87CEEB', charY: 10 },
+      { id: 'balloon_ride', name: 'Balloon Ride', width: 56, height: 80, color: '#FF69B4', charY: -18 },
+      { id: 'sled', name: 'Sled', width: 52, height: 20, color: '#8B4513', charY: -24 },
+      { id: 'van', name: 'Van', width: 88, height: 56, color: '#4169E1', charY: -32, charX: 8 },
+      { id: 'bus', name: 'Bus', width: 128, height: 64, color: '#FFD700', charY: -36, charX: -20 },
+      { id: 'train', name: 'Train', width: 140, height: 72, color: '#DC143C', charY: -34, charX: -15 }
+    ];
+    
+    const characters = ['Warrior', 'Cat Angel', 'Cyborg'];
+    
+    let currentVehicleIndex = 0;
+    let currentCharIndex = 0;
+    let player = { x: 300, y: 450, vx: 0, vy: 0, facingLeft: false, isRiding: false };
+    let vehicle = { 
+      x: 900, 
+      y: 450, 
+      vx: 0, 
+      vy: 0, 
+      facingLeft: false, 
+      rider: null,
+      data: vehicles[0]
+    };
+    
+    let keys = {};
+    let cameraX = 0;
+    const groundY = 500;
+    
+    function updateVehicle() {
+      vehicle.data = vehicles[currentVehicleIndex];
+      vehicleNameEl.textContent = vehicle.data.name;
+      vehicle.x = 900;
+      vehicle.y = groundY;
+      vehicle.vx = 0;
+      vehicle.facingLeft = false;
+      if (player.isRiding) {
+        player.isRiding = false;
+        vehicle.rider = null;
+        player.x = 300;
+        player.y = groundY;
+      }
+      statusEl.textContent = `Testing: ${vehicle.data.name} - Walk right and press E to board!`;
+    }
+    
+    // Simple vehicle render
+    function renderVehicle(v, t) {
+      ctx.save();
+      ctx.translate(v.x - cameraX, v.y);
+      if (v.facingLeft) ctx.scale(-1, 1);
+      
+      const data = v.data;
+      
+      // Generic vehicle shape based on type
+      ctx.fillStyle = data.color;
+      if (data.id.includes('bike') || data.id === 'chopper' || data.id.includes('chopper')) {
+        // Bike shape
+        ctx.fillRect(-data.width/2, -10, data.width, 14);
+        ctx.fillRect(-10, -14, 20, 6); // Seat
+        // Wheels
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.arc(-data.width/3, 6, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(data.width/3, 6, 6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (data.id.includes('jetpack')) {
+        // Jetpack shape
+        ctx.fillRect(-12, -20, 24, 32);
+        ctx.fillStyle = '#FF6600';
+        ctx.fillRect(-8, 12, 4, 8); // Flame
+        ctx.fillRect(4, 12, 4, 8);
+      } else if (data.id.includes('car')) {
+        // Car shape
+        ctx.fillRect(-data.width/2, -12, data.width, 20);
+        ctx.fillRect(-16, -18, 32, 8); // Roof
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.arc(-data.width/3, 10, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(data.width/3, 10, 7, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (data.id === 'skateboard') {
+        // Skateboard
+        ctx.fillRect(-20, -3, 40, 6);
+        ctx.fillStyle = '#222';
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.arc(-15 + i * 10, 5, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (data.id.includes('mech')) {
+        // Mech shape
+        ctx.fillRect(-20, -data.height/2, 40, data.height/2 + 10); // Body
+        ctx.fillRect(-16, 10, 10, 20); // Left leg
+        ctx.fillRect(6, 10, 10, 20); // Right leg
+        ctx.fillStyle = '#666';
+        ctx.fillRect(-12, -data.height/3, 24, 16); // Cockpit
+      } else if (data.id === 'tank') {
+        // Tank
+        ctx.fillRect(-56, -12, 112, 24);
+        ctx.fillRect(-24, -24, 48, 14); // Turret
+        ctx.fillRect(20, -20, 24, 6); // Cannon
+      } else if (data.id === 'helicopter') {
+        // Helicopter
+        ctx.fillRect(-48, -8, 96, 20);
+        ctx.fillStyle = '#666';
+        ctx.globalAlpha = 0.3;
+        ctx.fillRect(-50, -18, 100, 4); // Rotor
+        ctx.globalAlpha = 1;
+      } else {
+        // Default box
+        ctx.fillRect(-data.width/2, -data.height/2, data.width, data.height);
+      }
+      
+      ctx.restore();
+    }
+    
+    // Character rendering
+    function renderCharacter(char, t, offsetX = 0, offsetY = 0) {
+      ctx.save();
+      ctx.translate(char.x - cameraX + offsetX, char.y + offsetY);
+      if (char.facingLeft) ctx.scale(-1, 1);
+      
+      const charType = characters[currentCharIndex];
+      
+      if (charType === 'Warrior') {
+        // Warrior
+        ctx.fillStyle = '#8B6F47';
+        ctx.fillRect(-4, -16, 8, 8); // Head
+        ctx.fillStyle = '#FF4444';
+        ctx.fillRect(-5, -18, 10, 4); // Cap
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(-2, -14, 2, 2); // Eyes
+        ctx.fillRect(1, -14, 2, 2);
+        ctx.fillStyle = '#333';
+        ctx.fillRect(-5, -8, 10, 12); // Body
+      } else if (charType === 'Cat Angel') {
+        // Cat Angel
+        ctx.fillStyle = '#000';
+        ctx.fillRect(-4, -16, 8, 8); // Head
+        ctx.fillStyle = '#FFD700';
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, -20, 4, 0, Math.PI * 2);
+        ctx.stroke(); // Halo
+        ctx.fillStyle = '#FF88AA';
+        ctx.fillRect(-5, -8, 10, 12); // Body
+        ctx.beginPath();
+        ctx.arc(-8, -8, 3, 0, Math.PI * 2);
+        ctx.fill(); // Wing
+      } else {
+        // Cyborg
+        ctx.fillStyle = '#8B6F47';
+        ctx.fillRect(-5, -16, 10, 8); // Head
+        ctx.fillStyle = '#000';
+        ctx.fillRect(-7, -14, 2, 6); // Pigtails
+        ctx.fillRect(5, -14, 2, 6);
+        ctx.fillStyle = '#00FFFF';
+        ctx.fillRect(-3, -13, 6, 2); // Visor
+        ctx.fillStyle = '#556688';
+        ctx.fillRect(-5, -8, 10, 12); // Body
+      }
+      
+      ctx.restore();
+    }
+    
+    // Input
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'ArrowLeft' || e.code === 'ArrowRight' || e.code === 'ArrowUp' || e.code === 'KeyE' || e.code === 'KeyN' || e.code === 'KeyC') {
+        e.preventDefault();
+        keys[e.code] = true;
+        
+        if (e.code === 'KeyN') {
+          currentVehicleIndex = (currentVehicleIndex + 1) % vehicles.length;
+          updateVehicle();
+        }
+        
+        if (e.code === 'KeyC') {
+          currentCharIndex = (currentCharIndex + 1) % characters.length;
+          statusEl.textContent = `Character changed to: ${characters[currentCharIndex]}`;
+        }
+        
+        if (e.code === 'KeyE') {
+          const dist = Math.abs(player.x - vehicle.x);
+          if (dist < 80 && !player.isRiding && !vehicle.rider) {
+            player.isRiding = true;
+            vehicle.rider = player;
+            statusEl.textContent = `✅ BOARDED ${vehicle.data.name}! Character is ${vehicle.data.id.includes('car') || vehicle.data.id.includes('mech') || vehicle.data.id === 'tank' ? 'INSIDE' : vehicle.data.id === 'skateboard' ? 'ON TOP' : vehicle.data.id.includes('jetpack') ? 'WEARING' : 'RIDING'} the vehicle! Press E to unboard.`;
+          } else if (player.isRiding) {
+            player.isRiding = false;
+            vehicle.rider = null;
+            player.x = vehicle.x + (player.facingLeft ? -60 : 60);
+            statusEl.textContent = `Unboarded! Press N for next vehicle, C to change character.`;
+          }
+        }
+      }
+    });
+    
+    window.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
+    });
+    
+    // Update
+    function update(dt) {
+      if (player.isRiding) {
+        // Control vehicle
+        if (keys.ArrowLeft) vehicle.vx -= 500 * dt;
+        if (keys.ArrowRight) vehicle.vx += 500 * dt;
+        vehicle.vx *= 0.9;
+        vehicle.x += vehicle.vx * dt;
+        vehicle.facingLeft = vehicle.vx < 0;
+        player.x = vehicle.x;
+        player.y = vehicle.y;
+        player.facingLeft = vehicle.facingLeft;
+      } else {
+        // Control player
+        if (keys.ArrowLeft) player.vx -= 800 * dt;
+        if (keys.ArrowRight) player.vx += 800 * dt;
+        player.vx *= 0.85;
+        player.x += player.vx * dt;
+        player.facingLeft = player.vx < 0;
+        
+        if (keys.ArrowUp && player.y >= groundY) {
+          player.vy = -400;
+        }
+        player.vy += 1500 * dt;
+        player.y += player.vy * dt;
+        if (player.y >= groundY) {
+          player.y = groundY;
+          player.vy = 0;
+        }
+      }
+      
+      // Camera
+      const target = player.isRiding ? vehicle.x : player.x;
+      cameraX = target - 700;
+      cameraX = Math.max(0, Math.min(3000, cameraX));
+      
+      // Check distance
+      const dist = Math.abs(player.x - vehicle.x);
+      if (dist < 80 && !player.isRiding && !vehicle.rider) {
+        statusEl.textContent = `⚡ Press E to board ${vehicle.data.name}! Character will appear ${vehicle.data.id === 'skateboard' ? 'ON TOP' : vehicle.data.id.includes('car') || vehicle.data.id.includes('mech') || vehicle.data.id === 'tank' ? 'INSIDE' : 'ON'} it!`;
+      } else if (!player.isRiding) {
+        statusEl.textContent = `Walk to ${vehicle.data.name} (← →) | Press N for next vehicle | Press C to change character`;
+      }
+    }
+    
+    // Render
+    function render(t) {
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Ground
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, groundY, canvas.width, 300);
+      
+      // Grid
+      ctx.strokeStyle = '#2a2a3e';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < 4000; x += 50) {
+        ctx.beginPath();
+        ctx.moveTo(x - cameraX, groundY);
+        ctx.lineTo(x - cameraX, 800);
+        ctx.stroke();
+      }
+      
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.ellipse(vehicle.x - cameraX, groundY + 15, vehicle.data.width * 0.4, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Vehicle
+      renderVehicle(vehicle, t);
+      
+      // Character
+      if (!player.isRiding) {
+        renderCharacter(player, t);
+      } else {
+        // Character ON/IN vehicle
+        const charOffsetX = vehicle.data.charX || 0;
+        const charOffsetY = vehicle.data.charY;
+        renderCharacter(player, t, charOffsetX, charOffsetY);
+      }
+      
+      // Instructions
+      if (!player.isRiding) {
+        ctx.fillStyle = 'rgba(0,229,255,0.8)';
+        ctx.font = 'bold 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`← Walk to ${vehicle.data.name} and press E →`, 700, 100);
+      }
+    }
+    
+    // Game loop
+    let lastTime = performance.now();
+    function loop(t) {
+      const dt = Math.min((t - lastTime) / 1000, 0.05);
+      lastTime = t;
+      update(dt);
+      render(t);
+      requestAnimationFrame(loop);
+    }
+    
+    updateVehicle();
+    loop(performance.now());
+    
+    console.log('✅ Demo loaded! Test all 17 vehicles with 3 characters!');
+    console.log('Controls: ← → to walk, E to board/unboard, N for next vehicle, C to change character');
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>V2 Vehicle System - Test Vehicles & Characters</title>
+  <style>
+    body { margin: 0; padding: 20px; background: #0a0a0a; color: #fff; font-family: sans-serif; }
+    #game-canvas { border: 3px solid #00E5FF; display: block; margin: 20px auto; background: #0a0e1a; }
+    .info { text-align: center; margin: 20px; }
+    .controls { background: rgba(0,229,255,0.1); padding: 15px; border-radius: 10px; margin: 20px auto; max-width: 600px; }
+    .controls h3 { color: #00E5FF; margin-top: 0; }
+    kbd { background: #333; padding: 4px 8px; border-radius: 4px; border: 1px solid #555; }
+  </style>
+</head>
+<body>
+  <div class="info">
+    <h1 style="color: #00E5FF;">V2 Vehicle System - Test Mode</h1>
+    <p>Walk to the vehicle and press <kbd>E</kbd> to board!</p>
+  </div>
+  
+  <div class="controls">
+    <h3>Controls:</h3>
+    <p><kbd>←</kbd> <kbd>→</kbd> Walk &nbsp; <kbd>↑</kbd> Jump &nbsp; <kbd>E</kbd> Board/Unboard</p>
+    <p id="status" style="color: #00FF88; margin-top: 10px;">Status: Ready</p>
+  </div>
+  
+  <canvas id="game-canvas" width="1400" height="800"></canvas>
+  
+  <script>
+    // Quick test version - vehicles and characters visible
+    console.log('V2 Vehicle System - Test Mode Loading...');
+    
+    // Due to response size limits, this is a minimal test version
+    // Full standalone will be created next
+    
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const status = document.getElementById('status');
+    
+    // Simple test: Show that vehicles and characters work
+    let player = { x: 300, y: 450, vx: 0, vy: 0, facingLeft: false, isRiding: false };
+    let vehicle = { x: 800, y: 450, vx: 0, vy: 0, facingLeft: false, rider: null, data: { id: 'bike', width: 56, height: 32, category: 'ground' } };
+    
+    let keys = {};
+    let cameraX = 0;
+    const groundY = 500;
+    
+    // Simple vehicle render
+    function renderVehicle(v, t) {
+      ctx.save();
+      ctx.translate(v.x - cameraX, v.y);
+      if (v.facingLeft) ctx.scale(-1, 1);
+      
+      // Bike body
+      ctx.fillStyle = '#00AACC';
+      ctx.fillRect(-20, -8, 40, 12);
+      ctx.fillStyle = '#00E5FF';
+      ctx.fillRect(-18, -10, 36, 2);
+      
+      // Seat
+      ctx.fillStyle = '#0099BB';
+      ctx.fillRect(-8, -12, 16, 4);
+      
+      // Wheels
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.arc(-14, 6, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(14, 6, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+    }
+    
+    // Simple character render
+    function renderCharacter(char, t) {
+      ctx.save();
+      ctx.translate(char.x - cameraX, char.y);
+      if (char.facingLeft) ctx.scale(-1, 1);
+      
+      // Head
+      ctx.fillStyle = '#8B6F47';
+      ctx.fillRect(-4, -16, 8, 8);
+      
+      // Cap
+      ctx.fillStyle = '#FF4444';
+      ctx.fillRect(-5, -18, 10, 4);
+      
+      // Eyes
+      ctx.fillStyle = '#FF0000';
+      ctx.fillRect(-2, -14, 2, 2);
+      ctx.fillRect(1, -14, 2, 2);
+      
+      // Body
+      ctx.fillStyle = '#333';
+      ctx.fillRect(-5, -8, 10, 12);
+      
+      ctx.restore();
+    }
+    
+    // Input
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'ArrowLeft' || e.code === 'ArrowRight' || e.code === 'ArrowUp' || e.code === 'KeyE') {
+        e.preventDefault();
+        keys[e.code] = true;
+        
+        if (e.code === 'KeyE') {
+          const dist = Math.abs(player.x - vehicle.x);
+          if (dist < 60 && !player.isRiding && !vehicle.rider) {
+            player.isRiding = true;
+            vehicle.rider = player;
+            status.textContent = 'Status: Boarded! Use arrows to drive. Press E to unboard.';
+          } else if (player.isRiding) {
+            player.isRiding = false;
+            vehicle.rider = null;
+            player.x = vehicle.x + (player.facingLeft ? -40 : 40);
+            status.textContent = 'Status: Unboarded! Walk to vehicle and press E to board.';
+          }
+        }
+      }
+    });
+    
+    window.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
+    });
+    
+    // Update
+    function update(dt) {
+      if (player.isRiding) {
+        // Control vehicle
+        if (keys.ArrowLeft) vehicle.vx -= 500 * dt;
+        if (keys.ArrowRight) vehicle.vx += 500 * dt;
+        vehicle.vx *= 0.9;
+        vehicle.x += vehicle.vx * dt;
+        vehicle.facingLeft = vehicle.vx < 0;
+        player.x = vehicle.x;
+        player.y = vehicle.y;
+        player.facingLeft = vehicle.facingLeft;
+      } else {
+        // Control player
+        if (keys.ArrowLeft) player.vx -= 800 * dt;
+        if (keys.ArrowRight) player.vx += 800 * dt;
+        player.vx *= 0.85;
+        player.x += player.vx * dt;
+        player.facingLeft = player.vx < 0;
+        
+        if (keys.ArrowUp && player.y >= groundY) {
+          player.vy = -400;
+        }
+        player.vy += 1500 * dt;
+        player.y += player.vy * dt;
+        if (player.y >= groundY) {
+          player.y = groundY;
+          player.vy = 0;
+        }
+      }
+      
+      // Camera
+      const target = player.isRiding ? vehicle.x : player.x;
+      cameraX = target - 700;
+      
+      // Check distance
+      const dist = Math.abs(player.x - vehicle.x);
+      if (dist < 60 && !player.isRiding && !vehicle.rider) {
+        status.textContent = 'Status: Press E to board vehicle!';
+      } else if (!player.isRiding) {
+        status.textContent = 'Status: Walk to vehicle (← →) and press E to board';
+      }
+    }
+    
+    // Render
+    function render(t) {
+      ctx.fillStyle = '#0a0e1a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Ground
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, groundY, canvas.width, 300);
+      
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+      
+      // Vehicle
+      renderVehicle(vehicle, t);
+      
+      // Character
+      if (!player.isRiding) {
+        renderCharacter(player, t);
+      } else {
+        // Character on vehicle
+        ctx.save();
+        ctx.translate(vehicle.x, vehicle.y);
+        if (vehicle.facingLeft) ctx.scale(-1, 1);
+        
+        // Character riding
+        ctx.fillStyle = '#8B6F47';
+        ctx.fillRect(-4, -28, 8, 8);
+        ctx.fillStyle = '#FF4444';
+        ctx.fillRect(-5, -30, 10, 4);
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(-2, -26, 2, 2);
+        ctx.fillRect(1, -26, 2, 2);
+        ctx.fillStyle = '#333';
+        ctx.fillRect(-5, -20, 10, 12);
+        
+        ctx.restore();
+      }
+      
+      ctx.restore();
+    }
+    
+    // Game loop
+    let lastTime = performance.now();
+    function loop(t) {
+      const dt = (t - lastTime) / 1000;
+      lastTime = t;
+      update(dt);
+      render(t);
+      requestAnimationFrame(loop);
+    }
+    
+    loop(performance.now());
+    
+    console.log('Test mode loaded! Vehicles and characters should be visible.');
+    console.log('Walk to the vehicle (blue bike) and press E to board!');
+  </script>
+</body>
+</html>
+

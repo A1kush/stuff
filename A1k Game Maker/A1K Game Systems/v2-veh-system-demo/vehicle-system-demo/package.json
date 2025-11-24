@@ -1,0 +1,23 @@
+{
+  "name": "vehicle-system-demo",
+  "version": "1.0.0",
+  "description": "Production Vehicle System Demo",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "serve": "npx serve . -p 3000 --cors",
+    "serve:python": "python -m http.server 3000",
+    "build:offline": "node scripts/build-offline.js"
+  },
+  "keywords": ["game", "vehicle", "demo"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "vite": "npm:rolldown-vite@7.1.14"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.1.14"
+  }
+}

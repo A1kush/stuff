@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤖 AI Robot System - STANDALONE</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Consolas', 'Monaco', monospace;
+      background: linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 50%, #16213E 100%);
+      color: #00FFF0;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      text-shadow: 0 0 30px #00FFF0, 0 0 60px #0A84FF;
+      margin: 20px 0;
+    }
+    canvas {
+      border: 3px solid #00FFF0;
+      box-shadow: 0 0 30px rgba(0, 255, 240, 0.6);
+      background: #0A0A14;
+    }
+    .controls {
+      background: rgba(26, 26, 46, 0.95);
+      border: 2px solid #0A84FF;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+      max-width: 1400px;
+    }
+    h2 {
+      color: #0A84FF;
+      margin-bottom: 15px;
+    }
+    #robot-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px;
+      background: linear-gradient(135deg, #0A84FF 0%, #00FFF0 100%);
+      color: #0F0F1E;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Consolas', monospace;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #00FFF0;
+    }
+    button.selected {
+      box-shadow: 0 0 30px #00FFF0;
+      background: linear-gradient(135deg, #00FFF0 0%, #0A84FF 100%);
+    }
+    .info {
+      background: rgba(10, 10, 20, 0.9);
+      border: 1px solid #00FFF0;
+      border-radius: 8px;
+      padding: 20px;
+      line-height: 1.8;
+    }
+    .info strong {
+      color: #00FFF0;
+    }
+    .note {
+      background: rgba(0, 255, 240, 0.1);
+      border-left: 4px solid #00FFF0;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>🤖 AI Robot Gallery</h1>
+    <div class="note">
+      ✅ <strong>STANDALONE MODE</strong> - No server needed! Double-click and go!
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+      <h2>All 12 AI Robots</h2>
+      <div id="robot-selector"></div>
+      <div id="robot-stats" class="info"></div>
+    </div>
+  </div>
+
+  <script>
+    // ROBOT REGISTRY
+    const ROBOTS = [
+      { id: 'assault_bot', name: 'Assault Bot', type: 'combat', tier: 1, hp: 250, damage: 45, speed: 2.2, color: '#FF4444', secondaryColor: '#AA0000' },
+      { id: 'defender_bot', name: 'Defender Bot', type: 'combat', tier: 1, hp: 400, damage: 25, speed: 1.5, color: '#4444FF', secondaryColor: '#0000AA' },
+      { id: 'scout_drone', name: 'Scout Drone', type: 'combat', tier: 1, hp: 150, damage: 30, speed: 3.5, color: '#44FF44', secondaryColor: '#00AA00' },
+      { id: 'medic_bot', name: 'Medic Bot', type: 'support', tier: 1, hp: 200, damage: 10, speed: 1.8, color: '#00FFFF', secondaryColor: '#00AAAA' },
+      { id: 'engineer_bot', name: 'Engineer Bot', type: 'support', tier: 1, hp: 220, damage: 15, speed: 1.6, color: '#FFAA00', secondaryColor: '#AA7700' },
+      { id: 'sniper_bot', name: 'Sniper Bot', type: 'specialist', tier: 2, hp: 180, damage: 80, speed: 1.2, color: '#AA44FF', secondaryColor: '#7700AA' },
+      { id: 'stealth_drone', name: 'Stealth Drone', type: 'specialist', tier: 2, hp: 140, damage: 50, speed: 3.0, color: '#777777', secondaryColor: '#444444' },
+      { id: 'tank_bot', name: 'Tank Bot', type: 'specialist', tier: 2, hp: 600, damage: 35, speed: 1.0, color: '#555555', secondaryColor: '#222222' },
+      { id: 'titan_mk1', name: 'Titan MK-I', type: 'advanced', tier: 3, hp: 800, damage: 70, speed: 1.4, color: '#FF00FF', secondaryColor: '#AA00AA' },
+      { id: 'omega_drone', name: 'Omega Drone', type: 'advanced', tier: 3, hp: 300, damage: 60, speed: 3.8, color: '#00FFAA', secondaryColor: '#00AA77' },
+      { id: 'guardian_prime', name: 'Guardian Prime', type: 'advanced', tier: 3, hp: 1000, damage: 50, speed: 1.6, color: '#FFD700', secondaryColor: '#AA8800' },
+      { id: 'reaper_unit', name: 'Reaper Unit', type: 'advanced', tier: 3, hp: 400, damage: 120, speed: 2.0, color: '#FF0000', secondaryColor: '#880000' }
+    ];
+
+    const TYPES = {
+      combat: { icon: '⚔️', color: '#FF4444' },
+      support: { icon: '🛠️', color: '#00FFFF' },
+      specialist: { icon: '🎯', color: '#AA44FF' },
+      advanced: { icon: '⚡', color: '#FFD700' }
+    };
+
+    // Simple robot rendering
+    class RobotRenderer {
+      render(ctx, robot, x, y, time) {
+        const pulse = Math.sin(time / 200) * 2;
+        
+        ctx.save();
+        ctx.translate(x, y);
+        
+        // Body
+        ctx.fillStyle = robot.color;
+        ctx.fillRect(-20, -30, 40, 50);
+        
+        // Head
+        ctx.fillStyle = robot.secondaryColor;
+        ctx.fillRect(-15, -45, 30, 15);
+        
+        // Eyes
+        ctx.fillStyle = '#00FFF0';
+        ctx.fillRect(-10, -40, 6, 6);
+        ctx.fillRect(4, -40, 6, 6);
+        
+        // Arms
+        ctx.fillStyle = robot.color;
+        ctx.fillRect(-30, -20, 8, 25);
+        ctx.fillRect(22, -20, 8, 25);
+        
+        // Legs
+        ctx.fillRect(-15, 20, 10, 20);
+        ctx.fillRect(5, 20, 10, 20);
+        
+        // Glow
+        ctx.strokeStyle = '#00FFF0';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.3 + pulse * 0.1;
+        ctx.strokeRect(-22, -48, 44, 92);
+        ctx.globalAlpha = 1;
+        
+        ctx.restore();
+      }
+    }
+
+    // MAIN APP
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 1400;
+    canvas.height = 800;
+
+    const renderer = new RobotRenderer();
+    let selectedRobotIndex = 0;
+    let animTime = 0;
+
+    // Create buttons
+    const selector = document.getElementById('robot-selector');
+    ROBOTS.forEach((robot, index) => {
+      const btn = document.createElement('button');
+      const type = TYPES[robot.type];
+      btn.textContent = `${type.icon} ${robot.name}`;
+      btn.className = index === 0 ? 'selected' : '';
+      btn.onclick = () => {
+        selectedRobotIndex = index;
+        document.querySelectorAll('#robot-selector button').forEach((b, i) => {
+          b.className = i === index ? 'selected' : '';
+        });
+        updateStats();
+      };
+      selector.appendChild(btn);
+    });
+
+    function updateStats() {
+      const robot = ROBOTS[selectedRobotIndex];
+      const type = TYPES[robot.type];
+      const tierStars = '⭐'.repeat(robot.tier);
+      
+      document.getElementById('robot-stats').innerHTML = `
+        <h3>${type.icon} ${robot.name} ${tierStars}</h3>
+        <p><strong>Type:</strong> ${type.icon} ${robot.type.toUpperCase()}</p>
+        <p><strong>Tier:</strong> ${robot.tier}</p>
+        <p><strong>HP:</strong> ${robot.hp}</p>
+        <p><strong>Damage:</strong> ${robot.damage}</p>
+        <p><strong>Speed:</strong> ${robot.speed}</p>
+        <p><strong>AI Mode:</strong> ${robot.tier === 3 ? 'Advanced Strategic' : robot.tier === 2 ? 'Tactical' : 'Standard'}</p>
+        <p><strong>Target Mode:</strong> ${robot.type === 'combat' ? 'Aggressive' : robot.type === 'support' ? 'Defensive' : 'Precision'}</p>
+      `;
+    }
+
+    function render() {
+      // Background
+      ctx.fillStyle = '#0A0A14';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(0, 255, 240, 0.1)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < canvas.width; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      for (let i = 0; i < canvas.height; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+
+      const robot = ROBOTS[selectedRobotIndex];
+      const type = TYPES[robot.type];
+      
+      // Title
+      ctx.fillStyle = '#00FFF0';
+      ctx.font = 'bold 56px Consolas';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = '#00FFF0';
+      ctx.shadowBlur = 20;
+      ctx.fillText(robot.name, canvas.width / 2, 100);
+      ctx.shadowBlur = 0;
+
+      // Robot (large, centered, scaled)
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(2.5, 2.5);
+      renderer.render(ctx, robot, 0, 0, animTime);
+      ctx.restore();
+
+      // Stats
+      ctx.fillStyle = type.color;
+      ctx.font = 'bold 28px Consolas';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${type.icon} ${type.color}`, 50, canvas.height - 120);
+      ctx.fillText(`HP: ${robot.hp} | DMG: ${robot.damage}`, 50, canvas.height - 80);
+      ctx.fillText(`TIER ${robot.tier} ${type.icon}`, 50, canvas.height - 40);
+    }
+
+    function gameLoop() {
+      animTime += 16;
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    updateStats();
+    gameLoop();
+
+    console.log('✅ Robot Gallery loaded! Total robots:', ROBOTS.length);
+  </script>
+</body>
+</html>
+
